@@ -1,6 +1,6 @@
 IRS
 SOEN 390 - Mini Capstone Project
-**App Name:**📍 Conco-ordinates
+**App Name:** 📍 Conco-ordinates
 
 **SOEN 390 – Software Engineering Team Design Project**  
 **Semester:** Winter 2026  

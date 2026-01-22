@@ -1,4 +1,6 @@
+<p align="center">
 <img width="421" height="210" alt="Logo" src="https://github.com/user-attachments/assets/c0dcf8a8-70f9-4310-9e07-8edf45079b4e" />
+</p>
 
 **App Name:** 📍 Conco-ordinates
 **SOEN 390 – Software Engineering Team Design Project**  

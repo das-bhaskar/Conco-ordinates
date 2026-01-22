@@ -19,7 +19,7 @@
 </p>
 
 ---
-
+<p align="center">
 ## 👥 Team Members
 
 | Name                    | Student ID    | GitHub Username     | Role          |
@@ -95,3 +95,4 @@
 The goal of **Conco-ordinates** is to deliver a functional prototype demonstrating intelligent campus navigation, real-time direction generation, and seamless integration with academic data systems, while following Agile software engineering practices.
 
 ---
+</p>

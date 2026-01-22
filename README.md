@@ -20,7 +20,6 @@
 
 ---
 ## 👥 Team Members
-<p align="center">
 
 | Name                    | Student ID    | GitHub Username     | Role          |
 |-------------------------|---------------|---------------------|---------------|
@@ -35,7 +34,6 @@
 | Nasib Guma              |               | Nasib Guma          |               |
 | Matthew Kazemie         |               | Kazemie             |               |
 | Sasha Klein-Charland    |               | squidometer         |               |
-</p>
 ---
 
 ## 📖 Project Description

@@ -3,7 +3,7 @@
 </p>
 
 **App Name:** 📍 Conco-ordinates
-**SOEN 390 – Software Engineering Team Design Project**  
+**SOEN 390** – Software Engineering Team Design Project 
 **Semester:** Winter 2026  
 **Group Name:** IRS
 

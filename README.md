@@ -18,7 +18,7 @@
 | Mathieu Pare            |               | Mathieu2003         |               |
 | Bhumika Bhumika         |               | skyphi_             |               |
 | Robert Craciunescu      |               | Robert Craciunescu  |               |
-| Abd Al Rahman AL Kabani |   40247395    | abd_alkabbani       |               |
+| Abd Al Rahman Al Kabani |   40247395    | abd_alkabbani       |               |
 | Omar Ghazaly            |               | HersheyWaffle       |               |
 | Nasib Guma              |               | Nasib Guma          |               |
 | Matthew Kazemie         |               | Kazemie             |               |

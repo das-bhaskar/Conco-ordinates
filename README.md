@@ -24,7 +24,7 @@
 | Name                    | Student ID    | GitHub Username     | Role          |
 |-------------------------|---------------|---------------------|---------------|
 | Bhaskar Das             |               | bhaskar             |               |
-| Kevin Kerr              |               | Kevin K.            |               |
+| Kevin Kerr              |   40281044    | Kevin K.            |               |
 | Ahmad Al Habbal         |   40261029    | ham340i             |               |
 | Mathieu Pare            |               | Mathieu2003         |               |
 | Bhumika Bhumika         |               | skyphi_             |               |

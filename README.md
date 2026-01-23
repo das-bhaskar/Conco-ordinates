@@ -27,7 +27,7 @@
 | Kevin Kerr              |   40281044    | Kevin K.            |               |
 | Ahmad Al Habbal         |   40261029    | ham340i             |               |
 | Mathieu Pare            |               | Mathieu2003         |               |
-| Bhumika Bhumika         |               | skyphi_             |               |
+| Bhumika Bhumika         |   40223877    | bhumi-0902          |               |
 | Robert Craciunescu      |   40282245    | Robert Craciunescu  |               |
 | Abd Al Rahman Al Kabani |   40247395    | aboudka2003         |               |
 | Omar Ghazaly            |   40289795    | HersheyWaffle       |               |

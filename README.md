@@ -28,7 +28,7 @@
 | Ahmad Al Habbal         |   40261029    | ham340i             |               |
 | Mathieu Pare            |               | Mathieu2003         |               |
 | Bhumika Bhumika         |               | skyphi_             |               |
-| Robert Craciunescu      |               | Robert Craciunescu  |               |
+| Robert Craciunescu      |   40282245    | Robert Craciunescu  |               |
 | Abd Al Rahman Al Kabani |   40247395    | aboudka2003         |               |
 | Omar Ghazaly            |               | HersheyWaffle       |               |
 | Nasib Guma              |               | Nasib Guma          |               |

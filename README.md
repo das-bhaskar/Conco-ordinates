@@ -24,7 +24,7 @@
 | Name                    | Student ID    | GitHub Username     | Role          |
 |-------------------------|---------------|---------------------|---------------|
 | Bhaskar Das             |   40325270    | bhaskar             |               |
-| Kevin Kerr              |   40281044    | Kevin K.            |               |
+| Kevin Kerr              |   40281044    | Kevin K.            |  Backend             |
 | Ahmad Al Habbal         |   40261029    | ham340i             |               |
 | Mathieu Pare            |               | Mathieu2003         |               |
 | Bhumika Bhumika         |   40223877    | bhumi-0902          |               |
@@ -32,7 +32,7 @@
 | Abd Al Rahman Al Kabani |   40247395    | aboudka2003         |               |
 | Omar Ghazaly            |   40289795    | HersheyWaffle       |               |
 | Nasib Guma              |               | Nasib Guma          |               |
-| Matthew Kazemie         |   40190450    | Kazemie             |               |
+| Matthew Kazemie         |   40190450    | Kazemie             | 3d specialist              |
 | Sasha Klein-Charland    |               | squidometer         |               |
 | Yifu Li                 |   40286100    | YifuLi-blip         |               |
 ---

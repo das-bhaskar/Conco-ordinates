@@ -34,6 +34,7 @@
 | Nasib Guma              |               | Nasib Guma          |               |
 | Matthew Kazemie         |               | Kazemie             |               |
 | Sasha Klein-Charland    |               | squidometer         |               |
+| Yifu Li                 |   40286100    | YifuLi-blip         |               |
 ---
 
 ## 📖 Project Description

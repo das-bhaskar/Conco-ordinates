@@ -32,7 +32,7 @@
 | Abd Al Rahman Al Kabani |   40247395    | aboudka2003         |               |
 | Omar Ghazaly            |   40289795    | HersheyWaffle       |               |
 | Nasib Guma              |               | Nasib Guma          |               |
-| Matthew Kazemie         |               | Kazemie             |               |
+| Matthew Kazemie         |   40190450    | Kazemie             |               |
 | Sasha Klein-Charland    |               | squidometer         |               |
 | Yifu Li                 |   40286100    | YifuLi-blip         |               |
 ---

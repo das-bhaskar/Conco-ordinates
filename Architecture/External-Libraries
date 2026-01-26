@@ -1,1 +1,171 @@
+# External Libraries and Frameworks
+
+This section explores external libraries and frameworks that may be used in the project. Each option is evaluated based on usability, scalability, learning curve, and accessibility support.
+
+---
+
+## Frontend Frameworks
+
+### React.js
+**Description:**  
+React is a JavaScript library for building user interfaces using reusable components.
+
+**Pros:**
+- Component-based architecture improves code reuse
+- Large community and ecosystem
+- Excellent support for accessibility (ARIA, screen readers)
+- Works well with modern UI libraries (Material UI, Tailwind)
+
+**Cons:**
+- Steep learning curve for beginners
+- Requires additional libraries for routing and state management
+- JSX syntax may be confusing initially
+
+**Accessibility Notes:**
+- Strong ARIA support
+- Compatible with screen readers
+- Encourages semantic HTML
+
+---
+
+### Angular
+**Description:**  
+Angular is a full-featured frontend framework developed by Google.
+
+**Pros:**
+- Built-in routing, forms, and HTTP support
+- Strong TypeScript integration
+- Clear project structure
+
+**Cons:**
+- Very steep learning curve
+- Heavy framework for small projects
+- More boilerplate code
+
+**Accessibility Notes:**
+- Good built-in accessibility tools
+- Requires proper configuration for optimal results
+
+---
+
+## UI Component Libraries
+
+### Bootstrap
+**Description:**  
+Bootstrap is a CSS framework for building responsive web interfaces quickly.
+
+**Pros:**
+- Easy to learn and use
+- Responsive by default
+- Large collection of prebuilt components
+
+**Cons:**
+- Limited customization without overriding styles
+- Websites can look generic
+- Less modern than newer frameworks
+
+**Accessibility Notes:**
+- Many components are keyboard accessible
+- Requires care to ensure proper contrast ratios
+
+---
+
+### Tailwind CSS
+**Description:**  
+Tailwind is a utility-first CSS framework for building custom designs.
+
+**Pros:**
+- Highly customizable
+- Encourages consistent design
+- Smaller final CSS size
+
+**Cons:**
+- HTML can become cluttered with many classes
+- Requires design decisions upfront
+
+**Accessibility Notes:**
+- Makes it easy to enforce contrast and spacing
+- Developer is responsible for accessibility compliance
+
+---
+
+## Backend Frameworks
+
+### Node.js with Express
+**Description:**  
+Express is a lightweight backend framework for building APIs using Node.js.
+
+**Pros:**
+- Simple and flexible
+- Large ecosystem of middleware
+- Fast development cycle
+
+**Cons:**
+- Less structured than full frameworks
+- Requires manual setup for security and validation
+
+**Accessibility Notes:**
+- Accessibility handled mainly at frontend
+- Can provide accessible error messages via APIs
+
+---
+
+### ASP.NET Core
+**Description:**  
+ASP.NET Core is a backend framework developed by Microsoft.
+
+**Pros:**
+- High performance
+- Strong security features
+- Excellent tooling support
+
+**Cons:**
+- Steeper learning curve
+- Less flexible than lightweight frameworks
+
+**Accessibility Notes:**
+- Built-in support for accessibility standards
+- Good integration with accessible frontend frameworks
+
+---
+
+## Diagramming & Documentation Tools
+
+### Draw.io
+**Description:**  
+Tool for creating diagrams such as domain models and component diagrams.
+
+**Pros:**
+- Free and easy to use
+- Integrates with GitHub
+- Supports UML diagrams
+
+**Cons:**
+- Manual updates required
+- Limited collaboration features
+
+---
+
+### Figma
+**Description:**  
+Figma is a collaborative UI design and prototyping tool.
+
+**Pros:**
+- Real-time collaboration
+- Easy to share mockups
+- Good accessibility testing features
+
+**Cons:**
+- Requires internet access
+- Advanced features require paid plan
+
+**Accessibility Notes:**
+- Supports color contrast checks
+- Useful for designing inclusive interfaces
+
+---
+
+## Summary
+
+The selected libraries and frameworks will be chosen based on project requirements, team experience, and accessibility needs. Priority will be given to tools that support inclusive design, scalability, and maintainability.
 

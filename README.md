@@ -33,7 +33,6 @@
 | Omar Ghazaly            |   40289795    | HersheyWaffle       |               |
 | Nasib Guma              |   40283693    | Nasib Guma          |               |
 | Matthew Kazemie         |   40190450    | Kazemie             | 3d specialist              |
-| Sasha Klein-Charland    |               | squidometer         |               |
 | Yifu Li                 |   40286100    | YifuLi-blip         |               |
 ---
 

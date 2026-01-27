@@ -31,7 +31,7 @@
 | Robert Craciunescu      |   40282245    | Robert Craciunescu  |               |
 | Abd Al Rahman Al Kabani |   40247395    | aboudka2003         |               |
 | Omar Ghazaly            |   40289795    | HersheyWaffle       |               |
-| Nasib Guma              |               | Nasib Guma          |               |
+| Nasib Guma              |   40283693    | Nasib Guma          |               |
 | Matthew Kazemie         |   40190450    | Kazemie             | 3d specialist              |
 | Sasha Klein-Charland    |               | squidometer         |               |
 | Yifu Li                 |   40286100    | YifuLi-blip         |               |

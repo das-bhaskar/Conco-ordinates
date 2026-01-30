@@ -1,0 +1,36 @@
+name: Feature Request
+description: Suggest an idea or improvement for Conco-ordinates.
+title: "[FEATURE_REQUEST]: "
+labels: [enhancement]
+body:
+- type: checkboxes
+  attributes: 
+    label: Is there an existing issue for this?
+    description: Please search to see if an issue already exists for a similar feature.
+    options:
+    - label: I have searched the existing issues
+      required: true
+- type: textarea
+  attributes:
+    label: Summary
+    description: Describe the problem you are trying to solve or the opportunity you see.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Proposed Solution
+    description: What would you like Conco-ordinates to do?
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Alternatives Considered
+    description: Any other alternatives you have considered?
+  validations: 
+    required: false
+- type: textarea
+  attributes:
+    label: Additional Context
+    description: Links? Referennces? Screenshots? Anything related to the issue.
+  validations:
+    required: false

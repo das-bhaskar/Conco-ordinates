@@ -1,0 +1,22 @@
+name: User Story
+description: Create a new User Story
+title: "US-{usid}: {title}"
+labels: [USER STORY]
+body:
+- type: input
+  id: usid
+  attributes:
+    label: User Story ID
+    placeholder: US-123
+  validations:
+    required: true
+    pattern: "^US-\\d+$"
+    pattern_error: "The User Story ID must be in the format US-<number>, e.g., US-123."
+- type: input
+  id: title
+  attributes:
+    label: User Story Title
+    placeholder: Short title of the user story
+  validations:
+    required: true
+

@@ -3,6 +3,12 @@ description: Create a new User Story
 title: "US-{usid}: {title}"
 labels: [USER STORY]
 body:
+- type: markdown
+  attributes:
+    value: |
+      ** Do NOT edit the issue title manually. **
+      It is automatically generated from the fields below.
+      If the format is wrong, the issue may be closed.
 - type: input
   id: usid
   attributes:
@@ -19,4 +25,9 @@ body:
     placeholder: Short title of the user story
   validations:
     required: true
-
+- type: textarea
+  attributes:
+    label: Add a description
+    description: Provide a description for the User Story.
+  validations: 
+    required: false

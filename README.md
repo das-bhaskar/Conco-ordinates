@@ -34,6 +34,7 @@
 | Nasib Guma              |   40283693    | Nasib Guma          |               |
 | Matthew Kazemie         |   40190450    | Kazemie             | 3d specialist              |
 | Yifu Li                 |   40286100    | YifuLi-blip         |               |
+| Dmitrii Cazacu          |   40314501    | Hildthelsta         |               |
 ---
 
 ## 📖 Project Description

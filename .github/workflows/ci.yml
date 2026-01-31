@@ -1,0 +1,15 @@
+name: Basic Continuous Integration
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  basic-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Print confirmation message
+        run: echo "GitHub Actions workflow is running successfully"

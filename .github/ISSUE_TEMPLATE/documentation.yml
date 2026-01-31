@@ -1,0 +1,23 @@
+name: Documentation Improvement
+description: Suggest an update or correction to the project documentation.
+title: "[DOCUMENTATION]: "
+labels: [documentation]
+body:
+- type: textarea
+  attributes: 
+    label: Summary
+    description: Describe the updates/corrections you would like Conco-ordinates to do.
+  validations:
+    required: true
+- type: textarea 
+  attributes: 
+    label: Proposed Changes/Add-ons
+    description: Wiki? Issues? Describe the proposed changes.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Additional Context
+    description: Links? References? Screenshots?
+  validations:
+    required: false

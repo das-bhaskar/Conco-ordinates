@@ -2,9 +2,9 @@ name: Basic Continuous Integration
 
 on:
   push:
-    branches: [ "setup/github-actions" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "mainm" ]
+    branches: [ "main" ]
 
 jobs:
   basic-check:

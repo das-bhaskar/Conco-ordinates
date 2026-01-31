@@ -2,7 +2,7 @@ name: Basic Continuous Integration
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "setup/github-actions" ]
   pull_request:
     branches: [ "main" ]
 

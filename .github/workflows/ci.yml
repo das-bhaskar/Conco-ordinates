@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "setup/github-actions" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "mainm" ]
 
 jobs:
   basic-check:

@@ -1,11 +1,19 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.secrets.gradle)
+}
+
+secrets {
+    propertiesFileName = "local.properties"
 }
 
 android {
     namespace = "com.example.myapplication"
-    compileSdk = 36 // Cleaned up the release syntax for you
+    compileSdk = 36
+
+    // Required for Maps on certain Android versions
+    useLibrary("org.apache.http.legacy")
 
     defaultConfig {
         applicationId = "com.example.myapplication"
@@ -16,10 +24,9 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // --- ADD THESE TWO LINES ---
+        // This logic works for both local development AND GitHub CI
         val myKey: String = System.getenv("MAPS_API_KEY") ?: "DUMMY_KEY"
         manifestPlaceholders["mapsApiKey"] = myKey
-        // ---------------------------
     }
 
     buildTypes {
@@ -31,12 +38,15 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     buildFeatures {
         compose = true
+        viewBinding = true
     }
 }
 
@@ -49,6 +59,13 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
+
+    // Maps dependency
+    implementation("org.apache.httpcomponents:httpclient-android:4.3.5.1")
+    implementation(libs.play.services.maps)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

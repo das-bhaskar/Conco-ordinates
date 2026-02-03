@@ -5,9 +5,7 @@ plugins {
 
 android {
     namespace = "com.example.myapplication"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36 // Cleaned up the release syntax for you
 
     defaultConfig {
         applicationId = "com.example.myapplication"
@@ -17,6 +15,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // --- ADD THESE TWO LINES ---
+        val myKey: String = System.getenv("MAPS_API_KEY") ?: "DUMMY_KEY"
+        manifestPlaceholders["mapsApiKey"] = myKey
+        // ---------------------------
     }
 
     buildTypes {

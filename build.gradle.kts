@@ -7,9 +7,8 @@ plugins {
 }
 
 sonar {
-    properties {
-        property("sonar.projectKey", "soen-390-the-irs_backend")
-        property("sonar.organization", "soen-390-the-irs")
-        property("sonar.host.url", "https://sonarcloud.io")
-    }
+  properties {
+    property("sonar.projectKey", "soen-390-the-irs_backend")
+    property("sonar.organization", "soen-390-the-irs")
+  }
 }

@@ -5,7 +5,8 @@ import com.google.android.gms.maps.model.LatLng
 data class Building(
     val name: String,
     val code: String, // Added code for better identification
-    val outline: List<LatLng>
+    val outline: List<LatLng>,
+    val isCampusBuilding: Boolean = true
 )
 
 data class Campus(

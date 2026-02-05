@@ -66,6 +66,10 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
+    implementation("org.jetbrains.kotlin:kotlin-scripting-compiler-embeddable:1.9.22")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-compiler-impl-embeddable:1.9.22")
+    implementation("org.jetbrains.kotlin:kotlin-scripting-common:1.9.22")
+
 
     // Maps dependency
     implementation("org.apache.httpcomponents:httpclient-android:4.3.5.1")

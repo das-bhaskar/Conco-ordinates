@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <!-- Use an AppCompat theme to match MapsActivity (AppCompatActivity) -->
-    <style name="Theme.MyApplication" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="Theme.MyApplication" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/concordia_maroon</item>
+        <item name="colorSecondary">@color/concordia_gold</item>
+    </style>
 </resources>

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -21,8 +23,18 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // This logic works for both local development AND GitHub CI
-        val myKey: String = System.getenv("MAPS_API_KEY") ?: "DUMMY_KEY"
+        // 1. Load local.properties
+        val properties = Properties()
+        val propertiesFile = project.rootProject.file("local.properties")
+        if (propertiesFile.exists()) {
+            properties.load(propertiesFile.inputStream())
+        }
+
+        // 2. Check Environment (CI) first, then local.properties (You), then DUMMY
+        val myKey: String = System.getenv("MAPS_API_KEY")
+            ?: properties.getProperty("MAPS_API_KEY")
+            ?: "DUMMY_KEY"
+
         manifestPlaceholders["mapsApiKey"] = myKey
     }
 
@@ -58,6 +70,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
+    implementation("com.google.android.material:material:1.11.0")
 
     // Maps dependency
     implementation("org.apache.httpcomponents:httpclient-android:4.3.5.1")
@@ -70,4 +83,5 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
 }

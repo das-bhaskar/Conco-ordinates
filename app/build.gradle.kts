@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    id("org.sonarqube") version "7.1.0.6387"
 }
 
 
@@ -46,13 +45,6 @@ android {
         compose = true
         viewBinding = true
     }
-}
-
-sonar {
-  properties {
-    property("sonar.projectKey", "soen-390-the-irs_backend")
-    property("sonar.organization", "soen-390-the-irs")
-  }
 }
 
 dependencies {

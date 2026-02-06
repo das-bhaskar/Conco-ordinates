@@ -3,7 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    id("org.sonarqube") version "7.1.0.6387"
+    id("org.sonarqube")
 }
 
 

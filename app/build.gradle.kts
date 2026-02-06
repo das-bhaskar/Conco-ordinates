@@ -3,7 +3,6 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    id("org.sonarqube")
 }
 
 
@@ -93,12 +92,4 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-}
-
-sonar {
-    properties {
-        property("sonar.projectKey", "soen-390-the-irs_backend")
-        property("sonar.organization", "soen-390-the-irs")
-        property("sonar.host.url", "https://sonarcloud.io")
-    }
 }

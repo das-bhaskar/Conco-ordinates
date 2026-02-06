@@ -23,7 +23,7 @@
 
 | Name                    | Student ID    | GitHub Username     | Role          |
 |-------------------------|---------------|---------------------|---------------|
-| Bhaskar Das             |   40325270    | bhaskar             |               |
+| Bhaskar Das             |   40325270    | bhaskar             |  Fullstack             |
 | Kevin Kerr              |   40281044    | Kevin K.            |  Backend             |
 | Ahmad Al Habbal         |   40261029    | ham340i             |               |
 | Mathieu Pare            |   40261757    | Mathieu2003         |               |

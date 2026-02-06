@@ -6,14 +6,3 @@ plugins {
     id("org.sonarqube") version "7.1.0.6387"
 }
 
-sonar {
-  properties {
-    property("sonar.projectKey", "soen-390-the-irs_backend")
-    property("sonar.organization", "soen-390-the-irs")
-    property("sonar.host.url", "https://sonarcloud.io")
-    property("sonar.sources", "app/src/main")
-    property("sonar.tests", "app/src/test")
-    property("sonar.java.binaries", "app/build/intermediates/javac")
-    property("sonar.android.lint.report", "app/build/reports/lint-results.xml")
-  }
-}

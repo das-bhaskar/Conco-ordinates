@@ -40,7 +40,20 @@
             android:text="LOYOLA"
             app:strokeColor="@color/concordia_maroon"
             android:textColor="@color/concordia_maroon" />
-
     </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabRecenter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="24dp"
+        android:contentDescription="Recenter location"
+        app:srcCompat="@android:drawable/ic_menu_mylocation"
+        app:backgroundTint="@color/concordia_maroon"
+        app:tint="@android:color/white"
+        app:elevation="8dp"
+        app:pressedTranslationZ="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

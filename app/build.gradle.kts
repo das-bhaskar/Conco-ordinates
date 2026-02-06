@@ -71,6 +71,8 @@ dependencies {
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)
     implementation("com.google.android.material:material:1.11.0")
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+    implementation("com.google.maps.android:android-maps-utils:3.8.2")
 
     // Maps dependency
     implementation("org.apache.httpcomponents:httpclient-android:4.3.5.1")

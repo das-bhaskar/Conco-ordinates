@@ -64,15 +64,17 @@
 
 ## 🛠 Languages & Technologies
 
-- **Frontend:** HTML, CSS, JavaScript  
-- **Backend:** Node.js, Express.js  
-- **APIs & Services:**  
-  - Google Maps API  
-  - Google Calendar API  
-  - Concordia Open Data API  
-- **Architecture:** MVC (Model–View–Controller)  
-- **Methodology:** Agile / Scrum  
-- **Version Control:** GitHub  
+- **Platform:** Native Android (Mobile)
+- **Primary Language:** Kotlin
+- **Frontend/UI:** XML Layouts, Material Design 3 (M3)
+- **Backend/Logic:** Android Jetpack, FusedLocationProviderClient
+- **APIs & Services:** - **Google Maps SDK for Android** (Map rendering & Camera control)
+  - **Google Maps Utility Library** (PolyUtil for geofencing & distance logic)
+  - **Google Calendar API** (Class schedule integration)
+  - **Concordia Open Data API** (Shuttle & Building data)
+- **Architecture:** Model-View-Controller (MVC) / MVVM
+- **Methodology:** Agile / Scrum
+- **Version Control:** GitHub
 
 ---
 

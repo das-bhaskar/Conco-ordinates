@@ -9,4 +9,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="concordia_maroon">#912338</color>
     <color name="concordia_gold">#FFCC00</color>
+    <color name="grey">#D9D9D9</color>
+
 </resources>

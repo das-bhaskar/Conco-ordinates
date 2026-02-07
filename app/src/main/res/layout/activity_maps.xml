@@ -13,33 +13,49 @@
 
     <com.google.android.material.button.MaterialButtonToggleGroup
         android:id="@+id/toggleGroup"
-        android:layout_width="wrap_content"
+        android:layout_width="55dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginEnd="12dp"
+        android:orientation="vertical"
         app:checkedButton="@+id/btnSgw"
         app:singleSelection="true"
         app:selectionRequired="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintVertical_bias="0.75">
 
         <Button
             android:id="@+id/btnSgw"
             style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
             android:text="SGW"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            app:backgroundTint="@color/toggle_background"
             app:strokeColor="@color/concordia_maroon"
-            android:textColor="@color/concordia_maroon" />
+            android:textColor="@color/concordia_maroon"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Pill.Top" />
 
         <Button
             android:id="@+id/btnLoyola"
             style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="LOYOLA"
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            android:text="LOY"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            app:backgroundTint="@color/toggle_background"
             app:strokeColor="@color/concordia_maroon"
-            android:textColor="@color/concordia_maroon" />
+            android:textColor="@color/concordia_maroon"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Pill.Bottom" />
     </com.google.android.material.button.MaterialButtonToggleGroup>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -52,7 +68,6 @@
         app:backgroundTint="@color/concordia_maroon"
         app:tint="@android:color/white"
         app:elevation="8dp"
-        app:pressedTranslationZ="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

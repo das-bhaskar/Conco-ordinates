@@ -588,6 +588,7 @@ object CampusRepo {
             LatLng(45.4582597, -73.6395801),
             LatLng(45.4582466, -73.6395904),
             LatLng(45.4582286, -73.6396046)
+
         )),
 
         Building("BB Annex", "BB", 0,

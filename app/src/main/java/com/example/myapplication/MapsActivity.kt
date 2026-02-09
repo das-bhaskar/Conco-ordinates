@@ -13,8 +13,11 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.PolygonOptions
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.maps.android.PolyUtil
+
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mapManager: MapManager
@@ -51,6 +54,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         startLocationUpdates()
         setupToggleLogic()
         setupRecenterButton()
+        setBuildingClickPopup()
+    }
+
+    private fun setBuildingClickPopup(){
+        mMap.setOnMapClickListener { LatLng ->
+            checkBuildings(LatLng);
+        }
+    }
+
+    fun checkBuildings(latLng: LatLng){
+        var code = "None";
+        //Check SGW
+        for(item in CampusRepo.getAllBuildings()){
+            if(PolyUtil.containsLocation(latLng, item.outline, true)){
+                code = item.name;
+                println(code);
+                break;
+            }
+        }
     }
 
     private fun startLocationUpdates() {

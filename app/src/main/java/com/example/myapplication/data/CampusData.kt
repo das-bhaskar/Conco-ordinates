@@ -1064,4 +1064,15 @@ object CampusRepo {
 
     val SGW = Campus("SGW", LatLng(45.4973, -73.5790), sgwBuildings)
     val LOYOLA = Campus("Loyola", LatLng(45.4582, -73.6405), loyolaBuildings)
+
+    fun getAllBuildings(): List<Building>{
+        var buildings = mutableSetOf<Building>();
+        for(build in sgwBuildings){
+            buildings.add(build);
+        }
+        for(build in loyolaBuildings){
+            buildings.add(build);
+        }
+        return buildings.toList();
+    }
 }

@@ -56,21 +56,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setupRecenterButton()
         setBuildingClickPopup()
     }
-
+    
     private fun setBuildingClickPopup(){
         mMap.setOnMapClickListener { LatLng ->
-            checkBuildings(LatLng);
-        }
-    }
-
-    fun checkBuildings(latLng: LatLng){
-        var code = "None";
-        //Check SGW
-        for(item in CampusRepo.getAllBuildings()){
-            if(PolyUtil.containsLocation(latLng, item.outline, true)){
-                code = item.name;
-                println(code);
-                break;
+            val building = mapManager.checkClickBuildings(LatLng)
+            if(building != null){
+                println(building.name)
             }
         }
     }

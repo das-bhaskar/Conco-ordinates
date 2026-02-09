@@ -1,10 +1,12 @@
 package com.example.myapplication.logic
 
 import android.graphics.Color
+import com.example.myapplication.data.Building
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.PolygonOptions
 import com.example.myapplication.data.Campus
+import com.example.myapplication.data.CampusRepo
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.maps.android.PolyUtil
@@ -46,6 +48,18 @@ class MapManager(private val googleMap: GoogleMap) {
             }
         }
         return closestBuildingName
+    }
+
+    //Check if user click is in one of the buildings and return it
+    fun checkClickBuildings(latLng: LatLng): Building? {
+        for(item in CampusRepo.getAllBuildings()){
+
+            //Create poly from building outline and check if click is in it
+            if(PolyUtil.containsLocation(latLng, item.outline, true)){
+                return item;
+            }
+        }
+        return null;
     }
 
     // Helper to find the distance (in meters) from a point to the nearest polygon edge

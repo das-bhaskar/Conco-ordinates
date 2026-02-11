@@ -3,9 +3,12 @@ package com.example.myapplication
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.view.View
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.example.myapplication.data.CampusRepo
+import com.example.myapplication.databinding.BottomSheetBuildingInfoBinding
 import com.example.myapplication.logic.MapManager
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -13,10 +16,10 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.PolygonOptions
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.maps.android.PolyUtil
+import kotlinx.coroutines.*
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -61,7 +64,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.setOnMapClickListener { LatLng ->
             val building = mapManager.checkClickBuildings(LatLng)
             if(building != null){
-                println(building.name)
+                val coroutineScope = CoroutineScope(Dispatchers.IO)
+                coroutineScope.launch {
+                    println(building.name)
+                    val address = mapManager.getAddress(building)
+                    val bottomSheet = BottomSheetPopUp()
+                    bottomSheet.setAddress(building.name)
+                    bottomSheet.show(supportFragmentManager, "BottomSheet");
+                }
             }
         }
     }

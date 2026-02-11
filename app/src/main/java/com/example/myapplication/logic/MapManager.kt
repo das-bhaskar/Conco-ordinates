@@ -10,6 +10,8 @@ import com.example.myapplication.data.CampusRepo
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.maps.android.PolyUtil
+import java.net.HttpURLConnection
+import java.net.URL
 
 class MapManager(private val googleMap: GoogleMap) {
 
@@ -60,6 +62,34 @@ class MapManager(private val googleMap: GoogleMap) {
             }
         }
         return null;
+    }
+
+    //!!!Doesn''t work yet, the search throws UnknownHostException, need to function
+    suspend fun getAddress(building: Building): String?{
+        var latlng = ""
+        val urlString = "https://overpass-api.de/api/interpreter?data=[out:csv(::lat,::lon)];way(22080570);out center;"
+        val url = URL(urlString);
+        val connection = url.openConnection() as HttpURLConnection
+
+        try{
+            connection.requestMethod = "GET"
+            val responseCode = connection.responseCode
+
+
+            if (responseCode == HttpURLConnection.HTTP_OK){
+                latlng = connection.inputStream.bufferedReader().use { it.readText() }
+
+
+            } else {
+                println("GET request failed with response code: $responseCode")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            connection.disconnect()
+        }
+
+        return latlng
     }
 
     // Helper to find the distance (in meters) from a point to the nearest polygon edge

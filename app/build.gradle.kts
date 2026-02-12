@@ -84,6 +84,9 @@ dependencies {
     implementation("org.apache.httpcomponents:httpclient-android:4.3.5.1")
     implementation(libs.play.services.maps)
 
+    //Http interaction dependency
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

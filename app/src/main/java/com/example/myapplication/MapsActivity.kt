@@ -20,6 +20,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.*
+import kotlin.text.split
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -67,10 +68,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val coroutineScope = CoroutineScope(Dispatchers.IO)
                 coroutineScope.launch {
                     println(building.name)
-                    val address = mapManager.getAddress(building)
-                    val bottomSheet = BottomSheetPopUp()
-                    bottomSheet.setAddress(building.name)
-                    bottomSheet.show(supportFragmentManager, "BottomSheet");
+                    val center = mapManager.transformStringIntoCSV(building)
+                    println(center)
+                    if(center.latitude != 0.0) {
+                        val bottomSheet = BottomSheetPopUp()
+                        bottomSheet.setAddress(building.name)
+                        bottomSheet.show(supportFragmentManager, "BottomSheet");
+                    }
                 }
             }
         }

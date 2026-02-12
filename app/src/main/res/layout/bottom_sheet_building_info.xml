@@ -15,7 +15,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.141"
-        tools:srcCompat="@tools:sample/avatars" />
+        android:src="@drawable/car" />
 
     <TextView
         android:id="@+id/buildingAddress"
@@ -30,43 +30,75 @@
         app:layout_constraintVertical_bias="0.334" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/button8"
         android:layout_width="53dp"
         android:layout_height="50dp"
-        android:text="Button"
-        tools:layout_editor_absoluteX="40dp"
-        tools:layout_editor_absoluteY="303dp" />
-
-    <Button
-        android:id="@+id/button5"
-        android:layout_width="53dp"
-        android:layout_height="50dp"
-        android:text="Button"
-        tools:layout_editor_absoluteX="319dp"
-        tools:layout_editor_absoluteY="303dp" />
-
-    <Button
-        android:id="@+id/button6"
-        android:layout_width="53dp"
-        android:layout_height="50dp"
-        android:text="Button"
-        tools:layout_editor_absoluteX="179dp"
-        tools:layout_editor_absoluteY="303dp" />
+        android:background="@drawable/car"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.111"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.44" />
 
     <Button
         android:id="@+id/button7"
         android:layout_width="53dp"
         android:layout_height="50dp"
+        android:src="@drawable/floppy_disk"
         android:text="Button"
-        tools:layout_editor_absoluteX="110dp"
-        tools:layout_editor_absoluteY="303dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.312"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.44" />
 
     <Button
-        android:id="@+id/button8"
+        android:id="@+id/button3"
         android:layout_width="53dp"
         android:layout_height="50dp"
+        android:background="@drawable/pin"
+        android:backgroundTint="#FF0000"
         android:text="Button"
-        tools:layout_editor_absoluteX="246dp"
-        tools:layout_editor_absoluteY="303dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.44" />
+
+    <Button
+        android:id="@+id/button6"
+        android:layout_width="53dp"
+        android:layout_height="50dp"
+        android:background="@drawable/share"
+        android:backgroundTint="#FF0000"
+        android:text="Button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.706"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.44" />
+
+    <Button
+        android:id="@+id/button5"
+        android:layout_width="53dp"
+        android:layout_height="50dp"
+        android:background="@drawable/three_dots"
+        android:backgroundTint="#FF0000"
+        android:text="Button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.891"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.44" />
+
+
+
+
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

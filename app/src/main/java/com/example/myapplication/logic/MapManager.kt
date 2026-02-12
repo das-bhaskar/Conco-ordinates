@@ -10,8 +10,17 @@ import com.example.myapplication.data.CampusRepo
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.maps.android.PolyUtil
+import okhttp3.OkHttpClient
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+
 
 class MapManager(private val googleMap: GoogleMap) {
 
@@ -65,31 +74,34 @@ class MapManager(private val googleMap: GoogleMap) {
     }
 
     //!!!Doesn''t work yet, the search throws UnknownHostException, need to function
-    suspend fun getAddress(building: Building): String?{
-        var latlng = ""
-        val urlString = "https://overpass-api.de/api/interpreter?data=[out:csv(::lat,::lon)];way(22080570);out center;"
-        val url = URL(urlString);
-        val connection = url.openConnection() as HttpURLConnection
+    suspend fun getCenterLatLng(building: Building): String = withContext(Dispatchers.IO) {
+        var response = ""
+        val query = ("[out:csv(::lat,::lon)];way("+building.wayID+");out center;")
 
-        try{
-            connection.requestMethod = "GET"
-            val responseCode = connection.responseCode
+        val client = OkHttpClient()
 
+        val requestBody =
+            ("data=" + URLEncoder.encode(query, StandardCharsets.UTF_8.toString())).toRequestBody("application/x-www-form-urlencoded".toMediaType())
 
-            if (responseCode == HttpURLConnection.HTTP_OK){
-                latlng = connection.inputStream.bufferedReader().use { it.readText() }
+        val request = Request.Builder()
+            .url("https://overpass-api.de/api/interpreter?")
+            .post(requestBody)
+            .build()
 
-
-            } else {
-                println("GET request failed with response code: $responseCode")
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                throw Exception("Unexpected response: $response")
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            connection.disconnect()
+            return@withContext response.body?.string() ?: ""
         }
+    }
 
-        return latlng
+    suspend fun transformStringIntoCSV(building: Building): LatLng{
+        val address = getCenterLatLng(building).split("\n")[1]
+        if(!address.isEmpty()) {
+            return LatLng(address.split("\t")[0].toDouble(), address.split("\t")[1].toDouble())
+        }
+        return LatLng(0.0,0.0)
     }
 
     // Helper to find the distance (in meters) from a point to the nearest polygon edge

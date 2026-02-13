@@ -36,6 +36,8 @@ android {
             ?: "DUMMY_KEY"
 
         manifestPlaceholders["mapsApiKey"] = myKey
+
+        buildConfigField("String", "MAPS_API_KEY", "\"$myKey\"")
     }
 
     buildTypes {
@@ -62,6 +64,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
     testOptions {
         unitTests.isReturnDefaultValues = true
@@ -82,6 +85,7 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("com.google.maps.android:android-maps-utils:3.8.2")
+    implementation("com.squareup.okhttp3:okhttp:5.3.0")
 
     // Maps dependency
     implementation("org.apache.httpcomponents:httpclient-android:4.3.5.1")

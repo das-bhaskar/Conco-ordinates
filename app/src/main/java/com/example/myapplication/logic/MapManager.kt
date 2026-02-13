@@ -11,17 +11,18 @@ import com.google.maps.android.PolyUtil
 
 class MapManager(private val googleMap: GoogleMap) {
 
-    // Task 1.5.1: Retrieve user's current location
-    fun getUserLocation(fusedLocationClient: FusedLocationProviderClient, callback: (LatLng) -> Unit) {
+    fun getUserLocation(fusedLocationClient: FusedLocationProviderClient, callback: (LatLng?) -> Unit) {
         try {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                // If location is null, we pass null to the callback so the Activity can handle the fallback
                 if (location != null) {
-                    val userLatLng = LatLng(location.latitude, location.longitude)
-                    callback(userLatLng)
+                    callback(LatLng(location.latitude, location.longitude))
+                } else {
+                    callback(null)
                 }
             }
         } catch (e: SecurityException) {
-            // Permission missing
+            callback(null)
         }
     }
 
@@ -65,13 +66,11 @@ class MapManager(private val googleMap: GoogleMap) {
         return minDistance
     }
 
-    // Use this for Manual Button clicks (SGW/Loyola/Recenter)
     fun focusOnCampus(campus: Campus, highlightedBuildingName: String? = null) {
         drawBuildings(campus, highlightedBuildingName)
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(campus.center, campus.defaultZoom))
     }
 
-    // Task 1.5.4: Use this for Background GPS updates (No camera yanking)
     fun updateHighlightsOnly(campus: Campus, highlightedBuildingName: String? = null) {
         drawBuildings(campus, highlightedBuildingName)
     }

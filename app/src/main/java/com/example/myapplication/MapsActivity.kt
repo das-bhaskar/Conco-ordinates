@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
 import com.example.myapplication.logic.MapManager
 import com.google.android.gms.location.*
@@ -19,6 +20,7 @@ import com.google.maps.android.PolyUtil
 import java.io.IOException
 import okhttp3.*
 import org.json.JSONObject
+
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mapManager: MapManager
@@ -27,7 +29,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mMap: GoogleMap
 
     // Tracks which campus is currently selected by the user
-    private var currentVisibleCampus = CampusRepo.SGW
+    private var currentVisibleCampus: Campus? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,12 +52,39 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         enableMyLocation()
 
-        // Initial view
-        mapManager.focusOnCampus(currentVisibleCampus)
+        // --- FIX START ---
+        mapManager.getUserLocation(fusedLocationClient) { userLatLng ->
+            if (userLatLng != null) {
+                // 1. Move camera to where the user actually is
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(userLatLng, 16f))
+
+                // 2. Determine if they are on a campus (using your teammate's new logic)
+                val detectedCampus = CampusRepo.getCampus(userLatLng)
+                currentVisibleCampus = detectedCampus
+
+                // 3. Update the UI buttons to match
+                updateToggleUI(detectedCampus)
+            } else {
+                // Fallback: If GPS is off, default to SGW so the map isn't blank
+                currentVisibleCampus = CampusRepo.SGW
+                mapManager.focusOnCampus(CampusRepo.SGW)
+                updateToggleUI(CampusRepo.SGW)
+            }
+        }
+        // --- FIX END ---
 
         startLocationUpdates()
         setupToggleLogic()
         setupRecenterButton()
+    }
+
+    private fun updateToggleUI(campus: Campus?) {
+        val toggleGroup = findViewById<MaterialButtonToggleGroup>(R.id.toggleGroup)
+        when (campus) {
+            CampusRepo.SGW -> toggleGroup.check(R.id.btnSgw)
+            CampusRepo.LOYOLA -> toggleGroup.check(R.id.btnLoyola)
+            null -> toggleGroup.clearChecked()
+        }
     }
 
     private fun startLocationUpdates() {
@@ -67,12 +97,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 for (location in locationResult.locations) {
                     val userLatLng = LatLng(location.latitude, location.longitude)
 
-                    // Check building name for the campus the user is currently LOOKING at
-                    val buildingName = mapManager.findBuildingAtLocation(userLatLng, currentVisibleCampus)
-
-                    // IMPORTANT: Call a version of the focus function that DOES NOT move the camera
-                    // You need to ensure MapManager has a function that only clears/redraws polygons
-                    mapManager.updateHighlightsOnly(currentVisibleCampus, buildingName)
+                    // 1. It checks if currentVisibleCampus is null (fixing the type mismatch)
+                    // 2. It keeps 'buildingName' inside the scope (fixing the unresolved reference)
+                    currentVisibleCampus?.let { campus ->
+                        val buildingName = mapManager.findBuildingAtLocation(userLatLng, campus)
+                        mapManager.updateHighlightsOnly(campus, buildingName)
+                    }
                 }
             }
         }
@@ -89,12 +119,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 when (checkedId) {
                     R.id.btnSgw -> {
                         currentVisibleCampus = CampusRepo.SGW
-                        mapManager.focusOnCampus(currentVisibleCampus) // This one moves camera
+                        mapManager.focusOnCampus(currentVisibleCampus!!)
                     }
                     R.id.btnLoyola -> {
                         currentVisibleCampus = CampusRepo.LOYOLA
-                        mapManager.focusOnCampus(currentVisibleCampus) // This one moves camera
+                        mapManager.focusOnCampus(currentVisibleCampus!!)
                     }
+                }
+            } else {
+                // If no buttons are pressed in the group -> we set the state to null so the app knows we are "off-campus"
+                if (toggleGroup.checkedButtonId == -1) {
+                    currentVisibleCampus = null
                 }
             }
         }
@@ -104,13 +139,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val fabRecenter = findViewById<FloatingActionButton>(R.id.fabRecenter)
         fabRecenter.setOnClickListener {
             mapManager.getUserLocation(fusedLocationClient) { userLatLng ->
-                val cameraPosition = com.google.android.gms.maps.model.CameraPosition.Builder()
-                    .target(userLatLng)
-                    .zoom(18.5f)
-                    .tilt(0f)
-                    .build()
+                userLatLng?.let { latLng ->
+                    // 1. Move the camera to current location
+                    val cameraPosition = com.google.android.gms.maps.model.CameraPosition.Builder()
+                        .target(latLng)
+                        .zoom(18.5f)
+                        .tilt(0f)
+                        .build()
+                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 1000, null)
 
-                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 1000, null)
+                    // 2. RE-EVALUATE the campus state
+                    val detectedCampus = CampusRepo.getCampus(latLng)
+
+                    // 3. Update the state and UI
+                    currentVisibleCampus = detectedCampus
+                    updateToggleUI(detectedCampus)
+                }
             }
         }
     }

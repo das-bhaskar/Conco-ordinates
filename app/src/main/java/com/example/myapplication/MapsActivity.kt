@@ -15,6 +15,10 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.maps.android.PolyUtil
+import java.io.IOException
+import okhttp3.*
+import org.json.JSONObject
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mapManager: MapManager
@@ -124,5 +128,69 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         if (::locationCallback.isInitialized) {
             fusedLocationClient.removeLocationUpdates(locationCallback)
         }
+    }
+
+    enum class TravelMode {
+        PUB_TRANSIT,
+        MOTORIZED,
+        WALK,
+    }
+
+    // Send to callback function a path between two points
+    fun reqPath(start: LatLng, end: LatLng, travelMode: TravelMode, callback: (List<LatLng>) -> Unit) {
+        val mode = when (travelMode) {
+            TravelMode.PUB_TRANSIT -> "transit"
+            TravelMode.MOTORIZED -> "driving"
+            TravelMode.WALK -> "walking"
+        }
+
+        val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+        val apiKey = appInfo.metaData.getString("com.google.android.geo.API_KEY")
+
+        val url = "https://maps.googleapis.com/maps/api/directions/json?" +
+                "origin=${start.latitude},${start.longitude}" +
+                "&destination=${end.latitude},${end.longitude}" +
+                "&mode=$mode" +
+                "&key=${apiKey}"
+
+        val client = OkHttpClient()
+        val request = Request.Builder().url(url).build()
+
+        // Requests route from google api
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                e.printStackTrace()
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                response.body.string().let { json ->
+                    val points = decodeRoute(json)
+                    runOnUiThread {
+                        callback(points)
+                    }
+                }
+            }
+        })
+    }
+
+    // Returns parsed path given a valid json string and exception otherwise.
+    private fun decodeRoute(json: String): List<LatLng> {
+        val points = mutableListOf<LatLng>()
+        try {
+            val jsonObject = JSONObject(json)
+            val routes = jsonObject.getJSONArray("routes")
+            if (routes.length() > 0) {
+                val lineBytes = routes.getJSONObject(0)
+                    .getJSONObject("overview_polyline")
+                    .getString("points")
+                // Google api returns string of characters representing bytes
+                // describing the points in a sequence. These need to be parsed
+                // with a known algorithm before usable.
+                points.addAll(PolyUtil.decode(lineBytes))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return points
     }
 }

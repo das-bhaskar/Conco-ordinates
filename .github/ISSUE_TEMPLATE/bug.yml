@@ -1,29 +1,33 @@
 name: BUG
 description: File a bug/issue
 title: "[BUG]: "
-labels: [bug, help wanted]
+labels: [bug]
+assignees: []
 body: 
 - type: checkboxes
+  id: existing_issue
   attributes:
     label: Is there already an existing issue for this?
     description: Please search to see if an issue already exists for the bug you encountered.
     options:
       - label: I have searched the existing issues
         required: true
-
 - type: textarea
+  id: current_behavior
   attributes: 
     label: Current Behavior
     description: A consice description of what you're experiencing.
   validations:
     required: true
 - type: textarea
+  id: expected_behavior
   attributes:
     label: Expected Behavior
     description: A consice description of what you expected to happen.
   validations:
     required: true
 - type: textarea
+  id: steps
   attributes:
     label: Steps To Reproduce
     description: Steps to reproduce the behavior.
@@ -35,6 +39,7 @@ body:
   validations:
     required: true
 - type: textarea
+  id: anything_else
   attributes: 
     label: Anything Else?
     description: |

@@ -1,7 +1,7 @@
 name: Test Improvement
 description: Suggest improvements to testing or test coverage.
 title: "[TEST]: "
-label: ["TEST"]
+label: [TEST]
 assignees: []
 
 body:

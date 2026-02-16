@@ -50,6 +50,6 @@ body:
         - Low
         - Medium
         - High
-      validations:
-        required: true
+    validations:
+      required: true
 

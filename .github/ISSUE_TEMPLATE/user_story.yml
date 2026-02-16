@@ -1,7 +1,7 @@
 name: User Story
 description: Create a new User Story
 title: "US-{usid}: {title}"
-labels: [USER STORY]
+labels: ["USER STORY"]
 assignees: []
 body:
 - type: markdown

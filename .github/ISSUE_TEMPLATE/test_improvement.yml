@@ -28,7 +28,7 @@ body:
     id: proposed_improvement
     attributes:
       label: Proposed Improvement
-      desctiption: What tests should be added or improved?
+      description: What tests should be added or improved?
     validations:
       required: true
   - type: checkboxes
@@ -50,6 +50,6 @@ body:
         - Low
         - Medium
         - High
-      validations:
-        required: true
+    validations:
+      required: true
 

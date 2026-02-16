@@ -1,6 +1,13 @@
 package com.example.myapplication.logic
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.location.Address
+import android.location.Geocoder
+import android.media.Image
+import androidx.compose.ui.graphics.asImageBitmap
 import com.example.myapplication.data.Building
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -9,6 +16,7 @@ import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.maps.android.BuildConfig
 import com.google.maps.android.PolyUtil
 import okhttp3.OkHttpClient
 import java.net.HttpURLConnection
@@ -20,6 +28,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.Locale
 
 
 class MapManager(private val googleMap: GoogleMap) {
@@ -73,7 +82,6 @@ class MapManager(private val googleMap: GoogleMap) {
         return null;
     }
 
-    //!!!Doesn''t work yet, the search throws UnknownHostException, need to function
     suspend fun getCenterLatLng(building: Building): String = withContext(Dispatchers.IO) {
         var response = ""
         val query = ("[out:csv(::lat,::lon)];way("+building.wayID+");out center;")
@@ -96,13 +104,69 @@ class MapManager(private val googleMap: GoogleMap) {
         }
     }
 
-    suspend fun transformStringIntoCSV(building: Building): LatLng{
+    suspend fun transformStringIntoLatLng(building: Building): LatLng{
         val address = getCenterLatLng(building).split("\n")[1]
         if(!address.isEmpty()) {
             return LatLng(address.split("\t")[0].toDouble(), address.split("\t")[1].toDouble())
         }
         return LatLng(0.0,0.0)
     }
+
+    suspend fun getPanorama(latLng: LatLng): Bitmap? {
+        if(Math.abs(latLng.latitude) > 0.01 && Math.abs(latLng.longitude) > 0.01){
+
+            val apiKey = com.example.myapplication.BuildConfig.key
+
+            val url = "https://maps.googleapis.com/maps/api/streetview" +
+                    "?size=600x250" +
+                    "&location=${latLng.latitude},${latLng.longitude}" +
+                    "&key=$apiKey"
+
+
+            val client = OkHttpClient()
+
+            val request = Request.Builder()
+                .url(url)
+                .get()
+                .build()
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    throw Exception("Unexpected response: $response")
+                }
+
+                val bytes = response.body?.bytes()
+                return bytes?.let {
+                    BitmapFactory.decodeByteArray(it, 0, it.size)
+                }
+            }
+        }
+        return null
+    }
+
+    fun getAddressFromLatLng(
+        context: Context,
+        latitude: Double,
+        longitude: Double
+    ): String? {
+        return try {
+            val geocoder = Geocoder(context, Locale.getDefault())
+            var addresses: List<Address> =
+                geocoder.getFromLocation(latitude, longitude, 1)?.toMutableList() ?: emptyList()
+
+            if (!addresses.isNullOrEmpty()) {
+                addresses[0].getAddressLine(0)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+
+
 
     // Helper to find the distance (in meters) from a point to the nearest polygon edge
     private fun distanceFromPoly(point: LatLng, poly: List<LatLng>): Double {

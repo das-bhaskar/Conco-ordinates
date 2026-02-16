@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+var key = ""
 
 
 android {
@@ -36,6 +37,8 @@ android {
             ?: "DUMMY_KEY"
 
         manifestPlaceholders["mapsApiKey"] = myKey
+
+        key = myKey
     }
 
     buildTypes {
@@ -43,6 +46,10 @@ android {
         debug {
             enableAndroidTestCoverage = true
             enableUnitTestCoverage = true
+        }
+
+        debug{
+            buildConfigField("String", "key", "\"" + key + "\"")
         }
 
         release {
@@ -62,6 +69,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
 }
 

@@ -68,11 +68,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 val coroutineScope = CoroutineScope(Dispatchers.IO)
                 coroutineScope.launch {
                     println(building.name)
-                    val center = mapManager.transformStringIntoCSV(building)
-                    println(center)
-                    if(center.latitude != 0.0) {
+                    val center = mapManager.transformStringIntoLatLng(building)
+                    val campusImage = mapManager.getPanorama(center)
+                    val address = mapManager.getAddressFromLatLng(this@MapsActivity, center.latitude, center.longitude)
+                    if(center.latitude != 0.0 && campusImage != null && address != null) {
                         val bottomSheet = BottomSheetPopUp()
-                        bottomSheet.setAddress(building.name)
+                        bottomSheet.setBuildingPicture(campusImage)
+                        bottomSheet.setAddress(address)
                         bottomSheet.show(supportFragmentManager, "BottomSheet");
                     }
                 }

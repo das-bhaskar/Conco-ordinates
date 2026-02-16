@@ -14,6 +14,7 @@ class BottomSheetPopUp : BottomSheetDialogFragment() {
     private var address: String? = null
     private lateinit var addressViewText: TextView
     private var buildingPicture: ImageView? = null
+    private var buildingBitmap: Bitmap? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -25,24 +26,24 @@ class BottomSheetPopUp : BottomSheetDialogFragment() {
         addressViewText = view.findViewById(R.id.buildingAddress)
         buildingPicture = view.findViewById(R.id.buildingView)
 
-        address?.let{addressViewText.text = it}
+        buildingBitmap?.let {buildingPicture?.setImageBitmap(it)}
+
+
+        address?.let { addressViewText.text = it }
 
         return view
     }
 
     fun setAddress(addressInput: String) {
-            address = addressInput
-        if(::addressViewText.isInitialized){
+        address = addressInput
+        if (::addressViewText.isInitialized) {
             addressViewText.text = addressInput
         }
     }
 
-    private fun setImageInternal(image: Any) {
-        when (image) {
-            is Bitmap -> buildingPicture?.setImageBitmap(image)
-            is Uri -> buildingPicture?.setImageURI(image)
-            is Int -> buildingPicture?.setImageResource(image) // drawable res         }
-        }
+    fun setBuildingPicture(image: Bitmap) {
+        buildingBitmap = image
+        buildingPicture?.setImageBitmap(image)
     }
 }
 

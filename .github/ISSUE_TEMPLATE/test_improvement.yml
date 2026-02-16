@@ -1,0 +1,55 @@
+name: Test Improvement
+description: Suggest improvements to testing or test coverage.
+title: "[TEST]: "
+label: ["TEST"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Test Improvement Request
+        Help improve test reliability and coverage.
+  - type: input
+    id: area
+    attributes:
+      label: Affected Area
+      placeholder: e.g., Calendar, Campus toggle 
+    validations: 
+      required: true
+  - type: textarea
+    id: current_state
+    attributes:
+      label: Current Testing Situation
+      description: Describe current coverage or testing issues.
+    validations:
+      required: true
+  - type: textarea 
+    id: proposed_improvement
+    attributes:
+      label: Proposed Improvement
+      desctiption: What tests should be added or improved?
+    validations:
+      required: true
+  - type: checkboxes
+    id: improvement_type
+    attributes:
+      label: Type of Improvement
+      options:
+        - label: Increase coverage
+        - label: Fix failing tests
+        - label: Add unit tests
+        - label: Add integration tests
+        - label: Add usability tests
+        - label: Add E2E tests
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - Low
+        - Medium
+        - High
+      validations:
+        required: true
+

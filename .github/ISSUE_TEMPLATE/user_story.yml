@@ -2,6 +2,7 @@ name: User Story
 description: Create a new User Story
 title: "US-{usid}: {title}"
 labels: [USER STORY]
+assignees: []
 body:
 - type: markdown
   attributes:
@@ -26,6 +27,7 @@ body:
   validations:
     required: true
 - type: textarea
+  id: us_description
   attributes:
     label: Add a description
     description: Provide a description for the User Story.

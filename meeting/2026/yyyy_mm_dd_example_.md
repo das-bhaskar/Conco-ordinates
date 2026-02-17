@@ -1,5 +1,5 @@
 
-# Example Weekly Soft Deadline Meeting
+# Example Weekly Soft/Strict Deadline Meeting
 
 ## Meeting Information
 **Date:** 2026-02-01

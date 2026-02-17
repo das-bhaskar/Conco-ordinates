@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.location.Address
 import android.location.Geocoder
 import android.media.Image
+import android.util.Log
 import androidx.compose.ui.graphics.asImageBitmap
 import com.example.myapplication.data.Building
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -70,11 +71,9 @@ class MapManager(private val googleMap: GoogleMap) {
         return closestBuildingName
     }
 
-    //Check if user click is in one of the buildings and return it
+    //Check if user click on one of the buildings
     fun checkClickBuildings(latLng: LatLng): Building? {
         for(item in CampusRepo.getAllBuildings()){
-
-            //Create poly from building outline and check if click is in it
             if(PolyUtil.containsLocation(latLng, item.outline, true)){
                 return item;
             }
@@ -82,38 +81,46 @@ class MapManager(private val googleMap: GoogleMap) {
         return null;
     }
 
-    suspend fun getCenterLatLng(building: Building): String = withContext(Dispatchers.IO) {
-        var response = ""
-        val query = ("[out:csv(::lat,::lon)];way("+building.wayID+");out center;")
+    suspend fun getCenterLatLng(building: Building): LatLng {
+        if(building.wayID <=0){
+            return LatLng(0.0, 0.0)
+        }
+        val query = ("[out:csv(::lat,::lon)];way(" + building.wayID + ");out center;")
 
         val client = OkHttpClient()
 
         val requestBody =
-            ("data=" + URLEncoder.encode(query, StandardCharsets.UTF_8.toString())).toRequestBody("application/x-www-form-urlencoded".toMediaType())
+            ("data=" + URLEncoder.encode(
+                query,
+                StandardCharsets.UTF_8.toString()
+            )).toRequestBody("application/x-www-form-urlencoded".toMediaType())
 
         val request = Request.Builder()
             .url("https://overpass-api.de/api/interpreter?")
             .post(requestBody)
             .build()
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return@use LatLng(0.0, 0.0)
 
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) {
-                throw Exception("Unexpected response: $response")
+                val bodyString = response.body?.string() ?: ""
+
+                val lines = bodyString.split("\n")
+                if (lines.size > 1) {
+                    val addressLine = lines[1]
+                    if (addressLine.isNotEmpty()) {
+                        val parts = addressLine.split("\t")
+                        if (parts.size >= 2) {
+                            return LatLng(parts[0].toDouble(), parts[1].toDouble())
+                        }
+                    }
+                    return LatLng(0.0, 0.0)
+                }
             }
-            return@withContext response.body?.string() ?: ""
-        }
-    }
-
-    suspend fun transformStringIntoLatLng(building: Building): LatLng{
-        val address = getCenterLatLng(building).split("\n")[1]
-        if(!address.isEmpty()) {
-            return LatLng(address.split("\t")[0].toDouble(), address.split("\t")[1].toDouble())
-        }
-        return LatLng(0.0,0.0)
+        return LatLng(0.0, 0.0)
     }
 
     suspend fun getPanorama(latLng: LatLng): Bitmap? {
-        if(Math.abs(latLng.latitude) > 0.01 && Math.abs(latLng.longitude) > 0.01){
+        if(Math.abs(latLng.latitude+latLng.longitude) > 0.01){
 
             val apiKey = com.example.myapplication.BuildConfig.key
 
@@ -143,7 +150,7 @@ class MapManager(private val googleMap: GoogleMap) {
         }
         return null
     }
-    
+
     // Helper to find the distance (in meters) from a point to the nearest polygon edge
     private fun distanceFromPoly(point: LatLng, poly: List<LatLng>): Double {
         var minDistance = Double.MAX_VALUE

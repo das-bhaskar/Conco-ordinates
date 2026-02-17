@@ -67,10 +67,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             if (building != null) {
                 val coroutineScope = CoroutineScope(Dispatchers.IO)
                 coroutineScope.launch {
-                    println(building.name)
-                    val center = mapManager.transformStringIntoLatLng(building)
+                    val center = mapManager.getCenterLatLng(building)
                     val campusImage = mapManager.getPanorama(center)
-                    if (center.latitude != 0.0 && campusImage != null) {
+                    if (campusImage != null) {
                         val bottomSheet = BottomSheetPopUp()
                         bottomSheet.setBuildingPicture(campusImage)
                         bottomSheet.setAddress(building.address)

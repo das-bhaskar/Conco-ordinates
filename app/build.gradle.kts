@@ -92,6 +92,8 @@ dependencies {
     implementation("org.apache.httpcomponents:httpclient-android:4.3.5.1")
     implementation(libs.play.services.maps)
 
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.1")
     //Http interaction dependency
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
 

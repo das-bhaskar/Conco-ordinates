@@ -3,7 +3,7 @@
 
 ## Meeting Information
 **Date:** 2026-02-13
-**Attendees:** @20Mathieu03 (Mathieu Pare), @das-bhaskar (Bhaskar Das), @bhumi-0902 (Bhumika Bhumika), @Kazemiee (Matthew Kazemie), @Nasibgz (Nasib Guma), @YifuLi-blip (Yifu Li)
+**Attendees:** @20Mathieu03 (Mathieu Pare), @das-bhaskar (Bhaskar Das), @bhumi-0902 (Bhumika Bhumika), @Kazemiee (Matthew Kazemie), `@nasibgz_12118` (Nasib Guma), @YifuLi-blip (Yifu Li), @Kevin7582 (Kevin Kerr)
 
 ---
 

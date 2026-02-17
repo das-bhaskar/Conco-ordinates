@@ -3,9 +3,7 @@
 
 ## Meeting Information
 **Date:** 2026-02-15
-**Attendees:** @20Mathieu03 (Mathieu Pare), @das-bhaskat (Bhaskar Das), @bhumi-0902 (Bhumika Bhumika), @Kazemiee (Matthew Kazemie), @Nasibgz (Nasib Guma), @YifuLi-blip (Yifu Li), @TheRobber (Robert Craciunecsu), @Kevin7582 (Kevin Kerr)
-
-<!-- TODO: Add remaining attendees with proper name and github @nickname -->
+**Attendees:** @20Mathieu03 (Mathieu Pare), @das-bhaskat (Bhaskar Das), @bhumi-0902 (Bhumika Bhumika), @Kazemiee (Matthew Kazemie), `@nasibgz_12118` (Nasib Guma), @YifuLi-blip (Yifu Li), @TheRobber (Robert Craciunecsu), @Kevin7582 (Kevin Kerr), @Hildthelsta (Dmitrii Cazacu), @aboudka2003 (Abd Al Rahman Al Kabani), @ham340i (Ahmad Al Habbal), @HersheyWaffle (Omar Ghazaly)
 
 ---
 
@@ -58,9 +56,7 @@ None
 
 ## Action Items
 
-<!-- TODO: Add missing members github @nickname -->
-
-- [ ] @das-bhaskar and @member implement pop-up feature - Due: 2026-02-19
+- [ ] @das-bhaskar and @Hildthelsta implement pop-up feature - Due: 2026-02-19
 - [ ] @das-bhaskar implement end-2-end tesing for current features - Due: 2026-02-19
 - [ ] @20Mathieu03 update mockups for sprint 3 with selected feature 4 - Due: 2026-02-19
 - [ ] @bhumi-0902 update issues with appropriate based on due dates - Due: 2026-02-19
@@ -74,4 +70,5 @@ None
 ## Follow-up Tasks
 
 - [x] @20Mathieu03 implement new issue template for refactor and test-improvement - Due: 2026-02-19
+- [ ] @ham340i update wiki and makes changes according to feedback from Release 1 - Due: 2026-02-21
 

@@ -144,6 +144,7 @@ class MapManager(private val googleMap: GoogleMap) {
         return null
     }
 
+    //Deprecated with the addition of the address variable to CampusData
     fun getAddressFromLatLng(
         context: Context,
         latitude: Double,

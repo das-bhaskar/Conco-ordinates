@@ -7,6 +7,7 @@ data class Building(
     val name: String,
     val code: String, // Added code for better identification
     val wayID: Long,
+    val address: String,
     val outline: List<LatLng>,
     val isCampusBuilding: Boolean = true,
 
@@ -28,6 +29,7 @@ object CampusRepo {
             "Henry F. Hall Building",
             "H",
             22080570,
+            "1455 De Maisonneuve Blvd. W., Montreal, Quebec",
             listOf(
                 LatLng(45.4968261, -73.5788241),
                 LatLng(45.4970373, -73.5786245),
@@ -52,6 +54,7 @@ object CampusRepo {
             "J. W. McConnell Building",
             "LB",
             22080572,
+            "1400 De Maisonneuve Blvd. W., Montreal, Quebec",
             listOf(
                 LatLng(45.4966595, -73.5785573),
                 LatLng(45.4966932, -73.5785250),
@@ -94,6 +97,7 @@ object CampusRepo {
             "John Molson Building",
             "MB",
             22080581,
+            "1450 Guy St., Montreal, Quebec",
             listOf(
                 LatLng(45.4949482, -73.5787947),
                 LatLng(45.4951870, -73.5792261),
@@ -122,6 +126,7 @@ object CampusRepo {
             "Engineering, Computer Science and Visual Arts Integrated Complex",
             "EV",
             103248064,
+            "1515 Ste-Catherine St. W., Montreal, Quebec",
             listOf(
                 LatLng(45.4959332, -73.5784410),
                 LatLng(45.4958841, -73.5783336),
@@ -157,6 +162,7 @@ object CampusRepo {
             "Faubourg Tower",
             "FB",
             103248058,
+            "1250 Guy St., Montreal, Quebec",
             listOf(
                 LatLng(45.4946786, -73.5780177),
                 LatLng(45.4947429, -73.5779414),
@@ -191,6 +197,7 @@ object CampusRepo {
             "Le Faubourg",
             "FG",
             103248050,
+            "1610 Ste-Catherine St. W., Montreal, Quebec",
             listOf(
                 LatLng(45.4938097, -73.5790389),
                 LatLng(45.4936147, -73.5787064),
@@ -214,6 +221,7 @@ object CampusRepo {
             "Guy Metro Building",
             "GM",
             86068897,
+            "1550 De Maisonneuve Blvd. W., Montreal, Quebec",
             listOf(
                 LatLng(45.4959562, -73.5784181),
                 LatLng(45.4960817, -73.5786802),
@@ -238,6 +246,7 @@ object CampusRepo {
             "ER Building",
             "ER",
             103896385,
+            "2155 Guy St., Montreal, Quebec",
             listOf(
                 LatLng(45.4965177, -73.5796317),
                 LatLng(45.4966784, -73.5799683),
@@ -257,6 +266,7 @@ object CampusRepo {
             "Grey Nuns Building",
             "GN",
             1369689991,
+            "1190 Guy St., Montreal, Quebec",
             listOf(
                 LatLng(45.4941608, -73.5762328),
                 LatLng(45.4941713, -73.5762545),
@@ -419,6 +429,7 @@ object CampusRepo {
             "Concordia Learning Square",
             "LS",
             979438074,
+            "1535 De Maisonneuve Blvd. W.",
             listOf(
                 LatLng(45.4961716, -73.5794628),
                 LatLng(45.4963816, -73.5792527),
@@ -434,6 +445,7 @@ object CampusRepo {
             "GS Building",
             "GS",
             103973074,
+            "1538 Sherbrooke St. W., Montreal, Quebec",
             listOf(
                 LatLng(45.4965242, -73.5808226),
                 LatLng(45.496408, -73.5809336),
@@ -452,6 +464,7 @@ object CampusRepo {
             "LD Building",
             "LD",
             103248059,
+            "1424 Bishop St., Montreal, Quebec",
             listOf(
                 LatLng(45.4966296, -73.5773948),
                 LatLng(45.4965724, -73.5774475),
@@ -474,6 +487,7 @@ object CampusRepo {
             "Visual Arts Building",
             "VA",
             103521746,
+            "1395 René-Lévesque Blvd. W., Montreal, Quebec",
             listOf(
                 LatLng(45.4961732, -73.5737903),
                 LatLng(45.4956505, -73.5742947),
@@ -494,6 +508,7 @@ object CampusRepo {
             "TD Bank Building",
             "TD",
             103248049,
+            "1410 Guy St., Montreal, Quebec",
             listOf(
                 LatLng(45.4951729, -73.5783952),
                 LatLng(45.4951046, -73.5784763),
@@ -533,6 +548,7 @@ object CampusRepo {
     private val loyolaBuildings = listOf(
 
         Building("Administration Building", "AD", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",
             listOf(
             LatLng(45.4581785, -73.6394752),
             LatLng(45.4581606, -73.6394892),
@@ -592,6 +608,7 @@ object CampusRepo {
         )),
 
         Building("BB Annex", "BB", 0,
+            "3502 Belmore Ave., Montreal, Quebec",
             listOf(
             LatLng(45.4598208, -73.6391704),
             LatLng(45.4597195, -73.6392492),
@@ -600,14 +617,15 @@ object CampusRepo {
 
         )),
 
-        Building("BH Annex", "BH", 0,listOf(
+        Building("BH Annex", "BH", 0,"3500 Belmore Ave, Montreal, Quebec", listOf(
             LatLng(45.4597913, -73.6390959),
             LatLng(45.4596919, -73.6391749),
             LatLng(45.4596624, -73.6390950),
             LatLng(45.4597641, -73.6390208)
         )),
 
-        Building("Communication Studies Building", "CC", 0,listOf(
+        Building("Communication Studies Building", "CC", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4584607, -73.6406749),
             LatLng(45.4583684, -73.6404372),
             LatLng(45.4583574, -73.6404459),
@@ -626,7 +644,8 @@ object CampusRepo {
             LatLng(45.4582011, -73.6405694)
         )),
 
-        Building("Communication Studies and Journalism", "CJ", 0,listOf(
+        Building("Communication Studies and Journalism", "CJ", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4571693, -73.6403939),
             LatLng(45.4572802, -73.6406597),
             LatLng(45.4573061, -73.6406414),
@@ -664,7 +683,8 @@ object CampusRepo {
             LatLng(45.4574139, -73.6402070)
         )),
 
-        Building("Stinger Dome", "DO", 0,listOf(
+        Building("Stinger Dome", "DO", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4583485, -73.6359622),
             LatLng(45.4579205, -73.6352244),
             LatLng(45.4569567, -73.6363608),
@@ -681,7 +701,8 @@ object CampusRepo {
             LatLng(45.4580204, -73.6363491)
         )),
 
-        Building("F.C. Smith Building", "FC", 0,listOf(
+        Building("F.C. Smith Building", "FC", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4583380, -73.6391598),
             LatLng(45.4584294, -73.6394033),
             LatLng(45.4584223, -73.6394083),
@@ -714,7 +735,8 @@ object CampusRepo {
             LatLng(45.4584058, -73.6391055)
         )),
 
-        Building("Centre for Structural and Functional Genomics", "GE", 0,listOf(
+        Building("Centre for Structural and Functional Genomics", "GE", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4571701, -73.6405654),
             LatLng(45.4571108, -73.6406112),
             LatLng(45.4569490, -73.6407411),
@@ -729,7 +751,8 @@ object CampusRepo {
 
         )),
 
-        Building("Wing HA", "HA", 0,listOf(
+        Building("Wing HA", "HA", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4592642, -73.6410461),
             LatLng(45.4594645, -73.6408908),
             LatLng(45.4594695, -73.6409038),
@@ -752,7 +775,8 @@ object CampusRepo {
             LatLng(45.4592718, -73.6410658)
         )),
 
-        Building("Wing HB", "HB", 0,listOf(
+        Building("Wing HB", "HB", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4589611, -73.6418023),
             LatLng(45.4591597, -73.6416472),
             LatLng(45.4591648, -73.6416603),
@@ -781,7 +805,8 @@ object CampusRepo {
             LatLng(45.4589679, -73.6418198)
         )),
 
-        Building("Wing HC", "HC", 0,listOf(
+        Building("Wing HC", "HC", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4598870, -73.6420067),
             LatLng(45.4597763, -73.6420908),
             LatLng(45.4597900, -73.6421262),
@@ -794,7 +819,8 @@ object CampusRepo {
             LatLng(45.4598200, -73.6418276)
         )),
 
-        Building("Applied Science Hub", "HU", 0,listOf(
+        Building("Applied Science Hub", "HU", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4584315, -73.6421084),
             LatLng(45.4583945, -73.6420113),
             LatLng(45.4582761, -73.6416998),
@@ -810,7 +836,8 @@ object CampusRepo {
             LatLng(45.4587241, -73.6418822)
         )),
 
-        Building("Jesuit Residence", "JR", 0,listOf(
+        Building("Jesuit Residence", "JR", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4585404, -73.6433119),
             LatLng(45.4584695, -73.6433673),
             LatLng(45.4584643, -73.6433539),
@@ -829,7 +856,8 @@ object CampusRepo {
             LatLng(45.4585124, -73.6432393)
         )),
 
-        Building("PERFORM Centre", "PC", 0,listOf(
+        Building("PERFORM Centre", "PC", 0,
+            "7200 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4572701, -73.6376525),
             LatLng(45.4570453, -73.6378295),
             LatLng(45.4570004, -73.6378624),
@@ -837,7 +865,8 @@ object CampusRepo {
             LatLng(45.4569334, -73.6367839)
         )),
 
-        Building("Physical Services Building", "PS", 0,listOf(
+        Building("Physical Services Building", "PS", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4593968, -73.6395352),
             LatLng(45.4594378, -73.6396447),
             LatLng(45.4594167, -73.6396618),
@@ -852,7 +881,8 @@ object CampusRepo {
             LatLng(45.4593346, -73.6395831)
         )),
 
-        Building("Oscar Peterson Concert Hall", "PT", 0,listOf(
+        Building("Oscar Peterson Concert Hall", "PT", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4595066, -73.6391376),
             LatLng(45.4593050, -73.6386725),
             LatLng(45.4591639, -73.6387860),
@@ -863,7 +893,8 @@ object CampusRepo {
             LatLng(45.4593607, -73.6392369)
         )),
 
-        Building("PY Building", "PY", 0,listOf(
+        Building("PY Building", "PY", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4587698, -73.6407406),
             LatLng(45.4587966, -73.6408103),
             LatLng(45.4591103, -73.6405649),
@@ -878,7 +909,8 @@ object CampusRepo {
             LatLng(45.4587519, -73.6406940)
         )),
 
-        Building("RA Complex", "RA", 0,listOf(
+        Building("RA Complex", "RA", 0,
+            "7200 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4566649, -73.6369952),
             LatLng(45.4563928, -73.6373369),
             LatLng(45.4563979, -73.6373525),
@@ -897,7 +929,8 @@ object CampusRepo {
             LatLng(45.4570004, -73.6378624)
         )),
 
-        Building("Loyola Jesuit Hall and Conference Center", "RF", 0,listOf(
+        Building("Loyola Jesuit Hall and Conference Center", "RF", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4583412, -73.6409057),
             LatLng(45.4583493, -73.6408995),
             LatLng(45.4583941, -73.6410120),
@@ -919,7 +952,8 @@ object CampusRepo {
             LatLng(45.4583267, -73.6408679)
         )),
 
-        Building("Student Centre", "SC", 0,listOf(
+        Building("Student Centre", "SC", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4592282, -73.6389487),
             LatLng(45.4591458, -73.6390148),
             LatLng(45.4591282, -73.6389701),
@@ -936,14 +970,16 @@ object CampusRepo {
             LatLng(45.4593362, -73.6392039)
         )),
 
-        Building("SH Building", "SH", 0,listOf(
+        Building("SH Building", "SH", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4593132, -73.6426242),
             LatLng(45.4592216, -73.6426235),
             LatLng(45.4592224, -73.6424318),
             LatLng(45.4593140, -73.6424325)
         )),
 
-        Building("SI Building", "SI", 0,listOf(
+        Building("SI Building", "SI", 0,
+            "4455 West Broadway St., Montreal, Quebec",listOf(
             LatLng(45.4575836, -73.6423818),
             LatLng(45.4576174, -73.6424713),
             LatLng(45.4576488, -73.6425544),
@@ -979,7 +1015,8 @@ object CampusRepo {
             LatLng(45.4576537, -73.6423280)
         )),
 
-        Building("Science Complex", "SP", 0,listOf(
+        Building("Science Complex", "SP", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4569746, -73.6408295),
             LatLng(45.4570166, -73.6409402),
             LatLng(45.4569934, -73.6409581),
@@ -1031,14 +1068,16 @@ object CampusRepo {
             LatLng(45.4571441, -73.6406987)
         )),
 
-        Building("Terrebonne Building", "TA", 0,listOf(
+        Building("Terrebonne Building", "TA", 0,
+            "7079 de Terrebonne St., Montreal, Quebec",listOf(
             LatLng(45.4600516, -73.6408948),
             LatLng(45.4600117, -73.6407974),
             LatLng(45.4599197, -73.6408738),
             LatLng(45.4599596, -73.6409712)
         )),
 
-        Building("Vanier Library", "VL", 0,listOf(
+        Building("Vanier Library", "VL", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4590303, -73.6388426),
             LatLng(45.4588199, -73.6382949),
             LatLng(45.4589349, -73.6381995),
@@ -1051,7 +1090,8 @@ object CampusRepo {
             LatLng(45.4592771, -73.6386559)
         )) ,
 
-        Building("Vanier Extension", "VE", 0,listOf(
+        Building("Vanier Extension", "VE", 0,
+            "7141 Sherbrooke St. W., Montreal, Quebec",listOf(
             LatLng(45.4588274, -73.6390010),
             LatLng(45.4586120, -73.6384402),
             LatLng(45.4588149, -73.6382819),

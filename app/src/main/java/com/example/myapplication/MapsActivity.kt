@@ -60,21 +60,20 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         setupRecenterButton()
         setBuildingClickPopup()
     }
-    
-    private fun setBuildingClickPopup(){
+
+    private fun setBuildingClickPopup() {
         mMap.setOnMapClickListener { LatLng ->
             val building = mapManager.checkClickBuildings(LatLng)
-            if(building != null){
+            if (building != null) {
                 val coroutineScope = CoroutineScope(Dispatchers.IO)
                 coroutineScope.launch {
                     println(building.name)
                     val center = mapManager.transformStringIntoLatLng(building)
                     val campusImage = mapManager.getPanorama(center)
-                    val address = mapManager.getAddressFromLatLng(this@MapsActivity, center.latitude, center.longitude)
-                    if(center.latitude != 0.0 && campusImage != null && address != null) {
+                    if (center.latitude != 0.0 && campusImage != null) {
                         val bottomSheet = BottomSheetPopUp()
                         bottomSheet.setBuildingPicture(campusImage)
-                        bottomSheet.setAddress(address)
+                        bottomSheet.setAddress(building.address)
                         bottomSheet.show(supportFragmentManager, "BottomSheet");
                     }
                 }
@@ -93,7 +92,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     val userLatLng = LatLng(location.latitude, location.longitude)
 
                     // Check building name for the campus the user is currently LOOKING at
-                    val buildingName = mapManager.findBuildingAtLocation(userLatLng, currentVisibleCampus)
+                    val buildingName =
+                        mapManager.findBuildingAtLocation(userLatLng, currentVisibleCampus)
 
                     // IMPORTANT: Call a version of the focus function that DOES NOT move the camera
                     // You need to ensure MapManager has a function that only clears/redraws polygons
@@ -102,8 +102,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, mainLooper)
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                mainLooper
+            )
         }
     }
 
@@ -116,6 +124,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         currentVisibleCampus = CampusRepo.SGW
                         mapManager.focusOnCampus(currentVisibleCampus) // This one moves camera
                     }
+
                     R.id.btnLoyola -> {
                         currentVisibleCampus = CampusRepo.LOYOLA
                         mapManager.focusOnCampus(currentVisibleCampus) // This one moves camera
@@ -135,16 +144,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     .tilt(0f)
                     .build()
 
-                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 1000, null)
+                mMap.animateCamera(
+                    CameraUpdateFactory.newCameraPosition(cameraPosition),
+                    1000,
+                    null
+                )
             }
         }
     }
 
     private fun enableMyLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             mMap.isMyLocationEnabled = true
         } else {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                1
+            )
         }
     }
 

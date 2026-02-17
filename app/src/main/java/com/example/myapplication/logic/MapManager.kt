@@ -110,7 +110,11 @@ class MapManager(private val googleMap: GoogleMap) {
                     if (addressLine.isNotEmpty()) {
                         val parts = addressLine.split("\t")
                         if (parts.size >= 2) {
-                            return LatLng(parts[0].toDouble(), parts[1].toDouble())
+                            try {
+                                return LatLng(parts[0].toDouble(), parts[1].toDouble())
+                            }catch(e: NumberFormatException){
+                                return LatLng(0.0, 0.0)
+                            }
                         }
                     }
                     return LatLng(0.0, 0.0)
@@ -139,7 +143,7 @@ class MapManager(private val googleMap: GoogleMap) {
 
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
-                    throw Exception("Unexpected response: $response")
+                    return null
                 }
 
                 val bytes = response.body?.bytes()

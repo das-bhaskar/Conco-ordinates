@@ -32,3 +32,7 @@ google-services.json
 
 # Android Profiling
 *.hprof
+
+
+#idk what this is but idt its supposed to be pushed
+*.DS_Store

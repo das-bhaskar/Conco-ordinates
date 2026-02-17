@@ -143,32 +143,7 @@ class MapManager(private val googleMap: GoogleMap) {
         }
         return null
     }
-
-    //Deprecated with the addition of the address variable to CampusData
-    fun getAddressFromLatLng(
-        context: Context,
-        latitude: Double,
-        longitude: Double
-    ): String? {
-        return try {
-            val geocoder = Geocoder(context, Locale.getDefault())
-            var addresses: List<Address> =
-                geocoder.getFromLocation(latitude, longitude, 1)?.toMutableList() ?: emptyList()
-
-            if (!addresses.isNullOrEmpty()) {
-                addresses[0].getAddressLine(0)
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
-
-
-
-
+    
     // Helper to find the distance (in meters) from a point to the nearest polygon edge
     private fun distanceFromPoly(point: LatLng, poly: List<LatLng>): Double {
         var minDistance = Double.MAX_VALUE

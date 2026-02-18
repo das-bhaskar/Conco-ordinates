@@ -1,6 +1,7 @@
 package com.example.myapplication.logic
 
 import android.graphics.Color
+import androidx.core.graphics.toColorInt
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.PolygonOptions
@@ -11,17 +12,18 @@ import com.google.maps.android.PolyUtil
 
 class MapManager(private val googleMap: GoogleMap) {
 
-    // Task 1.5.1: Retrieve user's current location
-    fun getUserLocation(fusedLocationClient: FusedLocationProviderClient, callback: (LatLng) -> Unit) {
+    fun getUserLocation(fusedLocationClient: FusedLocationProviderClient, callback: (LatLng?) -> Unit) {
         try {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                // If location is null, we pass null to the callback so the Activity can handle the fallback
                 if (location != null) {
-                    val userLatLng = LatLng(location.latitude, location.longitude)
-                    callback(userLatLng)
+                    callback(LatLng(location.latitude, location.longitude))
+                } else {
+                    callback(null)
                 }
             }
         } catch (e: SecurityException) {
-            // Permission missing
+            callback(null)
         }
     }
 
@@ -65,18 +67,23 @@ class MapManager(private val googleMap: GoogleMap) {
         return minDistance
     }
 
-    // Use this for Manual Button clicks (SGW/Loyola/Recenter)
     fun focusOnCampus(campus: Campus, highlightedBuildingName: String? = null) {
         drawBuildings(campus, highlightedBuildingName)
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(campus.center, campus.defaultZoom))
     }
 
-    // Task 1.5.4: Use this for Background GPS updates (No camera yanking)
     fun updateHighlightsOnly(campus: Campus, highlightedBuildingName: String? = null) {
         drawBuildings(campus, highlightedBuildingName)
     }
 
+    private var lastBuilding: String? = "NONE"
+
     private fun drawBuildings(campus: Campus, highlightedBuildingName: String?) {
+        if (highlightedBuildingName == lastBuilding) {
+            return
+        }
+        lastBuilding = highlightedBuildingName
+
         googleMap.clear()
         campus.buildings.forEach { building ->
             val isCurrentBuilding = building.name == highlightedBuildingName
@@ -84,9 +91,11 @@ class MapManager(private val googleMap: GoogleMap) {
             val polygon = PolygonOptions()
                 .addAll(building.outline)
                 .strokeWidth(if (isCurrentBuilding) 8f else 4f)
-                .strokeColor(Color.parseColor("#912338"))
+                .strokeColor(if (isCurrentBuilding)
+                    "#FFD700".toColorInt() else //gold for when the user is near the building
+                    "#912338".toColorInt())
                 .fillColor(if (isCurrentBuilding)
-                    Color.argb(180, 145, 35, 56) else
+                    Color.argb(80, 255, 204, 0) else
                     Color.argb(80, 145, 35, 56))
 
             googleMap.addPolygon(polygon)

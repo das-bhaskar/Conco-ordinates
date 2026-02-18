@@ -72,7 +72,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     if (campusImage != null) {
                         val bottomSheet = BottomSheetPopUp()
                         bottomSheet.setBuildingPicture(campusImage)
-                        bottomSheet.setAddress(building.address)
+                        bottomSheet.setAddress(building.address.split(',')[0])
+                        bottomSheet.setSmallAddress(building.address)
                         bottomSheet.show(supportFragmentManager, "BottomSheet");
                     }
                 }

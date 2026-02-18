@@ -8,106 +8,230 @@
 
     <ImageView
         android:id="@+id/buildingView"
-        android:layout_width="0dp"
-        android:layout_height="130dp"
+        android:layout_width="388dp"
+        android:layout_height="143dp"
+        android:layout_marginTop="16dp"
         android:scaleType="centerCrop"
         android:src="@drawable/car"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/buildingAddress"
+        android:id="@+id/txtBuildingAddress"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:minHeight="46dp"
         android:text="Building Address"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/buildingView" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/button8"
-        android:layout_width="53dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="16dp"
-        android:padding="0dp"
+        android:id="@+id/btnCar"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="#b0c8f3"
         android:insetTop="0dp"
         android:insetBottom="0dp"
+        android:padding="0dp"
         app:icon="@drawable/car"
-        app:iconSize="50dp"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/button7"
+        app:iconSize="20dp"
+        app:iconTint="#004bd0"
+        app:layout_constraintEnd_toStartOf="@+id/btnSave"
         app:layout_constraintHorizontal_chainStyle="spread"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/buildingAddress" />
+        app:layout_constraintTop_toBottomOf="@id/txtBuildingAddress" />
+
+    <TextView
+        android:id="@+id/lblCar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="Directions"
+        android:textColor="#004bd0"
+        android:textSize="11sp"
+        app:layout_constraintEnd_toEndOf="@id/btnCar"
+        app:layout_constraintHorizontal_bias="0.4"
+        app:layout_constraintStart_toStartOf="@id/btnCar"
+        app:layout_constraintTop_toBottomOf="@id/btnCar" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/button7"
-        android:layout_width="53dp"
-        android:layout_height="50dp"
+        android:id="@+id/btnSave"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:backgroundTint="#b0c8f3"
         android:insetTop="0dp"
         android:insetBottom="0dp"
         android:padding="0dp"
         app:icon="@drawable/floppy_disk"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
-        app:iconSize="50dp"
-        app:layout_constraintBottom_toBottomOf="@+id/button8"
-        app:layout_constraintEnd_toStartOf="@+id/button6"
-        app:layout_constraintStart_toEndOf="@+id/button8"
-        app:layout_constraintTop_toTopOf="@+id/button8" />
+        app:iconSize="20dp"
+        app:iconTint="#004bd0"
+        app:layout_constraintEnd_toStartOf="@+id/btnPin"
+        app:layout_constraintStart_toEndOf="@+id/btnCar"
+        app:layout_constraintTop_toTopOf="@+id/btnCar" />
+
+    <TextView
+        android:id="@+id/lblSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="Save"
+        android:textColor="#004bd0"
+        android:textSize="11sp"
+        app:layout_constraintEnd_toEndOf="@id/btnSave"
+        app:layout_constraintHorizontal_bias="0.473"
+        app:layout_constraintStart_toStartOf="@id/btnSave"
+        app:layout_constraintTop_toBottomOf="@id/btnSave" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/button6"
-        android:layout_width="53dp"
-        android:layout_height="50dp"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        android:padding="0dp"
-        app:icon="@drawable/share"
-        app:iconGravity="textStart"
-        app:iconPadding="0dp"
-        app:iconSize="50dp"
-        app:layout_constraintBottom_toBottomOf="@+id/button8"
-        app:layout_constraintEnd_toStartOf="@+id/button3"
-        app:layout_constraintStart_toEndOf="@+id/button7"
-        app:layout_constraintTop_toTopOf="@+id/button8" />
-
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/button3"
-        android:layout_width="53dp"
-        android:layout_height="50dp"
+        android:id="@+id/btnPin"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:backgroundTint="#b0c8f3"
         android:insetTop="0dp"
         android:insetBottom="0dp"
         android:padding="0dp"
         app:icon="@drawable/pin"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
-        app:iconSize="50dp"
-        app:layout_constraintBottom_toBottomOf="@+id/button8"
-        app:layout_constraintEnd_toStartOf="@+id/button5"
-        app:layout_constraintStart_toEndOf="@+id/button6"
-        app:layout_constraintTop_toTopOf="@+id/button8" />
+        app:iconSize="20dp"
+        app:iconTint="#004bd0"
+        app:layout_constraintEnd_toStartOf="@+id/btnShare"
+        app:layout_constraintStart_toEndOf="@+id/btnSave"
+        app:layout_constraintTop_toTopOf="@+id/btnCar" />
+
+    <TextView
+        android:id="@+id/lblPin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="PIN"
+        android:textColor="#004bd0"
+        android:textSize="11sp"
+        app:layout_constraintEnd_toEndOf="@id/btnPin"
+        app:layout_constraintHorizontal_bias="0.481"
+        app:layout_constraintStart_toStartOf="@id/btnPin"
+        app:layout_constraintTop_toBottomOf="@id/btnPin" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/button5"
-        android:layout_width="53dp"
-        android:layout_height="50dp"
+        android:id="@+id/btnShare"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:backgroundTint="#b0c8f3"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:padding="0dp"
+        app:icon="@drawable/share"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconSize="20dp"
+        app:iconTint="#004bd0"
+        app:layout_constraintEnd_toStartOf="@+id/btnMore"
+        app:layout_constraintStart_toEndOf="@+id/btnPin"
+        app:layout_constraintTop_toTopOf="@+id/btnCar" />
+
+    <TextView
+        android:id="@+id/lblShare"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="Share"
+        android:textColor="#004bd0"
+        android:textSize="11sp"
+        app:layout_constraintEnd_toEndOf="@id/btnShare"
+        app:layout_constraintHorizontal_bias="0.437"
+        app:layout_constraintStart_toStartOf="@id/btnShare"
+        app:layout_constraintTop_toBottomOf="@id/btnShare" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnMore"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:backgroundTint="#b0c8f3"
         android:insetTop="0dp"
         android:insetBottom="0dp"
         android:padding="0dp"
         app:icon="@drawable/three_dots"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
-        app:iconSize="50dp"
-        app:layout_constraintBottom_toBottomOf="@+id/button8"
+        app:iconSize="20dp"
+        app:iconTint="#004bd0"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/button3"
-        app:layout_constraintTop_toTopOf="@+id/button8" />
+        app:layout_constraintStart_toEndOf="@+id/btnShare"
+        app:layout_constraintTop_toTopOf="@+id/btnCar" />
+
+    <TextView
+        android:id="@+id/lblMore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="More"
+        android:textColor="#004bd0"
+        android:textSize="11sp"
+        app:layout_constraintEnd_toEndOf="@id/btnMore"
+        app:layout_constraintStart_toStartOf="@id/btnMore"
+        app:layout_constraintTop_toBottomOf="@id/btnMore" />
+
+    <View
+        android:id="@+id/viewLine"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="#000000"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lblPin"
+        app:layout_constraintVertical_bias="0.19" />
+
+    <ImageView
+        android:id="@+id/imagePin"
+        android:layout_width="22dp"
+        android:layout_height="21dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="19dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/viewLine"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@drawable/pin2"
+        app:tint="#004bd0" />
+
+    <TextView
+        android:id="@+id/txtAddressSmall"
+        android:layout_width="227dp"
+        android:layout_height="29dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="17dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:fontFamily="sans-serif-medium"
+        android:text="TextView"
+        android:textColor="#004bd0"
+        android:textSize="11sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.128"
+        app:layout_constraintStart_toEndOf="@+id/imagePin"
+        app:layout_constraintTop_toBottomOf="@+id/viewLine"
+        app:layout_constraintVertical_bias="1.0" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

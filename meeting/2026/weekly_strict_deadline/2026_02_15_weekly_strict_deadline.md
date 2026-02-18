@@ -56,19 +56,19 @@ None
 
 ## Action Items
 
-- [ ] @das-bhaskar and @Hildthelsta implement pop-up feature - Due: 2026-02-19
-- [ ] @das-bhaskar implement end-2-end tesing for current features - Due: 2026-02-19
-- [ ] @20Mathieu03 update mockups for sprint 3 with selected feature 4 - Due: 2026-02-19
-- [ ] @bhumi-0902 update issues with appropriate based on due dates - Due: 2026-02-19
-- [ ] @Nasibgz work on annotations for mockups of sprint 1 and 2 - Due: 2026-02-19
-- [ ] @TheRobber fix SonarQube workflow - Due: 2026-02-19
-- [x] @20Mathieu03 implement pull request template - Due: 2026-02-19
-- [x] @20Mathieu03 work on meeting documentation structure - Due: 2026-02-19
+- [ ] @das-bhaskar and @Hildthelsta implement pop-up feature - Due: 2026-02-18
+- [ ] @20Mathieu03 implement end-2-end tesing for current features - Due: 2026-02-22
+- [ ] @20Mathieu03 update mockups for sprint 3 with selected feature 4 - Due: 2026-02-18
+- [ ] @bhumi-0902 update issues with appropriate based on due dates - Due: 2026-02-18
+- [ ] @Nasibgz work on annotations for mockups of sprint 1 and 2 - Due: 2026-02-18
+- [ ] @TheRobber fix SonarQube workflow - Due: 2026-02-18
+- [x] @20Mathieu03 implement pull request template - Due: 2026-02-18
+- [x] @20Mathieu03 work on meeting documentation structure - Due: 2026-02-18
 
 ---
 
 ## Follow-up Tasks
 
-- [x] @20Mathieu03 implement new issue template for refactor and test-improvement - Due: 2026-02-19
-- [ ] @ham340i update wiki and makes changes according to feedback from Release 1 - Due: 2026-02-21
+- [x] @20Mathieu03 implement new issue template for refactor and test-improvement - Due: 2026-02-18
+- [ ] @ham340i update wiki and makes changes according to feedback from Release 1 - Due: 2026-02-22
 

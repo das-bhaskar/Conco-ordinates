@@ -97,8 +97,7 @@ class MapManager(private val googleMap: GoogleMap) {
                 StandardCharsets.UTF_8.toString()
             )).toRequestBody("application/x-www-form-urlencoded".toMediaType())
 
-        val request = Request.Builder()
-            .url("https://overpass-api.de/api/interpreter?")
+        val request = Request.Builder().url("https://overpass-api.de/api/interpreter?")
             .post(requestBody)
             .build()
             client.newCall(request).execute().use { response ->

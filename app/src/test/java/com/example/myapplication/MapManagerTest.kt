@@ -68,7 +68,7 @@ class MapManagerTest {
             LatLng(45.4977, -73.5790),
             LatLng(45.4971, -73.5795)
         )
-        val hall = Building("Henry F. Hall Building", "H", 1L, hallOutline)
+        val hall = Building("Henry F. Hall Building", "H", 1L,            "1455 De Maisonneuve Blvd. W., Montreal, Quebec", hallOutline)
         val campus = Campus("SGW", LatLng(45.4968, -73.5788), listOf(hall))
 
         // Location right in the middle
@@ -84,7 +84,7 @@ class MapManagerTest {
 
     @Test
     fun `test findBuildingAtLocation returns null when user is too far`() {
-        val hall = Building("Hall", "H", 1L, listOf(LatLng(45.0, -73.0), LatLng(45.1, -73.1)))
+        val hall = Building("Hall", "H", 1L,             "1455 De Maisonneuve Blvd. W., Montreal, Quebec",listOf(LatLng(45.0, -73.0), LatLng(45.1, -73.1)))
         val campus = Campus("SGW", LatLng(45.0, -73.0), listOf(hall))
 
         // Location in a different city
@@ -96,7 +96,7 @@ class MapManagerTest {
 
     @Test
     fun `test map highlight logic updates`() {
-        val hall = Building("Hall", "H", 1L, listOf(LatLng(45.0, -73.0), LatLng(45.1, -73.1)))
+        val hall = Building("Hall", "H", 1L,             "1455 De Maisonneuve Blvd. W., Montreal, Quebec",listOf(LatLng(45.0, -73.0), LatLng(45.1, -73.1)))
         val campus = Campus("SGW", LatLng(45.0, -73.0), listOf(hall))
 
         try {

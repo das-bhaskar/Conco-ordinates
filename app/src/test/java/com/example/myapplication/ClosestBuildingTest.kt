@@ -24,6 +24,7 @@ class ClosestBuildingTest {
             name = "Building A",
             code = "A001",
             wayID = 1L,
+            "1455 De Maisonneuve Blvd. W., Montreal, Quebec",
             outline = listOf(
                 LatLng(45.0, -73.0),
                 LatLng(45.0, -73.001),
@@ -36,6 +37,7 @@ class ClosestBuildingTest {
             name = "Building B",
             code = "B001",
             wayID = 2L,
+            "1455 De Maisonneuve Blvd. W., Montreal, Quebec",
             outline = listOf(
                 LatLng(45.002, -73.002),
                 LatLng(45.002, -73.003),

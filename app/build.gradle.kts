@@ -39,6 +39,7 @@ android {
         manifestPlaceholders["mapsApiKey"] = myKey
 
         key = myKey
+        buildConfigField("String", "MAPS_API_KEY", "\"$myKey\"")
     }
 
     buildTypes {
@@ -71,6 +72,9 @@ android {
         viewBinding = true
         buildConfig = true
     }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -87,6 +91,7 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("com.google.maps.android:android-maps-utils:3.8.2")
+    implementation("com.squareup.okhttp3:okhttp:5.3.0")
 
     // Maps dependency
     implementation("org.apache.httpcomponents:httpclient-android:4.3.5.1")
@@ -99,6 +104,7 @@ dependencies {
 
 
     testImplementation(libs.junit)
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))

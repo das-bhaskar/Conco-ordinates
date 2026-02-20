@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.secrets.gradle)
 }
 
 
@@ -70,7 +71,10 @@ android {
         unitTests.isReturnDefaultValues = true
     }
 }
-
+secrets {
+    defaultPropertiesFileName = "local.properties"
+    ignoreList.add("sdk.*")
+}
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -86,6 +90,10 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("com.google.maps.android:android-maps-utils:3.8.2")
     implementation("com.squareup.okhttp3:okhttp:5.3.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    implementation("com.google.maps.android:maps-compose:4.3.3")
+    implementation("androidx.compose.material:material-icons-extended")
 
     // Maps dependency
     implementation("org.apache.httpcomponents:httpclient-android:4.3.5.1")

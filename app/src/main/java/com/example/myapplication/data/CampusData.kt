@@ -57,14 +57,11 @@ object CampusRepo {
 
     // This now accepts Google's LatLng so MapsActivity is happy
     fun getCampus(point: LatLng): Campus? {
-        // 1. First, try the strict math
         val inside = allCampuses.find { isInsidePolygon(point, it.getGoogleOutline()) }
         if (inside != null) return inside
 
-        // 2. If not inside, find the one with the closest center (within ~1km)
         return allCampuses.minByOrNull { campus ->
             val center = campus.getGoogleCenter()
-            // Simple distance math (Pythagoras is fine for short distances)
             Math.sqrt(Math.pow(point.latitude - center.latitude, 2.0) +
                     Math.pow(point.longitude - center.longitude, 2.0))
         }
@@ -83,6 +80,9 @@ object CampusRepo {
         return intersectCount % 2 != 0
     }
 
+    fun setTestCampuses(campuses: List<Campus>) {
+        allCampuses = campuses
+    }
     private fun rayCastIntersect(tap: LatLng, vertA: LatLng, vertB: LatLng): Boolean {
         val aY = vertA.latitude; val bY = vertB.latitude
         val aX = vertA.longitude; val bX = vertB.longitude

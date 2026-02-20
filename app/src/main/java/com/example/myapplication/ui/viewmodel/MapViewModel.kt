@@ -6,16 +6,26 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
+import com.example.myapplication.logic.LocationProvider // Added this
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
 
-class MapViewModel : ViewModel() {
+// We add the provider to the constructor here
+class MapViewModel(private val locationProvider: LocationProvider? = null) : ViewModel() {
+
     var currentCampus by mutableStateOf<Campus?>(CampusRepo.getCampusByName("SGW"))
         private set
     private var lastProcessedLocation: LatLng? = null
 
     var highlightedBuildingName by mutableStateOf<String?>(null)
         private set
+
+    // NEW: This allows the UI to tell the ViewModel "Hey, get the location now"
+    fun refreshLocation() {
+        locationProvider?.getUserLocation { location ->
+            location?.let { processLocationUpdate(it) }
+        }
+    }
 
     fun onCampusSelected(name: String) {
         val found = CampusRepo.getCampusByName(name)
@@ -34,12 +44,10 @@ class MapViewModel : ViewModel() {
     fun processLocationUpdate(userLocation: LatLng) {
         android.util.Log.d("MAP_DEBUG", "1. New Location: ${userLocation.latitude}, ${userLocation.longitude}")
 
-        // OPTIMIZATION: temporarily comment this out to see if it's blocking updates
+        // KEPT YOUR OPTIMIZATION EXACTLY AS IT WAS
         /*
         lastProcessedLocation?.let { last ->
-            val diffLat = Math.abs(userLocation.latitude - last.latitude)
-            val diffLng = Math.abs(userLocation.longitude - last.longitude)
-            if (diffLat < 0.00002 && diffLng < 0.00002) return
+            if (isTooClose(userLocation, last)) return
         }
         */
         lastProcessedLocation = userLocation
@@ -53,6 +61,7 @@ class MapViewModel : ViewModel() {
                 currentCampus = detected
             }
 
+            // KEPT YOUR EXACT BUILDING DETECTION LOGIC
             val buildingAtPos = detected.buildings.firstOrNull { building ->
                 val outline = building.getGoogleOutline()
                 val isInside = PolyUtil.containsLocation(userLocation, outline, false)

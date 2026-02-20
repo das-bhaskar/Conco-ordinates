@@ -25,13 +25,13 @@ jobs:
         run: chmod +x gradlew
 
       - name: Create local.properties
-        run: echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" > local.properties
+        env:
+          # If secret is missing, use 'unused' so the Java code is valid
+          MAPS_VAR: ${{ secrets.MAPS_API_KEY || 'unused' }}
+        run: echo "MAPS_API_KEY=\"$MAPS_VAR\"" > local.properties
 
       - name: Build Debug APK
-        # We pass an empty string if the secret isn't set yet
-        # so the build doesn't fail on missing environment variables
-        env:
-          MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+        # No extra env vars needed here; Gradle reads local.properties
         run: ./gradlew assembleDebug
 
       - name: Run Unit Tests

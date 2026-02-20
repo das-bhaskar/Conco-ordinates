@@ -24,6 +24,9 @@ jobs:
       - name: Grant Execute Permission
         run: chmod +x gradlew
 
+      - name: Create local.properties
+        run: echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" > local.properties
+
       - name: Build Debug APK
         # We pass an empty string if the secret isn't set yet
         # so the build doesn't fail on missing environment variables

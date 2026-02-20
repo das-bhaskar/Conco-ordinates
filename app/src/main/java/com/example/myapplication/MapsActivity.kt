@@ -19,8 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.data.CampusRepo
+import com.example.myapplication.logic.TrueLocationProvider
 import com.example.myapplication.ui.components.CampusMap
 import com.example.myapplication.ui.components.CampusToggle
 import com.example.myapplication.ui.theme.ConcordiaMaroon
@@ -37,16 +37,20 @@ class MapsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         CampusRepo.initialize(this)
-        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        val locationProvider = TrueLocationProvider(fusedLocationClient)
+
+        // This is your MASTER viewModel instance
+        val masterViewModel = MapViewModel(locationProvider)
 
         setContent {
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
-            val viewModel: MapViewModel = viewModel()
 
+            // FIX: We use the masterViewModel we created above, NOT a new one
+            val viewModel = masterViewModel
 
-            // Fix: Explicitly check permission and store as Boolean
             var hasLocationPermission by remember {
                 mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
             }
@@ -55,13 +59,12 @@ class MapsActivity : ComponentActivity() {
                 if (hasLocationPermission) {
                     val locationRequest = com.google.android.gms.location.LocationRequest.Builder(
                         com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
-                        5000 // Check every 5 seconds
+                        5000
                     ).build()
 
                     val locationCallback = object : com.google.android.gms.location.LocationCallback() {
                         override fun onLocationResult(result: com.google.android.gms.location.LocationResult) {
                             result.lastLocation?.let { loc ->
-                                // AUTOMATICALLY update the ViewModel as the user walks
                                 android.util.Log.d("MAP_DEBUG", "ACTIVITY: Sending location to ViewModel")
                                 viewModel.processLocationUpdate(LatLng(loc.latitude, loc.longitude))
                             }
@@ -83,7 +86,7 @@ class MapsActivity : ComponentActivity() {
             }
 
             val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-                hasLocationPermission = isGranted // Fix: Launcher result is a Boolean
+                hasLocationPermission = isGranted
             }
 
             Box(modifier = Modifier.fillMaxSize()) {
@@ -112,7 +115,6 @@ class MapsActivity : ComponentActivity() {
 
                 FloatingActionButton(
                     onClick = {
-                        // Fix: Call the local helper function correctly
                         handleRecenter(fusedLocationClient, hasLocationPermission, launcher) { userLocation ->
                             scope.launch {
                                 cameraPositionState.animate(
@@ -133,7 +135,6 @@ class MapsActivity : ComponentActivity() {
         }
     }
 
-    // Fix: Ensure these helpers are INSIDE the class or properly defined globally
     private fun handleRecenter(
         client: FusedLocationProviderClient,
         hasPermission: Boolean,

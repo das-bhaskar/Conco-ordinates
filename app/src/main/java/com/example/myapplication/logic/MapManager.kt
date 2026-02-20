@@ -12,6 +12,7 @@ import com.example.myapplication.data.Campus
 
 class MapManager(private val googleMap: GoogleMap) {
 
+    // 1. Android-dependent logic (Hard to unit test, stays in class)
     fun getUserLocation(fusedLocationClient: FusedLocationProviderClient, callback: (LatLng?) -> Unit) {
         try {
             fusedLocationClient.lastLocation.addOnSuccessListener { location ->
@@ -24,36 +25,6 @@ class MapManager(private val googleMap: GoogleMap) {
         } catch (e: SecurityException) {
             callback(null)
         }
-    }
-
-    fun findBuildingAtLocation(userLocation: LatLng, campus: Campus): String? {
-        val buildingInside = campus.buildings.firstOrNull { building ->
-            PolyUtil.containsLocation(userLocation, building.getGoogleOutline(), false)
-        }
-        if (buildingInside != null) return buildingInside.name
-
-        var closestBuildingName: String? = null
-        var shortestDistance = 10.0
-
-        campus.buildings.forEach { building ->
-            val distToPoly = distanceFromPoly(userLocation, building.getGoogleOutline())
-            if (distToPoly < shortestDistance) {
-                shortestDistance = distToPoly
-                closestBuildingName = building.name
-            }
-        }
-        return closestBuildingName
-    }
-
-    private fun distanceFromPoly(point: LatLng, poly: List<LatLng>): Double {
-        var minDistance = Double.MAX_VALUE
-        for (i in poly.indices) {
-            val segmentStart = poly[i]
-            val segmentEnd = poly[(i + 1) % poly.size]
-            val distance = PolyUtil.distanceToLine(point, segmentStart, segmentEnd)
-            if (distance < minDistance) minDistance = distance
-        }
-        return minDistance
     }
 
     fun focusOnCampus(campus: Campus, highlightedBuildingName: String? = null) {
@@ -82,6 +53,40 @@ class MapManager(private val googleMap: GoogleMap) {
                 .fillColor(if (isCurrentBuilding) Color.argb(80, 255, 204, 0) else Color.argb(80, 145, 35, 56))
 
             googleMap.addPolygon(polygon)
+        }
+    }
+
+    // 2. PURE LOGIC (Easy to unit test, moved to companion object)
+    // We use this in the app, and we use this in the tests.
+    companion object {
+        fun findBuildingAtLocation(userLocation: LatLng, campus: Campus): String? {
+            val buildingInside = campus.buildings.firstOrNull { building ->
+                PolyUtil.containsLocation(userLocation, building.getGoogleOutline(), false)
+            }
+            if (buildingInside != null) return buildingInside.name
+
+            var closestBuildingName: String? = null
+            var shortestDistance = 10.0
+
+            campus.buildings.forEach { building ->
+                val distToPoly = distanceFromPoly(userLocation, building.getGoogleOutline())
+                if (distToPoly < shortestDistance) {
+                    shortestDistance = distToPoly
+                    closestBuildingName = building.name
+                }
+            }
+            return closestBuildingName
+        }
+
+        fun distanceFromPoly(point: LatLng, poly: List<LatLng>): Double {
+            var minDistance = Double.MAX_VALUE
+            for (i in poly.indices) {
+                val segmentStart = poly[i]
+                val segmentEnd = poly[(i + 1) % poly.size]
+                val distance = PolyUtil.distanceToLine(point, segmentStart, segmentEnd)
+                if (distance < minDistance) minDistance = distance
+            }
+            return minDistance
         }
     }
 }

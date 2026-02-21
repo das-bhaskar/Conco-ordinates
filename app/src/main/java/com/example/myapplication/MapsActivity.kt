@@ -1,7 +1,7 @@
 package com.example.myapplication
 
 import android.Manifest
-import android.content.Context
+import com.example.myapplication.ui.components.BuildingInfoPopup
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -35,6 +35,9 @@ import kotlinx.coroutines.launch
 
 class MapsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (!com.google.android.libraries.places.api.Places.isInitialized()) {
+            com.google.android.libraries.places.api.Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
+        }
         super.onCreate(savedInstanceState)
         CampusRepo.initialize(this)
 
@@ -94,9 +97,18 @@ class MapsActivity : ComponentActivity() {
                     currentCampus = viewModel.currentCampus,
                     highlightedBuildingName = viewModel.highlightedBuildingName,
                     cameraPositionState = cameraPositionState,
-                    hasLocationPermission = hasLocationPermission
+                    hasLocationPermission = hasLocationPermission,
+                    viewModel = viewModel
                 )
-
+                if (viewModel.uiBuildingState.isVisible) {
+                    viewModel.uiBuildingState.building?.let { building ->
+                        com.example.myapplication.ui.components.BuildingInfoPopup(
+                            building = building,
+                            uiState = viewModel.uiBuildingState,
+                            onDismiss = { viewModel.handleMapTap(null) } // Reset state to hide it
+                        )
+                    }
+                }
                 CampusToggle(
                     selectedCampusName = viewModel.currentCampus?.name,
                     onCampusClick = { name ->
@@ -122,7 +134,7 @@ class MapsActivity : ComponentActivity() {
                                     1200
                                 )
                             }
-                            viewModel.processLocationUpdate(userLocation)
+                            viewModel.processLocationUpdate(userLocation, isForce = true)
                         }
                     },
                     modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp),
@@ -131,9 +143,19 @@ class MapsActivity : ComponentActivity() {
                 ) {
                     Icon(Icons.Default.MyLocation, contentDescription = null)
                 }
+                if (viewModel.uiBuildingState.isVisible) {
+                    viewModel.uiBuildingState.building?.let { building ->
+                        BuildingInfoPopup(
+                            building = building,
+                            uiState = viewModel.uiBuildingState,
+                            onDismiss = { viewModel.handleMapTap(null) }
+                        )
+                    }
+                }
+            }
             }
         }
-    }
+
 
     private fun handleRecenter(
         client: FusedLocationProviderClient,

@@ -94,10 +94,12 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation("com.google.maps.android:maps-compose:4.3.3")
     implementation("androidx.compose.material:material-icons-extended")
-
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("com.google.android.libraries.places:places:3.3.0")
     // Maps dependency
     implementation("org.apache.httpcomponents:httpclient-android:4.3.5.1")
     implementation(libs.play.services.maps)
+
 
     testImplementation(libs.junit)
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")

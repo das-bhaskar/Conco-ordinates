@@ -4,14 +4,28 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.myapplication.data.Building
 import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
 import com.example.myapplication.logic.LocationProvider // Added this
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
+import com.example.myapplication.ui.models.BuildingUiState
 
-// We add the provider to the constructor here
 class MapViewModel(private val locationProvider: LocationProvider? = null) : ViewModel() {
+
+    private var isManualCampusSelection = false
+    var uiBuildingState by mutableStateOf(BuildingUiState())
+        private set
+
+    fun handleMapTap(building: Building?, address: String? = null, imageUrl: String? = null) {
+        uiBuildingState = BuildingUiState(
+            isVisible = building != null,
+            building = building,
+            fullAddress = address,
+            imageUrl = imageUrl
+        )
+    }
 
     var currentCampus by mutableStateOf<Campus?>(CampusRepo.getCampusByName("SGW"))
         private set
@@ -20,7 +34,6 @@ class MapViewModel(private val locationProvider: LocationProvider? = null) : Vie
     var highlightedBuildingName by mutableStateOf<String?>(null)
         private set
 
-    // NEW: This allows the UI to tell the ViewModel "Hey, get the location now"
     fun refreshLocation() {
         locationProvider?.getUserLocation { location ->
             location?.let { processLocationUpdate(it) }
@@ -30,6 +43,7 @@ class MapViewModel(private val locationProvider: LocationProvider? = null) : Vie
     fun onCampusSelected(name: String) {
         val found = CampusRepo.getCampusByName(name)
         if (found != null) {
+            isManualCampusSelection = true // Lock the toggle to user choice
             currentCampus = found
             highlightedBuildingName = null
         }
@@ -41,27 +55,27 @@ class MapViewModel(private val locationProvider: LocationProvider? = null) : Vie
         return deltaLat < 0.00002 && deltaLng < 0.00002
     }
 
-    fun processLocationUpdate(userLocation: LatLng) {
-        android.util.Log.d("MAP_DEBUG", "1. New Location: ${userLocation.latitude}, ${userLocation.longitude}")
-
-        // KEPT YOUR OPTIMIZATION EXACTLY AS IT WAS
-        /*
-        lastProcessedLocation?.let { last ->
-            if (isTooClose(userLocation, last)) return
+    fun processLocationUpdate(userLocation: LatLng, isForce: Boolean = false) {
+        if (isForce) {
+            isManualCampusSelection = false
         }
-        */
-        lastProcessedLocation = userLocation
 
+        lastProcessedLocation = userLocation
         val detected = CampusRepo.getCampus(userLocation)
-        android.util.Log.d("MAP_DEBUG", "2. Detected Campus: ${detected?.name ?: "NONE"}")
 
         if (detected != null) {
-            if (currentCampus?.name != detected.name) {
-                android.util.Log.d("MAP_DEBUG", "3. SWITCHING Campus from ${currentCampus?.name} to ${detected.name}")
-                currentCampus = detected
+            // ONLY auto-switch if the user hasn't manually locked a campus choice
+            if (!isManualCampusSelection) {
+                if (currentCampus?.name != detected.name) {
+                    currentCampus = detected
+                }
+            } else {
+                // If they manually picked a campus and finally physically walk INTO it,
+                // we release the manual lock so auto-switching works again.
+                if (detected.name == currentCampus?.name) {
+                    isManualCampusSelection = false
+                }
             }
-
-            // KEPT YOUR EXACT BUILDING DETECTION LOGIC
             val buildingAtPos = detected.buildings.firstOrNull { building ->
                 val outline = building.getGoogleOutline()
                 val isInside = PolyUtil.containsLocation(userLocation, outline, false)
@@ -69,8 +83,10 @@ class MapViewModel(private val locationProvider: LocationProvider? = null) : Vie
                 isInside || isNear
             }
 
-            android.util.Log.d("MAP_DEBUG", "4. Highlighted Building: ${buildingAtPos?.name ?: "NONE"}")
             highlightedBuildingName = buildingAtPos?.name
+        } else {
+            // User walked out of all known campuses; reset the lock
+            isManualCampusSelection = false
         }
     }
 }

@@ -14,6 +14,15 @@ data class Building(
     val isCampusBuilding: Boolean = true
 ) {
     fun getGoogleOutline(): List<LatLng> = outline?.map { LatLng(it.latitude, it.longitude) } ?: emptyList()
+
+    fun getCenter(): LatLng {
+        val points = getGoogleOutline()
+        if (points.isEmpty()) return LatLng(45.497, -73.579) // Fallback to SGW center
+
+        val avgLat = points.map { it.latitude }.average()
+        val avgLng = points.map { it.longitude }.average()
+        return LatLng(avgLat, avgLng)
+    }
 }
 
 data class Campus(
@@ -91,6 +100,9 @@ object CampusRepo {
     fun getCampusByName(name: String): Campus? = allCampuses.find {
         it.name.trim().equals(name.trim(), ignoreCase = true)
     }
+
+
+
     private fun isInsidePolygon(point: LatLng, polygon: List<LatLng>): Boolean {
         if (polygon.isEmpty()) return false
         var intersectCount = 0

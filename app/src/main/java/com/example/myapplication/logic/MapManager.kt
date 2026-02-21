@@ -22,6 +22,9 @@ class MapManager(private val googleMap: GoogleMap) {
                     callback(null)
                 }
             }
+                .addOnFailureListener {
+                    callback(null)
+                }
         } catch (e: SecurityException) {
             callback(null)
         }

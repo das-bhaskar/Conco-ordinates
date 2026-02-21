@@ -125,7 +125,7 @@ class MapsActivity : ComponentActivity() {
                     modifier = Modifier.align(Alignment.BottomEnd).padding(end = 12.dp, bottom = 160.dp)
                 )
 
-                FloatingActionButton(
+                ExtendedFloatingActionButton(
                     onClick = {
                         handleRecenter(fusedLocationClient, hasLocationPermission, launcher) { userLocation ->
                             scope.launch {
@@ -137,12 +137,15 @@ class MapsActivity : ComponentActivity() {
                             viewModel.processLocationUpdate(userLocation, isForce = true)
                         }
                     },
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(24.dp),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(24.dp),
                     containerColor = ConcordiaMaroon,
-                    contentColor = Color.White
-                ) {
-                    Icon(Icons.Default.MyLocation, contentDescription = null)
-                }
+                    contentColor = Color.White,
+                    icon = { Icon(Icons.Default.MyLocation, contentDescription = null) },
+                    text = { Text(text = "RECENTER") }
+                )
+
                 if (viewModel.uiBuildingState.isVisible) {
                     viewModel.uiBuildingState.building?.let { building ->
                         BuildingInfoPopup(

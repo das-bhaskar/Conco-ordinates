@@ -82,7 +82,6 @@ object CampusRepo {
         if (insideBuilding != null) return insideBuilding
 
         // 3. Conditional Fallback: Only return the nearest if within a logical "Campus Zone"
-        // Adjust '0.005' (approx 500m) based on how strict you want to be
         val maxDistanceDegrees = 0.005
 
         return allCampuses.filter { campus ->

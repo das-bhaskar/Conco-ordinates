@@ -23,14 +23,12 @@ fun CampusToggle(
     Column(modifier = modifier.width(60.dp)) {
         CampusButton(
             label = "SGW",
-            // Use equals with ignoreCase to ensure the color stays solid
             isSelected = selectedCampusName?.equals("SGW", ignoreCase = true) == true,
             isTop = true,
             onClick = { onCampusClick("SGW") }
         )
         CampusButton(
             label = "LOY",
-            // Check for "LOYOLA" since that's likely the full name in your JSON
             isSelected = selectedCampusName?.equals("LOYOLA", ignoreCase = true) == true,
             isTop = false,
             onClick = { onCampusClick("LOYOLA") }

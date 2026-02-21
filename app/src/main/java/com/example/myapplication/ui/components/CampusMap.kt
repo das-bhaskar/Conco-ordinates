@@ -25,6 +25,10 @@ fun CampusMap(
         modifier = Modifier.fillMaxSize(),
         cameraPositionState = cameraPositionState,
         properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
+        uiSettings = MapUiSettings(
+            myLocationButtonEnabled = false,
+            zoomControlsEnabled = false
+        ),
         onMapClick = { latLng -> MapInteractionHandler.processClick(latLng, viewModel, context )}
     ) {
         currentCampus?.buildings?.forEach { building ->

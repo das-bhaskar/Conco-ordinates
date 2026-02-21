@@ -66,15 +66,22 @@
 
 - **Platform:** Native Android (Mobile)
 - **Primary Language:** Kotlin
-- **Frontend/UI:** XML Layouts, Material Design 3 (M3)
-- **Backend/Logic:** Android Jetpack, FusedLocationProviderClient
-- **APIs & Services:** - **Google Maps SDK for Android** (Map rendering & Camera control)
-  - **Google Maps Utility Library** (PolyUtil for geofencing & distance logic)
+- **Frontend/UI:** **Jetpack Compose** (Declarative UI) with Material Design 3 (M3)
+- **Architecture:** **MVVM (Model-View-ViewModel)**
+- **Data Management:** **JSON-based** persistence with **Gson** serialization
+- **APIs & Services:** - **Google Maps SDK for Android** (Compose-integrated map rendering)
+  - **Google Maps Utility Library** (PolyUtil for advanced geofencing & distance logic)
+  - **FusedLocationProviderClient** (Real-time GPS tracking)
   - **Google Calendar API** (Class schedule integration)
-  - **Concordia Open Data API** (Shuttle & Building data)
-- **Architecture:** Model-View-Controller (MVC) / MVVM
-- **Methodology:** Agile / Scrum
-- **Version Control:** GitHub
+- **Testing & CI/CD:** - **JUnit 4** for unit testing logic and viewmodels
+  - **SonarCloud** for automated code quality and coverage analysis
+  - **GitHub Actions** for continuous integration and automated build pipelines
+
+---
+
+## 📂 Project Architecture
+
+The project follows a reactive **MVVM** pattern, ensuring a clean separation between UI, logic, and data layers to maximize testability and maintainability.
 
 ---
 

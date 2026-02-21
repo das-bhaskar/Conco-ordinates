@@ -32,16 +32,45 @@ class CampusRepoTest {
         assertEquals("Test", namedCampus?.name)
     }
 
+
     @Test
-    fun `getCampus returns nearest campus when user is far away`() {
-        val campusA = Campus("FarNorth", JsonLatLng(80.0, 0.0), emptyList(), emptyList())
-        val campusB = Campus("FarSouth", JsonLatLng(-80.0, 0.0), emptyList(), emptyList())
-        CampusRepo.setTestCampuses(listOf(campusA, campusB))
+    fun `getCampus returns null for far away locations like Chemin Bates`() {
+        // Chemin Bates is roughly 45.51, far from these test coordinates
+        val campusA = Campus("SGW", JsonLatLng(45.49, -73.57), emptyList(), emptyList())
+        CampusRepo.setTestCampuses(listOf(campusA))
 
-        // Point near the equator, but closer to South
-        val userLoc = LatLng(-10.0, 0.0)
-        val result = CampusRepo.getCampus(userLoc)
+        // This point is ~2km away, exceeding the 0.005 (approx 500m) threshold
+        val farPoint = LatLng(45.51, -73.61)
+        val result = CampusRepo.getCampus(farPoint)
 
-        assertEquals("FarSouth", result?.name)
+        assertEquals(null, result)
     }
+
+    @Test
+    fun `getCampus identifies user inside a specific building even if campus outline is empty`() {
+        val bOutline = listOf(JsonLatLng(0.0, 0.0), JsonLatLng(1.0, 0.0), JsonLatLng(1.0, 1.0), JsonLatLng(0.0, 1.0))
+        val building = Building("Hall", "H", 1L, bOutline)
+        val campus = Campus("SGW", JsonLatLng(0.5, 0.5), listOf(building), emptyList())
+
+        CampusRepo.setTestCampuses(listOf(campus))
+
+        // Point inside the building (Step 2 of your logic)
+        val result = CampusRepo.getCampus(LatLng(0.5, 0.5))
+        assertEquals("SGW", result?.name)
+    }
+
+    @Test
+    fun `getCampus identifies user near campus via fallback buffer`() {
+        val campus = Campus("SGW", JsonLatLng(45.0, -73.0), emptyList(), emptyList())
+        CampusRepo.setTestCampuses(listOf(campus))
+
+        // Point is ~111m away (0.001 degrees), which is within the 0.005 buffer
+        val nearPoint = LatLng(45.001, -73.001)
+        val result = CampusRepo.getCampus(nearPoint)
+
+        assertEquals("SGW", result?.name)
+    }
+
+
+
 }

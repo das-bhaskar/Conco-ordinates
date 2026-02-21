@@ -57,10 +57,31 @@ object CampusRepo {
 
     // This now accepts Google's LatLng so MapsActivity is happy
     fun getCampus(point: LatLng): Campus? {
-        val inside = allCampuses.find { isInsidePolygon(point, it.getGoogleOutline()) }
-        if (inside != null) return inside
+        // 1. Strict Check: Is the user physically inside the campus perimeter?
+        val insideCampus = allCampuses.find { campus ->
+            val outline = campus.getGoogleOutline()
+            outline.isNotEmpty() && isInsidePolygon(point, outline)
+        }
+        if (insideCampus != null) return insideCampus
 
-        return allCampuses.minByOrNull { campus ->
+        // 2. Strict Check: Is the user inside a specific building?
+        val insideBuilding = allCampuses.find { campus ->
+            campus.buildings.any { building ->
+                isInsidePolygon(point, building.getGoogleOutline())
+            }
+        }
+        if (insideBuilding != null) return insideBuilding
+
+        // 3. Conditional Fallback: Only return the nearest if within a logical "Campus Zone"
+        // Adjust '0.005' (approx 500m) based on how strict you want to be
+        val maxDistanceDegrees = 0.005
+
+        return allCampuses.filter { campus ->
+            val center = campus.getGoogleCenter()
+            val dist = Math.sqrt(Math.pow(point.latitude - center.latitude, 2.0) +
+                    Math.pow(point.longitude - center.longitude, 2.0))
+            dist < maxDistanceDegrees
+        }.minByOrNull { campus ->
             val center = campus.getGoogleCenter()
             Math.sqrt(Math.pow(point.latitude - center.latitude, 2.0) +
                     Math.pow(point.longitude - center.longitude, 2.0))

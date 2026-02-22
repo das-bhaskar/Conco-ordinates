@@ -1,7 +1,7 @@
 name: Refactor
 description: Suggeest a refactor of existing code.
 title: "[REFACTOR]: "
-labels: [refactor]
+labels: ["refactor"]
 assignees: []
 body: 
   - type: markdown

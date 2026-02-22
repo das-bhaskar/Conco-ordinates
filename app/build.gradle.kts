@@ -71,10 +71,7 @@ android {
         unitTests.isReturnDefaultValues = true
     }
 }
-secrets {
-    defaultPropertiesFileName = "local.properties"
-    ignoreList.add("sdk.*")
-}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

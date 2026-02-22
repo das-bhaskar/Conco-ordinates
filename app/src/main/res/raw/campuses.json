@@ -1462,6 +1462,881 @@
           ],
           "wayID":103521746
         },
+
+
+        {
+            "code": "SB",
+            "isCampusBuilding": true,
+            "name": "SB Building",
+            "outline": [{
+              "latitude": 45.4964612,
+              "longitude": -73.5862621
+            },
+              {
+                "latitude": 45.4965266,
+                "longitude": -73.5862713
+              },
+              {
+                "latitude": 45.4965327,
+                "longitude": -73.5861978
+              },
+              {
+                "latitude": 45.4965515,
+                "longitude": -73.5862004
+              },
+              {
+                "latitude": 45.4965487,
+                "longitude": -73.5862152
+              },
+              {
+                "latitude": 45.4965675,
+                "longitude": -73.5862568
+              },
+              {
+                "latitude": 45.4965877,
+                "longitude": -73.5862418
+              },
+              {
+                "latitude": 45.4965806,
+                "longitude": -73.5862219
+              },
+              {
+                "latitude": 45.4965877,
+                "longitude": -73.5862163
+              },
+              {
+                "latitude": 45.4965966,
+                "longitude": -73.5862380
+              },
+              {
+                "latitude": 45.496708,
+                "longitude": -73.5861466
+              },
+              {
+                "latitude": 45.496684,
+                "longitude": -73.5860864
+              },
+              {
+                "latitude": 45.4966633,
+                "longitude": -73.5861039
+              },
+              {
+                "latitude": 45.4966568,
+                "longitude": -73.5860878
+              },
+              {
+                "latitude": 45.4966831,
+                "longitude": -73.5860690
+              },
+              {
+                "latitude": 45.4966004,
+                "longitude": -73.5858799
+              },
+              {
+                "latitude": 45.4965787,
+                "longitude": -73.5858303
+              },
+              {
+                "latitude": 45.4965515,
+                "longitude": -73.5858544
+              },
+              {
+                "latitude": 45.4965689,
+                "longitude": -73.5858985
+              },
+              {
+                "latitude": 45.4965515,
+                "longitude": -73.5859134
+              },
+              {
+                "latitude": 45.4965186,
+                "longitude": -73.5858544
+              },
+              {
+                "latitude": 45.4964979,
+                "longitude": -73.5858544
+              },
+              {
+                "latitude": 45.4964612,
+                "longitude": -73.5862621
+              }],
+            "wayID": 340272877
+          },
+
+          {
+            "code": "CL",
+            "isCampusBuilding": true,
+            "name": "CL Annex",
+            "outline": [{
+              "latitude": 45.4941615,
+              "longitude": -73.5796402
+            },
+              {
+                "latitude": 45.493971,
+                "longitude": -73.5793124
+              },
+              {
+                "latitude": 45.4939729,
+                "longitude": -73.5792952
+              },
+              {
+                "latitude": 45.4939832,
+                "longitude": -73.5792697
+              },
+              {
+                "latitude": 45.494002,
+                "longitude": -73.5792348
+              },
+              {
+                "latitude": 45.4940152,
+                "longitude": -73.5792201
+              },
+              {
+                "latitude": 45.4942577,
+                "longitude": -73.5789277
+              },
+              {
+                "latitude": 45.4944711,
+                "longitude": -73.5792777
+              },
+              {
+                "latitude": 45.4941615,
+                "longitude": -73.5796402
+              }],
+            "wayID": 103248055
+          },
+          {
+            "code": "B",
+            "isCampusBuilding": true,
+            "name": "B Annex",
+            "outline": [{
+              "latitude": 45.497887,
+              "longitude": -73.5793896
+            },
+              {
+                "latitude": 45.4979102,
+                "longitude": -73.5794406
+              },
+              {
+                "latitude": 45.4979241,
+                "longitude": -73.5794655
+              },
+              {
+                "latitude": 45.4977507,
+                "longitude": -73.5796322
+              },
+              {
+                "latitude": 45.4977144,
+                "longitude": -73.5795607
+              },
+              {
+                "latitude": 45.497887,
+                "longitude": -73.5793896
+              }],
+            "wayID": 103892958
+          },
+          {
+            "code": "CI",
+            "isCampusBuilding": true,
+            "name": "CI Annex",
+            "outline": [{
+              "latitude": 45.4974061,
+              "longitude": -73.5800149
+            },
+              {
+                "latitude": 45.4975819,
+                "longitude": -73.5798422
+              },
+              {
+                "latitude": 45.4975407,
+                "longitude": -73.5797543
+              },
+              {
+                "latitude": 45.4974912,
+                "longitude": -73.5798023
+              },
+              {
+                "latitude": 45.4973632,
+                "longitude": -73.5799218
+              },
+              {
+                "latitude": 45.4973615,
+                "longitude": -73.5799483
+              },
+              {
+                "latitude": 45.497373,
+                "longitude": -73.5799734
+              },
+              {
+                "latitude": 45.4973868,
+                "longitude": -73.5799742
+              },
+              {
+                "latitude": 45.4973958,
+                "longitude": -73.5799938
+              },
+              {
+                "latitude": 45.4974061,
+                "longitude": -73.5800149
+              }],
+            "wayID": 103892934
+          },
+          {
+            "code": "MI",
+            "isCampusBuilding": true,
+            "name": "MI Annex",
+            "outline": [{
+              "latitude": 45.497816,
+              "longitude": -73.5792401
+            },
+              {
+                "latitude": 45.4978341,
+                "longitude": -73.5792822
+              },
+              {
+                "latitude": 45.4978508,
+                "longitude": -73.5793152
+              },
+              {
+                "latitude": 45.4977565,
+                "longitude": -73.579405
+              },
+              {
+                "latitude": 45.4977075,
+                "longitude": -73.5794536
+              },
+              {
+                "latitude": 45.4976872,
+                "longitude": -73.5794096
+              },
+              {
+                "latitude": 45.4977301,
+                "longitude": -73.5793694
+              },
+              {
+                "latitude": 45.4977169,
+                "longitude": -73.5793354
+              },
+              {
+                "latitude": 45.497816,
+                "longitude": -73.5792401
+              }],
+            "wayID": 103892938
+          },
+          {
+            "code": "EN",
+            "isCampusBuilding": true,
+            "name": "EN Annex",
+            "outline": [{
+              "latitude": 45.4968834,
+              "longitude": -73.5794977
+            },
+              {
+                "latitude": 45.4968982,
+                "longitude": -73.5794838
+              },
+              {
+                "latitude": 45.4969165,
+                "longitude": -73.5795233
+              },
+              {
+                "latitude": 45.4969267,
+                "longitude": -73.5795137
+              },
+              {
+                "latitude": 45.4969507,
+                "longitude": -73.5795655
+              },
+              {
+                "latitude": 45.4969271,
+                "longitude": -73.5795884
+              },
+              {
+                "latitude": 45.4968297,
+                "longitude": -73.5796809
+              },
+              {
+                "latitude": 45.4967146,
+                "longitude": -73.5797877
+              },
+              {
+                "latitude": 45.496689,
+                "longitude": -73.5797324
+              },
+              {
+                "latitude": 45.4968073,
+                "longitude": -73.579621
+              },
+              {
+                "latitude": 45.4967907,
+                "longitude": -73.5795851
+              },
+              {
+                "latitude": 45.4968834,
+                "longitude": -73.5794977
+              }],
+            "wayID": 103892973
+          },
+          {
+            "code": "MU",
+            "isCampusBuilding": true,
+            "name": "MU Annex",
+            "outline": [{
+              "latitude": 45.4979241,
+              "longitude": -73.5794655
+            },
+              {
+                "latitude": 45.4979399,
+                "longitude": -73.5794938
+              },
+              {
+                "latitude": 45.4979605,
+                "longitude": -73.5795368
+              },
+              {
+                "latitude": 45.4977466,
+                "longitude": -73.579754
+              },
+              {
+                "latitude": 45.4977075,
+                "longitude": -73.5796772
+              },
+              {
+                "latitude": 45.4977507,
+                "longitude": -73.5796322
+              },
+              {
+                "latitude": 45.4979241,
+                "longitude": -73.5794655
+              }],
+            "wayID": 103892927
+          },
+          {
+            "code": "P",
+            "isCampusBuilding": true,
+            "name": "P Annex",
+            "outline": [
+              {
+                "latitude": 45.496684,
+                "longitude": -73.5790979
+              },
+              {
+                "latitude": 45.4967207,
+                "longitude": -73.5791744
+              },
+              {
+                "latitude": 45.4967172,
+                "longitude": -73.5791776
+              },
+              {
+                "latitude": 45.496621,
+                "longitude": -73.5792669
+              },
+              {
+                "latitude": 45.4965857,
+                "longitude": -73.5791899
+              },
+              {
+                "latitude": 45.496684,
+                "longitude": -73.5790979
+              }
+            ],
+            "wayID": 103892936
+          },
+          {
+            "code": "PR",
+            "isCampusBuilding": true,
+            "name": "PR Annex",
+            "outline": [
+              {
+                "latitude": 45.4969999,
+                "longitude": -73.5797534
+              },
+              {
+                "latitude": 45.4970082,
+                "longitude": -73.5797457
+              },
+              {
+                "latitude": 45.4970309,
+                "longitude": -73.5797950
+              },
+              {
+                "latitude": 45.4970326,
+                "longitude": -73.5798276
+              },
+              {
+                "latitude": 45.4969316,
+                "longitude": -73.5799272
+              },
+              {
+                "latitude": 45.4969346,
+                "longitude": -73.5799490
+              },
+              {
+                "latitude": 45.4969279,
+                "longitude": -73.5799345
+              },
+              {
+                "latitude": 45.4968886,
+                "longitude": -73.5799699
+              },
+              {
+                "latitude": 45.4968946,
+                "longitude": -73.5799898
+              },
+              {
+                "latitude": 45.4968248,
+                "longitude": -73.5800496
+              },
+              {
+                "latitude": 45.4967823,
+                "longitude": -73.5799532
+              },
+              {
+                "latitude": 45.4968411,
+                "longitude": -73.5798979
+              },
+              {
+                "latitude": 45.4968489,
+                "longitude": -73.5798908
+              },
+              {
+                "latitude": 45.4968741,
+                "longitude": -73.5799469
+              },
+              {
+                "latitude": 45.4969163,
+                "longitude": -73.5799082
+              },
+              {
+                "latitude": 45.4968917,
+                "longitude": -73.5798536
+              },
+              {
+                "latitude": 45.4969027,
+                "longitude": -73.5798436
+              },
+              {
+                "latitude": 45.4969999,
+                "longitude": -73.5797534
+              }
+            ],
+            "wayID": 103892959
+          },
+          {
+            "code": "Q",
+            "isCampusBuilding": true,
+            "name": "Q Annex",
+            "outline": [
+              {
+                "latitude": 45.496652,
+                "longitude": -73.579029
+              },
+              {
+                "latitude": 45.496684,
+                "longitude": -73.5790979
+              },
+              {
+                "latitude": 45.4965857,
+                "longitude": -73.5791899
+              },
+              {
+                "latitude": 45.4965778,
+                "longitude": -73.5791972
+              },
+              {
+                "latitude": 45.4965484,
+                "longitude": -73.579129
+              },
+              {
+                "latitude": 45.496652,
+                "longitude": -73.579029
+              }
+            ],
+            "wayID": 103892957
+          },
+          {
+            "code": "R",
+            "isCampusBuilding": true,
+            "name": "R Annex",
+            "outline": [
+              {
+                "latitude": 45.4967012,
+                "longitude": -73.5794243
+              },
+              {
+                "latitude": 45.4967406,
+                "longitude": -73.5795156
+              },
+              {
+                "latitude": 45.4968443,
+                "longitude": -73.5794153
+              },
+              {
+                "latitude": 45.4968027,
+                "longitude": -73.5793309
+              },
+              {
+                "latitude": 45.4967012,
+                "longitude": -73.5794243
+              }
+            ],
+            "wayID": 103892935
+          },
+          {
+            "code": "RR",
+            "isCampusBuilding": true,
+            "name": "RR Annex",
+            "outline": [
+              {
+                "latitude": 45.4967535,
+                "longitude": -73.5792532
+              },
+              {
+                "latitude": 45.4967635,
+                "longitude": -73.579244
+              },
+              {
+                "latitude": 45.4968027,
+                "longitude": -73.5793309
+              },
+              {
+                "latitude": 45.4967012,
+                "longitude": -73.5794243
+              },
+              {
+                "latitude": 45.4966525,
+                "longitude": -73.5794691
+              },
+              {
+                "latitude": 45.496613,
+                "longitude": -73.5793816
+              },
+              {
+                "latitude": 45.496657,
+                "longitude": -73.5793412
+              },
+              {
+                "latitude": 45.4967535,
+                "longitude": -73.5792532
+              }
+            ],
+            "wayID": 103892971
+          },
+          {
+            "code": "S",
+            "isCampusBuilding": true,
+            "name": "S Annex",
+            "outline": [
+              {
+                "latitude": 45.4974912,
+                "longitude": -73.5798023
+              },
+              {
+                "latitude": 45.4974585,
+                "longitude": -73.5797346
+              },
+              {
+                "latitude": 45.4974321,
+                "longitude": -73.5797603
+              },
+              {
+                "latitude": 45.4974204,
+                "longitude": -73.5797377
+              },
+              {
+                "latitude": 45.4973206,
+                "longitude": -73.5798361
+              },
+              {
+                "latitude": 45.497321,
+                "longitude": -73.5798567
+              },
+              {
+                "latitude": 45.4973335,
+                "longitude": -73.5798829
+              },
+              {
+                "latitude": 45.4973455,
+                "longitude": -73.5798855
+              },
+              {
+                "latitude": 45.4973547,
+                "longitude": -73.5799045
+              },
+              {
+                "latitude": 45.4973632,
+                "longitude": -73.5799218
+              },
+              {
+                "latitude": 45.4974912,
+                "longitude": -73.5798023
+              }
+            ],
+            "wayID": 103892969
+          },
+          {
+            "code": "T",
+            "isCampusBuilding": true,
+            "name": "T Annex",
+            "outline": [
+              {
+                "latitude": 45.4967172,
+                "longitude": -73.5791776
+              },
+              {
+                "latitude": 45.4967535,
+                "longitude": -73.5792532
+              },
+              {
+                "latitude": 45.496657,
+                "longitude": -73.5793412
+              },
+              {
+                "latitude": 45.496621,
+                "longitude": -73.5792669
+              },
+              {
+                "latitude": 45.4967172,
+                "longitude": -73.5791776
+              }
+            ],
+            "wayID": 103892939
+          },
+          {
+            "code": "V",
+            "isCampusBuilding": true,
+            "name": "V Annex",
+            "outline": [
+              {
+                "latitude": 45.4970326,
+                "longitude": -73.5798276
+              },
+              {
+                "latitude": 45.4970504,
+                "longitude": -73.579812
+              },
+              {
+                "latitude": 45.4970779,
+                "longitude": -73.5798721
+              },
+              {
+                "latitude": 45.4970896,
+                "longitude": -73.5798984
+              },
+              {
+                "latitude": 45.4970717,
+                "longitude": -73.5799152
+              },
+              {
+                "latitude": 45.4969695,
+                "longitude": -73.5800161
+              },
+              {
+                "latitude": 45.4969316,
+                "longitude": -73.5799272
+              },
+              {
+                "latitude": 45.4970326,
+                "longitude": -73.5798276
+              }
+            ],
+            "wayID": 103892931
+          },
+          {
+            "code": "X",
+            "isCampusBuilding": true,
+            "name": "X Annex",
+            "outline": [
+              {
+                "latitude": 45.4969271,
+                "longitude": -73.5795884
+              },
+              {
+                "latitude": 45.4969613,
+                "longitude": -73.5796672
+              },
+              {
+                "latitude": 45.4968645,
+                "longitude": -73.5797555
+              },
+              {
+                "latitude": 45.4968297,
+                "longitude": -73.5796809
+              },
+              {
+                "latitude": 45.4969271,
+                "longitude": -73.5795884
+              }
+            ],
+            "wayID": 103892928
+          },
+          {
+            "code": "Z",
+            "isCampusBuilding": true,
+            "name": "Z Annex",
+            "outline": [
+              {
+                "latitude": 45.4968645,
+                "longitude": -73.5797555
+              },
+              {
+                "latitude": 45.496877,
+                "longitude": -73.5797833
+              },
+              {
+                "latitude": 45.4968151,
+                "longitude": -73.5798399
+              },
+              {
+                "latitude": 45.4968411,
+                "longitude": -73.5798979
+              },
+              {
+                "latitude": 45.4968489,
+                "longitude": -73.5798908
+              },
+              {
+                "latitude": 45.4968827,
+                "longitude": -73.5798585
+              },
+              {
+                "latitude": 45.4968711,
+                "longitude": -73.5798326
+              },
+              {
+                "latitude": 45.4968899,
+                "longitude": -73.5798153
+              },
+              {
+                "latitude": 45.4969027,
+                "longitude": -73.5798436
+              },
+              {
+                "latitude": 45.4969999,
+                "longitude": -73.5797534
+              },
+              {
+                "latitude": 45.4969613,
+                "longitude": -73.5796672
+              },
+              {
+                "latitude": 45.4968645,
+                "longitude": -73.5797555
+              }
+            ],
+            "wayID":  103892926
+          },
+
+        {
+          "code": "M",
+          "isCampusBuilding": true,
+          "name": "M Annex",
+          "outline": [
+            {
+              "latitude": 45.4974204,
+              "longitude": -73.5797377
+            },
+            {
+              "latitude": 45.4974254,
+              "longitude": -73.5797325
+            },
+            {
+              "latitude": 45.4973882,
+              "longitude": -73.5796579
+            },
+            {
+              "latitude": 45.4972844,
+              "longitude": -73.5797586
+            },
+            {
+              "latitude": 45.4972817,
+              "longitude": -73.579781
+            },
+            {
+              "latitude": 45.4972922,
+              "longitude": -73.579803
+            },
+            {
+              "latitude": 45.4973058,
+              "longitude": -73.5798082
+            },
+            {
+              "latitude": 45.4973116,
+              "longitude": -73.5798209
+            },
+            {
+              "latitude": 45.4973206,
+              "longitude": -73.5798361
+            },
+            {
+              "latitude": 45.4974204,
+              "longitude": -73.5797377
+            }
+          ],
+          "wayID":  103892967
+        },
+        {
+          "code": "D",
+          "isCampusBuilding": true,
+          "name": "D Annex",
+          "outline":[
+            {
+              "latitude": 45.4978508,
+              "longitude": -73.5793152
+            },
+            {
+              "latitude": 45.4978723,
+              "longitude": -73.5793612
+            },
+            {
+              "latitude": 45.497887,
+              "longitude": -73.5793896
+            },
+            {
+              "latitude": 45.4977144,
+              "longitude": -73.5795607
+            },
+            {
+              "latitude": 45.4976342,
+              "longitude": -73.579643
+            },
+            {
+              "latitude": 45.4975958,
+              "longitude": -73.5795611
+            },
+            {
+              "latitude": 45.4976804,
+              "longitude": -73.5794786
+            },
+            {
+              "latitude": 45.497706,
+              "longitude": -73.5795321
+            },
+            {
+              "latitude": 45.4977493,
+              "longitude": -73.5794813
+            },
+            {
+              "latitude": 45.4977435,
+              "longitude": -73.5794647
+            },
+            {
+              "latitude": 45.49777,
+              "longitude": -73.5794334
+            },
+            {
+              "latitude": 45.4977565,
+              "longitude": -73.579405
+            },
+            {
+              "latitude": 45.4978508,
+              "longitude": -73.5793152
+            }
+          ] ,
+          "wayID":  103892960
+        },
+
         {
           "code":"TD",
           "isCampusBuilding":true,

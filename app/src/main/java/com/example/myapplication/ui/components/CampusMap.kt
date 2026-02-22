@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import com.example.myapplication.data.Campus
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.theme.concordiaGold
@@ -17,12 +18,13 @@ fun CampusMap(
     highlightedBuildingName: String?,
     cameraPositionState: CameraPositionState,
     hasLocationPermission: Boolean,
+    modifier: Modifier = Modifier,
     viewModel: MapViewModel
 ) {
     val context = LocalContext.current
 
     GoogleMap(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().testTag("google_map"),
         cameraPositionState = cameraPositionState,
         properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
         uiSettings = MapUiSettings(

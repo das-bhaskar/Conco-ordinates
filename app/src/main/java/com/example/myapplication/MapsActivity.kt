@@ -17,17 +17,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.example.myapplication.data.CampusRepo
 import com.example.myapplication.logic.TrueLocationProvider
+import com.example.myapplication.map.TrueCameraController
 import com.example.myapplication.ui.components.CampusMap
 import com.example.myapplication.ui.components.CampusToggle
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.viewmodel.MapViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.*
@@ -88,6 +89,16 @@ class MapsActivity : ComponentActivity() {
                 position = CameraPosition.fromLatLngZoom(LatLng(45.497, -73.579), 16f)
             }
 
+            val cameraController = remember(cameraPositionState) {
+                TrueCameraController(cameraPositionState)
+            }
+
+            LaunchedEffect(viewModel.currentCampus) {
+                viewModel.currentCampus?.let { campus ->
+                    cameraController.animateTo(campus.getGoogleCenter(), campus.defaultZoom)
+                }
+            }
+
             val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
                 hasLocationPermission = isGranted
             }
@@ -98,7 +109,8 @@ class MapsActivity : ComponentActivity() {
                     highlightedBuildingName = viewModel.highlightedBuildingName,
                     cameraPositionState = cameraPositionState,
                     hasLocationPermission = hasLocationPermission,
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    modifier = Modifier.testTag("campus_map")
                 )
                 if (viewModel.uiBuildingState.isVisible) {
                     viewModel.uiBuildingState.building?.let { building ->
@@ -113,14 +125,6 @@ class MapsActivity : ComponentActivity() {
                     selectedCampusName = viewModel.currentCampus?.name,
                     onCampusClick = { name ->
                         viewModel.onCampusSelected(name)
-                        viewModel.currentCampus?.let { campus ->
-                            scope.launch {
-                                cameraPositionState.animate(
-                                    CameraUpdateFactory.newLatLngZoom(campus.getGoogleCenter(), campus.defaultZoom),
-                                    1000
-                                )
-                            }
-                        }
                     },
                     modifier = Modifier.align(Alignment.BottomEnd).padding(end = 12.dp, bottom = 160.dp)
                 )
@@ -129,10 +133,7 @@ class MapsActivity : ComponentActivity() {
                     onClick = {
                         handleRecenter(fusedLocationClient, hasLocationPermission, launcher) { userLocation ->
                             scope.launch {
-                                cameraPositionState.animate(
-                                    CameraUpdateFactory.newLatLngZoom(userLocation, 18.5f),
-                                    1200
-                                )
+                                cameraController.animateTo(userLocation, 18.5f)
                             }
                             viewModel.processLocationUpdate(userLocation, isForce = true)
                         }

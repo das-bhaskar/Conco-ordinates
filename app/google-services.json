@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "618418383316",
+    "project_id": "soen-390-d7ff3",
+    "storage_bucket": "soen-390-d7ff3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618418383316:android:7ce328761402ab5e878e41",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDvP0iXw1EJU1QslFBgL1peMmCa_fCTXo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

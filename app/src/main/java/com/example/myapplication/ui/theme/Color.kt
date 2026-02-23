@@ -9,3 +9,11 @@ val Pink80 = Color(0xFFEFB8C8)
 val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
+val ConcordiaMaroon = Color(0xFF912338)
+val ToggleWhite = Color(0xFFFFFFFF)
+
+val lightMaroon = ConcordiaMaroon.copy(alpha = 0.7f)
+
+// Create a very faint 20% transparent version
+val faintMaroon = ConcordiaMaroon.copy(alpha = 0.2f)
+val concordiaGold = Color(0xFFFFD700)

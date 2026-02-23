@@ -1,8 +1,9 @@
 name: Refactor
 description: Suggeest a refactor of existing code.
 title: "[REFACTOR]: "
-labels: [refactor]
+labels: ["refactor"]
 assignees: []
+
 body: 
   - type: markdown
     attributes:
@@ -22,7 +23,7 @@ body:
       label: Current Problem
       description: What is wrong with the current implementation?
       placeholder: Explain duplication, perfomance issues, etc.
-    validattions:
+    validations:
       required: true
   - type: textarea
     id: proposed_solution
@@ -36,14 +37,16 @@ body:
     attributes:
       label: Expected Impact
       options:
-        - label: Improves performance
-        - label: Removes duplication
-        - label: Simplifies architechture
+        - label: "Improves performance"
+        - label: "Removes duplication"
+        - label: "Simplifies architechture"
   - type: checkboxes
     id: breaking_changes
     attributes:
       label: Breaking Changes?
       options:
-        - label: Yes
-        - label: No
+        - label: "Yes"
+        - label: "No"
+    validations:
+      required: true
 

@@ -36,9 +36,9 @@ class CampusToggleButtonTest {
 
     @Before
     fun setup() {
-        viewModel = MapViewModel()
-        testCameraController = CameraControllerTest()
         mockLocationProvider = MockLocationProvider()
+        viewModel = MapViewModel(mockLocationProvider)
+        testCameraController = CameraControllerTest()
 
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         CampusRepo.initialize(context)
@@ -49,10 +49,38 @@ class CampusToggleButtonTest {
 
         // Set up screen
         composeTestRule.setContent {
+
+            val scope = rememberCoroutineScope()
+
+            LaunchedEffect(Unit) {
+                mockLocationProvider.getUserLocation { location ->
+                    location?.let {
+                        scope.launch {
+                            testCameraController.animateTo(it, 15f)
+                        }
+                    }
+                }
+            }
+
+            LaunchedEffect(viewModel.currentCampus) {
+                if (viewModel.currentCampus != null) {
+                    testCameraController.animateTo(viewModel.currentCampus!!.getGoogleCenter(), 17f)
+                }
+                else {
+                    mockLocationProvider.getUserLocation { location ->
+                        location?.let {
+                            scope.launch {
+                                testCameraController.animateTo(it, 15f)
+                            }
+                        }
+                    }
+                }
+            }
+
             Box {
                 CampusToggle(
-                    selectedCampusName = null,
-                    onCampusClick = {}
+                    selectedCampusName = viewModel.currentCampus?.name,
+                    onCampusClick = {name -> viewModel.onCampusSelected(name)}
                 )
             }
 

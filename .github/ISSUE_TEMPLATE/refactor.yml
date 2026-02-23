@@ -3,6 +3,7 @@ description: Suggeest a refactor of existing code.
 title: "[REFACTOR]: "
 labels: ["refactor"]
 assignees: []
+
 body: 
   - type: markdown
     attributes:
@@ -36,14 +37,16 @@ body:
     attributes:
       label: Expected Impact
       options:
-        - label: Improves performance
-        - label: Removes duplication
-        - label: Simplifies architechture
+        - label: "Improves performance"
+        - label: "Removes duplication"
+        - label: "Simplifies architechture"
   - type: checkboxes
     id: breaking_changes
     attributes:
       label: Breaking Changes?
       options:
-        - label: Yes
-        - label: No
+        - label: "Yes"
+        - label: "No"
+    validations:
+      required: true
 

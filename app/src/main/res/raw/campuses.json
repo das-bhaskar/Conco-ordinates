@@ -1811,6 +1811,66 @@
               }],
             "wayID": 103892927
           },
+        {
+          "code": "GA",
+          "isCampusBuilding": true,
+          "name": "GA Annex",
+          "outline":[
+            {
+              "latitude": 45.4943514,
+              "longitude": -73.5777445
+            },
+            {
+              "latitude": 45.4942936,
+              "longitude": -73.5776302
+            },
+            {
+              "latitude": 45.4942764,
+              "longitude": -73.5776472
+            },
+            {
+              "latitude": 45.4940548,
+              "longitude": -73.5778657
+            },
+            {
+              "latitude": 45.4940806,
+              "longitude": -73.5779245
+            },
+            {
+              "latitude": 45.4940462,
+              "longitude": -73.5779652
+            },
+            {
+              "latitude": 45.4939674,
+              "longitude": -73.5780584
+            },
+            {
+              "latitude": 45.4938898,
+              "longitude": -73.5781503
+            },
+            {
+              "latitude": 45.4937941,
+              "longitude": -73.5782636
+            },
+            {
+              "latitude": 45.4938505,
+              "longitude": -73.5783599
+            },
+            {
+              "latitude": 45.4941474,
+              "longitude": -73.5780186
+            },
+            {
+              "latitude": 45.4941217,
+              "longitude": -73.577975
+            },
+            {
+              "latitude": 45.4943514,
+              "longitude": -73.5777445
+            }
+          ] ,
+          "wayID": 103248061
+        },
           {
             "code": "P",
             "isCampusBuilding": true,
@@ -2146,7 +2206,7 @@
           {
             "code": "X",
             "isCampusBuilding": true,
-            "name": "X Annex",
+            "name": "X(FA) Annex",
             "outline": [
               {
                 "latitude": 45.4969271,
@@ -2279,7 +2339,7 @@
         {
           "code": "D",
           "isCampusBuilding": true,
-          "name": "D Annex",
+          "name": "D(KK) Annex",
           "outline":[
             {
               "latitude": 45.4978508,

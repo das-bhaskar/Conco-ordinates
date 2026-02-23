@@ -29,6 +29,7 @@ import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.viewmodel.MapViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.MapsInitializer
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.*
@@ -36,6 +37,10 @@ import kotlinx.coroutines.launch
 
 class MapsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Initialize Maps SDK to prevent CameraUpdateFactory errors for the
+        // UI Tests
+        MapsInitializer.initialize(applicationContext)
+        
         if (!com.google.android.libraries.places.api.Places.isInitialized()) {
             com.google.android.libraries.places.api.Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
         }
@@ -140,7 +145,8 @@ class MapsActivity : ComponentActivity() {
                     },
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .padding(24.dp),
+                        .padding(24.dp)
+                        .testTag("recenter_button"),
                     containerColor = ConcordiaMaroon,
                     contentColor = Color.White,
                     icon = { Icon(Icons.Default.MyLocation, contentDescription = null) },

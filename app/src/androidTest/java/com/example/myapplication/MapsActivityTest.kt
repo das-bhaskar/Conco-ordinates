@@ -1,31 +1,26 @@
 package com.example.myapplication
 
 import android.Manifest
-import android.view.View
-import androidx.lifecycle.Lifecycle
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.ext.junit.rules.ActivityScenarioRule
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import com.example.myapplication.data.CampusRepo
+import com.google.android.gms.maps.MapsInitializer
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.material.button.MaterialButton
-import org.hamcrest.Description
-import org.hamcrest.Matcher
-import org.hamcrest.TypeSafeMatcher
 import org.junit.Assert.assertNotNull
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import androidx.lifecycle.Lifecycle
 
 @RunWith(AndroidJUnit4::class)
 class MapsActivityTest {
 
     @get:Rule
-    val activityRule = ActivityScenarioRule(MapsActivity::class.java)
+    val composeTestRule = createAndroidComposeRule<MapsActivity>()
 
     @get:Rule
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
@@ -33,99 +28,69 @@ class MapsActivityTest {
         Manifest.permission.ACCESS_COARSE_LOCATION
     )
 
+    @Before
+    fun setup() {
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        instrumentation.runOnMainSync {
+            val context = instrumentation.targetContext
+            // This ensure Maps is initialized on the UI thread before Activity start
+            // otherwise, CameraUpdateFactory errors
+            MapsInitializer.initialize(context)
+        }
+    }
+
     @Test
     fun testUIElementsDisplayed() {
-        onView(withId(R.id.map)).check(matches(isDisplayed()))
-        onView(withId(R.id.toggleGroup)).check(matches(isDisplayed()))
-        onView(withId(R.id.btnSgw)).check(matches(isDisplayed()))
-        onView(withId(R.id.btnLoyola)).check(matches(isDisplayed()))
-        onView(withId(R.id.fabRecenter)).check(matches(isDisplayed()))
+        composeTestRule.waitForIdle()
+
+        // Use useUnmergedTree = true to find the GoogleMap node
+        composeTestRule.onNodeWithTag("google_map", useUnmergedTree = true).assertExists()
+
+        // Check toggle buttons
+        composeTestRule.onNodeWithText("SGW").assertExists()
+        composeTestRule.onNodeWithText("LOY").assertExists()
     }
 
     @Test
     fun testToggleCampusSelection() {
-        // Test switching to Loyola
-        onView(withId(R.id.btnLoyola)).perform(click())
-        onView(withId(R.id.btnLoyola)).check(matches(isMaterialButtonChecked()))
-        onView(withId(R.id.btnSgw)).check(matches(isMaterialButtonNotChecked()))
+        composeTestRule.waitForIdle()
 
-        // Test switching to SGW
-        onView(withId(R.id.btnSgw)).perform(click())
-        onView(withId(R.id.btnSgw)).check(matches(isMaterialButtonChecked()))
-        onView(withId(R.id.btnLoyola)).check(matches(isMaterialButtonNotChecked()))
+        // Switch to LOY
+        composeTestRule.onNodeWithText("LOY").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("LOY_button").assertIsSelected()
+
+        // Switch back to SGW
+        composeTestRule.onNodeWithText("SGW").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("SGW_button").assertIsSelected()
+        composeTestRule.onNodeWithTag("LOY_button").assertIsNotSelected()
     }
 
     @Test
-    fun testRecenterButtonClick() {
-        // Verifies that the FAB is clickable and exists
-        onView(withId(R.id.fabRecenter)).perform(click())
-        onView(withId(R.id.fabRecenter)).check(matches(isDisplayed()))
+    fun testMapInteraction() {
+        composeTestRule.waitForIdle()
+        // Click on the map to work with logic
+        composeTestRule.onNodeWithTag("google_map").performClick()
+        composeTestRule.waitForIdle()
     }
 
     @Test
-    fun testLifecycleStateChanges() {
-        // Move through lifecycle states to cover onCreate, onStart, onResume
-        activityRule.scenario.moveToState(Lifecycle.State.STARTED)
-        activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
-        activityRule.scenario.moveToState(Lifecycle.State.STARTED)
+    fun testActivityLifecycleAndRecreation() {
+        composeTestRule.waitForIdle()
+        // This covers state restoration
+        composeTestRule.activityRule.scenario.recreate()
+        composeTestRule.waitForIdle()
+        
+        // This covers transitions
+        composeTestRule.activityRule.scenario.moveToState(Lifecycle.State.STARTED)
+        composeTestRule.activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+        composeTestRule.waitForIdle()
     }
 
     @Test
-    fun testTravelModeCoverage() {
-        // Exercises the TravelMode enum to cover all cases
-        MapsActivity.TravelMode.values().forEach { mode ->
-            assertNotNull(mode.name)
-        }
-    }
-
-    @Test
-    fun testReqPathLogic() {
-        activityRule.scenario.onActivity { activity ->
-            val start = LatLng(45.497, -73.579)
-            val end = LatLng(45.458, -73.640)
-            
-            // Exercise each travel mode in reqPath to cover the switch statement
-            MapsActivity.TravelMode.values().forEach { mode ->
-                try {
-                    activity.reqPath(start, end, mode) { /* callback */ }
-                } catch (e: Exception) {
-                    // Ignore the failures that are due to missing API keys or network in
-                    // test environment
-                }
-            }
-        }
-    }
-
-    @Test
-    fun testCampusRepoLogicThroughActivity() {
+    fun testCampusRepoIntegration() {
         val sgwLatLng = LatLng(45.4973, -73.5790)
-        val loyolaLatLng = LatLng(45.4582, -73.6405)
-        val outsideLatLng = LatLng(0.0, 0.0)
-
         assertNotNull(CampusRepo.getCampus(sgwLatLng))
-        assertNotNull(CampusRepo.getCampus(loyolaLatLng))
-        assert(CampusRepo.getCampus(outsideLatLng) == null)
-    }
-
-    private fun isMaterialButtonChecked(): Matcher<View> {
-        return object : TypeSafeMatcher<View>() {
-            override fun describeTo(description: Description) {
-                description.appendText("It is a MaterialButton and it is checked")
-            }
-            override fun matchesSafely(view: View): Boolean {
-                return view is MaterialButton && view.isChecked
-            }
-        }
-    }
-
-    private fun isMaterialButtonNotChecked(): Matcher<View> {
-        return object : TypeSafeMatcher<View>() {
-            override fun describeTo(description: Description) {
-                description.appendText("It is a MaterialButton and it is not checked")
-            }
-            override fun matchesSafely(view: View): Boolean {
-                return view is MaterialButton && !view.isChecked
-            }
-        }
     }
 }

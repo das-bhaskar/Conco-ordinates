@@ -108,18 +108,8 @@ class InterpolatingMockRouteProvider(
 }
 
 class InterpolatingMockRouteProvider(
-    private var start: LatLng,
-    private var end: LatLng,
     private var steps: UInt
 ) : RouteProvider {
-
-    fun setStart(input: LatLng) {
-        start = input
-    }
-
-    fun setEnd(input: LatLng) {
-        end = input
-    }
 
     override fun getRoute(start: LatLng,
                           end: LatLng,

@@ -135,8 +135,7 @@ class RouteStateTest {
 
     @Test
     fun autoUpdateStart() {
-        val route = Route(InterpolatingMockRouteProvider(start = pointA,
-            end = pointB,
+        val route = Route(InterpolatingMockRouteProvider(
             steps = 2u))
         var received: List<LatLng>? = null
         route.setCallback { received = it }

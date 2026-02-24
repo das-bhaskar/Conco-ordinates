@@ -45,14 +45,13 @@ class MapsActivity : ComponentActivity() {
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         val locationProvider = TrueLocationProvider(fusedLocationClient)
 
-        // This is your MASTER viewModel instance
         val masterViewModel = MapViewModel(locationProvider)
 
         setContent {
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
+            var showSettingsDialog by remember { mutableStateOf(false) }
 
-            // FIX: We use the masterViewModel we created above, NOT a new one
             val viewModel = masterViewModel
 
             var hasLocationPermission by remember {
@@ -112,6 +111,37 @@ class MapsActivity : ComponentActivity() {
                     viewModel = viewModel,
                     modifier = Modifier.testTag("campus_map")
                 )
+
+                if (showSettingsDialog && !hasLocationPermission) {
+                    AlertDialog(
+                        onDismissRequest = { showSettingsDialog = false },
+                        title = { Text("Location Required") },
+                        text = { Text("To see which building you are in, please enable location permissions in the app settings.") },
+                        confirmButton = {
+                            Button(
+                                onClick = { openAppSettings(context) },
+                                colors = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon)
+                            ) {
+                                Text("OPEN SETTINGS")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showSettingsDialog = false }) {
+                                Text("CANCEL", color = Color.Gray)
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.MyLocation,
+                                contentDescription = null,
+                                tint = ConcordiaMaroon
+                            )
+                        }
+
+
+                    )
+                }
+
                 if (viewModel.uiBuildingState.isVisible) {
                     viewModel.uiBuildingState.building?.let { building ->
                         com.example.myapplication.ui.components.BuildingInfoPopup(
@@ -131,7 +161,13 @@ class MapsActivity : ComponentActivity() {
 
                 ExtendedFloatingActionButton(
                     onClick = {
-                        handleRecenter(fusedLocationClient, hasLocationPermission, launcher) { userLocation ->
+                        handleRecenter(
+                            client = fusedLocationClient,
+                            hasPermission = hasLocationPermission,
+                            launcher = launcher,
+                            context = context,
+                            onShowSettings = { showSettingsDialog = true }
+                        ) { userLocation ->
                             scope.launch {
                                 cameraController.animateTo(userLocation, 18.5f)
                             }
@@ -165,10 +201,23 @@ class MapsActivity : ComponentActivity() {
         client: FusedLocationProviderClient,
         hasPermission: Boolean,
         launcher: androidx.activity.result.ActivityResultLauncher<String>,
+        context: android.content.Context,
+        onShowSettings: () -> Unit,
         onLocationFound: (LatLng) -> Unit
     ) {
         if (!hasPermission) {
-            launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            val activity = context as? androidx.activity.ComponentActivity
+            val shouldShowRationale = activity?.let {
+                androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.ACCESS_FINE_LOCATION)
+            } ?: false
+
+            if (shouldShowRationale) {
+                // They've denied it before, show the "Go to Settings" box
+                onShowSettings()
+            } else {
+                // First time or system can still show the popup
+                launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
             return
         }
         try {
@@ -177,4 +226,13 @@ class MapsActivity : ComponentActivity() {
             }
         } catch (e: SecurityException) { /* log error */ }
     }
+
+    private fun openAppSettings(context: android.content.Context) {
+        val intent = android.content.Intent(
+            android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            android.net.Uri.fromParts("package", context.packageName, null)
+        )
+        context.startActivity(intent)
+    }
+
 }

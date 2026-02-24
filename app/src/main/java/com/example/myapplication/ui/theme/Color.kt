@@ -17,3 +17,4 @@ val lightMaroon = ConcordiaMaroon.copy(alpha = 0.7f)
 // Create a very faint 20% transparent version
 val faintMaroon = ConcordiaMaroon.copy(alpha = 0.2f)
 val concordiaGold = Color(0xFFFFD700)
+val ConcordiaBlue = Color(0xFF1652f0)

@@ -36,15 +36,23 @@ fun CampusMap(
         currentCampus?.buildings?.forEach { building ->
             val points = building.getGoogleOutline()
             val isHighlighted = building.name == highlightedBuildingName
+            val isSelected = viewModel.uiBuildingState.building?.name == building.name
 
             if (points.isNotEmpty()) {
                 Polygon(
                     points = points,
-                    // Use Gold if highlighted, otherwise Maroon
-                    fillColor = if (isHighlighted) concordiaGold.copy(alpha = 0.5f)
-                    else ConcordiaMaroon.copy(alpha = 0.3f),
-                    strokeColor = if (isHighlighted) concordiaGold else ConcordiaMaroon,
-                    strokeWidth = if (isHighlighted) 10f else 5f
+
+                    fillColor = when{
+                        isSelected -> com.example.myapplication.ui.theme.ConcordiaBlue.copy(alpha = 0.5f)
+                        isHighlighted -> concordiaGold.copy(alpha = 0.5f)
+                        else -> ConcordiaMaroon.copy(alpha = 0.3f)
+                    },
+                    strokeColor = when {
+                        isSelected -> com.example.myapplication.ui.theme.ConcordiaBlue
+                        isHighlighted -> concordiaGold
+                        else -> ConcordiaMaroon
+                    },
+                    strokeWidth = if (isSelected || isHighlighted) 10f else 5f
                 )
             }
         }

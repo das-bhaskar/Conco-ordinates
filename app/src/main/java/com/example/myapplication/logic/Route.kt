@@ -48,18 +48,30 @@ class Route(private var routeProvider: RouteProvider) {
     }
 
     // Calls reqPath if all parameters are set
-    public fun updateRoute(): RouteUpdateStatus {
-        val startIm: LatLng = start ?: return RouteUpdateStatus.MISSING_START
-        val endIm: LatLng = end ?: return RouteUpdateStatus.MISSING_END
-        val travelModeIm: TravelMode = travelMode ?: return RouteUpdateStatus.MISSING_TRAVEL_MODE
-        val callbackIm = callback
+    public fun updateRoute(): Set<RouteUpdateStatus> {
+        val errors = errors()
+        if (errors.isNotEmpty()) return errors
         routeProvider.getRoute(
-            startIm,
-            endIm,
-            travelModeIm,
-            callbackIm
+            start!!,
+            end!!,
+            travelMode!!,
+            callback
         )
 
-        return RouteUpdateStatus.SUCCESS
+        return setOf(RouteUpdateStatus.SUCCESS)
+    }
+
+    public fun errors(): Set<RouteUpdateStatus> {
+        val errors = mutableSetOf<RouteUpdateStatus>()
+        if (start == null) {
+            errors.add(RouteUpdateStatus.MISSING_START)
+        }
+        if (end == null) {
+            errors.add(RouteUpdateStatus.MISSING_END)
+        }
+        if (travelMode == null) {
+            errors.add(RouteUpdateStatus.MISSING_TRAVEL_MODE)
+        }
+        return errors
     }
 }

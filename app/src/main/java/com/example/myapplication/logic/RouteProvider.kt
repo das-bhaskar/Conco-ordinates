@@ -106,3 +106,31 @@ class InterpolatingMockRouteProvider(
         callback(Result.success(points))
     }
 }
+
+class InterpolatingMockRouteProvider(
+    private var start: LatLng,
+    private var end: LatLng,
+    private var steps: UInt
+) : RouteProvider {
+
+    fun setStart(input: LatLng) {
+        start = input
+    }
+
+    fun setEnd(input: LatLng) {
+        end = input
+    }
+
+    override fun getRoute(start: LatLng,
+                          end: LatLng,
+                          travelMode: TravelMode,
+                          callback: (List<LatLng>) -> Unit
+    ) {
+        val latStep = (end.latitude - start.latitude) / steps.toDouble()
+        val lngStep = (end.longitude - start.longitude) / steps.toDouble()
+        val points = (0..steps.toInt()).map { i ->
+            LatLng(start.latitude + latStep * i, start.longitude + lngStep * i)
+        }
+        callback(points)
+    }
+}

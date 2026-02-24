@@ -121,6 +121,7 @@ class RouteStateTest {
             ),
             status
         )
+        assertEquals(mockPoints, route.route())
     }
 
     @Test
@@ -131,6 +132,7 @@ class RouteStateTest {
         route.setParams(pointA, pointB, TravelMode.WALK)
 
         assertEquals(mockPoints, received)
+        assertEquals(mockPoints, route.route())
     }
 
     @Test
@@ -151,5 +153,6 @@ class RouteStateTest {
             pointB)
 
         assertEquals(mockPointsUpdated, received)
+        assertEquals(mockPointsUpdated, route.route())
     }
 }

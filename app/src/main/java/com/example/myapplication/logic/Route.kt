@@ -55,7 +55,12 @@ class Route(private var routeProvider: RouteProvider) {
             start!!,
             end!!,
             travelMode!!,
-            callback
+            { result ->
+                if (result.isSuccess) {
+                    route = result.getOrNull()
+                }
+                callback(result)
+            }
         )
 
         return setOf(RouteUpdateStatus.SUCCESS)

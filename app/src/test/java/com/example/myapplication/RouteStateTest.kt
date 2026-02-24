@@ -127,7 +127,7 @@ class RouteStateTest {
     fun callbackGivesMockPoints() {
         val route = Route(SimpleMockRouteProvider(mockPoints))
         var received: List<LatLng>? = null
-        route.setCallback { received = it }
+        route.setCallback { received = it.getOrNull() }
         route.setParams(pointA, pointB, TravelMode.WALK)
 
         assertEquals(mockPoints, received)
@@ -138,7 +138,7 @@ class RouteStateTest {
         val route = Route(InterpolatingMockRouteProvider(
             steps = 2u))
         var received: List<LatLng>? = null
-        route.setCallback { received = it }
+        route.setCallback { received = it.getOrNull() }
         route.setParams(pointA, pointB, TravelMode.WALK)
 
         assertEquals(mockPoints, received)

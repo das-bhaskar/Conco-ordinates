@@ -20,7 +20,7 @@ class Route(private var routeProvider: RouteProvider) {
     private var travelMode: TravelMode? = null
     private var start: LatLng? = null
     private var end: LatLng? = null
-    private var callback: ((List<LatLng>) -> Unit) = {}
+    private var callback: ((Result<List<LatLng>>) -> Unit) = {}
 
     public fun route(): List<LatLng>? {
         return route
@@ -37,7 +37,7 @@ class Route(private var routeProvider: RouteProvider) {
         end = input
         updateRoute()
     }
-    public fun setCallback(input: ((List<LatLng>) -> Unit)) {
+    public fun setCallback(input: ((Result<List<LatLng>>) -> Unit)) {
         callback = input
     }
     public fun setParams(startIn: LatLng, endIn: LatLng, mode: TravelMode) {

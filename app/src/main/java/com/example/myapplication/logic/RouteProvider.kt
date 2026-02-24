@@ -12,7 +12,7 @@ interface RouteProvider {
     fun getRoute(start: LatLng,
                  end: LatLng,
                  travelMode: TravelMode,
-                 callback: (List<LatLng>) -> Unit
+                 callback: (Result<List<LatLng>>) -> Unit
     )
 }
 
@@ -23,7 +23,7 @@ class GoogleRouteProvider(private val context: Context,
     override fun getRoute(start: LatLng,
                           end: LatLng,
                           travelMode: TravelMode,
-                          callback: (List<LatLng>) -> Unit
+                          callback: (Result<List<LatLng>>) -> Unit
     ) {
         val mode = when (travelMode) {
             TravelMode.PUB_TRANSIT -> "transit"
@@ -44,13 +44,13 @@ class GoogleRouteProvider(private val context: Context,
 
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                e.printStackTrace()
+                callback(Result.failure(e))
             }
 
             override fun onResponse(call: Call, response: Response) {
                 response.body.string().let { json ->
                     val points = decodeRoute(json)
-                    callback(points)
+                    callback(Result.success(points))
                 }
             }
         })
@@ -83,9 +83,9 @@ class SimpleMockRouteProvider(private val points: List<LatLng> = emptyList()) : 
     override fun getRoute(start: LatLng,
                           end: LatLng,
                           travelMode: TravelMode,
-                          callback: (List<LatLng>) -> Unit
+                          callback: (Result<List<LatLng>>) -> Unit
     ) {
-        callback(points)
+        callback(Result.success(points))
     }
 }
 
@@ -96,13 +96,13 @@ class InterpolatingMockRouteProvider(
     override fun getRoute(start: LatLng,
                           end: LatLng,
                           travelMode: TravelMode,
-                          callback: (List<LatLng>) -> Unit
+                          callback: (Result<List<LatLng>>) -> Unit
     ) {
         val latStep = (end.latitude - start.latitude) / steps.toDouble()
         val lngStep = (end.longitude - start.longitude) / steps.toDouble()
         val points = (0..steps.toInt()).map { i ->
             LatLng(start.latitude + latStep * i, start.longitude + lngStep * i)
         }
-        callback(points)
+        callback(Result.success(points))
     }
 }

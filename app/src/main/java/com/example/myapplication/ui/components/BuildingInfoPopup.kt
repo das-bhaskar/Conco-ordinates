@@ -3,10 +3,7 @@ package com.example.myapplication.ui.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Directions
-import androidx.compose.material.icons.filled.PinDrop
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.Building
 import com.example.myapplication.ui.models.BuildingUiState
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.AsyncImage
@@ -24,7 +20,8 @@ import coil.compose.AsyncImage
 fun BuildingInfoPopup(
     building: Building,
     uiState: BuildingUiState,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onDirectionsClick: () -> Unit // Added this
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -37,7 +34,6 @@ fun BuildingInfoPopup(
             elevation = CardDefaults.cardElevation(12.dp)
         ) {
             Column {
-                // THE IMAGE
                 AsyncImage(
                     model = uiState.imageUrl ?: "https://your-placeholder-url.com/campus.jpg",
                     contentDescription = null,
@@ -52,17 +48,14 @@ fun BuildingInfoPopup(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        ActionButton(Icons.Default.Directions, "Directions")
-                        ActionButton(Icons.Default.Save, "Save")
-                        ActionButton(Icons.Default.PinDrop, "PIN")
-                        ActionButton(Icons.Default.Share, "Share")
+                        // Wired the click here
+                        ActionButton(Icons.Default.Directions, "Directions", onDirectionsClick)
+                        ActionButton(Icons.Default.Save, "Save") {}
+                        ActionButton(Icons.Default.PinDrop, "PIN") {}
+                        ActionButton(Icons.Default.Share, "Share") {}
                     }
 
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 8.dp),
-                        thickness = 1.dp,
-                        color = Color.LightGray
-                    )
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 1.dp, color = Color.LightGray)
                     Row(modifier = Modifier.padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color.Blue)
                         Spacer(Modifier.width(8.dp))
@@ -75,12 +68,11 @@ fun BuildingInfoPopup(
 }
 
 @Composable
-fun ActionButton(icon: ImageVector, label: String) {
+fun ActionButton(icon: ImageVector, label: String, onClick: () -> Unit) {
     val concordiaBlue = Color(0xFF1652f0)
-
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         FilledTonalIconButton(
-            onClick = { /* TODO */ },
+            onClick = onClick,
             colors = IconButtonDefaults.filledTonalIconButtonColors(
                 containerColor = concordiaBlue.copy(alpha = 0.1f),
                 contentColor = concordiaBlue

@@ -49,7 +49,13 @@ class CampusRepoTest {
     @Test
     fun `getCampus identifies user inside a specific building even if campus outline is empty`() {
         val bOutline = listOf(JsonLatLng(0.0, 0.0), JsonLatLng(1.0, 0.0), JsonLatLng(1.0, 1.0), JsonLatLng(0.0, 1.0))
-        val building = Building("Hall", "H", 1L, bOutline)
+        val building = Building(
+            name = "Hall",
+            code = "H",
+            wayID = 22080570,
+            fullAddress = "1455 De Maisonneuve",
+            outline = emptyList()
+        )
         val campus = Campus("SGW", JsonLatLng(0.5, 0.5), listOf(building), emptyList())
 
         CampusRepo.setTestCampuses(listOf(campus))

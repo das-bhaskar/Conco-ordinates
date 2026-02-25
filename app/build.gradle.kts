@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("jacoco")
 }
 
 
@@ -93,4 +94,36 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+}
+
+tasks.withType<Test> {
+    configure<JacocoTaskExtension> {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileFilter = listOf(
+        "**/R.class", "**/R$*.class", "**/BuildConfig.*",
+        "**/Manifest*.*", "**/*Test*.*", "android/**/*.*",
+        "**/*_Impl*.*", "**/di/**", "**/*Module.*", "**/*Hilt*.*"
+    )
+
+    val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
+        exclude(fileFilter)
+    }
+
+    sourceDirectories.setFrom(files("${project.projectDir}/src/main/java"))
+    classDirectories.setFrom(files(debugTree))
+    executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
+        include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
+    })
 }

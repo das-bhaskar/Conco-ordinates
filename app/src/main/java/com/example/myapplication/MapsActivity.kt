@@ -1,128 +1,358 @@
 package com.example.myapplication
 
 import android.Manifest
+import com.example.myapplication.ui.components.BuildingInfoPopup
 import android.content.pm.PackageManager
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MyLocation
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import android.content.Intent
+import com.example.myapplication.ui.components.DirectionsInfoPopup
+import android.net.Uri
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.net.PlacesClient
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import androidx.core.content.ContextCompat
 import com.example.myapplication.data.CampusRepo
-import com.example.myapplication.logic.MapManager
-import com.google.android.gms.location.*
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
+import com.example.myapplication.logic.SearchResult
+import com.example.myapplication.logic.TrueLocationProvider
+import com.example.myapplication.map.TrueCameraController
+import com.example.myapplication.ui.components.CampusMap
+import com.example.myapplication.ui.components.CampusToggle
+import com.example.myapplication.ui.components.DirectionsHeader
+import com.example.myapplication.ui.models.MapUIMode
+import com.example.myapplication.ui.theme.ConcordiaMaroon
+import com.example.myapplication.ui.viewmodel.MapViewModel
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.material.button.MaterialButtonToggleGroup
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.maps.android.compose.*
+import kotlinx.coroutines.launch
 
-    private lateinit var mapManager: MapManager
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationCallback: LocationCallback
-    private lateinit var mMap: GoogleMap
-
-    // Tracks which campus is currently selected by the user
-    private var currentVisibleCampus = CampusRepo.SGW
-
+class MapsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        if (!com.google.android.libraries.places.api.Places.isInitialized()) {
+            com.google.android.libraries.places.api.Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
+        }
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_maps)
+        CampusRepo.initialize(this)
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        val locationProvider = TrueLocationProvider(fusedLocationClient)
+        val routeProvider = com.example.myapplication.logic.GoogleRouteProvider(BuildConfig.MAPS_API_KEY)
 
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
-    }
+        val viewModel = MapViewModel(locationProvider, routeProvider)
 
-    override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
-        mapManager = MapManager(googleMap)
+        val placesClient = com.google.android.libraries.places.api.Places.createClient(this)
+        viewModel.initSearch(placesClient)
 
-        mMap.uiSettings.isTiltGesturesEnabled = false
-        mMap.uiSettings.isMyLocationButtonEnabled = false
+        setContent {
+            val mapPaddingBottom = if (viewModel.uiBuildingState.mode == MapUIMode.DIRECTIONS) 600 else 0
+            val context = LocalContext.current
+            val scope = rememberCoroutineScope()
+            var showSettingsDialog by remember { mutableStateOf(false) }
 
-        enableMyLocation()
+            var hasLocationPermission by remember {
+                mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            }
 
-        // Initial view
-        mapManager.focusOnCampus(currentVisibleCampus)
+            LaunchedEffect(hasLocationPermission) {
+                if (hasLocationPermission) {
+                    val locationRequest = com.google.android.gms.location.LocationRequest.Builder(
+                        com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+                        5000
+                    ).build()
 
-        startLocationUpdates()
-        setupToggleLogic()
-        setupRecenterButton()
-    }
+                    val locationCallback = object : com.google.android.gms.location.LocationCallback() {
+                        override fun onLocationResult(result: com.google.android.gms.location.LocationResult) {
+                            result.lastLocation?.let { loc ->
+                                android.util.Log.d("MAP_DEBUG", "ACTIVITY: Sending location to ViewModel")
+                                viewModel.processLocationUpdate(LatLng(loc.latitude, loc.longitude))
+                            }
+                        }
+                    }
 
-    private fun startLocationUpdates() {
-        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 2000)
-            .setMinUpdateIntervalMillis(1000)
-            .build()
-
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult) {
-                for (location in locationResult.locations) {
-                    val userLatLng = LatLng(location.latitude, location.longitude)
-
-                    // Check building name for the campus the user is currently LOOKING at
-                    val buildingName = mapManager.findBuildingAtLocation(userLatLng, currentVisibleCampus)
-
-                    // IMPORTANT: Call a version of the focus function that DOES NOT move the camera
-                    // You need to ensure MapManager has a function that only clears/redraws polygons
-                    mapManager.updateHighlightsOnly(currentVisibleCampus, buildingName)
+                    try {
+                        fusedLocationClient.requestLocationUpdates(
+                            locationRequest,
+                            locationCallback,
+                            android.os.Looper.getMainLooper()
+                        )
+                    } catch (e: SecurityException) { /* Handle error */ }
                 }
             }
-        }
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, mainLooper)
-        }
-    }
 
-    private fun setupToggleLogic() {
-        val toggleGroup = findViewById<MaterialButtonToggleGroup>(R.id.toggleGroup)
-        toggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (isChecked) {
-                when (checkedId) {
-                    R.id.btnSgw -> {
-                        currentVisibleCampus = CampusRepo.SGW
-                        mapManager.focusOnCampus(currentVisibleCampus) // This one moves camera
+            val cameraPositionState = rememberCameraPositionState {
+                position = CameraPosition.fromLatLngZoom(LatLng(45.497, -73.579), 16f)
+            }
+
+            val cameraController = remember(cameraPositionState) {
+                TrueCameraController(cameraPositionState)
+            }
+
+
+            LaunchedEffect(viewModel.uiBuildingState.routeBounds) {
+                val bounds = viewModel.uiBuildingState.routeBounds
+                if (bounds != null) {
+                    kotlinx.coroutines.delay(500)
+                    cameraPositionState.animate(
+                        update = com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds, 400),
+                        durationMs = 1000
+                    )
+                }
+            }
+            LaunchedEffect(viewModel.currentCampus) {
+                viewModel.currentCampus?.let { campus ->
+                    cameraController.animateTo(campus.getGoogleCenter(), campus.defaultZoom)
+                }
+            }
+
+            val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+                hasLocationPermission = isGranted
+            }
+
+            LaunchedEffect(viewModel.uiBuildingState.routeBounds) {
+                val bounds = viewModel.uiBuildingState.routeBounds
+                if (bounds != null) {
+                    kotlinx.coroutines.delay(500)
+                    cameraPositionState.animate(
+                        update = com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds, 150),
+                        durationMs = 1000
+                    )
+                }
+            }
+            Box(modifier = Modifier.fillMaxSize()) {
+                CampusMap(
+                    currentCampus = viewModel.currentCampus,
+                    highlightedBuildingName = viewModel.highlightedBuildingName,
+                    cameraPositionState = cameraPositionState,
+                    hasLocationPermission = hasLocationPermission,
+                    viewModel = viewModel,
+                    contentPadding = PaddingValues(bottom = mapPaddingBottom.dp),
+                    modifier = Modifier.testTag("campus_map")
+                )
+
+                if (viewModel.uiBuildingState.mode == MapUIMode.PREVIEW) {
+                    com.example.myapplication.ui.components.CampusSearchBar(
+                        query = viewModel.searchQuery,
+                        results = viewModel.searchResults,
+                        onQueryChange = { viewModel.onSearchQueryChanged(it) },
+                        onResultClick = { viewModel.handleSearchResult(it, context) },
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 8.dp)
+                    )
+                } else {
+                    if (viewModel.uiBuildingState.isSearchExpanded) {
+                        DirectionsHeader(
+                            uiState = viewModel.uiBuildingState,
+                            onBackClick = { viewModel.toggleSearchExpansion(false) },
+                            onStartQueryChange = { viewModel.onSearchQueryChanged(it, field = "start") },
+                            onDestQueryChange = { viewModel.onSearchQueryChanged(it, field = "dest") },
+                            modifier = Modifier.align(Alignment.TopCenter)
+                        )
                     }
-                    R.id.btnLoyola -> {
-                        currentVisibleCampus = CampusRepo.LOYOLA
-                        mapManager.focusOnCampus(currentVisibleCampus) // This one moves camera
+
+                    if (viewModel.uiBuildingState.mode == MapUIMode.DIRECTIONS) {
+                        DirectionsInfoPopup(
+                            uiState = viewModel.uiBuildingState,
+                            onModeChange = { viewModel.onTransportModeChanged(it) },
+                            onStartClick = { viewModel.toggleSearchExpansion(true, "start") },
+                            onDestinationClick = { viewModel.toggleSearchExpansion(true, "dest") },
+                            onSwapClick = { viewModel.swapLocations() },
+                            onClose = { viewModel.onBackToPreview() },
+                            onStartNavigation = { /* ... */ },
+                            modifier = Modifier.align(Alignment.BottomCenter)
+                        )
+                    }
+
+                    val currentFieldText = when(viewModel.activeSearchField) {
+                        "start" -> viewModel.uiBuildingState.startLocationName
+                        "dest" -> viewModel.uiBuildingState.destinationName
+                        else -> viewModel.searchQuery
+                    }
+
+                    if (viewModel.activeSearchField != "main" && currentFieldText.isNotEmpty()) {
+                        Card(
+                            modifier = Modifier
+                                .padding(horizontal = 24.dp)
+                                .offset(y = 190.dp) // Adjusted slightly to sit below the DirectionsHeader
+                                .zIndex(1f), // Ensure it sits on top of everything
+                            elevation = CardDefaults.cardElevation(4.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp)) {
+                                items(viewModel.searchResults) { result ->
+                                    val title = when(result) {
+                                        is com.example.myapplication.logic.SearchResult.BuildingResult -> result.building.name
+                                        is SearchResult.CampusResult -> result.campus.name
+                                        is com.example.myapplication.logic.SearchResult.GoogleResult -> result.title
+                                        is com.example.myapplication.logic.SearchResult.CurrentLocation -> "Your position"
+                                        is com.example.myapplication.logic.SearchResult.Home -> "Home"
+                                    }
+
+                                    ListItem(
+                                        headlineContent = { Text(title) },
+                                        modifier = Modifier.clickable {
+                                            viewModel.handleSearchResult(result, context)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+
+                if (showSettingsDialog && !hasLocationPermission) {
+                    AlertDialog(
+                        onDismissRequest = { showSettingsDialog = false },
+                        title = { Text("Location Required") },
+                        text = { Text("To see which building you are in, please enable location permissions in the app settings.") },
+                        confirmButton = {
+                            Button(
+                                onClick = { openAppSettings(context) },
+                                colors = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon)
+                            ) {
+                                Text("OPEN SETTINGS")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showSettingsDialog = false }) {
+                                Text("CANCEL", color = Color.Gray)
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Default.MyLocation,
+                                contentDescription = null,
+                                tint = ConcordiaMaroon
+                            )
+                        }
+
+
+                    )
+                }
+
+                if (viewModel.uiBuildingState.mode != MapUIMode.DIRECTIONS) {
+                CampusToggle(
+                    selectedCampusName = viewModel.currentCampus?.name,
+                    onCampusClick = { name ->
+                        viewModel.onCampusSelected(name)
+                    },
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(end = 12.dp, bottom = 160.dp)
+                )
+
+                ExtendedFloatingActionButton(
+                    onClick = {
+                        handleRecenter(
+                            client = fusedLocationClient,
+                            hasPermission = hasLocationPermission,
+                            launcher = launcher,
+                            context = context,
+                            onShowSettings = { showSettingsDialog = true }
+                        ) { userLocation ->
+                            scope.launch {
+                                cameraController.animateTo(userLocation, 18.5f)
+                            }
+                            viewModel.processLocationUpdate(userLocation, isForce = true)
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(24.dp),
+                    containerColor = ConcordiaMaroon,
+                    contentColor = Color.White,
+                    icon = { Icon(Icons.Default.MyLocation, contentDescription = null) },
+                    text = { Text(text = "RECENTER") }
+                )
+                }
+
+                if (viewModel.uiBuildingState.isVisible) {
+                    viewModel.uiBuildingState.building?.let { building ->
+                        if (viewModel.uiBuildingState.mode == com.example.myapplication.ui.models.MapUIMode.PREVIEW) {
+                            BuildingInfoPopup(
+                                building = building,
+                                uiState = viewModel.uiBuildingState,
+                                onDismiss = { viewModel.handleMapTap(null) },
+                                onDirectionsClick = { viewModel.onDirectionsRequested() }
+                            )
+                        }
+                        else {
+                            DirectionsInfoPopup(
+                                uiState = viewModel.uiBuildingState,
+                                onModeChange = { mode -> viewModel.onTransportModeChanged(mode) },
+                                onStartClick = { viewModel.toggleSearchExpansion(true, "start") },
+                                onDestinationClick = { viewModel.toggleSearchExpansion(true, "dest") },
+                                onSwapClick = { viewModel.swapLocations() },
+                                onClose = { viewModel.onBackToPreview() },
+                                onStartNavigation = { /* Logic for navigation later */ },
+                                modifier = Modifier.align(Alignment.BottomCenter)
+                            )
+                        }
+
                     }
                 }
             }
-        }
-    }
-
-    private fun setupRecenterButton() {
-        val fabRecenter = findViewById<FloatingActionButton>(R.id.fabRecenter)
-        fabRecenter.setOnClickListener {
-            mapManager.getUserLocation(fusedLocationClient) { userLatLng ->
-                val cameraPosition = com.google.android.gms.maps.model.CameraPosition.Builder()
-                    .target(userLatLng)
-                    .zoom(18.5f)
-                    .tilt(0f)
-                    .build()
-
-                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition), 1000, null)
             }
         }
+
+
+    private fun handleRecenter(
+        client: FusedLocationProviderClient,
+        hasPermission: Boolean,
+        launcher: androidx.activity.result.ActivityResultLauncher<String>,
+        context: android.content.Context,
+        onShowSettings: () -> Unit,
+        onLocationFound: (LatLng) -> Unit
+    ) {
+        if (!hasPermission) {
+            val activity = context as? androidx.activity.ComponentActivity
+            val shouldShowRationale = activity?.let {
+                androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.ACCESS_FINE_LOCATION)
+            } ?: false
+
+            if (shouldShowRationale) {
+                // They've denied it before, show the "Go to Settings" box
+                onShowSettings()
+            } else {
+                // First time or system can still show the popup
+                launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+            return
+        }
+        try {
+            client.lastLocation.addOnSuccessListener { loc ->
+                loc?.let { onLocationFound(LatLng(it.latitude, it.longitude)) }
+            }
+        } catch (e: SecurityException) { /* log error */ }
     }
 
-    private fun enableMyLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            mMap.isMyLocationEnabled = true
-        } else {
-            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1)
-        }
+    private fun openAppSettings(context: android.content.Context) {
+        val intent = android.content.Intent(
+            android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            android.net.Uri.fromParts("package", context.packageName, null)
+        )
+        context.startActivity(intent)
     }
 
-    override fun onPause() {
-        super.onPause()
-        if (::locationCallback.isInitialized) {
-            fusedLocationClient.removeLocationUpdates(locationCallback)
-        }
-    }
 }

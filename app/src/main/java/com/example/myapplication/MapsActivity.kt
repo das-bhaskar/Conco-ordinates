@@ -14,17 +14,29 @@ import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import android.content.Intent
+import com.example.myapplication.ui.components.DirectionsInfoPopup
+import android.net.Uri
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.net.PlacesClient
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import com.example.myapplication.data.CampusRepo
+import com.example.myapplication.logic.SearchResult
 import com.example.myapplication.logic.TrueLocationProvider
 import com.example.myapplication.map.TrueCameraController
 import com.example.myapplication.ui.components.CampusMap
 import com.example.myapplication.ui.components.CampusToggle
+import com.example.myapplication.ui.components.DirectionsHeader
+import com.example.myapplication.ui.models.MapUIMode
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.viewmodel.MapViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -44,15 +56,18 @@ class MapsActivity : ComponentActivity() {
 
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         val locationProvider = TrueLocationProvider(fusedLocationClient)
+        val routeProvider = com.example.myapplication.logic.GoogleRouteProvider(BuildConfig.MAPS_API_KEY)
 
-        val masterViewModel = MapViewModel(locationProvider)
+        val viewModel = MapViewModel(locationProvider, routeProvider)
+
+        val placesClient = com.google.android.libraries.places.api.Places.createClient(this)
+        viewModel.initSearch(placesClient)
 
         setContent {
+            val mapPaddingBottom = if (viewModel.uiBuildingState.mode == MapUIMode.DIRECTIONS) 600 else 0
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
             var showSettingsDialog by remember { mutableStateOf(false) }
-
-            val viewModel = masterViewModel
 
             var hasLocationPermission by remember {
                 mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
@@ -84,6 +99,7 @@ class MapsActivity : ComponentActivity() {
                 }
             }
 
+
             val cameraPositionState = rememberCameraPositionState {
                 position = CameraPosition.fromLatLngZoom(LatLng(45.497, -73.579), 16f)
             }
@@ -92,6 +108,17 @@ class MapsActivity : ComponentActivity() {
                 TrueCameraController(cameraPositionState)
             }
 
+
+            LaunchedEffect(viewModel.uiBuildingState.routeBounds) {
+                val bounds = viewModel.uiBuildingState.routeBounds
+                if (bounds != null) {
+                    kotlinx.coroutines.delay(500)
+                    cameraPositionState.animate(
+                        update = com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds, 400),
+                        durationMs = 1000
+                    )
+                }
+            }
             LaunchedEffect(viewModel.currentCampus) {
                 viewModel.currentCampus?.let { campus ->
                     cameraController.animateTo(campus.getGoogleCenter(), campus.defaultZoom)
@@ -102,6 +129,16 @@ class MapsActivity : ComponentActivity() {
                 hasLocationPermission = isGranted
             }
 
+            LaunchedEffect(viewModel.uiBuildingState.routeBounds) {
+                val bounds = viewModel.uiBuildingState.routeBounds
+                if (bounds != null) {
+                    kotlinx.coroutines.delay(500)
+                    cameraPositionState.animate(
+                        update = com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds, 150),
+                        durationMs = 1000
+                    )
+                }
+            }
             Box(modifier = Modifier.fillMaxSize()) {
                 CampusMap(
                     currentCampus = viewModel.currentCampus,
@@ -109,8 +146,82 @@ class MapsActivity : ComponentActivity() {
                     cameraPositionState = cameraPositionState,
                     hasLocationPermission = hasLocationPermission,
                     viewModel = viewModel,
+                    contentPadding = PaddingValues(bottom = mapPaddingBottom.dp),
                     modifier = Modifier.testTag("campus_map")
                 )
+
+                if (viewModel.uiBuildingState.mode == MapUIMode.PREVIEW) {
+                    com.example.myapplication.ui.components.CampusSearchBar(
+                        query = viewModel.searchQuery,
+                        results = viewModel.searchResults,
+                        onQueryChange = { viewModel.onSearchQueryChanged(it) },
+                        onResultClick = { viewModel.handleSearchResult(it, context) },
+                        modifier = Modifier
+                            .align(Alignment.TopCenter)
+                            .padding(top = 8.dp)
+                    )
+                } else {
+                    if (viewModel.uiBuildingState.isSearchExpanded) {
+                        DirectionsHeader(
+                            uiState = viewModel.uiBuildingState,
+                            onBackClick = { viewModel.toggleSearchExpansion(false) },
+                            onStartQueryChange = { viewModel.onSearchQueryChanged(it, field = "start") },
+                            onDestQueryChange = { viewModel.onSearchQueryChanged(it, field = "dest") },
+                            modifier = Modifier.align(Alignment.TopCenter)
+                        )
+                    }
+
+                    if (viewModel.uiBuildingState.mode == MapUIMode.DIRECTIONS) {
+                        DirectionsInfoPopup(
+                            uiState = viewModel.uiBuildingState,
+                            onModeChange = { viewModel.onTransportModeChanged(it) },
+                            onStartClick = { viewModel.toggleSearchExpansion(true, "start") },
+                            onDestinationClick = { viewModel.toggleSearchExpansion(true, "dest") },
+                            onSwapClick = { viewModel.swapLocations() },
+                            onClose = { viewModel.onBackToPreview() },
+                            onStartNavigation = { /* ... */ },
+                            modifier = Modifier.align(Alignment.BottomCenter)
+                        )
+                    }
+
+                    val currentFieldText = when(viewModel.activeSearchField) {
+                        "start" -> viewModel.uiBuildingState.startLocationName
+                        "dest" -> viewModel.uiBuildingState.destinationName
+                        else -> viewModel.searchQuery
+                    }
+
+                    if (viewModel.activeSearchField != "main" && currentFieldText.isNotEmpty()) {
+                        Card(
+                            modifier = Modifier
+                                .padding(horizontal = 24.dp)
+                                .offset(y = 190.dp) // Adjusted slightly to sit below the DirectionsHeader
+                                .zIndex(1f), // Ensure it sits on top of everything
+                            elevation = CardDefaults.cardElevation(4.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp)) {
+                                items(viewModel.searchResults) { result ->
+                                    val title = when(result) {
+                                        is com.example.myapplication.logic.SearchResult.BuildingResult -> result.building.name
+                                        is SearchResult.CampusResult -> result.campus.name
+                                        is com.example.myapplication.logic.SearchResult.GoogleResult -> result.title
+                                        is com.example.myapplication.logic.SearchResult.CurrentLocation -> "Your position"
+                                        is com.example.myapplication.logic.SearchResult.Home -> "Home"
+                                    }
+
+                                    ListItem(
+                                        headlineContent = { Text(title) },
+                                        modifier = Modifier.clickable {
+                                            viewModel.handleSearchResult(result, context)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                }
+
 
                 if (showSettingsDialog && !hasLocationPermission) {
                     AlertDialog(
@@ -142,15 +253,7 @@ class MapsActivity : ComponentActivity() {
                     )
                 }
 
-                if (viewModel.uiBuildingState.isVisible) {
-                    viewModel.uiBuildingState.building?.let { building ->
-                        com.example.myapplication.ui.components.BuildingInfoPopup(
-                            building = building,
-                            uiState = viewModel.uiBuildingState,
-                            onDismiss = { viewModel.handleMapTap(null) } // Reset state to hide it
-                        )
-                    }
-                }
+                if (viewModel.uiBuildingState.mode != MapUIMode.DIRECTIONS) {
                 CampusToggle(
                     selectedCampusName = viewModel.currentCampus?.name,
                     onCampusClick = { name ->
@@ -182,14 +285,31 @@ class MapsActivity : ComponentActivity() {
                     icon = { Icon(Icons.Default.MyLocation, contentDescription = null) },
                     text = { Text(text = "RECENTER") }
                 )
+                }
 
                 if (viewModel.uiBuildingState.isVisible) {
                     viewModel.uiBuildingState.building?.let { building ->
-                        BuildingInfoPopup(
-                            building = building,
-                            uiState = viewModel.uiBuildingState,
-                            onDismiss = { viewModel.handleMapTap(null) }
-                        )
+                        if (viewModel.uiBuildingState.mode == com.example.myapplication.ui.models.MapUIMode.PREVIEW) {
+                            BuildingInfoPopup(
+                                building = building,
+                                uiState = viewModel.uiBuildingState,
+                                onDismiss = { viewModel.handleMapTap(null) },
+                                onDirectionsClick = { viewModel.onDirectionsRequested() }
+                            )
+                        }
+                        else {
+                            DirectionsInfoPopup(
+                                uiState = viewModel.uiBuildingState,
+                                onModeChange = { mode -> viewModel.onTransportModeChanged(mode) },
+                                onStartClick = { viewModel.toggleSearchExpansion(true, "start") },
+                                onDestinationClick = { viewModel.toggleSearchExpansion(true, "dest") },
+                                onSwapClick = { viewModel.swapLocations() },
+                                onClose = { viewModel.onBackToPreview() },
+                                onStartNavigation = { /* Logic for navigation later */ },
+                                modifier = Modifier.align(Alignment.BottomCenter)
+                            )
+                        }
+
                     }
                 }
             }

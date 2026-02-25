@@ -10,6 +10,7 @@ data class Building(
     val name: String,
     val code: String,
     val wayID: Long,
+    val fullAddress: String = "Concordia University",
     val outline: List<JsonLatLng>?, // Make nullable for safety
     val isCampusBuilding: Boolean = true
 ) {
@@ -130,4 +131,5 @@ object CampusRepo {
         val xIntersection = (pY - bee) / m
         return xIntersection > pX
     }
+    fun getAllCampuses(): List<Campus> = allCampuses
 }

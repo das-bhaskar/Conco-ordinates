@@ -6,6 +6,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.example.myapplication.ui.viewmodel.MapViewModel
 import java.util.Locale
 import com.example.myapplication.BuildConfig
+import com.example.myapplication.data.Building
 
 object MapInteractionHandler {
     fun processClick(latLng: LatLng, viewModel: MapViewModel, context: Context) {
@@ -55,5 +56,18 @@ object MapInteractionHandler {
             "Address unavailable"
         }
     }
+
+    fun handleSearchSelection(building: Building, viewModel: MapViewModel, context: Context) {
+        val center = building.getCenter()
+
+        val realStreetAddress = getAddressFromCoords(context, center)
+
+        viewModel.handleMapTap(building, realStreetAddress, null)
+
+        fetchProfessionalData(context, center) { photoUrl ->
+            viewModel.handleMapTap(building, realStreetAddress, photoUrl)
+        }
+    }
+
 }
 

@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("jacoco")
     alias(libs.plugins.secrets.gradle)
     alias(libs.plugins.google.services)
 }
@@ -113,3 +114,45 @@ dependencies {
 
 }
 
+val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
+    // 1. Ensure the tests run first. If a test fails, the build stops here.
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileFilter = listOf(
+        "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
+        "**/*Test*.*", "android/**/*.*", "**/androidx/**/*.*",
+        "**/*_MembersInjector.class", "**/Dagger*Component.class",
+        "**/*_Factory.class", "**/Hilt_*.class", "**/*\$Composable*.*",
+        "**/MapsActivity*.*", "**/ui/components/**", "**/ui/theme/**"
+    )
+
+    sourceDirectories.setFrom(files(
+        "${project.projectDir}/src/main/java",
+        "${project.projectDir}/src/main/kotlin"
+    ))
+
+    // 2. Use the Provider API (dir) instead of .get() to prevent configuration crashes
+    val buildDir = project.layout.buildDirectory
+
+    
+    val kotlinTree = fileTree(buildDir.dir("intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes")) {
+        exclude(fileFilter)
+    }
+
+    val javaTree = fileTree(buildDir.dir("intermediates/javac/debug/classes")) {
+        exclude(fileFilter)
+    }
+
+    // 3. This combines them only at execution time
+    classDirectories.setFrom(files(kotlinTree, javaTree))
+
+    
+    executionData.setFrom(fileTree(buildDir) {
+        include("outputs/unit_test_code_coverage/debugUnitTest/*.exec")
+    })
+}

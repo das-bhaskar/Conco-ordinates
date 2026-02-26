@@ -6,6 +6,7 @@
           "code":"H",
           "isCampusBuilding":true,
           "name":"Henry F. Hall Building",
+          "address":"1455 De Maisonneuve Blvd. W., Montreal, QC H3G 1M8",
           "outline":[
             {
               "latitude":45.4968261,
@@ -66,6 +67,7 @@
           "code":"LB",
           "isCampusBuilding":true,
           "name":"J. W. McConnell Building",
+          "address":"1400 De Maisonneuve Blvd. W., Montreal, QC H3G 1M8",
           "outline":[
             {
               "latitude":45.4966595,
@@ -194,6 +196,7 @@
           "code":"MB",
           "isCampusBuilding":true,
           "name":"John Molson Building",
+          "address":"1450 Guy St., Montreal, QC H3H 0A1",
           "outline":[
             {
               "latitude":45.4949482,
@@ -282,6 +285,7 @@
           "code":"EV",
           "isCampusBuilding":true,
           "name":"Engineering, Computer Science and Visual Arts Integrated Complex",
+          "address":"1515 Ste-Catherine St. W., Montreal, QC H3G 2W1",
           "outline":[
             {
               "latitude":45.4959332,
@@ -394,6 +398,7 @@
           "code":"FB",
           "isCampusBuilding":true,
           "name":"Faubourg Tower",
+          "address":"1250 Guy St., Montreal, QC H3H 2L3",
           "outline":[
             {
               "latitude":45.4946786,
@@ -494,6 +499,7 @@
           "code":"FG",
           "isCampusBuilding":true,
           "name":"Le Faubourg",
+          "address": "1610 Ste-Catherine St. W., Montreal, QC H3H 1L7",
           "outline":[
             {
               "latitude":45.4938097,
@@ -554,6 +560,7 @@
           "code":"GM",
           "isCampusBuilding":true,
           "name":"Guy Metro Building",
+          "address": "1550 De Maisonneuve Blvd. W., Montreal, QC H3G 1M9",
           "outline":[
             {
               "latitude":45.4959562,
@@ -610,6 +617,7 @@
           "code":"ER",
           "isCampusBuilding":true,
           "name":"ER Building",
+          "address": "2155 Guy St., Montreal, QC H3H 2L9",
           "outline":[
             {
               "latitude":45.4965177,
@@ -654,6 +662,7 @@
           "code":"GN",
           "isCampusBuilding":true,
           "name":"Grey Nuns Building",
+          "address": "1190 Guy St., Montreal, QC H3H 2L4",
           "outline":[
             {
               "latitude":45.4941608,
@@ -1274,6 +1283,7 @@
           "code":"LS",
           "isCampusBuilding":true,
           "name":"Concordia Learning Square",
+          "address":"1535 De Maisonneuve Blvd. W., Montreal, Quebec H3G 1M9",
           "outline":[
             {
               "latitude":45.4961716,
@@ -1310,6 +1320,7 @@
           "code":"GS",
           "isCampusBuilding":true,
           "name":"GS Building",
+          "address":"1538 Sherbrooke St. W., Montreal, QC H3G 1L5",
           "outline":[
             {
               "latitude":45.4965242,
@@ -1354,6 +1365,7 @@
           "code":"LD",
           "isCampusBuilding":true,
           "name":"LD Building",
+          "address": "1424 Bishop St., Montreal, QC H3G 2E6",
           "outline":[
             {
               "latitude":45.4966296,
@@ -1414,6 +1426,7 @@
           "code":"VA",
           "isCampusBuilding":true,
           "name":"Visual Arts Building",
+          "address": "1395 René-Lévesque Blvd. W., Montreal, QC H3G 2M5",
           "outline":[
             {
               "latitude":45.4961732,
@@ -1468,6 +1481,7 @@
             "code": "SB",
             "isCampusBuilding": true,
             "name": "SB Building",
+            "address": "1590 Docteur Penfield, Montreal, QC H3G 1C5",
             "outline": [{
               "latitude": 45.4964612,
               "longitude": -73.5862621
@@ -1567,6 +1581,7 @@
             "code": "CL",
             "isCampusBuilding": true,
             "name": "CL Annex",
+            "address": "1665 Ste-Catherine St. W., Montreal, QC H3H 1L9",
             "outline": [{
               "latitude": 45.4941615,
               "longitude": -73.5796402
@@ -1609,6 +1624,7 @@
             "code": "B",
             "isCampusBuilding": true,
             "name": "B Annex",
+            "address": "2160 Bishop St, Montreal, QC H3G 2E9",
             "outline": [{
               "latitude": 45.497887,
               "longitude": -73.5793896
@@ -1639,6 +1655,7 @@
             "code": "CI",
             "isCampusBuilding": true,
             "name": "CI Annex",
+            "address": "2149 Mackay St, Montreal, QC H3G 2J1",
             "outline": [{
               "latitude": 45.4974061,
               "longitude": -73.5800149
@@ -1685,6 +1702,7 @@
             "code": "MI",
             "isCampusBuilding": true,
             "name": "MI Annex",
+            "address": "2130 Bishop St, Montreal, QC H3G 1M8",
             "outline": [{
               "latitude": 45.497816,
               "longitude": -73.5792401
@@ -1727,6 +1745,7 @@
             "code": "EN",
             "isCampusBuilding": true,
             "name": "EN Annex",
+            "address": "2070 Mackay St, Montreal, QC H3G 2J1",
             "outline": [{
               "latitude": 45.4968834,
               "longitude": -73.5794977
@@ -1781,6 +1800,7 @@
             "code": "MU",
             "isCampusBuilding": true,
             "name": "MU Annex",
+            "address": "2170 Bishop St, Montreal, QC H3G 2E9",
             "outline": [{
               "latitude": 45.4979241,
               "longitude": -73.5794655
@@ -1815,6 +1835,7 @@
           "code": "GA",
           "isCampusBuilding": true,
           "name": "GA Annex",
+          "address": "1215 Rue St Mathieu, Montréal, QC H3H 1L7",
           "outline":[
             {
               "latitude": 45.4943514,
@@ -1875,6 +1896,7 @@
             "code": "P",
             "isCampusBuilding": true,
             "name": "P Annex",
+            "address": "2020 Mackay St, Montreal, QC H3G 2M2",
             "outline": [
               {
                 "latitude": 45.496684,
@@ -1907,6 +1929,7 @@
             "code": "PR",
             "isCampusBuilding": true,
             "name": "PR Annex",
+            "address": "2100 Mackay St, Montreal, QC H3G 2J1",
             "outline": [
               {
                 "latitude": 45.4969999,
@@ -1987,6 +2010,7 @@
             "code": "Q",
             "isCampusBuilding": true,
             "name": "Q Annex",
+            "address": "2010 Mackay St, Montreal, QC H3G 2J1",
             "outline": [
               {
                 "latitude": 45.496652,
@@ -2019,6 +2043,7 @@
             "code": "R",
             "isCampusBuilding": true,
             "name": "R Annex",
+            "address": "2050 Mackay St, Montreal, QC H3G 2J1",
             "outline": [
               {
                 "latitude": 45.4967012,
@@ -2047,6 +2072,7 @@
             "code": "RR",
             "isCampusBuilding": true,
             "name": "RR Annex",
+            "address": "2040 Mackay St, Montreal, QC H3G 2J1",
             "outline": [
               {
                 "latitude": 45.4967535,
@@ -2087,6 +2113,7 @@
             "code": "S",
             "isCampusBuilding": true,
             "name": "S Annex",
+            "address": "2145 Mackay St, Montreal, QC H3G 2J2",
             "outline": [
               {
                 "latitude": 45.4974912,
@@ -2139,6 +2166,7 @@
             "code": "T",
             "isCampusBuilding": true,
             "name": "T Annex",
+            "address": "2030 Mackay St, Montreal, QC H3G 2J1",
             "outline": [
               {
                 "latitude": 45.4967172,
@@ -2167,6 +2195,7 @@
             "code": "V",
             "isCampusBuilding": true,
             "name": "V Annex",
+            "address": "2110 Mackay St, Montreal, QC H3G 2J1",
             "outline": [
               {
                 "latitude": 45.4970326,
@@ -2207,6 +2236,7 @@
             "code": "X",
             "isCampusBuilding": true,
             "name": "X(FA) Annex",
+            "address": "2080 Mackay St, Montreal, QC H3G 2J1",
             "outline": [
               {
                 "latitude": 45.4969271,
@@ -2235,6 +2265,7 @@
             "code": "Z",
             "isCampusBuilding": true,
             "name": "Z Annex",
+            "address": "2090 Mackay St, Montreal, QC H3G 2J1",
             "outline": [
               {
                 "latitude": 45.4968645,
@@ -2292,6 +2323,7 @@
           "code": "M",
           "isCampusBuilding": true,
           "name": "M Annex",
+          "address": "2135 Mackay St, Montreal, QC H3G 2J2",
           "outline": [
             {
               "latitude": 45.4974204,
@@ -2340,6 +2372,7 @@
           "code": "D",
           "isCampusBuilding": true,
           "name": "D(KK) Annex",
+          "address": "2140 Bishop St, Montreal, QC H3G 2E9",
           "outline":[
             {
               "latitude": 45.4978508,
@@ -2401,6 +2434,7 @@
           "code":"TD",
           "isCampusBuilding":true,
           "name":"TD Bank Building",
+          "address": "1410 Guy St., Montreal, QC H3H 1L8",
           "outline":[
             {
               "latitude":45.4951729,
@@ -2467,6 +2501,7 @@
           "code":"AD",
           "isCampusBuilding":true,
           "name":"Administration Building",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4582595,
@@ -2691,6 +2726,7 @@
           "code":"BB",
           "isCampusBuilding":true,
           "name":"BB Annex",
+          "address": "3502 Belmore Ave., Montreal, QC H4B 2B9",
           "outline":[
             {
               "latitude":45.4598208,
@@ -2715,6 +2751,7 @@
           "code":"BH",
           "isCampusBuilding":true,
           "name":"BH Annex",
+          "address": "3500 Belmore Ave, Montreal, QC H4B 2B9",
           "outline":[
             {
               "latitude":45.4597913,
@@ -2739,6 +2776,7 @@
           "code":"CC",
           "isCampusBuilding":true,
           "name":"Communication Studies Building",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4585197,
@@ -2815,6 +2853,7 @@
           "code":"CJ",
           "isCampusBuilding":true,
           "name":"Communication Studies and Journalism",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4571693,
@@ -2963,6 +3002,7 @@
           "code":"DO",
           "isCampusBuilding":true,
           "name":"Stinger Dome",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4583485,
@@ -3027,6 +3067,7 @@
           "code":"FC",
           "isCampusBuilding":true,
           "name":"F.C. Smith Building",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.458419,
@@ -3155,6 +3196,7 @@
           "code":"GE",
           "isCampusBuilding":true,
           "name":"Centre for Structural and Functional Genomics",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4571701,
@@ -3207,6 +3249,7 @@
           "code":"HA",
           "isCampusBuilding":true,
           "name":"Wing HA",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4592642,
@@ -3295,6 +3338,7 @@
           "code":"HB",
           "isCampusBuilding":true,
           "name":"Wing HB",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4589611,
@@ -3407,6 +3451,7 @@
           "code":"HC",
           "isCampusBuilding":true,
           "name":"Wing HC",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.459887,
@@ -3455,6 +3500,7 @@
           "code":"HU",
           "isCampusBuilding":true,
           "name":"Applied Science Hub",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4584315,
@@ -3515,6 +3561,7 @@
           "code":"JR",
           "isCampusBuilding":true,
           "name":"Jesuit Residence",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4586419,
@@ -3587,6 +3634,7 @@
           "code":"PC",
           "isCampusBuilding":true,
           "name":"PERFORM Centre",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4572701,
@@ -3615,6 +3663,7 @@
           "code":"PS",
           "isCampusBuilding":true,
           "name":"Physical Services Building",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4593968,
@@ -3671,6 +3720,7 @@
           "code":"PT",
           "isCampusBuilding":true,
           "name":"Oscar Peterson Concert Hall",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4595066,
@@ -3711,6 +3761,7 @@
           "code":"PY",
           "isCampusBuilding":true,
           "name":"PY Building",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4587698,
@@ -3767,6 +3818,7 @@
           "code":"RA",
           "isCampusBuilding":true,
           "name":"RA Complex",
+          "address": "7200 Sherbrooke St. W., Montreal, QC H4B 2A4",
           "outline":[
             {
               "latitude":45.4566649,
@@ -3839,6 +3891,7 @@
           "code":"RF",
           "isCampusBuilding":true,
           "name":"Loyola Jesuit Hall and Conference Center",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4583412,
@@ -3923,6 +3976,7 @@
           "code":"SC",
           "isCampusBuilding":true,
           "name":"Student Centre",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4592282,
@@ -3987,6 +4041,7 @@
           "code":"SH",
           "isCampusBuilding":true,
           "name":"SH Building",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4593132,
@@ -4011,6 +4066,7 @@
           "code":"SI",
           "isCampusBuilding":true,
           "name":"SI Building",
+          "address": "4455 West Broadway St., Montreal, QC H4B 2A7",
           "outline":[
             {
               "latitude":45.4575836,
@@ -4151,6 +4207,7 @@
           "code":"SP",
           "isCampusBuilding":true,
           "name":"Science Complex",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4569746,
@@ -4355,6 +4412,7 @@
           "code":"TA",
           "isCampusBuilding":true,
           "name":"Terrebonne Building",
+          "address": "7079 de Terrebonne St., Montreal, QC H4B 1E1",
           "outline":[
             {
               "latitude":45.4600516,
@@ -4379,6 +4437,7 @@
           "code":"VL",
           "isCampusBuilding":true,
           "name":"Vanier Library",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.459305,
@@ -4467,6 +4526,7 @@
           "code":"VE",
           "isCampusBuilding":true,
           "name":"Vanier Extension",
+          "address": "7141 Sherbrooke St. W., Montreal, QC H4B 1R6",
           "outline":[
             {
               "latitude":45.4588315,

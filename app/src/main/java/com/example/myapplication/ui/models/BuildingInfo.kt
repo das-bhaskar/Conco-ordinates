@@ -11,7 +11,7 @@ data class BuildingUiState(
     val isVisible: Boolean = false,
     val mode: MapUIMode = MapUIMode.PREVIEW,
     val building: Building? = null,
-    val fullAddress: String? = null,
+    val address: String? = null,
     val imageUrl: String? = null,
     val startLocationName: String = "Your position", // Default start
     val destinationName: String = "",

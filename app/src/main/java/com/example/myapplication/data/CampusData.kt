@@ -11,7 +11,7 @@ data class Building(
     val name: String,
     val code: String,
     val wayID: Long,
-    val fullAddress: String = "Concordia University",
+    val address: String,
     val outline: List<JsonLatLng>?, // Make nullable for safety
     val isCampusBuilding: Boolean = true
 ) {

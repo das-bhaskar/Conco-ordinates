@@ -7,18 +7,14 @@ import androidx.lifecycle.ViewModel
 import com.example.myapplication.data.Building
 import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
-import com.example.myapplication.logic.LocationProvider
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.BuildConfig
 import com.example.myapplication.logic.SearchResult
 import com.example.myapplication.logic.HybridSearchProvider
 import kotlinx.coroutines.launch
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
 import com.example.myapplication.ui.models.BuildingUiState
-import com.google.android.libraries.places.api.net.PlacesClient
 import com.example.myapplication.ui.models.MapUIMode
-import com.example.myapplication.logic.RouteProvider
 
 class MapViewModel(
     private val locationProvider: com.example.myapplication.logic.LocationProvider? = null,
@@ -38,12 +34,12 @@ class MapViewModel(
     var uiBuildingState by mutableStateOf(BuildingUiState())
         private set
 
-    fun handleMapTap(building: Building?, address: String? = null, imageUrl: String? = null) {
+    fun handleMapTap(building: Building?, imageUrl: String? = null) {
         if (uiBuildingState.mode == MapUIMode.DIRECTIONS) return
         uiBuildingState = BuildingUiState(
             isVisible = building != null,
             building = building,
-            fullAddress = address,
+            address = building?.address,
             imageUrl = imageUrl
         )
     }

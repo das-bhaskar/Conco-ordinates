@@ -13,6 +13,7 @@ class MapManagerTest {
         name = "Hall Building",
         code = "H",
         wayID = 123L,
+        address = "1455 De Maisonneuve",
         outline = listOf(
             JsonLatLng(45.497, -73.579),
             JsonLatLng(45.498, -73.579),

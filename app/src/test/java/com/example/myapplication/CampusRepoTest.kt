@@ -53,7 +53,7 @@ class CampusRepoTest {
             name = "Hall",
             code = "H",
             wayID = 22080570,
-            fullAddress = "1455 De Maisonneuve",
+            address = "1455 De Maisonneuve",
             outline = emptyList()
         )
         val campus = Campus("SGW", JsonLatLng(0.5, 0.5), listOf(building), emptyList())

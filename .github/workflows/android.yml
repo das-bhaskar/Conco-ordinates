@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: ["main", "develop"]
 
+permissions:
+  contents: read
+  pull-requests: write
+  
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,11 +38,26 @@ jobs:
         # No extra env vars needed here; Gradle reads local.properties
         run: ./gradlew assembleDebug
 
-      - name: Run Unit Tests
-        run: ./gradlew test
-
+      - name: Run Tests and Generate Coverage
+        run: ./gradlew jacocoTestReport
+          
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Conco-ordinates-Debug-Build
           path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload HTML Report to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: app/build/reports/jacoco/jacocoTestReport/html/
+
+    
+      - name: PR Coverage Reporter
+        uses: madrapps/jacoco-report@v1.7.1
+        with:
+          paths: ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Unit Test Coverage Report"
+          update-comment: true

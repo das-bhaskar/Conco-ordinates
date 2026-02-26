@@ -16,12 +16,11 @@ object MapInteractionHandler {
         val buildingObject = campus.buildings.find { it.name == clickedBuildingName }
 
         if (buildingObject != null) {
-            val streetAddress = getAddressFromCoords(context, latLng)
-            viewModel.handleMapTap(buildingObject, streetAddress, null)
+            viewModel.handleMapTap(buildingObject,  null)
 
             val buildingCenter = buildingObject.getCenter()
             fetchProfessionalData(context, buildingCenter) { photoUrl ->
-                viewModel.handleMapTap(buildingObject, streetAddress, photoUrl)
+                viewModel.handleMapTap(buildingObject, photoUrl)
             }
         } else {
             viewModel.handleMapTap(null)
@@ -51,28 +50,13 @@ object MapInteractionHandler {
         }
     }
 
-    private fun getAddressFromCoords(context: Context, latLng: LatLng): String {
-        return try {
-            val geocoder = Geocoder(context, Locale.getDefault())
-            val addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
-            addresses?.firstOrNull()?.getAddressLine(0) ?: "Address not found"
-        } catch (e: Exception) {
-            CrashReporter.setKey("interaction_context", "reverse_geocode")
-            CrashReporter.setKey("target_latlng", "${latLng.latitude},${latLng.longitude}")
-            CrashReporter.recordNonFatal(e, "reverse_geocode_failed")
-            "Address unavailable"
-        }
-    }
-
     fun handleSearchSelection(building: Building, viewModel: MapViewModel, context: Context) {
         val center = building.getCenter()
 
-        val realStreetAddress = getAddressFromCoords(context, center)
-
-        viewModel.handleMapTap(building, realStreetAddress, null)
+        viewModel.handleMapTap(building, null)
 
         fetchProfessionalData(context, center) { photoUrl ->
-            viewModel.handleMapTap(building, realStreetAddress, photoUrl)
+            viewModel.handleMapTap(building,  photoUrl)
         }
     }
 

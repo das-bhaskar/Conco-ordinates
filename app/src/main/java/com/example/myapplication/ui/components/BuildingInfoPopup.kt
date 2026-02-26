@@ -59,7 +59,7 @@ fun BuildingInfoPopup(
                     Row(modifier = Modifier.padding(top = 16.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color.Blue)
                         Spacer(Modifier.width(8.dp))
-                        Text(text = uiState.fullAddress ?: "Address loading...", style = MaterialTheme.typography.bodyMedium)
+                        Text(text = uiState.address ?: "Address loading...", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }

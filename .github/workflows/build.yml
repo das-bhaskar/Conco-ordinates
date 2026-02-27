@@ -43,10 +43,12 @@ jobs:
         run: ./gradlew assembleDebug
         env:
           MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+
       - name: Run Unit Tests and Generate Coverage Report
         run: ./gradlew testDebugUnitTest jacocoTestReport
         env:
           MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+
       - name: Debug - Show JaCoCo XML content
         run: |
           echo "=== Finding XML ==="
@@ -56,6 +58,14 @@ jobs:
           echo "=== Kotlin class files ==="
           find . -path "*/tmp/kotlin-classes/debug" -type d
           find . -path "*/tmp/kotlin-classes/debug/*.class" | head -20
+
+      - name: Debug - Find class files
+        run: |
+          echo "=== tmp/kotlin-classes ==="
+          find app/build/tmp/kotlin-classes -name "*.class" 2>/dev/null | head -20 || echo "DIRECTORY NOT FOUND"
+          echo "=== XML first 30 lines ==="
+          cat app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml | head -30 || echo "XML NOT FOUND"  
+
       - name: Run SonarQube analysis
         uses: SonarSource/sonarcloud-github-action@master
         with:

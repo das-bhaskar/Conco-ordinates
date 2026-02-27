@@ -9,6 +9,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.maps.android.PolyUtil
 import com.example.myapplication.data.Campus
+import com.example.myapplication.telemetry.CrashReporter
 
 class MapManager(private val googleMap: GoogleMap) {
 
@@ -26,6 +27,8 @@ class MapManager(private val googleMap: GoogleMap) {
                     callback(null)
                 }
         } catch (e: SecurityException) {
+            CrashReporter.setKey("map_manager_operation", "get_user_location")
+            CrashReporter.recordNonFatal(e, "location_permission_missing_in_map_manager")
             callback(null)
         }
     }

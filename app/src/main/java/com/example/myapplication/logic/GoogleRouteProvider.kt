@@ -2,6 +2,7 @@ package com.example.myapplication.logic
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
+import com.example.myapplication.telemetry.CrashReporter
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -56,6 +57,10 @@ class GoogleRouteProvider(private val apiKey: String) : RouteProvider {
             }
         } catch (e: Exception) {
             android.util.Log.e("ROUTE_DEBUG", "Exception: ${e.message}")
+            CrashReporter.setKey("route_mode", transportMode)
+            CrashReporter.setKey("route_start", "${start.latitude},${start.longitude}")
+            CrashReporter.setKey("route_end", "${end.latitude},${end.longitude}")
+            CrashReporter.recordNonFatal(e, "google_directions_request_failed")
         }
 
         // Final fallback: return null if everything fails

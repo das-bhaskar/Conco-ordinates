@@ -3,6 +3,7 @@ package com.example.myapplication.logic
 import com.example.myapplication.data.Building
 import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
+import com.example.myapplication.telemetry.CrashReporter
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import kotlinx.coroutines.tasks.await
@@ -41,6 +42,8 @@ class HybridSearchProvider(private val placesClient: PlacesClient) {
             }
             campusMatches + localMatches + googleMatches
         } catch (e: Exception) {
+            CrashReporter.setKey("search_query_length", query.length)
+            CrashReporter.recordNonFatal(e, "places_autocomplete_failed")
             campusMatches + localMatches
         }
     }

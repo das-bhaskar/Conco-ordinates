@@ -37,6 +37,7 @@ import com.example.myapplication.ui.components.CampusMap
 import com.example.myapplication.ui.components.CampusToggle
 import com.example.myapplication.ui.components.DirectionsHeader
 import com.example.myapplication.ui.models.MapUIMode
+import com.example.myapplication.telemetry.CrashReporter
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.viewmodel.MapViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -52,6 +53,9 @@ class MapsActivity : ComponentActivity() {
             com.google.android.libraries.places.api.Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
         }
         super.onCreate(savedInstanceState)
+        CrashReporter.setKey("screen", "MapsActivity")
+        CrashReporter.setKey("app_version", BuildConfig.VERSION_NAME)
+        CrashReporter.log("maps_activity_created")
         CampusRepo.initialize(this)
 
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -74,6 +78,7 @@ class MapsActivity : ComponentActivity() {
             }
 
             LaunchedEffect(hasLocationPermission) {
+                CrashReporter.setKey("location_permission_granted", hasLocationPermission)
                 if (hasLocationPermission) {
                     val locationRequest = com.google.android.gms.location.LocationRequest.Builder(
                         com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
@@ -95,7 +100,9 @@ class MapsActivity : ComponentActivity() {
                             locationCallback,
                             android.os.Looper.getMainLooper()
                         )
-                    } catch (e: SecurityException) { /* Handle error */ }
+                    } catch (e: SecurityException) {
+                        CrashReporter.recordNonFatal(e, "request_location_updates_failed")
+                    }
                 }
             }
 
@@ -121,8 +128,13 @@ class MapsActivity : ComponentActivity() {
             }
             LaunchedEffect(viewModel.currentCampus) {
                 viewModel.currentCampus?.let { campus ->
+                    CrashReporter.setKey("selected_campus", campus.name)
                     cameraController.animateTo(campus.getGoogleCenter(), campus.defaultZoom)
                 }
+            }
+
+            LaunchedEffect(viewModel.uiBuildingState.mode) {
+                CrashReporter.setKey("map_mode", viewModel.uiBuildingState.mode.name)
             }
 
             val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -344,7 +356,10 @@ class MapsActivity : ComponentActivity() {
             client.lastLocation.addOnSuccessListener { loc ->
                 loc?.let { onLocationFound(LatLng(it.latitude, it.longitude)) }
             }
-        } catch (e: SecurityException) { /* log error */ }
+        } catch (e: SecurityException) {
+            CrashReporter.setKey("recenter_has_permission", hasPermission)
+            CrashReporter.recordNonFatal(e, "recenter_location_lookup_failed")
+        }
     }
 
     private fun openAppSettings(context: android.content.Context) {

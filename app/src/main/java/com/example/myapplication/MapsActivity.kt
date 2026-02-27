@@ -298,21 +298,6 @@ class MapsActivity : ComponentActivity() {
                     text = { Text(text = "RECENTER") }
                 )
 
-                if (BuildConfig.DEBUG) {
-                    FloatingActionButton(
-                        onClick = {
-                            CrashReporter.log("debug_test_crash_button_pressed")
-                            throw RuntimeException("Crashlytics test crash from debug button")
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomStart)
-                            .padding(24.dp),
-                        containerColor = Color.DarkGray,
-                        contentColor = Color.White
-                    ) {
-                        Text(text = "CRASH")
-                    }
-                }
                 }
 
                 if (viewModel.uiBuildingState.isVisible) {

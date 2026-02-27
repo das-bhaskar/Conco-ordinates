@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.example.myapplication.R
+import com.example.myapplication.telemetry.CrashReporter
 data class JsonLatLng(val latitude: Double, val longitude: Double)
 
 data class Building(
@@ -61,6 +62,8 @@ object CampusRepo {
             }
         } catch (e: Exception) {
             android.util.Log.e("DATA_CHECK", "FATAL ERROR: ${e.message}")
+            CrashReporter.setKey("campus_data_source", "res/raw/campuses.json")
+            CrashReporter.recordNonFatal(e, "campus_data_initialize_failed")
             e.printStackTrace()
         }
     }

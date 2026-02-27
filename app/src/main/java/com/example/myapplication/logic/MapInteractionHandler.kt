@@ -7,6 +7,7 @@ import com.example.myapplication.ui.viewmodel.MapViewModel
 import java.util.Locale
 import com.example.myapplication.BuildConfig
 import com.example.myapplication.data.Building
+import com.example.myapplication.telemetry.CrashReporter
 
 object MapInteractionHandler {
     fun processClick(latLng: LatLng, viewModel: MapViewModel, context: Context) {
@@ -43,6 +44,9 @@ object MapInteractionHandler {
 
             callback(streetViewUrl)
         } catch (e: Exception) {
+            CrashReporter.setKey("interaction_context", "fetch_professional_data")
+            CrashReporter.setKey("target_latlng", "${latLng.latitude},${latLng.longitude}")
+            CrashReporter.recordNonFatal(e, "street_view_url_build_failed")
             callback(null)
         }
     }
@@ -53,6 +57,9 @@ object MapInteractionHandler {
             val addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
             addresses?.firstOrNull()?.getAddressLine(0) ?: "Address not found"
         } catch (e: Exception) {
+            CrashReporter.setKey("interaction_context", "reverse_geocode")
+            CrashReporter.setKey("target_latlng", "${latLng.latitude},${latLng.longitude}")
+            CrashReporter.recordNonFatal(e, "reverse_geocode_failed")
             "Address unavailable"
         }
     }

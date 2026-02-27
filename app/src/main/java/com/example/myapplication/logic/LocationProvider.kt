@@ -2,6 +2,7 @@ package com.example.myapplication.logic
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.example.myapplication.telemetry.CrashReporter
 
 
 interface LocationProvider {
@@ -20,6 +21,8 @@ class TrueLocationProvider(private val client: FusedLocationProviderClient) : Lo
                 }
             }
         } catch (e: SecurityException) {
+            CrashReporter.setKey("location_provider", "TrueLocationProvider")
+            CrashReporter.recordNonFatal(e, "location_permission_missing_in_provider")
             callback(null)
         }
     }

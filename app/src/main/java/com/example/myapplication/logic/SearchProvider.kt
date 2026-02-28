@@ -27,7 +27,8 @@ class HybridSearchProvider(private val placesClient: PlacesClient) {
         val allBuildings = CampusRepo.getAllCampuses().flatMap { it.buildings }
         val localMatches = allBuildings.filter { building ->
             building.name.contains(query, ignoreCase = true) ||
-                    building.code.contains(query, ignoreCase = true)
+                    building.code.contains(query, ignoreCase = true) ||
+            building.address.contains(query, ignoreCase = true)
         }.take(3).map { SearchResult.BuildingResult(it) }
 
         val request = FindAutocompletePredictionsRequest.builder().setQuery(query).build()

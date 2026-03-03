@@ -21,8 +21,6 @@ class MapViewModel(
     private val routeProvider: com.example.myapplication.logic.RouteProvider? = null
 ) : ViewModel() {
 
-
-
     var searchQuery by mutableStateOf("")
         private set
 
@@ -81,14 +79,11 @@ class MapViewModel(
         val detected = CampusRepo.getCampus(userLocation)
 
         if (detected != null) {
-            // ONLY auto-switch if the user hasn't manually locked a campus choice
             if (!isManualCampusSelection) {
                 if (currentCampus?.name != detected.name) {
                     currentCampus = detected
                 }
             } else {
-                // If they manually picked a campus and finally physically walk INTO it,
-                // we release the manual lock so auto-switching works again.
                 if (detected.name == currentCampus?.name) {
                     isManualCampusSelection = false
                 }
@@ -102,7 +97,6 @@ class MapViewModel(
 
             highlightedBuildingName = buildingAtPos?.name
         } else {
-            // User walked out of all known campuses; reset the lock
             isManualCampusSelection = false
         }
     }
@@ -135,21 +129,19 @@ class MapViewModel(
             uiBuildingState = if (activeSearchField == "start") {
                 uiBuildingState.copy(
                     startLocationName = resultName,
-                    startPoint = resultCoords // <--- Saved for route
+                    startPoint = resultCoords
                 )
             } else {
                 uiBuildingState.copy(
                     destinationName = resultName,
                     building = selectedBuilding,
-                    endPoint = resultCoords // <--- Saved for route
+                    endPoint = resultCoords
                 )
             }
 
-            // Camera move for directions selection
             resultCoords?.let { setMapEventWithOffset(it) }
 
             uiBuildingState = uiBuildingState.copy(isSearchExpanded = false)
-            // RECALCULATE ROUTE AUTOMATICALLY
             calculateRoute()
 
             searchResults = emptyList()
@@ -157,38 +149,26 @@ class MapViewModel(
         }
 
         when (result) {
-
             is SearchResult.CampusResult -> {
                 onCampusSelected(result.campus.name)
-
                 resultCoords?.let { setMapEventWithOffset(it) }
-
-                uiBuildingState = uiBuildingState.copy(
-                    isVisible = false,
-                    building = null
-                )
+                uiBuildingState = uiBuildingState.copy(isVisible = false, building = null)
             }
-
             is SearchResult.BuildingResult -> {
                 val b = result.building
                 highlightedBuildingName = b.name
-
-                // Set endPoint in case they switch to directions later
                 uiBuildingState = uiBuildingState.copy(
                     isVisible = true,
                     building = b,
                     endPoint = b.getCenter()
                 )
-
                 com.example.myapplication.logic.MapInteractionHandler.handleSearchSelection(
                     b, this, context
                 )
-
                 CampusRepo.getAllCampuses().find { it.buildings.contains(b) }?.let {
                     currentCampus = it
                     isManualCampusSelection = true
                 }
-
                 b.getGoogleOutline().firstOrNull()?.let { mapEvent = it }
             }
             is SearchResult.CurrentLocation -> {
@@ -205,10 +185,11 @@ class MapViewModel(
                 mapEvent = homePos
                 uiBuildingState = uiBuildingState.copy(startPoint = homePos)
             }
-            is SearchResult.GoogleResult -> { /* Future implementation */ }
+            is SearchResult.GoogleResult -> { /* TODO */ }
         }
         searchResults = emptyList()
     }
+
     fun initSearch(client: com.google.android.libraries.places.api.net.PlacesClient) {
         searchProvider = HybridSearchProvider(client)
         searchResults = listOf(SearchResult.CurrentLocation)
@@ -219,7 +200,6 @@ class MapViewModel(
 
     fun onSearchQueryChanged(newQuery: String, field: String = "main") {
         activeSearchField = field
-
         if (field == "main") {
             searchQuery = newQuery
         } else if (field == "start") {
@@ -229,50 +209,48 @@ class MapViewModel(
         }
 
         viewModelScope.launch {
-            searchProvider?.let { provider ->
-                searchResults = provider.search(newQuery)
-            }
+            searchProvider?.let { searchResults = it.search(newQuery) }
         }
     }
+
     fun onDirectionsRequested() {
         uiBuildingState = uiBuildingState.copy(
-            mode = com.example.myapplication.ui.models.MapUIMode.DIRECTIONS,
+            mode = MapUIMode.DIRECTIONS,
             destinationName = uiBuildingState.building?.name ?: ""
         )
     }
 
     fun onBackToPreview() {
-        uiBuildingState = uiBuildingState.copy(
-            mode = com.example.myapplication.ui.models.MapUIMode.PREVIEW
-        )
-    }
-    fun onStartQueryChanged(newQuery: String) {
-        uiBuildingState = uiBuildingState.copy(startLocationName = newQuery)
-    }
-
-    fun onDestinationQueryChanged(newQuery: String) {
-        uiBuildingState = uiBuildingState.copy(destinationName = newQuery)
+        uiBuildingState = uiBuildingState.copy(mode = MapUIMode.PREVIEW)
     }
 
     fun onTransportModeChanged(mode: String) {
-        uiBuildingState = uiBuildingState.copy(selectedTransportMode = mode)
-        calculateRoute()
+        if (mode == "shuttle") {
+            uiBuildingState = uiBuildingState.copy(
+                selectedTransportMode = mode,
+                routePoints = emptyList(),
+                routeDuration = "-- min",
+                routeDistance = "-- m",
+                routeBounds = null
+            )
+        } else {
+            uiBuildingState = uiBuildingState.copy(selectedTransportMode = mode)
+            calculateRoute()
+        }
     }
 
     fun calculateRoute() {
+        if (uiBuildingState.selectedTransportMode == "shuttle") return
 
         val start = uiBuildingState.startPoint ?: lastProcessedLocation ?: return
-
         val end = uiBuildingState.endPoint ?: uiBuildingState.building?.getCenter() ?: return
 
         viewModelScope.launch {
             val routeData = routeProvider?.getRoute(start, end, uiBuildingState.selectedTransportMode)
-
             if (routeData != null) {
                 val builder = com.google.android.gms.maps.model.LatLngBounds.Builder()
                 routeData.points.forEach { builder.include(it) }
                 val bounds = builder.build()
-
                 uiBuildingState = uiBuildingState.copy(
                     routePoints = routeData.points,
                     routeDuration = routeData.duration,
@@ -294,25 +272,25 @@ class MapViewModel(
         activeSearchField = field
         uiBuildingState = uiBuildingState.copy(isSearchExpanded = expanded)
     }
+
     fun swapLocations() {
         val currentStartLatLng = uiBuildingState.startPoint ?: lastProcessedLocation
         val currentDestLatLng = uiBuildingState.endPoint ?: uiBuildingState.building?.getCenter()
-
         val currentDestBuilding = uiBuildingState.building
+
         uiBuildingState = uiBuildingState.copy(
             startLocationName = uiBuildingState.destinationName,
             destinationName = uiBuildingState.startLocationName,
             startPoint = currentDestLatLng,
             endPoint = currentStartLatLng,
-            building = if (!uiBuildingState.isStartCurrentLocation) null else currentDestBuilding        )
+            building = if (!uiBuildingState.isStartCurrentLocation) null else currentDestBuilding
+        )
 
         uiBuildingState.endPoint?.let { setMapEventWithOffset(it) }
-
-        // Update the building highlight name for the renderer
         highlightedBuildingName = uiBuildingState.building?.name
-
         calculateRoute()
     }
+
     fun setMapEventWithOffset(target: LatLng) {
         val offsetTarget = LatLng(target.latitude - 0.005, target.longitude)
         mapEvent = offsetTarget

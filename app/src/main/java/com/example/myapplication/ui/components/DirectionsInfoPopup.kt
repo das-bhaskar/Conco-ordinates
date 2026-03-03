@@ -9,7 +9,6 @@ import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.ImportExport
-import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,127 +25,202 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.myapplication.ui.models.BuildingUiState
+import com.example.myapplication.ui.viewmodel.ShuttleViewModel
 
 @Composable
 fun DirectionsInfoPopup(
     uiState: BuildingUiState,
+    shuttleViewModel: ShuttleViewModel,
     onModeChange: (String) -> Unit,
     onStartClick: () -> Unit,
     onSwapClick: () -> Unit,
     onDestinationClick: () -> Unit,
     onClose: () -> Unit,
     onStartNavigation: () -> Unit,
+    bottomNavHeight: androidx.compose.ui.unit.Dp = 80.dp,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 20.dp)
+            .padding(bottom = bottomNavHeight)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
-        // Main Semi-Translucent Container
         Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(28.dp),
-            color = Color.White.copy(alpha = 0.92f), // Translucent effect
+            color = Color.White.copy(alpha = 0.92f),
             shadowElevation = 10.dp
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                // Header with X
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Directions", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold))
+                    Text(
+                        "Directions",
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+                    )
                     IconButton(onClick = onClose) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.Black)
                     }
                 }
 
-                // Transport Toggle Pill
                 TransportModeToggle(uiState.selectedTransportMode, onModeChange)
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Location Rows (Native Mockup Style)
                 LocationRow(
                     label = uiState.startLocationName,
                     icon = Icons.Default.Circle,
                     iconColor = Color(0xFF4285F4),
-                    trailingIcon = Icons.Default.ImportExport, // Use swap icon
-                    onTrailingIconClick = onSwapClick, // Trigger the swap
+                    trailingIcon = Icons.Default.ImportExport,
+                    onTrailingIconClick = onSwapClick,
                     onClick = onStartClick
                 )
 
-                Divider(modifier = Modifier.padding(start = 40.dp), thickness = 0.5.dp, color = Color.LightGray)
+                Divider(
+                    modifier = Modifier.padding(start = 40.dp),
+                    thickness = 0.5.dp,
+                    color = Color.LightGray
+                )
 
                 LocationRow(
                     label = uiState.destinationName,
                     icon = Icons.Default.LocationOn,
                     iconColor = Color(0xFFEA4335),
-                    trailingIcon = Icons.Default.Menu, // Keep menu icon for the second one
+                    trailingIcon = Icons.Default.Menu,
                     onClick = onDestinationClick
                 )
 
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // NESTED ETA CARD (The Rounded Grey Rectangle from Mockup)
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    color = Color(0xFFF1F3F4) // Light Google Grey
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = uiState.routeDuration,
-                                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
-                            )
-                            Text(
-                                text = "Fastest route · ${uiState.routeDistance}",
-                                color = Color.Gray,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-
-                        // Action Button (Car Icon in Circle)
-                        Surface(
-                            shape = CircleShape,
-                            color = Color.White,
-                            modifier = Modifier.size(44.dp)
-                        ) {
-                            Icon(
-                                imageVector = when(uiState.selectedTransportMode) {
-                                    "drive" -> Icons.Default.DirectionsCar
-                                    "walk" -> Icons.AutoMirrored.Filled.DirectionsWalk
-                                    else -> Icons.Default.DirectionsBus
-                                },
-                                contentDescription = null,
-                                modifier = Modifier.padding(10.dp),
-                                tint = Color(0xFF5F6368)
-                            )
-                        }
-                    }
-                }
-
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Button(
-                    onClick = onStartNavigation,
-                    modifier = Modifier.fillMaxWidth().height(54.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF912338)), // Concordia Maroon
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text(
-                        text = if (uiState.startLocationName == "Your position") "START" else "PREVIEW",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White
-                    )                }
+                // Conditional content based on transport mode
+                if (uiState.selectedTransportMode == "shuttle") {
+                    ShuttleInfoSection(shuttleViewModel, onStartNavigation)
+                } else {
+                    RouteInfoSection(uiState, onStartNavigation)
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun RouteInfoSection(uiState: BuildingUiState, onStartNavigation: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = Color(0xFFF1F3F4)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = uiState.routeDuration,
+                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+                )
+                Text(
+                    text = "Fastest route · ${uiState.routeDistance}",
+                    color = Color.Gray,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            Surface(
+                shape = CircleShape,
+                color = Color.White,
+                modifier = Modifier.size(44.dp)
+            ) {
+                Icon(
+                    imageVector = when (uiState.selectedTransportMode) {
+                        "drive"   -> Icons.Default.DirectionsCar
+                        "walk"    -> Icons.AutoMirrored.Filled.DirectionsWalk
+                        else      -> Icons.Default.DirectionsBus // Covers transit
+                    },
+                    contentDescription = null,
+                    modifier = Modifier.padding(10.dp),
+                    tint = Color(0xFF5F6368)
+                )
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    Button(
+        onClick = onStartNavigation,
+        modifier = Modifier.fillMaxWidth().height(54.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A73E8)), // Google Blue
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Text(
+            text = if (uiState.startLocationName == "Your position") "START" else "PREVIEW",
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.White
+        )
+    }
+}
+
+@Composable
+private fun ShuttleInfoSection(viewModel: ShuttleViewModel, onStartNavigation: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = if (viewModel.isShuttleEnabled) ConcordiaMaroon.copy(alpha = 0.1f) else Color.LightGray.copy(alpha = 0.3f)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                if (viewModel.isLoadingRoute) {
+                    CircularProgressIndicator(modifier = Modifier.size(28.dp), color = ConcordiaMaroon)
+                    Text(
+                        text = "Finding nearest stop...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = ConcordiaMaroon
+                    )
+                } else {
+                    Text(
+                        text = viewModel.shuttleStatusText,
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                        color = if (viewModel.isShuttleEnabled) ConcordiaMaroon else Color.DarkGray
+                    )
+                    Text(
+                        // ALWAYS show the direction, so the user knows which schedule they are looking at
+                        text = viewModel.currentDirection.displayName,
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            Icon(
+                imageVector = Icons.Default.DirectionsBus,
+                contentDescription = null,
+                modifier = Modifier.size(32.dp),
+                tint = if (viewModel.isShuttleEnabled) ConcordiaMaroon else Color.Gray
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    Button(
+        onClick = onStartNavigation,
+        modifier = Modifier.fillMaxWidth().height(54.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon),
+        shape = RoundedCornerShape(16.dp),
+        enabled = viewModel.shuttleRoute != null
+    ) {
+        Text(
+            text = "SHOW ROUTE",
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.White
+        )
     }
 }
 
@@ -155,8 +229,8 @@ fun LocationRow(
     label: String,
     icon: ImageVector,
     iconColor: Color,
-    trailingIcon: ImageVector = Icons.Default.Menu, // Default to menu
-    onTrailingIconClick: () -> Unit = {},           // Default to nothing
+    trailingIcon: ImageVector = Icons.Default.Menu,
+    onTrailingIconClick: () -> Unit = {},
     onClick: () -> Unit
 ) {
     Row(
@@ -168,14 +242,19 @@ fun LocationRow(
     ) {
         Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = label, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Spacer(modifier = Modifier.weight(1f))
-
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f)
+        )
         IconButton(onClick = onTrailingIconClick) {
             Icon(trailingIcon, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(22.dp))
         }
     }
 }
+
 @Composable
 fun TransportModeToggle(selectedMode: String, onModeChange: (String) -> Unit) {
     Surface(
@@ -188,9 +267,10 @@ fun TransportModeToggle(selectedMode: String, onModeChange: (String) -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             val modes = listOf(
-                Triple("walk", Icons.AutoMirrored.Filled.DirectionsWalk, "Walk"),
-                Triple("drive", Icons.Default.DirectionsCar, "Drive"),
-                Triple("transit", Icons.Default.DirectionsBus, "Transit")
+                Triple("walk",    Icons.AutoMirrored.Filled.DirectionsWalk, "Walk"),
+                Triple("drive",   Icons.Default.DirectionsCar,              "Drive"),
+                Triple("transit", Icons.Default.DirectionsBus,              "Transit"),
+                Triple("shuttle", Icons.Default.DirectionsBus,              "Shuttle")
             )
 
             modes.forEach { (mode, icon, label) ->
@@ -200,16 +280,24 @@ fun TransportModeToggle(selectedMode: String, onModeChange: (String) -> Unit) {
                         .height(40.dp)
                         .weight(1f)
                         .clickable { onModeChange(mode) },
-                    color = if (isSelected) Color(0xFF1A73E8) else Color.Transparent,
+                    color = when {
+                        isSelected && mode == "shuttle" -> ConcordiaMaroon
+                        isSelected                     -> Color(0xFF1A73E8)
+                        else                           -> Color.Transparent
+                    },
                     shape = RoundedCornerShape(20.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = label,
-                            tint = if (isSelected) Color.White else Color(0xFF5F6368),
-                            modifier = Modifier.size(20.dp)
-                        )
+                        if (mode == "shuttle") {
+                            Text("🚌", style = MaterialTheme.typography.labelSmall)
+                        } else {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = label,
+                                tint = if (isSelected) Color.White else Color(0xFF5F6368),
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
                 }
             }

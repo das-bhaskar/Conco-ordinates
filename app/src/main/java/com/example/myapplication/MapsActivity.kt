@@ -53,6 +53,7 @@ class MapsActivity : ComponentActivity() {
             com.google.android.libraries.places.api.Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
         }
         super.onCreate(savedInstanceState)
+
         CrashReporter.setKey("screen", "MapsActivity")
         CrashReporter.setKey("app_version", BuildConfig.VERSION_NAME)
         CrashReporter.log("maps_activity_created")

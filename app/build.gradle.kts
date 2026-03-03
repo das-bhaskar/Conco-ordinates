@@ -35,13 +35,17 @@ android {
         }
 
         // 2. Check Environment (CI) first, then local.properties (You), then DUMMY
-        val myKey: String = System.getenv("MAPS_API_KEY")
+        val mapsApiKey: String = System.getenv("MAPS_API_KEY")
             ?: properties.getProperty("MAPS_API_KEY")
             ?: "DUMMY_KEY"
+        val smartlookProjectKey: String = System.getenv("SMARTLOOK_PROJECT_KEY")
+            ?: properties.getProperty("SMARTLOOK_PROJECT_KEY")
+            ?: ""
 
-        manifestPlaceholders["mapsApiKey"] = myKey
+        manifestPlaceholders["mapsApiKey"] = mapsApiKey
 
-        buildConfigField("String", "MAPS_API_KEY", "\"$myKey\"")
+        buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
+        buildConfigField("String", "SMARTLOOK_PROJECT_KEY", "\"$smartlookProjectKey\"")
     }
 
     buildTypes {
@@ -79,7 +83,7 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.crashlytics)
-
+    implementation(libs.smartlook.analytics)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

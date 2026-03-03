@@ -16,8 +16,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven("https://sdk.smartlook.com/android/release")
     }
 }
+
+
 
 rootProject.name = "My Application"
 include(":app")

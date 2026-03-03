@@ -62,6 +62,9 @@ class MapsActivity : ComponentActivity() {
             val smartlook = Smartlook.instance
             smartlook.preferences.projectKey = BuildConfig.SMARTLOOK_PROJECT_KEY
             smartlook.start()
+            if (BuildConfig.SMARTLOOK_TESTER_ID.isNotBlank()) {
+                smartlook.user.identifier = BuildConfig.SMARTLOOK_TESTER_ID
+            }
         }
 
         Smartlook.instance.trackNavigationEnter("MapsActivity")

@@ -41,11 +41,15 @@ android {
         val smartlookProjectKey: String = System.getenv("SMARTLOOK_PROJECT_KEY")
             ?: properties.getProperty("SMARTLOOK_PROJECT_KEY")
             ?: ""
+        val smartlookTesterId: String = System.getenv("SMARTLOOK_TESTER_ID")
+            ?: properties.getProperty("SMARTLOOK_TESTER_ID")
+            ?: ""
 
         manifestPlaceholders["mapsApiKey"] = mapsApiKey
 
         buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
         buildConfigField("String", "SMARTLOOK_PROJECT_KEY", "\"$smartlookProjectKey\"")
+        buildConfigField("String", "SMARTLOOK_TESTER_ID", "\"$smartlookTesterId\"")
     }
 
     buildTypes {

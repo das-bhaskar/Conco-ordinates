@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
 import com.example.myapplication.data.CampusRepo
+import com.example.myapplication.data.ShuttleRepo
 import com.example.myapplication.logic.SearchResult
 import com.example.myapplication.logic.TrueLocationProvider
 import com.example.myapplication.map.TrueCameraController
@@ -57,6 +58,7 @@ class MapsActivity : ComponentActivity() {
         CrashReporter.setKey("app_version", BuildConfig.VERSION_NAME)
         CrashReporter.log("maps_activity_created")
         CampusRepo.initialize(this)
+        ShuttleRepo.initialize(this)
 
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         val locationProvider = TrueLocationProvider(fusedLocationClient)

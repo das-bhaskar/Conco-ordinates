@@ -3,17 +3,33 @@ package com.example.myapplication.ui.viewmodel
 import com.example.myapplication.data.*
 import com.example.myapplication.logic.*
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 
 /**
  * US-2.6 / 2.7 / 2.8 — ShuttleViewModel unit tests
- * Uses fakes injected through the constructor.
+ *
+ * UnconfinedTestDispatcher is set BEFORE ViewModel construction so that
+ * viewModelScope.launch does not crash on a missing Android main looper.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 class ShuttleViewModelTest {
 
+    // Set main dispatcher before any ViewModel is created
+    private val testDispatcher = UnconfinedTestDispatcher()
+
+    @Before fun setUp() { Dispatchers.setMain(testDispatcher) }
+    @After  fun tearDown() { Dispatchers.resetMain() }
+
     // ── Fakes ─────────────────────────────────────────────────────────────
+
     private class FakeAvailabilityRepo(
         private val result: ShuttleAvailability = ShuttleAvailability.Active(10)
     ) : ShuttleRepository {
@@ -26,100 +42,76 @@ class ShuttleViewModelTest {
         override fun findNearest(userLocation: LatLng, direction: ShuttleDirection) = result
     }
 
-    private class FakeDirectionsRepo(
-        private val result: ShuttleRouteResult = ShuttleRouteResult.NetworkError
-    ) : ShuttleDirectionsRepository {
-        override suspend fun getRoute(boarding: ShuttleStop, alighting: ShuttleStop, direction: ShuttleDirection) = result
+    // Suspends immediately — never blocks
+    private class FakeDirectionsRepo : ShuttleDirectionsRepository {
+        override suspend fun getRoute(
+            boarding: ShuttleStop, alighting: ShuttleStop, direction: ShuttleDirection
+        ) = ShuttleRouteResult.NetworkError
     }
 
-    private val sgwStop = ShuttleStop("sgw_main", "SGW Stop", "SGW", LatLng(45.49719, -73.57859))
+    private fun makeVm(
+        availability: ShuttleAvailability = ShuttleAvailability.Active(10),
+        stopResult: NearestStopResult = NearestStopResult.Found(sgwStop)
+    ) = ShuttleViewModel(
+        availabilityRepo = FakeAvailabilityRepo(availability),
+        stopFinder       = FakeStopFinder(stopResult),
+        directionsRepo   = FakeDirectionsRepo()
+    )
+
+    private val sgwStop    = ShuttleStop("sgw_main",    "SGW Stop",    "SGW",    LatLng(45.49719, -73.57859))
     private val loyolaStop = ShuttleStop("loyola_main", "Loyola Stop", "Loyola", LatLng(45.45825, -73.63913))
     private val userLocation = LatLng(45.49720, -73.57860)
 
-    // ── US-2.7 Tests ──────────────────────────────────────────────────────
+    // ── US-2.7 ────────────────────────────────────────────────────────────
 
     @Test fun `enableShuttleMode sets isShuttleModeActive true`() {
-        val vm = ShuttleViewModel(
-            availabilityRepo = FakeAvailabilityRepo(ShuttleAvailability.Active(5)),
-            stopFinder       = FakeStopFinder(NearestStopResult.Found(sgwStop)),
-            directionsRepo   = FakeDirectionsRepo()
-        )
+        val vm = makeVm()
         vm.enableShuttleMode(userLocation, "SGW")
         assertTrue(vm.isShuttleModeActive)
     }
 
-    @Test fun `enableShuttleMode with Active availability sets isShuttleEnabled true`() {
-        val vm = ShuttleViewModel(
-            availabilityRepo = FakeAvailabilityRepo(ShuttleAvailability.Active(15)),
-            stopFinder       = FakeStopFinder(NearestStopResult.Found(sgwStop)),
-            directionsRepo   = FakeDirectionsRepo()
-        )
+    @Test fun `enableShuttleMode Active sets isShuttleEnabled true`() {
+        val vm = makeVm(ShuttleAvailability.Active(15))
         vm.enableShuttleMode(userLocation, "SGW")
         assertTrue(vm.isShuttleEnabled)
     }
 
-    @Test fun `enableShuttleMode on weekend disables shuttle`() {
-        val vm = ShuttleViewModel(
-            availabilityRepo = FakeAvailabilityRepo(ShuttleAvailability.WeekendOrHoliday),
-            stopFinder       = FakeStopFinder(NearestStopResult.NoStopsAvailable),
-            directionsRepo   = FakeDirectionsRepo()
-        )
+    @Test fun `WeekendOrHoliday disables shuttle with correct message`() {
+        val vm = makeVm(ShuttleAvailability.WeekendOrHoliday, NearestStopResult.NoStopsAvailable)
         vm.enableShuttleMode(userLocation, "SGW")
         assertFalse(vm.isShuttleEnabled)
         assertEquals("Shuttle does not operate on weekends", vm.shuttleStatusText)
     }
 
-    @Test fun `enableShuttleMode OutOfService disables shuttle`() {
-        val vm = ShuttleViewModel(
-            availabilityRepo = FakeAvailabilityRepo(ShuttleAvailability.OutOfService),
-            stopFinder       = FakeStopFinder(NearestStopResult.NoStopsAvailable),
-            directionsRepo   = FakeDirectionsRepo()
-        )
+    @Test fun `OutOfService disables shuttle`() {
+        val vm = makeVm(ShuttleAvailability.OutOfService, NearestStopResult.NoStopsAvailable)
         vm.enableShuttleMode(userLocation, "SGW")
         assertFalse(vm.isShuttleEnabled)
     }
 
-    // ── US-2.7 AC3: Direction inference ───────────────────────────────────
-
-    @Test fun `SGW startCampus sets SGW_TO_LOYOLA direction`() {
-        val vm = ShuttleViewModel(
-            availabilityRepo = FakeAvailabilityRepo(),
-            stopFinder       = FakeStopFinder(NearestStopResult.Found(sgwStop)),
-            directionsRepo   = FakeDirectionsRepo()
-        )
+    @Test fun `SGW startCampus infers SGW_TO_LOYOLA direction`() {
+        val vm = makeVm()
         vm.enableShuttleMode(userLocation, "SGW")
         assertEquals(ShuttleDirection.SGW_TO_LOYOLA, vm.currentDirection)
     }
 
-    @Test fun `Loyola startCampus sets LOYOLA_TO_SGW direction`() {
-        val vm = ShuttleViewModel(
-            availabilityRepo = FakeAvailabilityRepo(),
-            stopFinder       = FakeStopFinder(NearestStopResult.Found(loyolaStop)),
-            directionsRepo   = FakeDirectionsRepo()
-        )
+    @Test fun `Loyola startCampus infers LOYOLA_TO_SGW direction`() {
+        val vm = makeVm(stopResult = NearestStopResult.Found(loyolaStop))
         vm.enableShuttleMode(userLocation, "Loyola")
         assertEquals(ShuttleDirection.LOYOLA_TO_SGW, vm.currentDirection)
     }
 
-    // ── US-2.8 Tests ──────────────────────────────────────────────────────
+    // ── US-2.8 ────────────────────────────────────────────────────────────
 
-    @Test fun `Found nearest stop sets nearestStop`() {
-        val vm = ShuttleViewModel(
-            availabilityRepo = FakeAvailabilityRepo(),
-            stopFinder       = FakeStopFinder(NearestStopResult.Found(sgwStop)),
-            directionsRepo   = FakeDirectionsRepo()
-        )
+    @Test fun `Found nearest stop is stored`() {
+        val vm = makeVm()
         vm.enableShuttleMode(userLocation, "SGW")
         assertEquals(sgwStop, vm.nearestStop)
     }
 
-    @Test fun `Ambiguous stops sets ambiguousStops list`() {
+    @Test fun `Ambiguous result populates ambiguousStops and clears nearestStop`() {
         val candidates = listOf(sgwStop, sgwStop.copy(id = "sgw_alt"))
-        val vm = ShuttleViewModel(
-            availabilityRepo = FakeAvailabilityRepo(),
-            stopFinder       = FakeStopFinder(NearestStopResult.Ambiguous(candidates)),
-            directionsRepo   = FakeDirectionsRepo()
-        )
+        val vm = makeVm(stopResult = NearestStopResult.Ambiguous(candidates))
         vm.enableShuttleMode(userLocation, "SGW")
         assertEquals(2, vm.ambiguousStops.size)
         assertNull(vm.nearestStop)
@@ -127,11 +119,7 @@ class ShuttleViewModelTest {
 
     @Test fun `onUserSelectedStop resolves ambiguity`() {
         val candidates = listOf(sgwStop, sgwStop.copy(id = "sgw_alt"))
-        val vm = ShuttleViewModel(
-            availabilityRepo = FakeAvailabilityRepo(),
-            stopFinder       = FakeStopFinder(NearestStopResult.Ambiguous(candidates)),
-            directionsRepo   = FakeDirectionsRepo()
-        )
+        val vm = makeVm(stopResult = NearestStopResult.Ambiguous(candidates))
         vm.enableShuttleMode(userLocation, "SGW")
         vm.onUserSelectedStop(sgwStop)
         assertEquals(sgwStop, vm.selectedStop)
@@ -140,15 +128,10 @@ class ShuttleViewModelTest {
 
     // ── disableShuttleMode ────────────────────────────────────────────────
 
-    @Test fun `disableShuttleMode clears all state`() {
-        val vm = ShuttleViewModel(
-            availabilityRepo = FakeAvailabilityRepo(),
-            stopFinder       = FakeStopFinder(NearestStopResult.Found(sgwStop)),
-            directionsRepo   = FakeDirectionsRepo()
-        )
+    @Test fun `disableShuttleMode resets all state`() {
+        val vm = makeVm()
         vm.enableShuttleMode(userLocation, "SGW")
         vm.disableShuttleMode()
-
         assertFalse(vm.isShuttleModeActive)
         assertFalse(vm.isShuttleEnabled)
         assertNull(vm.shuttleRoute)
@@ -156,16 +139,12 @@ class ShuttleViewModelTest {
         assertEquals("", vm.shuttleStatusText)
     }
 
-    // ── US-2.8.4: location update ─────────────────────────────────────────
+    // ── US-2.8.4 ─────────────────────────────────────────────────────────
 
-    @Test fun `onUserLocationUpdated does nothing when shuttle inactive`() {
-        val vm = ShuttleViewModel(
-            availabilityRepo = FakeAvailabilityRepo(),
-            stopFinder       = FakeStopFinder(NearestStopResult.Found(sgwStop)),
-            directionsRepo   = FakeDirectionsRepo()
-        )
-        // Not enabled — location update should be ignored
+    @Test fun `onUserLocationUpdated ignored when shuttle inactive`() {
+        val vm = makeVm()
+        // Do NOT call enableShuttleMode — shuttle is inactive
         vm.onUserLocationUpdated(userLocation)
-        assertNull(vm.nearestStop) // nearestStop never set
+        assertNull(vm.nearestStop)
     }
 }

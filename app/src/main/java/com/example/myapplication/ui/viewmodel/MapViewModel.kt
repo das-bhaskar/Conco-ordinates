@@ -13,6 +13,7 @@ import com.example.myapplication.logic.HybridSearchProvider
 import kotlinx.coroutines.launch
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
+import com.example.myapplication.telemetry.AnalyticsManager
 import com.example.myapplication.ui.models.BuildingUiState
 import com.example.myapplication.ui.models.MapUIMode
 
@@ -21,6 +22,7 @@ class MapViewModel(
     private val routeProvider: com.example.myapplication.logic.RouteProvider? = null
 ) : ViewModel() {
 
+    private var activeModeNavigation: String? = null
 
 
     var searchQuery by mutableStateOf("")
@@ -33,6 +35,10 @@ class MapViewModel(
     private var isManualCampusSelection = false
     var uiBuildingState by mutableStateOf(BuildingUiState())
         private set
+
+    init {
+        trackModeTransition(uiBuildingState.mode)
+    }
 
     fun handleMapTap(building: Building?, imageUrl: String? = null) {
         if (uiBuildingState.mode == MapUIMode.DIRECTIONS) return
@@ -239,12 +245,14 @@ class MapViewModel(
             mode = com.example.myapplication.ui.models.MapUIMode.DIRECTIONS,
             destinationName = uiBuildingState.building?.name ?: ""
         )
+        trackModeTransition(uiBuildingState.mode)
     }
 
     fun onBackToPreview() {
         uiBuildingState = uiBuildingState.copy(
             mode = com.example.myapplication.ui.models.MapUIMode.PREVIEW
         )
+        trackModeTransition(uiBuildingState.mode)
     }
     fun onStartQueryChanged(newQuery: String) {
         uiBuildingState = uiBuildingState.copy(startLocationName = newQuery)
@@ -316,5 +324,21 @@ class MapViewModel(
     fun setMapEventWithOffset(target: LatLng) {
         val offsetTarget = LatLng(target.latitude - 0.005, target.longitude)
         mapEvent = offsetTarget
+    }
+
+    private fun trackModeTransition(mode: MapUIMode) {
+        val newNavigation = "map_mode_${mode.name.lowercase()}"
+        activeModeNavigation
+            ?.takeIf { it != newNavigation }
+            ?.let { AnalyticsManager.trackNavigationExit(it) }
+        if (activeModeNavigation != newNavigation) {
+            AnalyticsManager.trackNavigationEnter(newNavigation)
+        }
+        activeModeNavigation = newNavigation
+    }
+
+    override fun onCleared() {
+        activeModeNavigation?.let { AnalyticsManager.trackNavigationExit(it) }
+        super.onCleared()
     }
 }

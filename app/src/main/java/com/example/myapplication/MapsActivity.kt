@@ -4,7 +4,6 @@ import android.Manifest
 import com.example.myapplication.ui.components.BuildingInfoPopup
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
@@ -38,6 +37,7 @@ import com.example.myapplication.ui.components.CampusMap
 import com.example.myapplication.ui.components.CampusToggle
 import com.example.myapplication.ui.components.DirectionsHeader
 import com.example.myapplication.ui.models.MapUIMode
+import com.example.myapplication.telemetry.AnalyticsManager
 import com.example.myapplication.telemetry.CrashReporter
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.viewmodel.MapViewModel
@@ -47,7 +47,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.maps.android.compose.*
 import kotlinx.coroutines.launch
-import com.smartlook.android.core.api.Smartlook
 
 class MapsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,19 +54,6 @@ class MapsActivity : ComponentActivity() {
             com.google.android.libraries.places.api.Places.initialize(applicationContext, BuildConfig.MAPS_API_KEY)
         }
         super.onCreate(savedInstanceState)
-
-        if (BuildConfig.SMARTLOOK_PROJECT_KEY.isBlank()) {
-            Log.w("Smartlook", "SMARTLOOK_PROJECT_KEY is empty, Smartlook is not started.")
-        } else {
-            val smartlook = Smartlook.instance
-            smartlook.preferences.projectKey = BuildConfig.SMARTLOOK_PROJECT_KEY
-            smartlook.start()
-            if (BuildConfig.SMARTLOOK_TESTER_ID.isNotBlank()) {
-                smartlook.user.identifier = BuildConfig.SMARTLOOK_TESTER_ID
-            }
-        }
-
-        Smartlook.instance.trackNavigationEnter("MapsActivity")
 
         CrashReporter.setKey("screen", "MapsActivity")
         CrashReporter.setKey("app_version", BuildConfig.VERSION_NAME)
@@ -88,7 +74,6 @@ class MapsActivity : ComponentActivity() {
             val context = LocalContext.current
             val scope = rememberCoroutineScope()
             var showSettingsDialog by remember { mutableStateOf(false) }
-            var previousModeNavigation by remember { mutableStateOf<String?>(null) }
 
             var hasLocationPermission by remember {
                 mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
@@ -152,14 +137,6 @@ class MapsActivity : ComponentActivity() {
 
             LaunchedEffect(viewModel.uiBuildingState.mode) {
                 CrashReporter.setKey("map_mode", viewModel.uiBuildingState.mode.name)
-                val modeNavigation = "map_mode_${viewModel.uiBuildingState.mode.name.lowercase()}"
-                previousModeNavigation
-                    ?.takeIf { it != modeNavigation }
-                    ?.let { Smartlook.instance.trackNavigationExit(it) }
-                if (previousModeNavigation != modeNavigation) {
-                    Smartlook.instance.trackNavigationEnter(modeNavigation)
-                }
-                previousModeNavigation = modeNavigation
             }
 
             val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -351,17 +328,17 @@ class MapsActivity : ComponentActivity() {
                     }
                 }
             }
-            DisposableEffect(Unit) {
-                onDispose {
-                    previousModeNavigation?.let { Smartlook.instance.trackNavigationExit(it) }
-                }
-            }
             }
         }
 
-    override fun onDestroy() {
-        Smartlook.instance.trackNavigationExit("MapsActivity")
-        super.onDestroy()
+    override fun onStart() {
+        super.onStart()
+        AnalyticsManager.trackNavigationEnter("MapsActivity")
+    }
+
+    override fun onStop() {
+        AnalyticsManager.trackNavigationExit("MapsActivity")
+        super.onStop()
     }
 
 

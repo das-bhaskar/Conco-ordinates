@@ -1,6 +1,8 @@
 package com.example.myapplication.ui.models
 
 import com.example.myapplication.data.Building
+import com.example.myapplication.data.ShuttleAvailability
+import com.example.myapplication.data.ShuttleStop
 
 enum class MapUIMode {
     PREVIEW,    // Just looking at a building
@@ -13,7 +15,7 @@ data class BuildingUiState(
     val building: Building? = null,
     val address: String? = null,
     val imageUrl: String? = null,
-    val startLocationName: String = "Your position", // Default start
+    val startLocationName: String = "Your position",
     val destinationName: String = "",
     val startPoint: com.google.android.gms.maps.model.LatLng? = null,
     val endPoint: com.google.android.gms.maps.model.LatLng? = null,
@@ -24,4 +26,15 @@ data class BuildingUiState(
     val routeBounds: com.google.android.gms.maps.model.LatLngBounds? = null,
     val routeDuration: String = "-- min",
     val routeDistance: String = "-- m",
+    val routeErrorMessage: String? = null,
+
+    // ── Shuttle (US-2.6 / US-2.7 / US-2.8) ───────────────────────────────────
+    val shuttleAvailability: ShuttleAvailability = ShuttleAvailability.ScheduleUnavailable,
+    val shuttleStatusMessage: String = "",
+    val nearestShuttleStopName: String = "",
+    val nearestShuttleStopCampus: String = "",
+    /** All shuttle stop markers to draw on the map.
+     *  Populated by the ViewModel – the Map composable must NOT query the
+     *  data layer directly (MVVM).                                      [#6] */
+    val shuttleStops: List<ShuttleStop> = emptyList()
 )

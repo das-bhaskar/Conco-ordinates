@@ -7,26 +7,37 @@ import androidx.lifecycle.ViewModel
 import com.example.myapplication.data.Building
 import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
-import com.example.myapplication.data.NearestStopResult
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.logic.SearchResult
 import com.example.myapplication.logic.HybridSearchProvider
-import com.example.myapplication.logic.DefaultShuttleService
 import com.example.myapplication.logic.ShuttleRouteProvider
 import com.example.myapplication.logic.ShuttleService
+import com.example.myapplication.logic.SimpleMockRouteProvider
 import kotlinx.coroutines.launch
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.PolyUtil
 import com.example.myapplication.ui.models.BuildingUiState
 import com.example.myapplication.ui.models.MapUIMode
 
+/**
+ * [shuttleService] has no default value so callers must inject a concrete
+ * implementation.  This makes the ViewModel truly modular – swap in a
+ * [MockShuttleService] for tests without touching this class.         [#7]
+ *
+ * [ShuttleRouteProvider] is constructed internally but receives its two
+ * dependencies via constructor injection, keeping it testable as well.  [#1][#2]
+ */
 class MapViewModel(
     private val locationProvider: com.example.myapplication.logic.LocationProvider? = null,
     private val routeProvider: com.example.myapplication.logic.RouteProvider? = null,
-    private val shuttleService: ShuttleService = DefaultShuttleService()
+    private val shuttleService: ShuttleService                // no default – must be injected
 ) : ViewModel() {
 
-    private val shuttleRouteProvider = ShuttleRouteProvider(shuttleService)
+    private val shuttleRouteProvider = ShuttleRouteProvider(
+        shuttleService     = shuttleService,
+        googleRouteProvider = routeProvider ?: SimpleMockRouteProvider()
+    )
 
     var searchQuery by mutableStateOf("")
         private set
@@ -138,13 +149,10 @@ class MapViewModel(
             resultCoords?.let { setMapEventWithOffset(it) }
             uiBuildingState = uiBuildingState.copy(isSearchExpanded = false)
 
-            // After search selection in directions mode, refresh shuttle with new startPoint
-            if (uiBuildingState.selectedTransportMode == "shuttle") {
-                refreshShuttleStatus(uiBuildingState.startPoint)
-            }
-
-            calculateRoute()
             searchResults = emptyList()
+
+            // Emit one atomic state update for shuttle + route.           [#8]
+            calculateRouteWithState()
             return
         }
 
@@ -225,71 +233,88 @@ class MapViewModel(
 
     fun onTransportModeChanged(mode: String) {
         uiBuildingState = uiBuildingState.copy(selectedTransportMode = mode)
-        if (mode == "shuttle") {
-            // Use startPoint if manually set, otherwise fall back to current location
-            val fromLocation = uiBuildingState.startPoint ?: lastProcessedLocation
-            refreshShuttleStatus(fromLocation)
-        }
-        calculateRoute()
+        calculateRouteWithState()
     }
 
-    fun calculateRoute() {
+    /**
+     * Calculates the route and, if shuttle mode is active, refreshes the
+     * shuttle status in the **same coroutine** so both are committed in a
+     * single [uiBuildingState] assignment – no risk of one update
+     * overwriting the other.                                            [#8]
+     */
+    fun calculateRouteWithState() {
         val start = uiBuildingState.startPoint ?: lastProcessedLocation ?: return
         val end   = uiBuildingState.endPoint   ?: uiBuildingState.building?.getCenter() ?: return
-
-        val provider = if (uiBuildingState.selectedTransportMode == "shuttle") {
-            shuttleRouteProvider
-        } else {
-            routeProvider
-        }
+        val isShuttle = uiBuildingState.selectedTransportMode == "shuttle"
+        val provider  = if (isShuttle) shuttleRouteProvider else routeProvider
 
         viewModelScope.launch {
+            // Resolve shuttle status inside the coroutine so both
+            // shuttle fields and route fields are written atomically.   [#8][#9]
+            val shuttleSnapshot = if (isShuttle) {
+                val locationToUse = uiBuildingState.startPoint ?: lastProcessedLocation
+                val nearestStop   = shuttleService.resolveNearestStop(locationToUse)
+                val fromCampus    = nearestStop?.campus ?: "SGW"
+                ShuttleSnapshot(
+                    availability  = shuttleService.checkAvailability(fromCampus),
+                    statusMessage = shuttleService.statusMessage(fromCampus),
+                    stopName      = nearestStop?.name   ?: "",
+                    stopCampus    = nearestStop?.campus ?: "",
+                    stops         = shuttleService.getAllStops()
+                )
+            } else null
+
             val routeData = provider?.getRoute(start, end, uiBuildingState.selectedTransportMode)
-            if (routeData != null) {
-                val builder = com.google.android.gms.maps.model.LatLngBounds.Builder()
+
+            // One atomic copy – shuttle + route fields together.        [#8]
+            uiBuildingState = if (routeData != null) {
+                val builder = LatLngBounds.Builder()
                 routeData.points.forEach { builder.include(it) }
-                uiBuildingState = uiBuildingState.copy(
+                uiBuildingState.copy(
                     routePoints   = routeData.points,
                     routeDuration = routeData.duration,
                     routeDistance = routeData.distance,
                     routeBounds   = builder.build()
                 )
             } else {
-                uiBuildingState = uiBuildingState.copy(
+                uiBuildingState.copy(
                     routePoints   = emptyList(),
                     routeDuration = "-- min",
                     routeDistance = "-- m",
                     routeBounds   = null
                 )
+            }.let { state ->
+                if (shuttleSnapshot != null) state.copy(
+                    shuttleAvailability      = shuttleSnapshot.availability,
+                    shuttleStatusMessage     = shuttleSnapshot.statusMessage,
+                    nearestShuttleStopName   = shuttleSnapshot.stopName,
+                    nearestShuttleStopCampus = shuttleSnapshot.stopCampus,
+                    shuttleStops             = shuttleSnapshot.stops
+                ) else state
             }
         }
     }
 
+    // Keep the old name as an alias so existing call-sites still compile.
+    fun calculateRoute() = calculateRouteWithState()
+
     /**
-     * Refreshes shuttle status based on the from-location (start point).
-     * Uses startPoint from uiBuildingState if available, falls back to [fromLocation].
-     * This ensures swap operations correctly reflect the new direction.
+     * Refreshes only the shuttle status fields (no route recalculation).
+     * Called from [processLocationUpdate] when the user moves while in
+     * shuttle mode – the route itself doesn't need to change.
      */
     private fun refreshShuttleStatus(fromLocation: LatLng?) {
-        // Always prefer the current startPoint in state (already updated before this call)
         val locationToUse = uiBuildingState.startPoint ?: fromLocation
+        val nearestStop   = shuttleService.resolveNearestStop(locationToUse)  // [#9]
+        val fromCampus    = nearestStop?.campus ?: "SGW"
 
-        val nearestResult = shuttleService.nearestStop(locationToUse)
-        val nearestStop = when (nearestResult) {
-            is NearestStopResult.Found     -> nearestResult.stop
-            is NearestStopResult.Ambiguous -> nearestResult.candidates.firstOrNull()
-            else                           -> null
-        }
-
-        val fromCampus   = nearestStop?.campus ?: "SGW"
-        val availability = shuttleService.checkAvailability(fromCampus)
-        val statusMsg    = shuttleService.statusMessage(fromCampus)
-
+        // Single atomic copy – all shuttle fields together.             [#8]
         uiBuildingState = uiBuildingState.copy(
-            shuttleAvailability      = availability,
-            shuttleStatusMessage     = statusMsg,
+            shuttleAvailability      = shuttleService.checkAvailability(fromCampus),
+            shuttleStatusMessage     = shuttleService.statusMessage(fromCampus),
             nearestShuttleStopName   = nearestStop?.name   ?: "",
-            nearestShuttleStopCampus = nearestStop?.campus ?: ""
+            nearestShuttleStopCampus = nearestStop?.campus ?: "",
+            shuttleStops             = shuttleService.getAllStops()         // [#6]
         )
     }
 
@@ -303,7 +328,6 @@ class MapViewModel(
         val currentDestLatLng   = uiBuildingState.endPoint   ?: uiBuildingState.building?.getCenter()
         val currentDestBuilding = uiBuildingState.building
 
-        // Swap names, points and building first
         uiBuildingState = uiBuildingState.copy(
             startLocationName = uiBuildingState.destinationName,
             destinationName   = uiBuildingState.startLocationName,
@@ -315,15 +339,22 @@ class MapViewModel(
         uiBuildingState.endPoint?.let { setMapEventWithOffset(it) }
         highlightedBuildingName = uiBuildingState.building?.name
 
-        // Refresh shuttle AFTER swap so startPoint already reflects new direction
-        if (uiBuildingState.selectedTransportMode == "shuttle") {
-            refreshShuttleStatus(uiBuildingState.startPoint)
-        }
-
-        calculateRoute()
+        // Refresh shuttle + route in one atomic update after swap.      [#8]
+        calculateRouteWithState()
     }
 
     fun setMapEventWithOffset(target: LatLng) {
         mapEvent = LatLng(target.latitude - 0.005, target.longitude)
     }
+
+    // ── Private helpers ────────────────────────────────────────────────────────
+
+    /** Transient carrier for shuttle status computed inside the coroutine. */
+    private data class ShuttleSnapshot(
+        val availability:  com.example.myapplication.data.ShuttleAvailability,
+        val statusMessage: String,
+        val stopName:      String,
+        val stopCampus:    String,
+        val stops:         List<com.example.myapplication.data.ShuttleStop>
+    )
 }

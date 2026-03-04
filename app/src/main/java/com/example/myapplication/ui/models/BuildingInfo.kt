@@ -2,6 +2,7 @@ package com.example.myapplication.ui.models
 
 import com.example.myapplication.data.Building
 import com.example.myapplication.data.ShuttleAvailability
+import com.example.myapplication.data.ShuttleStop
 
 enum class MapUIMode {
     PREVIEW,    // Just looking at a building
@@ -30,5 +31,9 @@ data class BuildingUiState(
     val shuttleAvailability: ShuttleAvailability = ShuttleAvailability.ScheduleUnavailable,
     val shuttleStatusMessage: String = "",
     val nearestShuttleStopName: String = "",
-    val nearestShuttleStopCampus: String = ""
+    val nearestShuttleStopCampus: String = "",
+    /** All shuttle stop markers to draw on the map.
+     *  Populated by the ViewModel – the Map composable must NOT query the
+     *  data layer directly (MVVM).                                      [#6] */
+    val shuttleStops: List<ShuttleStop> = emptyList()
 )

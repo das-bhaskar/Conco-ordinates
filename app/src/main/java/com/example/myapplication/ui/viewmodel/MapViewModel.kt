@@ -274,14 +274,17 @@ class MapViewModel(
                     routePoints   = routeData.points,
                     routeDuration = routeData.duration,
                     routeDistance = routeData.distance,
-                    routeBounds   = builder.build()
+                    routeBounds   = builder.build(),
+                    routeErrorMessage = null
                 )
             } else {
+                val mode = uiBuildingState.selectedTransportMode.replaceFirstChar { it.uppercase() }
                 uiBuildingState.copy(
                     routePoints   = emptyList(),
                     routeDuration = "-- min",
                     routeDistance = "-- m",
-                    routeBounds   = null
+                    routeBounds   = null,
+                    routeErrorMessage = "$mode route unavailable between these points."
                 )
             }.let { state ->
                 if (shuttleSnapshot != null) state.copy(

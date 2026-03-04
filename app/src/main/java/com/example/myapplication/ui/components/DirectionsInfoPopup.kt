@@ -126,70 +126,104 @@ fun DirectionsInfoPopup(
                     exit = fadeOut()
                 ) {
                     Column {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(20.dp),
-                            color = Color(0xFFF1F3F4)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                        // --- ADDED FALLBACK LOGIC START ---
+                        if (uiState.routeErrorMessage != null) {
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(20.dp),
+                                color = Color(0xFFFCE8E6) // Light Red Error background
                             ) {
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = uiState.routeDuration,
-                                        style = MaterialTheme.typography.headlineMedium.copy(
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    )
-                                    Text(
-                                        text = "Fastest route · ${uiState.routeDistance}",
-                                        color = Color.Gray,
-                                        style = MaterialTheme.typography.bodyMedium
-                                    )
-                                }
-                                Surface(
-                                    shape = CircleShape,
-                                    color = Color.White,
-                                    modifier = Modifier.size(44.dp)
+                                Row(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Icon(
-                                        imageVector = when (uiState.selectedTransportMode) {
-                                            "drive"   -> Icons.Default.DirectionsCar
-                                            "walk"    -> Icons.AutoMirrored.Filled.DirectionsWalk
-                                            else      -> Icons.Default.DirectionsBus
-                                        },
-                                        contentDescription = null,
-                                        modifier = Modifier.padding(10.dp),
-                                        tint = Color(0xFF5F6368)
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Error",
+                                        tint = Color(0xFFC5221F) // Dark Red
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Text(
+                                        text = uiState.routeErrorMessage!!,
+                                        color = Color(0xFFC5221F),
+                                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                                     )
                                 }
                             }
+                        } else {
+                            // --- YOUR EXISTING ETA CARD START ---
+                            Surface(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(20.dp),
+                                color = Color(0xFFF1F3F4)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = uiState.routeDuration,
+                                            style = MaterialTheme.typography.headlineMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        )
+                                        Text(
+                                            text = "Fastest route · ${uiState.routeDistance}",
+                                            color = Color.Gray,
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                    Surface(
+                                        shape = CircleShape,
+                                        color = Color.White,
+                                        modifier = Modifier.size(44.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = when (uiState.selectedTransportMode) {
+                                                "drive"   -> Icons.Default.DirectionsCar
+                                                "walk"    -> Icons.AutoMirrored.Filled.DirectionsWalk
+                                                else      -> Icons.Default.DirectionsBus
+                                            },
+                                            contentDescription = null,
+                                            modifier = Modifier.padding(10.dp),
+                                            tint = Color(0xFF5F6368)
+                                        )
+                                    }
+                                }
+                            }
+                            // --- YOUR EXISTING ETA CARD END ---
                         }
+                        // --- ADDED FALLBACK LOGIC END ---
+
                         Spacer(Modifier.height(16.dp))
                     }
                 }
 
                 // ── CTA button ────────────────────────────────────────────────
                 // Disabled when shuttle is selected but currently out of service.
-                val shuttleUnavailable = uiState.selectedTransportMode == "shuttle" &&
-                        uiState.shuttleAvailability !is ShuttleAvailability.Active
-
+                val isCurrentModeInvalid = when (uiState.selectedTransportMode) {
+                    "shuttle" -> uiState.shuttleAvailability !is ShuttleAvailability.Active
+                    else -> uiState.routeErrorMessage != null || uiState.routePoints.isEmpty()
+                }
                 Button(
                     onClick = onStartNavigation,
-                    enabled = !shuttleUnavailable,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(54.dp),
+                    enabled = !isCurrentModeInvalid,
+                    modifier = Modifier.fillMaxWidth().height(54.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor         = Color(0xFF912338),
+                        containerColor = Color(0xFF912338), // Concordia Maroon
                         disabledContainerColor = Color(0xFFBDBDBD)
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
+
                         text = when {
-                            shuttleUnavailable                             -> "SHUTTLE OUT OF SERVICE"
+                            uiState.selectedTransportMode == "shuttle" && isCurrentModeInvalid ->
+                                "SHUTTLE OUT OF SERVICE"
+
+                            isCurrentModeInvalid ->
+                                "UNAVAILABLE"
                             uiState.startLocationName == "Your position"  -> "START"
                             else                                           -> "PREVIEW"
                         },

@@ -35,12 +35,12 @@ class MapViewModel(
     private val shuttleService: ShuttleService                // no default – must be injected
 ) : ViewModel() {
 
+    private var activeModeNavigation: String? = null
+
     private val shuttleRouteProvider = ShuttleRouteProvider(
         shuttleService     = shuttleService,
         googleRouteProvider = routeProvider ?: SimpleMockRouteProvider()
     )
-
-    private var activeModeNavigation: String? = null
 
 
     var searchQuery by mutableStateOf("")
@@ -229,8 +229,11 @@ class MapViewModel(
     }
 
     fun onBackToPreview() {
-        uiBuildingState = uiBuildingState.copy(mode = MapUIMode.PREVIEW)
+        uiBuildingState = uiBuildingState.copy(
+            mode = com.example.myapplication.ui.models.MapUIMode.PREVIEW
+        )
         trackModeTransition(uiBuildingState.mode)
+        uiBuildingState = uiBuildingState.copy(mode = MapUIMode.PREVIEW)
     }
 
     fun onStartQueryChanged(newQuery: String) {
@@ -373,7 +376,7 @@ class MapViewModel(
         activeModeNavigation?.let { AnalyticsManager.trackNavigationExit(it) }
         super.onCleared()
     }
-
+    // ── Private helpers ────────────────────────────────────────────────────────
     /** Transient carrier for shuttle status computed inside the coroutine. */
     private data class ShuttleSnapshot(
         val availability:  com.example.myapplication.data.ShuttleAvailability,

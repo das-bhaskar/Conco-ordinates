@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.secrets.gradle) apply false
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.firebase.crashlytics) apply false
-    id("org.sonarqube") version "5.0.0.4638"
+    id("org.sonarqube") version "6.0.1.5171"
 }
 
 sonar {

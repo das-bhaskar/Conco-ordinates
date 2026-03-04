@@ -148,6 +148,24 @@ class MapsActivity : ComponentActivity() {
                 CrashReporter.setKey("map_mode", viewModel.uiBuildingState.mode.name)
             }
 
+            var lastTrackedMode by remember { mutableStateOf<MapUIMode?>(null) }
+            LaunchedEffect(viewModel.uiBuildingState.mode) {
+                val currentMode = viewModel.uiBuildingState.mode
+                val currentNav = "map_mode_${currentMode.name.lowercase()}"
+                lastTrackedMode
+                    ?.takeIf { it != currentMode }
+                    ?.let { AnalyticsManager.trackNavigationExit("map_mode_${it.name.lowercase()}") }
+                AnalyticsManager.trackNavigationEnter(currentNav)
+                lastTrackedMode = currentMode
+            }
+            DisposableEffect(Unit) {
+                onDispose {
+                    lastTrackedMode?.let {
+                        AnalyticsManager.trackNavigationExit("map_mode_${it.name.lowercase()}")
+                    }
+                }
+            }
+
             val launcher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
                 hasLocationPermission = isGranted
             }

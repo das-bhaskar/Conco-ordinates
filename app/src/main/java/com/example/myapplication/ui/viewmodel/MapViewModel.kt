@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.PolyUtil
-import com.example.myapplication.telemetry.AnalyticsManager
 import com.example.myapplication.ui.models.BuildingUiState
 import com.example.myapplication.ui.models.MapUIMode
 
@@ -34,8 +33,6 @@ class MapViewModel(
     private val routeProvider: com.example.myapplication.logic.RouteProvider? = null,
     private val shuttleService: ShuttleService                // no default – must be injected
 ) : ViewModel() {
-
-    private var activeModeNavigation: String? = null
 
     private val shuttleRouteProvider = ShuttleRouteProvider(
         shuttleService     = shuttleService,
@@ -54,10 +51,6 @@ class MapViewModel(
 
     var uiBuildingState by mutableStateOf(BuildingUiState())
         private set
-
-    init {
-        trackModeTransition(uiBuildingState.mode)
-    }
 
     fun handleMapTap(building: Building?, imageUrl: String? = null) {
         if (uiBuildingState.mode == MapUIMode.DIRECTIONS) return
@@ -225,14 +218,12 @@ class MapViewModel(
             mode            = MapUIMode.DIRECTIONS,
             destinationName = uiBuildingState.building?.name ?: ""
         )
-        trackModeTransition(uiBuildingState.mode)
     }
 
     fun onBackToPreview() {
         uiBuildingState = uiBuildingState.copy(
             mode = MapUIMode.PREVIEW
         )
-        trackModeTransition(uiBuildingState.mode)
     }
 
     fun onStartQueryChanged(newQuery: String) {
@@ -360,21 +351,6 @@ class MapViewModel(
         mapEvent = offsetTarget
     }
 
-    private fun trackModeTransition(mode: MapUIMode) {
-        val newNavigation = "map_mode_${mode.name.lowercase()}"
-        activeModeNavigation
-            ?.takeIf { it != newNavigation }
-            ?.let { AnalyticsManager.trackNavigationExit(it) }
-        if (activeModeNavigation != newNavigation) {
-            AnalyticsManager.trackNavigationEnter(newNavigation)
-        }
-        activeModeNavigation = newNavigation
-    }
-
-    override fun onCleared() {
-        activeModeNavigation?.let { AnalyticsManager.trackNavigationExit(it) }
-        super.onCleared()
-    }
     // ── Private helpers ────────────────────────────────────────────────────────
     /** Transient carrier for shuttle status computed inside the coroutine. */
     private data class ShuttleSnapshot(

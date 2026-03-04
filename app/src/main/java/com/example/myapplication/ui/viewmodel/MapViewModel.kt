@@ -230,10 +230,9 @@ class MapViewModel(
 
     fun onBackToPreview() {
         uiBuildingState = uiBuildingState.copy(
-            mode = com.example.myapplication.ui.models.MapUIMode.PREVIEW
+            mode = MapUIMode.PREVIEW
         )
         trackModeTransition(uiBuildingState.mode)
-        uiBuildingState = uiBuildingState.copy(mode = MapUIMode.PREVIEW)
     }
 
     fun onStartQueryChanged(newQuery: String) {

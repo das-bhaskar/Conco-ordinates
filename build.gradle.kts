@@ -15,6 +15,8 @@ sonar {
         property("sonar.projectKey", "soen-390-the-irs_backend")
         property("sonar.organization", "soen-390-the-irs")
         property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.coverage.jacoco.xmlReportPaths",
+            "${project.projectDir}/app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
     }
 }
 

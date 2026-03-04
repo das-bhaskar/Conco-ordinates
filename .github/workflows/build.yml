@@ -49,13 +49,11 @@ jobs:
           MAPS_VAR: ${{ secrets.MAPS_API_KEY || 'unused' }}
         run: echo "MAPS_API_KEY=\"$MAPS_VAR\"" > local.properties
 
-      # STEP 1: Run tests and generate the JaCoCo coverage report
       - name: Run tests with coverage
         run: ./gradlew jacocoTestReport --info
 
-      # STEP 2: Run SonarCloud analysis via the Gradle plugin (NOT the CLI action)
       - name: Run SonarCloud analysis
+        uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew sonar --info

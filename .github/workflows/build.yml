@@ -52,6 +52,17 @@ jobs:
       - name: Run tests with coverage
         run: ./gradlew jacocoTestReport --info
 
+      - name: Verify coverage report exists
+        run: |
+          echo "=== Looking for JaCoCo XML reports ==="
+          find . -name "*.xml" -path "*/jacoco*" -type f
+          echo ""
+          echo "=== Checking expected path ==="
+          ls -la app/build/reports/jacoco/jacocoTestReport/ || echo "Directory does not exist"
+          echo ""
+          echo "=== Checking .exec files ==="
+          find . -name "*.exec" -type f
+
       - name: Run SonarCloud analysis
         uses: SonarSource/sonarcloud-github-action@master
         env:

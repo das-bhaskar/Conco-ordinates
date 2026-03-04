@@ -197,7 +197,7 @@ class GoogleRouteProviderTest {
     }
 
     @Test
-    fun `test getRoute check bad Key`() = runTest {
+    fun `test getRoute check bad Key return null routeData`() = runTest {
     val badProvider = GoogleRouteProvider("0")
         val routeData = badProvider.getRoute(
             LatLng(45.4973357596697, -73.57894993830904),

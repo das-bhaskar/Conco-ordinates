@@ -207,7 +207,9 @@ class MapViewModel(
             "dest"  -> uiBuildingState = uiBuildingState.copy(destinationName = newQuery)
         }
         viewModelScope.launch {
-            searchProvider?.let { searchResults = it.search(newQuery) }
+            searchProvider?.let { provider ->
+                searchResults = provider.search(newQuery, CampusRepo)
+            }
         }
     }
 

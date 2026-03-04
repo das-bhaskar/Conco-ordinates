@@ -3,8 +3,6 @@ package com.example.myapplication.ui.viewmodel
 import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
 import com.example.myapplication.data.JsonLatLng
-import com.example.myapplication.data.ShuttleRepo
-import com.example.myapplication.logic.DefaultShuttleService
 import com.example.myapplication.logic.MockLocationProvider
 import com.google.android.gms.maps.model.LatLng
 import org.junit.Assert.assertEquals
@@ -30,13 +28,7 @@ class MapViewModelTest {
         CampusRepo.setTestCampuses(listOf(testCampus))
 
         mockProvider = MockLocationProvider()
-        // shuttleService is now required – inject the real default.
-        // ShuttleRepo returns empty lists until initialized, which is fine
-        // for these non-shuttle tests.
-        viewModel = MapViewModel(
-            locationProvider = mockProvider,
-            shuttleService   = DefaultShuttleService(ShuttleRepo)
-        )
+        viewModel = MapViewModel(mockProvider)
     }
 
     @Test

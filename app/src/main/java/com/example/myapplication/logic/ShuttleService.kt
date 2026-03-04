@@ -2,11 +2,9 @@ package com.example.myapplication.logic
 
 import com.example.myapplication.data.NearestStopResult
 import com.example.myapplication.data.ShuttleAvailability
-import com.example.myapplication.data.ShuttleDataSource
 import com.example.myapplication.data.ShuttleRepo
 import com.example.myapplication.data.ShuttleStop
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.SphericalUtil
 import java.util.Calendar
 
 interface ShuttleService {
@@ -17,28 +15,10 @@ interface ShuttleService {
 
     fun nearestStop(userLocation: LatLng?): NearestStopResult
 
-    /**
-     * Convenience wrapper: resolves [nearestStop] and picks the single best
-     * candidate, handling the [NearestStopResult.Ambiguous] case internally.
-     * Business logic kept in the service layer, not in the ViewModel.   [#9]
-     */
-    fun resolveNearestStop(userLocation: LatLng?): ShuttleStop?
-
-    /** Exposes all stops so the ViewModel can pass them to the UI without
-     *  importing [ShuttleRepo] directly.                                 [#6] */
-    fun getAllStops(): List<ShuttleStop>
-
     fun statusMessage(fromCampus: String, calendar: Calendar = Calendar.getInstance()): String
 }
 
-/**
- * [repo] is injected so the service can be tested without a real [Context]
- * or Android resources.                                                  [#5]
- * The default value keeps existing call-sites working without changes.
- */
-class DefaultShuttleService(
-    private val repo: ShuttleDataSource = ShuttleRepo
-) : ShuttleService {
+class DefaultShuttleService : ShuttleService {
 
     override fun checkAvailability(fromCampus: String, calendar: Calendar): ShuttleAvailability {
         val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
@@ -46,7 +26,7 @@ class DefaultShuttleService(
             return ShuttleAvailability.WeekendOrHoliday
         }
 
-        val departures = repo.getDepartures(fromCampus)
+        val departures = ShuttleRepo.getDepartures(fromCampus)
         if (departures.isEmpty()) return ShuttleAvailability.ScheduleUnavailable
 
         val nowMinutes = nowInMinutes(calendar)
@@ -60,34 +40,26 @@ class DefaultShuttleService(
     override fun nearestStop(userLocation: LatLng?): NearestStopResult {
         if (userLocation == null) return NearestStopResult.LocationUnavailable
 
-        val stops = repo.getAllStops()
+        val stops = ShuttleRepo.getAllStops()
         if (stops.isEmpty()) return NearestStopResult.NoStopsAvailable
 
-        // Use SphericalUtil (Haversine) instead of flat-plane Pythagorean.  [#4]
-        fun distMetres(stop: ShuttleStop): Double =
-            SphericalUtil.computeDistanceBetween(stop.location, userLocation)
+        fun distSq(stop: ShuttleStop): Double {
+            val dLat = stop.location.latitude  - userLocation.latitude
+            val dLng = stop.location.longitude - userLocation.longitude
+            return dLat * dLat + dLng * dLng
+        }
 
-        val minDist    = stops.minOf { distMetres(it) }
-        // epsilon: two stops are "equidistant" only if within 0.5 m of each other
-        val candidates = stops.filter { Math.abs(distMetres(it) - minDist) < 0.5 }
+        val minDist    = stops.minOf { distSq(it) }
+        val candidates = stops.filter { Math.abs(distSq(it) - minDist) < 1e-12 }
 
         return if (candidates.size == 1) NearestStopResult.Found(candidates.first())
                else NearestStopResult.Ambiguous(candidates)
     }
 
-    override fun resolveNearestStop(userLocation: LatLng?): ShuttleStop? =
-        when (val result = nearestStop(userLocation)) {
-            is NearestStopResult.Found     -> result.stop
-            is NearestStopResult.Ambiguous -> result.candidates.firstOrNull()
-            else                           -> null
-        }
-
-    override fun getAllStops(): List<ShuttleStop> = repo.getAllStops()
-
     override fun statusMessage(fromCampus: String, calendar: Calendar): String {
         return when (val avail = checkAvailability(fromCampus, calendar)) {
             is ShuttleAvailability.Active -> {
-                val next = repo.getDepartures(fromCampus)
+                val next = ShuttleRepo.getDepartures(fromCampus)
                     .map { parseTime(it) }
                     .firstOrNull { toMinutes(it) > nowInMinutes(calendar) }
                 if (next != null) "Next shuttle: ${formatTime(next)} (in ${avail.nextDepartureMinutes} min)"

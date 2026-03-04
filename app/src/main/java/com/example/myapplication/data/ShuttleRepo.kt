@@ -26,17 +26,6 @@ private data class JsonShuttleData(
     val schedules: List<JsonSchedule>
 )
 
-// ── ShuttleDataSource ─────────────────────────────────────────────────────────
-
-/**
- * Abstraction over the shuttle data layer.
- * Implement this interface to inject test doubles without a real [Context].
- */
-interface ShuttleDataSource {
-    fun getAllStops(): List<ShuttleStop>
-    fun getDepartures(fromCampus: String): List<String>
-}
-
 // ── ShuttleRepo ───────────────────────────────────────────────────────────────
 
 /**
@@ -48,7 +37,7 @@ interface ShuttleDataSource {
  * Keeping data in a JSON file (res/raw/shuttle_schedule.json) means the
  * schedule can be updated without touching any Kotlin source files.
  */
-object ShuttleRepo : ShuttleDataSource {
+object ShuttleRepo {
 
     private var stops: List<ShuttleStop> = emptyList()
     private var schedules: Map<String, List<String>> = emptyMap()  // campus → departures
@@ -80,10 +69,10 @@ object ShuttleRepo : ShuttleDataSource {
         }
     }
 
-    override fun getAllStops(): List<ShuttleStop> = stops
+    fun getAllStops(): List<ShuttleStop> = stops
 
     /** Returns departure strings ("HH:MM") for the given campus, or empty list. */
-    override fun getDepartures(fromCampus: String): List<String> =
+    fun getDepartures(fromCampus: String): List<String> =
         schedules[fromCampus] ?: emptyList()
 
     /** For unit tests only – inject mock data without needing a Context. */

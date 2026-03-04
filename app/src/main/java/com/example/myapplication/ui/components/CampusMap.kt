@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import com.example.myapplication.data.Campus
+import com.example.myapplication.data.ShuttleRepo
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.theme.concordiaGold
 import com.example.myapplication.ui.viewmodel.MapViewModel
@@ -91,9 +92,8 @@ fun CampusMap(
 
             if (isShuttleMode) {
                 // SHUTTLE MODE: show only the two fixed stop markers (US-2.8)
-                // Stops come from ViewModel state – Map must not query the data
-                // layer directly (MVVM).                                  [#6]
-                viewModel.uiBuildingState.shuttleStops.forEach { stop ->
+                // No start/end markers – just highlight the boarding and alighting stops
+                ShuttleRepo.getAllStops().forEach { stop ->
                     val isNearest = stop.name == viewModel.uiBuildingState.nearestShuttleStopName
                     Marker(
                         state = MarkerState(position = stop.location),

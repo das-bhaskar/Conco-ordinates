@@ -264,8 +264,11 @@ class MapViewModel(
                 )
             } else null
 
-            val routeData = provider?.getRoute(start, end, uiBuildingState.selectedTransportMode)
-
+            val routeData = try {
+                provider?.getRoute(start, end, uiBuildingState.selectedTransportMode)
+            } catch (e: Exception) {
+                null // Treat network/API crashes as no route found
+            }
             // One atomic copy – shuttle + route fields together.        [#8]
             uiBuildingState = if (routeData != null) {
                 val builder = LatLngBounds.Builder()
@@ -276,15 +279,16 @@ class MapViewModel(
                     routeDistance = routeData.distance,
                     routeBounds   = builder.build(),
                     routeErrorMessage = null
+
                 )
             } else {
-                val mode = uiBuildingState.selectedTransportMode.replaceFirstChar { it.uppercase() }
+                val modeName = uiBuildingState.selectedTransportMode.replaceFirstChar { it.uppercase() }
                 uiBuildingState.copy(
                     routePoints   = emptyList(),
                     routeDuration = "-- min",
                     routeDistance = "-- m",
                     routeBounds   = null,
-                    routeErrorMessage = "$mode route unavailable between these points."
+                    routeErrorMessage = "$modeName route unavailable between these points."
                 )
             }.let { state ->
                 if (shuttleSnapshot != null) state.copy(

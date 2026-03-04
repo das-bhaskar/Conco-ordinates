@@ -27,6 +27,7 @@ data class BuildingUiState(
     val routeDuration: String = "-- min",
     val routeDistance: String = "-- m",
     val routeErrorMessage: String? = null,
+
     // ── Shuttle (US-2.6 / US-2.7 / US-2.8) ───────────────────────────────────
     val shuttleAvailability: ShuttleAvailability = ShuttleAvailability.ScheduleUnavailable,
     val shuttleStatusMessage: String = "",

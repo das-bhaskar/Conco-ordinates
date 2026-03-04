@@ -126,32 +126,28 @@ fun DirectionsInfoPopup(
                     exit = fadeOut()
                 ) {
                     Column {
-                        // --- ADDED FALLBACK LOGIC START ---
                         if (uiState.routeErrorMessage != null) {
+                            // ── SURGERY: Show Error Card if API fails ──
                             Surface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(20.dp),
-                                color = Color(0xFFFCE8E6) // Light Red Error background
+                                color = Color(0xFFFCE8E6) // Light Red background
                             ) {
                                 Row(
                                     modifier = Modifier.padding(16.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Close,
-                                        contentDescription = "Error",
-                                        tint = Color(0xFFC5221F) // Dark Red
-                                    )
+                                    Icon(Icons.Default.Close, contentDescription = null, tint = Color(0xFFC5221F))
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Text(
-                                        text = uiState.routeErrorMessage!!,
+                                        text = uiState.routeErrorMessage,
                                         color = Color(0xFFC5221F),
                                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                                     )
                                 }
                             }
                         } else {
-                            // --- YOUR EXISTING ETA CARD START ---
+                            // ── YOUR ORIGINAL CODE: Show ETA if API works ──
                             Surface(
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(20.dp),
@@ -164,9 +160,7 @@ fun DirectionsInfoPopup(
                                     Column(modifier = Modifier.weight(1f)) {
                                         Text(
                                             text = uiState.routeDuration,
-                                            style = MaterialTheme.typography.headlineMedium.copy(
-                                                fontWeight = FontWeight.Bold
-                                            )
+                                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
                                         )
                                         Text(
                                             text = "Fastest route · ${uiState.routeDistance}",
@@ -192,45 +186,41 @@ fun DirectionsInfoPopup(
                                     }
                                 }
                             }
-                            // --- YOUR EXISTING ETA CARD END ---
                         }
-                        // --- ADDED FALLBACK LOGIC END ---
-
-                        Spacer(Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
 
                 // ── CTA button ────────────────────────────────────────────────
                 // Disabled when shuttle is selected but currently out of service.
-                val isCurrentModeInvalid = when (uiState.selectedTransportMode) {
+
+                val isModeInvalid = when (uiState.selectedTransportMode) {
                     "shuttle" -> uiState.shuttleAvailability !is ShuttleAvailability.Active
                     else -> uiState.routeErrorMessage != null || uiState.routePoints.isEmpty()
                 }
+
                 Button(
                     onClick = onStartNavigation,
-                    enabled = !isCurrentModeInvalid,
+                    enabled = !isModeInvalid, // Use the new check here
                     modifier = Modifier.fillMaxWidth().height(54.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF912338), // Concordia Maroon
+                        containerColor = Color(0xFF912338),
                         disabledContainerColor = Color(0xFFBDBDBD)
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-
                         text = when {
-                            uiState.selectedTransportMode == "shuttle" && isCurrentModeInvalid ->
-                                "SHUTTLE OUT OF SERVICE"
-
-                            isCurrentModeInvalid ->
-                                "UNAVAILABLE"
-                            uiState.startLocationName == "Your position"  -> "START"
-                            else                                           -> "PREVIEW"
+                            uiState.selectedTransportMode == "shuttle" && isModeInvalid -> "SHUTTLE OUT OF SERVICE"
+                            isModeInvalid -> "UNAVAILABLE" // Fallback for Drive/Walk/Transit
+                            uiState.startLocationName == "Your position" -> "START"
+                            else -> "PREVIEW"
                         },
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White
                     )
                 }
+
             }
         }
     }

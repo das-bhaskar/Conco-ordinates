@@ -24,4 +24,5 @@ data class BuildingUiState(
     val routeBounds: com.google.android.gms.maps.model.LatLngBounds? = null,
     val routeDuration: String = "-- min",
     val routeDistance: String = "-- m",
+    val routeErrorMessage: String? = null,
 )

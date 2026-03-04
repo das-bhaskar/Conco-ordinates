@@ -90,58 +90,91 @@ fun DirectionsInfoPopup(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // NESTED ETA CARD (The Rounded Grey Rectangle from Mockup)
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    color = Color(0xFFF1F3F4) // Light Google Grey
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                // --- FALLBACK LOGIC START ---
+                if (uiState.routeErrorMessage != null) {
+                    // ERROR CARD: Displayed when no route is found
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0xFFFCE8E6) // Light Red / Google Error Red
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = uiState.routeDuration,
-                                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
-                            )
-                            Text(
-                                text = "Fastest route · ${uiState.routeDistance}",
-                                color = Color.Gray,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-
-                        // Action Button (Car Icon in Circle)
-                        Surface(
-                            shape = CircleShape,
-                            color = Color.White,
-                            modifier = Modifier.size(44.dp)
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = when(uiState.selectedTransportMode) {
-                                    "drive" -> Icons.Default.DirectionsCar
-                                    "walk" -> Icons.AutoMirrored.Filled.DirectionsWalk
-                                    else -> Icons.Default.DirectionsBus
-                                },
+                                imageVector = com.google.android.material.R.drawable.design_ic_visibility_off.let { Icons.Default.Close }, // Use an error-style icon
                                 contentDescription = null,
-                                modifier = Modifier.padding(10.dp),
-                                tint = Color(0xFF5F6368)
+                                tint = Color(0xFFC5221F)
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = uiState.routeErrorMessage,
+                                color = Color(0xFFC5221F),
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                             )
                         }
                     }
                 }
+                else {
+                    // NESTED ETA CARD (The Rounded Grey Rectangle from Mockup)
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        color = Color(0xFFF1F3F4) // Light Google Grey
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = uiState.routeDuration,
+                                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+                                )
+                                Text(
+                                    text = "Fastest route · ${uiState.routeDistance}",
+                                    color = Color.Gray,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
 
+                            // Action Button (Car Icon in Circle)
+                            Surface(
+                                shape = CircleShape,
+                                color = Color.White,
+                                modifier = Modifier.size(44.dp)
+                            ) {
+                                Icon(
+                                    imageVector = when (uiState.selectedTransportMode) {
+                                        "drive" -> Icons.Default.DirectionsCar
+                                        "walk" -> Icons.AutoMirrored.Filled.DirectionsWalk
+                                        else -> Icons.Default.DirectionsBus
+                                    },
+                                    contentDescription = null,
+                                    modifier = Modifier.padding(10.dp),
+                                    tint = Color(0xFF5F6368)
+                                )
+                            }
+                        }
+                    }
+                }
                 Spacer(modifier = Modifier.height(16.dp))
-
+                val isRouteValid = uiState.routeErrorMessage == null && uiState.routePoints.isNotEmpty()
                 Button(
                     onClick = onStartNavigation,
+                    enabled = isRouteValid,
                     modifier = Modifier.fillMaxWidth().height(54.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF912338)), // Concordia Maroon
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF912338), // Concordia Maroon
+                        disabledContainerColor = Color.Gray.copy(alpha = 0.5f)
+                    ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = if (uiState.startLocationName == "Your position") "START" else "PREVIEW",
+                        text = if (!isRouteValid && uiState.routeErrorMessage != null) "UNAVAILABLE"
+                        else if (uiState.startLocationName == "Your position") "START"
+                        else "PREVIEW",
                         style = MaterialTheme.typography.titleMedium,
                         color = Color.White
                     )                }

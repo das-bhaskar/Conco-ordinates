@@ -7,16 +7,6 @@ plugins {
     alias(libs.plugins.secrets.gradle) apply false
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.firebase.crashlytics) apply false
-    id("org.sonarqube") version "6.0.1.5171"
 }
 
-sonar {
-    properties {
-        property("sonar.projectKey", "soen-390-the-irs_backend")
-        property("sonar.organization", "soen-390-the-irs")
-        property("sonar.host.url", "https://sonarcloud.io")
-        property("sonar.coverage.jacoco.xmlReportPaths",
-            "${project.projectDir}/app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
-    }
-}
 

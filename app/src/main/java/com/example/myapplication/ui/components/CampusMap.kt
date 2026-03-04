@@ -27,6 +27,8 @@ fun CampusMap(
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     val context = LocalContext.current
+    val isShuttleMode = viewModel.uiBuildingState.selectedTransportMode == "shuttle"
+            && viewModel.uiBuildingState.mode == com.example.myapplication.ui.models.MapUIMode.DIRECTIONS
 
     GoogleMap(
         modifier = Modifier.fillMaxSize().testTag("google_map"),
@@ -37,7 +39,7 @@ fun CampusMap(
             myLocationButtonEnabled = false,
             zoomControlsEnabled = false
         ),
-        onMapClick = { latLng -> MapInteractionHandler.processClick(latLng, viewModel, context )}
+        onMapClick = { latLng -> MapInteractionHandler.processClick(latLng, viewModel, context) }
     ) {
         // 1. THE ROUTE LINE
         if (viewModel.uiBuildingState.routePoints.isNotEmpty()) {
@@ -53,16 +55,14 @@ fun CampusMap(
             )
         }
 
-        // 2. THE BUILDING POLYGONS (Draw all campuses)
+        // 2. THE BUILDING POLYGONS
         com.example.myapplication.data.CampusRepo.getAllCampuses().forEach { campus ->
             campus.buildings.forEach { building ->
                 val points = building.getGoogleOutline()
 
-                // Highlight logic
                 val isDestinationBuilding = viewModel.uiBuildingState.mode == com.example.myapplication.ui.models.MapUIMode.DIRECTIONS
                         && building.name == viewModel.uiBuildingState.destinationName
-
-                val isSelected = viewModel.uiBuildingState.building?.name == building.name
+                val isSelected    = viewModel.uiBuildingState.building?.name == building.name
                 val isHighlighted = building.name == highlightedBuildingName
 
                 if (points.isNotEmpty()) {
@@ -70,15 +70,15 @@ fun CampusMap(
                         points = points,
                         fillColor = when {
                             isDestinationBuilding -> ConcordiaGreen.copy(alpha = 0.3f)
-                            isSelected -> com.example.myapplication.ui.theme.ConcordiaBlue.copy(alpha = 0.5f)
-                            isHighlighted -> concordiaGold.copy(alpha = 0.5f)
-                            else -> ConcordiaMaroon.copy(alpha = 0.3f)
+                            isSelected            -> com.example.myapplication.ui.theme.ConcordiaBlue.copy(alpha = 0.5f)
+                            isHighlighted         -> concordiaGold.copy(alpha = 0.5f)
+                            else                  -> ConcordiaMaroon.copy(alpha = 0.3f)
                         },
                         strokeColor = when {
                             isDestinationBuilding -> ConcordiaGreen.copy(alpha = 0.5f)
-                            isSelected -> com.example.myapplication.ui.theme.ConcordiaBlue
-                            isHighlighted -> concordiaGold
-                            else -> ConcordiaMaroon
+                            isSelected            -> com.example.myapplication.ui.theme.ConcordiaBlue
+                            isHighlighted         -> concordiaGold
+                            else                  -> ConcordiaMaroon
                         },
                         strokeWidth = if (isSelected || isHighlighted || isDestinationBuilding) 10f else 5f
                     )
@@ -86,25 +86,41 @@ fun CampusMap(
             }
         }
 
-        // 3. THE NAVIGATION MARKERS (Outside the loop so they follow coordinates, not building objects)
+        // 3. NAVIGATION MARKERS
         if (viewModel.uiBuildingState.mode == com.example.myapplication.ui.models.MapUIMode.DIRECTIONS) {
 
-            // START POINT (The Big Azure Dot)
-            viewModel.uiBuildingState.startPoint?.let { startPos ->
-                Marker(
-                    state = MarkerState(position = startPos),
-                    title = "Start: ${viewModel.uiBuildingState.startLocationName}",
-                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
-                )
-            }
-
-            // END POINT (The Red Destination Marker)
-            viewModel.uiBuildingState.endPoint?.let { endPos ->
-                Marker(
-                    state = MarkerState(position = endPos),
-                    title = "Destination: ${viewModel.uiBuildingState.destinationName}",
-                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
-                )
+            if (isShuttleMode) {
+                // SHUTTLE MODE: show only the two fixed stop markers (US-2.8)
+                // Stops come from ViewModel state – Map must not query the data
+                // layer directly (MVVM).                                  [#6]
+                viewModel.uiBuildingState.shuttleStops.forEach { stop ->
+                    val isNearest = stop.name == viewModel.uiBuildingState.nearestShuttleStopName
+                    Marker(
+                        state = MarkerState(position = stop.location),
+                        title = stop.name,
+                        snippet = if (isNearest) "Nearest stop" else null,
+                        icon = BitmapDescriptorFactory.defaultMarker(
+                            if (isNearest) BitmapDescriptorFactory.HUE_GREEN
+                            else           BitmapDescriptorFactory.HUE_ORANGE
+                        )
+                    )
+                }
+            } else {
+                // NORMAL MODE: start and destination markers
+                viewModel.uiBuildingState.startPoint?.let { startPos ->
+                    Marker(
+                        state = MarkerState(position = startPos),
+                        title = "Start: ${viewModel.uiBuildingState.startLocationName}",
+                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                    )
+                }
+                viewModel.uiBuildingState.endPoint?.let { endPos ->
+                    Marker(
+                        state = MarkerState(position = endPos),
+                        title = "Destination: ${viewModel.uiBuildingState.destinationName}",
+                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+                    )
+                }
             }
         }
     }

@@ -1,251 +1,363 @@
-package com.example.myapplication.ui.components
+package com.example.myapplication.ui.viewmodel
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
-import androidx.compose.material.icons.filled.DirectionsBus
-import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.ImportExport
-import androidx.compose.material.icons.filled.DirectionsWalk
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import com.example.myapplication.ui.theme.ConcordiaMaroon
-import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.filled.Circle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import com.example.myapplication.data.Building
+import com.example.myapplication.data.Campus
+import com.example.myapplication.data.CampusRepo
+import androidx.lifecycle.viewModelScope
+import com.example.myapplication.logic.SearchResult
+import com.example.myapplication.logic.HybridSearchProvider
+import com.example.myapplication.logic.ShuttleRouteProvider
+import com.example.myapplication.logic.ShuttleService
+import com.example.myapplication.logic.SimpleMockRouteProvider
+import kotlinx.coroutines.launch
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
+import com.google.maps.android.PolyUtil
 import com.example.myapplication.ui.models.BuildingUiState
+import com.example.myapplication.ui.models.MapUIMode
 
-@Composable
-fun DirectionsInfoPopup(
-    uiState: BuildingUiState,
-    onModeChange: (String) -> Unit,
-    onStartClick: () -> Unit,
-    onSwapClick: () -> Unit,
-    onDestinationClick: () -> Unit,
-    onClose: () -> Unit,
-    onStartNavigation: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 20.dp)
-    ) {
-        // Main Semi-Translucent Container
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(28.dp),
-            color = Color.White.copy(alpha = 0.92f), // Translucent effect
-            shadowElevation = 10.dp
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                // Header with X
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Directions", style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold))
-                    IconButton(onClick = onClose) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.Black)
-                    }
-                }
+/**
+ * [shuttleService] has no default value so callers must inject a concrete
+ * implementation.  This makes the ViewModel truly modular – swap in a
+ * [MockShuttleService] for tests without touching this class.         [#7]
+ *
+ * [ShuttleRouteProvider] is constructed internally but receives its two
+ * dependencies via constructor injection, keeping it testable as well.  [#1][#2]
+ */
+class MapViewModel(
+    private val locationProvider: com.example.myapplication.logic.LocationProvider? = null,
+    private val routeProvider: com.example.myapplication.logic.RouteProvider? = null,
+    private val shuttleService: ShuttleService                // no default – must be injected
+) : ViewModel() {
 
-                // Transport Toggle Pill
-                TransportModeToggle(uiState.selectedTransportMode, onModeChange)
+    private val shuttleRouteProvider = ShuttleRouteProvider(
+        shuttleService     = shuttleService,
+        googleRouteProvider = routeProvider ?: SimpleMockRouteProvider()
+    )
 
-                Spacer(modifier = Modifier.height(16.dp))
+    var searchQuery by mutableStateOf("")
+        private set
 
-                // Location Rows (Native Mockup Style)
-                LocationRow(
-                    label = uiState.startLocationName,
-                    icon = Icons.Default.Circle,
-                    iconColor = Color(0xFF4285F4),
-                    trailingIcon = Icons.Default.ImportExport, // Use swap icon
-                    onTrailingIconClick = onSwapClick, // Trigger the swap
-                    onClick = onStartClick
-                )
+    var searchResults by mutableStateOf<List<SearchResult>>(emptyList())
+        private set
 
-                Divider(modifier = Modifier.padding(start = 40.dp), thickness = 0.5.dp, color = Color.LightGray)
+    private var searchProvider: HybridSearchProvider? = null
+    private var isManualCampusSelection = false
 
-                LocationRow(
-                    label = uiState.destinationName,
-                    icon = Icons.Default.LocationOn,
-                    iconColor = Color(0xFFEA4335),
-                    trailingIcon = Icons.Default.Menu, // Keep menu icon for the second one
-                    onClick = onDestinationClick
-                )
+    var uiBuildingState by mutableStateOf(BuildingUiState())
+        private set
 
-                Spacer(modifier = Modifier.height(24.dp))
+    fun handleMapTap(building: Building?, imageUrl: String? = null) {
+        if (uiBuildingState.mode == MapUIMode.DIRECTIONS) return
+        uiBuildingState = BuildingUiState(
+            isVisible = building != null,
+            building  = building,
+            address   = building?.address,
+            imageUrl  = imageUrl
+        )
+    }
 
-                // --- FALLBACK LOGIC START ---
-                if (uiState.routeErrorMessage != null) {
-                    // ERROR CARD: Displayed when no route is found
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        color = Color(0xFFFCE8E6) // Light Red / Google Error Red
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = com.google.android.material.R.drawable.design_ic_visibility_off.let { Icons.Default.Close }, // Use an error-style icon
-                                contentDescription = null,
-                                tint = Color(0xFFC5221F)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = uiState.routeErrorMessage,
-                                color = Color(0xFFC5221F),
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                            )
-                        }
-                    }
-                }
-                else {
-                    // NESTED ETA CARD (The Rounded Grey Rectangle from Mockup)
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        color = Color(0xFFF1F3F4) // Light Google Grey
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = uiState.routeDuration,
-                                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
-                                )
-                                Text(
-                                    text = "Fastest route · ${uiState.routeDistance}",
-                                    color = Color.Gray,
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
+    var currentCampus by mutableStateOf<Campus?>(CampusRepo.getCampusByName("SGW"))
+        private set
 
-                            // Action Button (Car Icon in Circle)
-                            Surface(
-                                shape = CircleShape,
-                                color = Color.White,
-                                modifier = Modifier.size(44.dp)
-                            ) {
-                                Icon(
-                                    imageVector = when (uiState.selectedTransportMode) {
-                                        "drive" -> Icons.Default.DirectionsCar
-                                        "walk" -> Icons.AutoMirrored.Filled.DirectionsWalk
-                                        else -> Icons.Default.DirectionsBus
-                                    },
-                                    contentDescription = null,
-                                    modifier = Modifier.padding(10.dp),
-                                    tint = Color(0xFF5F6368)
-                                )
-                            }
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                val isRouteValid = uiState.routeErrorMessage == null && uiState.routePoints.isNotEmpty()
-                Button(
-                    onClick = onStartNavigation,
-                    enabled = isRouteValid,
-                    modifier = Modifier.fillMaxWidth().height(54.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF912338), // Concordia Maroon
-                        disabledContainerColor = Color.Gray.copy(alpha = 0.5f)
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                ) {
-                    Text(
-                        text = if (!isRouteValid && uiState.routeErrorMessage != null) "UNAVAILABLE"
-                        else if (uiState.startLocationName == "Your position") "START"
-                        else "PREVIEW",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White
-                    )                }
+    private var lastProcessedLocation: LatLng? = null
+
+    var highlightedBuildingName by mutableStateOf<String?>(null)
+        private set
+
+    fun refreshLocation() {
+        locationProvider?.getUserLocation { location ->
+            location?.let { processLocationUpdate(it) }
+        }
+    }
+
+    fun onCampusSelected(name: String) {
+        val found = CampusRepo.getCampusByName(name)
+        if (found != null) {
+            isManualCampusSelection = true
+            currentCampus = found
+            highlightedBuildingName = null
+        }
+    }
+
+    fun processLocationUpdate(userLocation: LatLng, isForce: Boolean = false) {
+        if (isForce) isManualCampusSelection = false
+
+        lastProcessedLocation = userLocation
+        val detected = CampusRepo.getCampus(userLocation)
+
+        if (detected != null) {
+            if (!isManualCampusSelection) {
+                if (currentCampus?.name != detected.name) currentCampus = detected
+            } else {
+                if (detected.name == currentCampus?.name) isManualCampusSelection = false
             }
+
+            val buildingAtPos = detected.buildings.firstOrNull { building ->
+                val outline = building.getGoogleOutline()
+                PolyUtil.containsLocation(userLocation, outline, false) ||
+                        PolyUtil.isLocationOnPath(userLocation, outline, true, 15.0)
+            }
+            highlightedBuildingName = buildingAtPos?.name
+
+            // US-2.8: refresh shuttle status on location update,
+            // but only if start point hasn't been manually set
+            if (uiBuildingState.selectedTransportMode == "shuttle" &&
+                uiBuildingState.startLocationName == "Your position") {
+                refreshShuttleStatus(userLocation)
+            }
+        } else {
+            isManualCampusSelection = false
         }
     }
-}
 
-@Composable
-fun LocationRow(
-    label: String,
-    icon: ImageVector,
-    iconColor: Color,
-    trailingIcon: ImageVector = Icons.Default.Menu, // Default to menu
-    onTrailingIconClick: () -> Unit = {},           // Default to nothing
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp))
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(text = label, style = MaterialTheme.typography.bodyLarge, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        Spacer(modifier = Modifier.weight(1f))
+    var mapEvent by mutableStateOf<LatLng?>(null)
+        private set
 
-        IconButton(onClick = onTrailingIconClick) {
-            Icon(trailingIcon, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(22.dp))
+    fun clearMapEvent() { mapEvent = null }
+
+    fun handleSearchResult(result: SearchResult, context: android.content.Context) {
+        val resultName = when (result) {
+            is SearchResult.BuildingResult  -> result.building.name
+            is SearchResult.CampusResult    -> result.campus.name
+            is SearchResult.GoogleResult    -> result.title
+            is SearchResult.CurrentLocation -> "Your position"
+            is SearchResult.Home            -> "Home"
         }
-    }
-}
-@Composable
-fun TransportModeToggle(selectedMode: String, onModeChange: (String) -> Unit) {
-    Surface(
-        color = Color(0xFFF1F3F4),
-        shape = RoundedCornerShape(24.dp),
-        modifier = Modifier.padding(vertical = 8.dp)
-    ) {
-        Row(
-            modifier = Modifier.padding(4.dp),
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            val modes = listOf(
-                Triple("walk", Icons.AutoMirrored.Filled.DirectionsWalk, "Walk"),
-                Triple("drive", Icons.Default.DirectionsCar, "Drive"),
-                Triple("transit", Icons.Default.DirectionsBus, "Transit")
-            )
 
-            modes.forEach { (mode, icon, label) ->
-                val isSelected = selectedMode == mode
-                Surface(
-                    modifier = Modifier
-                        .height(40.dp)
-                        .weight(1f)
-                        .clickable { onModeChange(mode) },
-                    color = if (isSelected) Color(0xFF1A73E8) else Color.Transparent,
-                    shape = RoundedCornerShape(20.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = label,
-                            tint = if (isSelected) Color.White else Color(0xFF5F6368),
-                            modifier = Modifier.size(20.dp)
-                        )
+        val resultCoords = when (result) {
+            is SearchResult.BuildingResult  -> result.building.getCenter()
+            is SearchResult.CampusResult    -> result.campus.buildings.firstOrNull()?.getCenter()
+            is SearchResult.CurrentLocation -> lastProcessedLocation
+            is SearchResult.Home            -> LatLng(45.51723868665001, -73.627297124046)
+            is SearchResult.GoogleResult    -> null
+        }
+
+        if (uiBuildingState.mode == MapUIMode.DIRECTIONS) {
+            val selectedBuilding = if (result is SearchResult.BuildingResult) result.building else null
+
+            uiBuildingState = if (activeSearchField == "start") {
+                uiBuildingState.copy(startLocationName = resultName, startPoint = resultCoords)
+            } else {
+                uiBuildingState.copy(destinationName = resultName, building = selectedBuilding, endPoint = resultCoords)
+            }
+
+            resultCoords?.let { setMapEventWithOffset(it) }
+            uiBuildingState = uiBuildingState.copy(isSearchExpanded = false)
+
+            searchResults = emptyList()
+
+            // Emit one atomic state update for shuttle + route.           [#8]
+            calculateRouteWithState()
+            return
+        }
+
+        when (result) {
+            is SearchResult.CampusResult -> {
+                onCampusSelected(result.campus.name)
+                resultCoords?.let { setMapEventWithOffset(it) }
+                uiBuildingState = uiBuildingState.copy(isVisible = false, building = null)
+            }
+            is SearchResult.BuildingResult -> {
+                val b = result.building
+                highlightedBuildingName = b.name
+                uiBuildingState = uiBuildingState.copy(isVisible = true, building = b, endPoint = b.getCenter())
+                com.example.myapplication.logic.MapInteractionHandler.handleSearchSelection(b, this, context)
+                CampusRepo.getAllCampuses().find { it.buildings.contains(b) }?.let {
+                    currentCampus = it
+                    isManualCampusSelection = true
+                }
+                b.getGoogleOutline().firstOrNull()?.let { mapEvent = it }
+            }
+            is SearchResult.CurrentLocation -> {
+                locationProvider?.getUserLocation { location ->
+                    location?.let {
+                        mapEvent = it
+                        processLocationUpdate(it, isForce = true)
+                        uiBuildingState = uiBuildingState.copy(startPoint = it)
                     }
                 }
             }
+            is SearchResult.Home -> {
+                val homePos = LatLng(45.51723868665001, -73.627297124046)
+                mapEvent = homePos
+                uiBuildingState = uiBuildingState.copy(startPoint = homePos)
+            }
+            is SearchResult.GoogleResult -> { /* Future implementation */ }
+        }
+        searchResults = emptyList()
+    }
+
+    fun initSearch(client: com.google.android.libraries.places.api.net.PlacesClient) {
+        searchProvider = HybridSearchProvider(client)
+        searchResults = listOf(SearchResult.CurrentLocation)
+    }
+
+    var activeSearchField by mutableStateOf("main")
+        private set
+
+    fun onSearchQueryChanged(newQuery: String, field: String = "main") {
+        activeSearchField = field
+        when (field) {
+            "main"  -> searchQuery = newQuery
+            "start" -> uiBuildingState = uiBuildingState.copy(startLocationName = newQuery)
+            "dest"  -> uiBuildingState = uiBuildingState.copy(destinationName = newQuery)
+        }
+        viewModelScope.launch {
+            searchProvider?.let { searchResults = it.search(newQuery) }
         }
     }
+
+    fun onDirectionsRequested() {
+        uiBuildingState = uiBuildingState.copy(
+            mode            = MapUIMode.DIRECTIONS,
+            destinationName = uiBuildingState.building?.name ?: ""
+        )
+    }
+
+    fun onBackToPreview() {
+        uiBuildingState = uiBuildingState.copy(mode = MapUIMode.PREVIEW)
+    }
+
+    fun onStartQueryChanged(newQuery: String) {
+        uiBuildingState = uiBuildingState.copy(startLocationName = newQuery)
+    }
+
+    fun onDestinationQueryChanged(newQuery: String) {
+        uiBuildingState = uiBuildingState.copy(destinationName = newQuery)
+    }
+
+    fun onTransportModeChanged(mode: String) {
+        uiBuildingState = uiBuildingState.copy(selectedTransportMode = mode)
+        calculateRouteWithState()
+    }
+
+    /**
+     * Calculates the route and, if shuttle mode is active, refreshes the
+     * shuttle status in the **same coroutine** so both are committed in a
+     * single [uiBuildingState] assignment – no risk of one update
+     * overwriting the other.                                            [#8]
+     */
+    fun calculateRouteWithState() {
+        val start = uiBuildingState.startPoint ?: lastProcessedLocation ?: return
+        val end   = uiBuildingState.endPoint   ?: uiBuildingState.building?.getCenter() ?: return
+        val isShuttle = uiBuildingState.selectedTransportMode == "shuttle"
+        val provider  = if (isShuttle) shuttleRouteProvider else routeProvider
+
+        viewModelScope.launch {
+            // Resolve shuttle status inside the coroutine so both
+            // shuttle fields and route fields are written atomically.   [#8][#9]
+            val shuttleSnapshot = if (isShuttle) {
+                val locationToUse = uiBuildingState.startPoint ?: lastProcessedLocation
+                val nearestStop   = shuttleService.resolveNearestStop(locationToUse)
+                val fromCampus    = nearestStop?.campus ?: "SGW"
+                ShuttleSnapshot(
+                    availability  = shuttleService.checkAvailability(fromCampus),
+                    statusMessage = shuttleService.statusMessage(fromCampus),
+                    stopName      = nearestStop?.name   ?: "",
+                    stopCampus    = nearestStop?.campus ?: "",
+                    stops         = shuttleService.getAllStops()
+                )
+            } else null
+
+            val routeData = provider?.getRoute(start, end, uiBuildingState.selectedTransportMode)
+
+            // One atomic copy – shuttle + route fields together.        [#8]
+            uiBuildingState = if (routeData != null) {
+                val builder = LatLngBounds.Builder()
+                routeData.points.forEach { builder.include(it) }
+                uiBuildingState.copy(
+                    routePoints   = routeData.points,
+                    routeDuration = routeData.duration,
+                    routeDistance = routeData.distance,
+                    routeBounds   = builder.build(),
+                    routeErrorMessage = null
+                )
+            } else {
+                val mode = uiBuildingState.selectedTransportMode.replaceFirstChar { it.uppercase() }
+                uiBuildingState.copy(
+                    routePoints   = emptyList(),
+                    routeDuration = "-- min",
+                    routeDistance = "-- m",
+                    routeBounds   = null,
+                    routeErrorMessage = "$mode route unavailable between these points."
+                )
+            }.let { state ->
+                if (shuttleSnapshot != null) state.copy(
+                    shuttleAvailability      = shuttleSnapshot.availability,
+                    shuttleStatusMessage     = shuttleSnapshot.statusMessage,
+                    nearestShuttleStopName   = shuttleSnapshot.stopName,
+                    nearestShuttleStopCampus = shuttleSnapshot.stopCampus,
+                    shuttleStops             = shuttleSnapshot.stops
+                ) else state
+            }
+        }
+    }
+
+    // Keep the old name as an alias so existing call-sites still compile.
+    fun calculateRoute() = calculateRouteWithState()
+
+    /**
+     * Refreshes only the shuttle status fields (no route recalculation).
+     * Called from [processLocationUpdate] when the user moves while in
+     * shuttle mode – the route itself doesn't need to change.
+     */
+    private fun refreshShuttleStatus(fromLocation: LatLng?) {
+        val locationToUse = uiBuildingState.startPoint ?: fromLocation
+        val nearestStop   = shuttleService.resolveNearestStop(locationToUse)  // [#9]
+        val fromCampus    = nearestStop?.campus ?: "SGW"
+
+        // Single atomic copy – all shuttle fields together.             [#8]
+        uiBuildingState = uiBuildingState.copy(
+            shuttleAvailability      = shuttleService.checkAvailability(fromCampus),
+            shuttleStatusMessage     = shuttleService.statusMessage(fromCampus),
+            nearestShuttleStopName   = nearestStop?.name   ?: "",
+            nearestShuttleStopCampus = nearestStop?.campus ?: "",
+            shuttleStops             = shuttleService.getAllStops()         // [#6]
+        )
+    }
+
+    fun toggleSearchExpansion(expanded: Boolean, field: String = "main") {
+        activeSearchField = field
+        uiBuildingState = uiBuildingState.copy(isSearchExpanded = expanded)
+    }
+
+    fun swapLocations() {
+        val currentStartLatLng  = uiBuildingState.startPoint ?: lastProcessedLocation
+        val currentDestLatLng   = uiBuildingState.endPoint   ?: uiBuildingState.building?.getCenter()
+        val currentDestBuilding = uiBuildingState.building
+
+        uiBuildingState = uiBuildingState.copy(
+            startLocationName = uiBuildingState.destinationName,
+            destinationName   = uiBuildingState.startLocationName,
+            startPoint        = currentDestLatLng,
+            endPoint          = currentStartLatLng,
+            building          = if (!uiBuildingState.isStartCurrentLocation) null else currentDestBuilding
+        )
+
+        uiBuildingState.endPoint?.let { setMapEventWithOffset(it) }
+        highlightedBuildingName = uiBuildingState.building?.name
+
+        // Refresh shuttle + route in one atomic update after swap.      [#8]
+        calculateRouteWithState()
+    }
+
+    fun setMapEventWithOffset(target: LatLng) {
+        mapEvent = LatLng(target.latitude - 0.005, target.longitude)
+    }
+
+    // ── Private helpers ────────────────────────────────────────────────────────
+
+    /** Transient carrier for shuttle status computed inside the coroutine. */
+    private data class ShuttleSnapshot(
+        val availability:  com.example.myapplication.data.ShuttleAvailability,
+        val statusMessage: String,
+        val stopName:      String,
+        val stopCampus:    String,
+        val stops:         List<com.example.myapplication.data.ShuttleStop>
+    )
 }

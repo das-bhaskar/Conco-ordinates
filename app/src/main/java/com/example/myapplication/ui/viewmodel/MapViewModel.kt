@@ -19,7 +19,6 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.PolyUtil
 import com.example.myapplication.ui.models.BuildingUiState
 import com.example.myapplication.ui.models.MapUIMode
-import com.google.android.gms.maps.model.LatLngBounds
 
 /**
  * [shuttleService] has no default value so callers must inject a concrete

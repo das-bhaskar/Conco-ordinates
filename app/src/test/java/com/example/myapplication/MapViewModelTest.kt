@@ -101,12 +101,12 @@ class MapViewModelTest {
         CampusRepo.setTestCampuses(listOf(testCampus))
 
         mockProvider = MockLocationProvider()
+        mockRoute = mock<RouteProvider>()
         // shuttleService is now required – inject the real default.
         // ShuttleRepo returns empty lists until initialized, which is fine
         // for these non-shuttle tests.
-        viewModel = Mspy(apViewModel(mockProvider,mockRoute, DefaultShuttleService(ShuttleRepo))
+        viewModel = spy(MapViewModel(mockProvider,mockRoute, DefaultShuttleService(ShuttleRepo))
         )
-        mockRoute = mock<RouteProvider>()
 
         testListPoints = ArrayList<LatLng>()
         testListPoints.addAll(

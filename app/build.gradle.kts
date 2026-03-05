@@ -126,14 +126,14 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
     }
 
     val fileFilter = listOf(
-    "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
-    "**/*Test*.*", "android/**/*.*", "**/androidx/**/*.*",
-    "**/*_MembersInjector.class", "**/Dagger*Component.class",
-    "**/*_Factory.class", "**/Hilt_*.class", "**/*\$Composable*.*",
-    "**/MapsActivity*.*", "**/ui/components/**", "**/ui/theme/**",
-    "**/*ComposableSingletons*.*",
-    "**/*\$lambda*.*",
-    "**/*Kt$*.*"
+        "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
+        "**/*Test*.*", "android/**/*.*", "**/androidx/**/*.*",
+        "**/*_MembersInjector.class", "**/Dagger*Component.class",
+        "**/*_Factory.class", "**/Hilt_*.class", "**/*\$Composable*.*",
+        "**/MapsActivity*.*", "**/ui/components/**", "**/ui/theme/**",
+        "**/*ComposableSingletons*.*",
+        "**/*\$lambda*.*",
+        "**/*Kt$*.*"
     )
 
     sourceDirectories.setFrom(files(

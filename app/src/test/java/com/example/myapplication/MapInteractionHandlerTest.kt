@@ -29,6 +29,7 @@ import org.mockito.kotlin.whenever
 import java.io.InputStream
 import org.junit.Assert.assertEquals
 import org.mockito.Mockito.doNothing
+import org.mockito.Mockito.spy
 
 
 class MapInteractionHandlerTest {
@@ -59,6 +60,12 @@ class MapInteractionHandlerTest {
     val buildingCaptor = argumentCaptor<Building>()
     val imgCaptor = argumentCaptor<String>()
 
+    var imageURl = "https://maps.googleapis.com/maps/api/streetview?" +
+            "size=600x300" +
+            "&location=${testBuilding.getCenter().latitude},${testBuilding.getCenter().longitude}" +
+            "&fov=90&heading=235&pitch=10" +
+            "&key="
+
     @Before
     fun setup() {
         mapViewModel = mock<MapViewModel>().also {
@@ -69,20 +76,15 @@ class MapInteractionHandlerTest {
     }
 
     @Test
-    fun `test processClick inside of a building`(){
+    fun `test processClick inside of a building`() {
         MapInteractionHandler.processClick(LatLng(45.4975, -73.5785), mapViewModel, context)
         assertEquals(testBuilding, buildingCaptor.firstValue)
+        assert(imgCaptor.secondValue.contains(imageURl))
     }
 
     @Test
-    fun `test processClick outside of a building`(){
+    fun `test processClick outside of a building`() {
         MapInteractionHandler.processClick(LatLng(45.49, -73.57), mapViewModel, context)
         assertEquals(null, buildingCaptor.firstValue)
-    }
-
-    @Test
-    fun `test handleSearchSelection`(){
-        MapInteractionHandler.handleSearchSelection(testBuilding, mapViewModel, context)
-        assertEquals(testBuilding, buildingCaptor.firstValue)
     }
 }

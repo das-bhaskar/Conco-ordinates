@@ -19,6 +19,7 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.PolyUtil
 import com.example.myapplication.ui.models.BuildingUiState
 import com.example.myapplication.ui.models.MapUIMode
+import com.google.android.gms.maps.model.LatLngBounds
 
 /**
  * [shuttleService] has no default value so callers must inject a concrete
@@ -237,6 +238,18 @@ class MapViewModel(
         calculateRouteWithState()
     }
 
+    fun buildBounds(points: List<LatLng>): LatLngBounds {
+        val builder = LatLngBounds.Builder()
+        points.forEach { builder.include(it) }
+        return builder.build()
+    }
+
+    /**
+     * Calculates the route and, if shuttle mode is active, refreshes the
+     * shuttle status in the **same coroutine** so both are committed in a
+     * single [uiBuildingState] assignment – no risk of one update
+     * overwriting the other.                                            [#8]
+     */
     fun calculateRouteWithState() {
         val start     = uiBuildingState.startPoint ?: lastProcessedLocation ?: return
         val end       = uiBuildingState.endPoint   ?: uiBuildingState.building?.getCenter() ?: return
@@ -263,13 +276,11 @@ class MapViewModel(
             val modeName = uiBuildingState.selectedTransportMode
                 .replaceFirstChar { it.uppercase() }
             uiBuildingState = if (routeData != null) {
-                val builder = LatLngBounds.Builder()
-                routeData.points.forEach { builder.include(it) }
                 uiBuildingState.copy(
-                    routePoints       = routeData.points,
-                    routeDuration     = routeData.duration,
-                    routeDistance     = routeData.distance,
-                    routeBounds       = builder.build(),
+                    routePoints   = routeData.points,
+                    routeDuration = routeData.duration,
+                    routeDistance = routeData.distance,
+                    routeBounds   = buildBounds(routeData.points),
                     routeErrorMessage = null
                 )
             } else {

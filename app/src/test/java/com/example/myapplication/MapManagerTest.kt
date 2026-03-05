@@ -6,6 +6,7 @@ import com.example.myapplication.data.JsonLatLng
 import com.google.android.gms.maps.model.LatLng
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import java.lang.reflect.Method
 
 class MapManagerTest {
 

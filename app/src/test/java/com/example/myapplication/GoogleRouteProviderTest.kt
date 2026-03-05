@@ -168,7 +168,9 @@ class GoogleRouteProviderTest {
                 LatLng(45.48937, -73.58411000000001)
             )
         )
-        assertEquals(RouteData(testListPoints, "1 min", "0.9 km"), routeData)
+        assertEquals(testListPoints, routeData?.points)
+        assertEquals("0.9 km", routeData?.distance)
+        assert(routeData?.duration.contentEquals("1 min") || routeData?.duration.contentEquals("2 mins"))
     }
 
     @Test

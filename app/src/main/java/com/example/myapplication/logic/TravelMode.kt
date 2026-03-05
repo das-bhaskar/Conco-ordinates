@@ -3,7 +3,7 @@ package com.example.myapplication.logic
 enum class TravelMode {
     PUB_TRANSIT,
     MOTORIZED,
-    WALK,
+    WALK;
 
     fun displayLabel(): String = when (this) {
         PUB_TRANSIT -> "Public transit"

@@ -63,6 +63,14 @@ jobs:
           echo "=== Checking .exec files ==="
           find . -name "*.exec" -type f
 
+      - name: PR Coverage Reporter
+        uses: madrapps/jacoco-report@v1.7.1
+        with:
+          paths: ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Unit Test Coverage Report"
+          update-comment: true
+
       - name: Run SonarCloud analysis
         uses: SonarSource/sonarcloud-github-action@master
         env:

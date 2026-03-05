@@ -145,8 +145,16 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
     val buildDir = project.layout.buildDirectory
 
     
-    val kotlinTree = fileTree(buildDir.dir("intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes")) {
-        exclude(fileFilter)
+    val kotlinClassDirs = listOf(
+        "intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes",
+        "tmp/kotlin-classes/debug",
+        "kotlin/compileDebugKotlin/classes"
+    )
+
+    val kotlinTrees = kotlinClassDirs.map { dir ->
+        fileTree(buildDir.dir(dir)) {
+            exclude(fileFilter)
+        }
     }
 
     val javaTree = fileTree(buildDir.dir("intermediates/javac/debug/classes")) {
@@ -154,7 +162,7 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
     }
 
     // 3. This combines them only at execution time
-    classDirectories.setFrom(files(kotlinTree, javaTree))
+    classDirectories.setFrom(files(*kotlinTrees.toTypedArray(), javaTree))
 
     
     executionData.setFrom(fileTree(buildDir) {

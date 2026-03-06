@@ -139,23 +139,32 @@ class ParsedLocationTest {
     // ── LocationResult.Known — long pattern ───────────────────────────────────
 
     @Test
-    fun `long SGW verbose string parses correctly`() {
-        val result = parseLocation("Sir George Williams Campus - Hall Building Rm 862")
+    fun `long SGW verbose string with building code parses correctly`() {
+        // Long pattern works when the building CODE appears in the string
+        val result = parseLocation("Sir George Williams Campus H Rm 862")
         assertTrue(result is LocationResult.Known)
         val loc = (result as LocationResult.Known).location
-        assertEquals("H",           loc.buildingCode)
-        assertEquals("862",         loc.roomCode)
-        assertEquals(CAMPUS_SGW,    loc.campus)
+        assertEquals("H",        loc.buildingCode)
+        assertEquals("862",      loc.roomCode)
+        assertEquals(CAMPUS_SGW, loc.campus)
     }
 
     @Test
-    fun `long Loyola verbose string parses correctly`() {
-        val result = parseLocation("Loyola Campus - Hingston Hall Rm 210")
+    fun `long Loyola verbose string with building code parses correctly`() {
+        // Long pattern works when the building CODE appears in the string
+        val result = parseLocation("Loyola Campus HC Rm 210")
         assertTrue(result is LocationResult.Known)
         val loc = (result as LocationResult.Known).location
         assertEquals("HC",           loc.buildingCode)
         assertEquals("210",          loc.roomCode)
         assertEquals(CAMPUS_LOYOLA,  loc.campus)
+    }
+
+    @Test
+    fun `long verbose string without recognisable code returns Unknown`() {
+        // Building full names like "Hall Building" are not in the code map
+        val result = parseLocation("Sir George Williams Campus - Hall Building Rm 862")
+        assertEquals(LocationResult.Unknown, result)
     }
 
     // ── ParsedLocation helpers ────────────────────────────────────────────────

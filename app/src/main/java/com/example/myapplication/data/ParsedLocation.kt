@@ -12,7 +12,7 @@ data class ParsedLocation(
     val buildingCode: String,   // e.g. "H"
     val buildingName: String,   // e.g. "Henry F. Hall"
     val roomCode: String,       // e.g. "820"
-    val campus: String          // e.g. "Sir George Williams"
+    val campus: String          // e.g. CAMPUS_SGW
 ) {
     /** Display string for the room, e.g. "H-820" */
     val roomDisplay: String get() = "$buildingCode-$roomCode"
@@ -41,6 +41,11 @@ sealed class LocationResult {
     /** Blank or unrecognisable location string. */
     object Unknown : LocationResult()
 }
+
+// ── Campus name constants ─────────────────────────────────────────────────────
+
+internal const val CAMPUS_SGW    = "Sir George Williams"
+internal const val CAMPUS_LOYOLA = "Loyola"
 
 // ── Building code → full name map ─────────────────────────────────────────
 
@@ -101,17 +106,17 @@ fun parseLocation(raw: String): LocationResult {
                 buildingCode = bCode,
                 buildingName = buildingNames[bCode] ?: bCode,
                 roomCode     = short.groupValues[2],
-                campus       = if (short.groupValues[3] == "SGW") "Sir George Williams" else "Loyola"
+                campus       = if (short.groupValues[3] == "SGW") CAMPUS_SGW else CAMPUS_LOYOLA
             )
         )
     }
 
     // ── Long pattern: verbose string like "Hall Building Rm 862" ──────────
     val campus = when {
-        trimmed.contains("Sir George", ignoreCase = true) -> "Sir George Williams"
-        trimmed.contains("SGW",        ignoreCase = true) -> "Sir George Williams"
-        trimmed.contains("Loyola",     ignoreCase = true) -> "Loyola"
-        trimmed.contains("LOY",        ignoreCase = true) -> "Loyola"
+        trimmed.contains("Sir George", ignoreCase = true) -> CAMPUS_SGW
+        trimmed.contains("SGW",        ignoreCase = true) -> CAMPUS_SGW
+        trimmed.contains(CAMPUS_LOYOLA,     ignoreCase = true) -> CAMPUS_LOYOLA
+        trimmed.contains("LOY",        ignoreCase = true) -> CAMPUS_LOYOLA
         else -> ""
     }
     val tokens = trimmed.uppercase().split(Regex("""\s+|-|,"""))

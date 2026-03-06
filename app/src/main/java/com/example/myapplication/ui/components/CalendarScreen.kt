@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.LocationResult
 import com.example.myapplication.data.parseLocation
 import com.example.myapplication.logic.CalendarInfo
+import com.example.myapplication.ui.components.CalendarAccountState
 import com.example.myapplication.ui.components.WeekCalendarView
 import com.example.myapplication.ui.models.CalendarState
 import com.example.myapplication.ui.viewmodel.CalendarViewModel
@@ -58,10 +59,12 @@ fun CalendarScreen(
         weekStartMs       = viewModel.currentWeekStartMs,
         events            = viewModel.weekEvents,
         isLoading         = viewModel.weekViewLoading || calState is CalendarState.Loading,
-        isSignedIn        = isSignedIn,
-        userEmail         = userEmail,
-        onConnectClick    = onConnectClick,
-        onSignOutClick    = onSignOutClick,
+        accountState      = CalendarAccountState(
+            isSignedIn     = isSignedIn,
+            userEmail      = userEmail,
+            onConnectClick = onConnectClick,
+            onSignOutClick = onSignOutClick
+        ),
         onPreviousWeek    = { selectedCalendarId?.let { viewModel.goToPreviousWeek(it) } },
         onNextWeek        = { selectedCalendarId?.let { viewModel.goToNextWeek(it) } },
         onNavigateToEvent = { event ->

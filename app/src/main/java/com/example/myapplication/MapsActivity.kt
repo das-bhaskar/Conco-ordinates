@@ -204,11 +204,9 @@ class MapsActivity : ComponentActivity() {
 
     @Composable
     private fun MapScreen() {
-        val mapPaddingBottom = if (viewModel.uiBuildingState.mode == MapUIMode.DIRECTIONS) 600 else 0
         val context = LocalContext.current
         val scope   = rememberCoroutineScope()
         var showSettingsDialog by remember { mutableStateOf(false) }
-
         var hasLocationPermission by remember {
             mutableStateOf(
                 ContextCompat.checkSelfPermission(
@@ -217,7 +215,48 @@ class MapsActivity : ComponentActivity() {
             )
         }
 
-        // ── Location updates ──────────────────────────────────────────────────
+        ObserveLocationUpdates(hasLocationPermission)
+        val cameraPositionState = rememberMapCamera()
+        val cameraController    = remember(cameraPositionState) { TrueCameraController(cameraPositionState) }
+        ObserveCameraEffects(cameraPositionState, cameraController)
+
+        val launcher = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted -> hasLocationPermission = isGranted }
+
+        val mapPaddingBottom = if (viewModel.uiBuildingState.mode == MapUIMode.DIRECTIONS) 600 else 0
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            CampusMap(
+                currentCampus           = viewModel.currentCampus,
+                highlightedBuildingName = viewModel.highlightedBuildingName,
+                cameraPositionState     = cameraPositionState,
+                hasLocationPermission   = hasLocationPermission,
+                viewModel               = viewModel,
+                contentPadding          = PaddingValues(bottom = mapPaddingBottom.dp),
+                modifier                = Modifier.testTag("campus_map")
+            )
+            MapSearchOverlay(context)
+            MapPreviewOverlays(
+                hasLocationPermission = hasLocationPermission,
+                launcher              = launcher,
+                cameraController      = cameraController,
+                scope                 = scope,
+                onShowSettings        = { showSettingsDialog = true },
+                context               = context
+            )
+            MapBuildingOverlay()
+            if (showSettingsDialog && !hasLocationPermission) {
+                LocationPermissionDialog(
+                    onOpenSettings = { openAppSettings(context) },
+                    onDismiss      = { showSettingsDialog = false }
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun ObserveLocationUpdates(hasLocationPermission: Boolean) {
         LaunchedEffect(hasLocationPermission) {
             CrashReporter.setKey("location_permission_granted", hasLocationPermission)
             if (hasLocationPermission) {
@@ -240,15 +279,21 @@ class MapsActivity : ComponentActivity() {
                 }
             }
         }
+    }
 
-        // ── Camera ────────────────────────────────────────────────────────────
-        val cameraPositionState = rememberCameraPositionState {
+    @Composable
+    private fun rememberMapCamera(): com.google.maps.android.compose.CameraPositionState {
+        val state = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(LatLng(45.497, -73.579), 16f)
         }
-        val cameraController = remember(cameraPositionState) {
-            TrueCameraController(cameraPositionState)
-        }
+        return state
+    }
 
+    @Composable
+    private fun ObserveCameraEffects(
+        cameraPositionState: com.google.maps.android.compose.CameraPositionState,
+        cameraController: TrueCameraController
+    ) {
         LaunchedEffect(viewModel.uiBuildingState.routeBounds) {
             val bounds = viewModel.uiBuildingState.routeBounds
             if (bounds != null) {
@@ -259,208 +304,177 @@ class MapsActivity : ComponentActivity() {
                 )
             }
         }
-
         LaunchedEffect(viewModel.currentCampus) {
             viewModel.currentCampus?.let { campus ->
                 CrashReporter.setKey("selected_campus", campus.name)
                 cameraController.animateTo(campus.getGoogleCenter(), campus.defaultZoom)
             }
         }
-
         LaunchedEffect(viewModel.uiBuildingState.mode) {
             CrashReporter.setKey("map_mode", viewModel.uiBuildingState.mode.name)
         }
+    }
 
-        val launcher = rememberLauncherForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) { isGranted -> hasLocationPermission = isGranted }
-
-        // ── Layout ────────────────────────────────────────────────────────────
-        Box(modifier = Modifier.fillMaxSize()) {
-
-            // 1. Map
-            CampusMap(
-                currentCampus           = viewModel.currentCampus,
-                highlightedBuildingName = viewModel.highlightedBuildingName,
-                cameraPositionState     = cameraPositionState,
-                hasLocationPermission   = hasLocationPermission,
-                viewModel               = viewModel,
-                contentPadding          = PaddingValues(bottom = mapPaddingBottom.dp),
-                modifier                = Modifier.testTag("campus_map")
+    @Composable
+    private fun BoxScope.MapSearchOverlay(context: android.content.Context) {
+        val mode = viewModel.uiBuildingState.mode
+        if (mode == MapUIMode.PREVIEW) {
+            CampusSearchBar(
+                query         = viewModel.searchQuery,
+                results       = viewModel.searchResults,
+                onQueryChange = { viewModel.onSearchQueryChanged(it) },
+                onResultClick = { viewModel.handleSearchResult(it, context) },
+                modifier      = Modifier.align(Alignment.TopCenter).padding(top = 8.dp)
             )
-
-            // 2. Search bar / Directions header
-            if (viewModel.uiBuildingState.mode == MapUIMode.PREVIEW) {
-                CampusSearchBar(
-                    query         = viewModel.searchQuery,
-                    results       = viewModel.searchResults,
-                    onQueryChange = { viewModel.onSearchQueryChanged(it) },
-                    onResultClick = { viewModel.handleSearchResult(it, context) },
-                    modifier      = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = 8.dp)
+        } else {
+            if (viewModel.uiBuildingState.isSearchExpanded) {
+                DirectionsHeader(
+                    uiState            = viewModel.uiBuildingState,
+                    onBackClick        = { viewModel.toggleSearchExpansion(false) },
+                    onStartQueryChange = { viewModel.onSearchQueryChanged(it, field = "start") },
+                    onDestQueryChange  = { viewModel.onSearchQueryChanged(it, field = "dest") },
+                    modifier           = Modifier.align(Alignment.TopCenter)
                 )
-            } else {
-                if (viewModel.uiBuildingState.isSearchExpanded) {
-                    DirectionsHeader(
-                        uiState            = viewModel.uiBuildingState,
-                        onBackClick        = { viewModel.toggleSearchExpansion(false) },
-                        onStartQueryChange = { viewModel.onSearchQueryChanged(it, field = "start") },
-                        onDestQueryChange  = { viewModel.onSearchQueryChanged(it, field = "dest") },
-                        modifier           = Modifier.align(Alignment.TopCenter)
-                    )
-                }
-                if (viewModel.uiBuildingState.mode == MapUIMode.DIRECTIONS) {
-                    DirectionsInfoPopup(
-                        uiState            = viewModel.uiBuildingState,
-                        onModeChange       = { viewModel.onTransportModeChanged(it) },
-                        onStartClick       = { viewModel.toggleSearchExpansion(true, "start") },
-                        onDestinationClick = { viewModel.toggleSearchExpansion(true, "dest") },
-                        onSwapClick        = { viewModel.swapLocations() },
-                        onClose            = { viewModel.onBackToPreview() },
-                        onStartNavigation  = { },
-                        modifier           = Modifier.align(Alignment.BottomCenter)
-                    )
-                }
-                val currentFieldText = when (viewModel.activeSearchField) {
-                    "start" -> viewModel.uiBuildingState.startLocationName
-                    "dest"  -> viewModel.uiBuildingState.destinationName
-                    else    -> viewModel.searchQuery
-                }
-                if (viewModel.activeSearchField != "main" && currentFieldText.isNotEmpty()) {
-                    Card(
-                        modifier  = Modifier
-                            .padding(horizontal = 24.dp)
-                            .offset(y = 190.dp)
-                            .zIndex(1f),
-                        elevation = CardDefaults.cardElevation(4.dp),
-                        colors    = CardDefaults.cardColors(containerColor = Color.White)
-                    ) {
-                        LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp)) {
-                            items(viewModel.searchResults) { result ->
-                                val title = when (result) {
-                                    is SearchResult.BuildingResult  -> result.building.name
-                                    is SearchResult.CampusResult    -> result.campus.name
-                                    is SearchResult.GoogleResult    -> result.title
-                                    is SearchResult.CurrentLocation -> "Your position"
-                                    is SearchResult.Home            -> "Home"
-                                }
-                                ListItem(
-                                    headlineContent = { Text(title) },
-                                    modifier        = Modifier.clickable {
-                                        viewModel.handleSearchResult(result, context)
-                                    }
-                                )
+            }
+            if (mode == MapUIMode.DIRECTIONS) {
+                DirectionsInfoPopup(
+                    uiState            = viewModel.uiBuildingState,
+                    onModeChange       = { viewModel.onTransportModeChanged(it) },
+                    onStartClick       = { viewModel.toggleSearchExpansion(true, "start") },
+                    onDestinationClick = { viewModel.toggleSearchExpansion(true, "dest") },
+                    onSwapClick        = { viewModel.swapLocations() },
+                    onClose            = { viewModel.onBackToPreview() },
+                    onStartNavigation  = { },
+                    modifier           = Modifier.align(Alignment.BottomCenter)
+                )
+            }
+            val currentFieldText = when (viewModel.activeSearchField) {
+                "start" -> viewModel.uiBuildingState.startLocationName
+                "dest"  -> viewModel.uiBuildingState.destinationName
+                else    -> viewModel.searchQuery
+            }
+            if (viewModel.activeSearchField != "main" && currentFieldText.isNotEmpty()) {
+                Card(
+                    modifier  = Modifier.padding(horizontal = 24.dp).offset(y = 190.dp).zIndex(1f),
+                    elevation = CardDefaults.cardElevation(4.dp),
+                    colors    = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp)) {
+                        items(viewModel.searchResults) { result ->
+                            val title = when (result) {
+                                is SearchResult.BuildingResult  -> result.building.name
+                                is SearchResult.CampusResult    -> result.campus.name
+                                is SearchResult.GoogleResult    -> result.title
+                                is SearchResult.CurrentLocation -> "Your position"
+                                is SearchResult.Home            -> "Home"
                             }
+                            ListItem(
+                                headlineContent = { Text(title) },
+                                modifier        = Modifier.clickable { viewModel.handleSearchResult(result, context) }
+                            )
                         }
                     }
                 }
-            }
-
-            // 3. Next Class Pill (bottom-left, PREVIEW mode only)
-            if (viewModel.uiBuildingState.mode == MapUIMode.PREVIEW) {
-                NextClassPill(
-                    nextEvent       = calendarViewModel.nextUpcomingEvent,
-                    onNavigateClick = {
-                        val event = calendarViewModel.nextUpcomingEvent
-                        if (event != null) {
-                            val dest = (event.locationResult as? LocationResult.Known)
-                                ?.location?.buildingCode
-                                ?: event.location
-                                ?: return@NextClassPill
-                            viewModel.navigateToEvent(dest)
-                        }
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(start = 12.dp, bottom = 28.dp)
-                )
-            }
-
-            // 4. Campus toggle + Recenter FAB
-            if (viewModel.uiBuildingState.mode != MapUIMode.DIRECTIONS) {
-                CampusToggle(
-                    selectedCampusName = viewModel.currentCampus?.name,
-                    onCampusClick      = { name -> viewModel.onCampusSelected(name) },
-                    modifier           = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(end = 12.dp, bottom = 160.dp)
-                )
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        handleRecenter(
-                            client         = fusedLocationClient,
-                            hasPermission  = hasLocationPermission,
-                            launcher       = launcher,
-                            context        = context,
-                            onShowSettings = { showSettingsDialog = true }
-                        ) { userLocation ->
-                            scope.launch { cameraController.animateTo(userLocation, 18.5f) }
-                            viewModel.processLocationUpdate(userLocation, isForce = true)
-                        }
-                    },
-                    modifier       = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(end = 12.dp, bottom = 24.dp),
-                    containerColor = ConcordiaMaroon,
-                    contentColor   = Color.White,
-                    icon           = { Icon(Icons.Default.MyLocation, contentDescription = null) },
-                    text           = { Text("RECENTER") }
-                )
-            }
-
-            // 5. Building info / Directions popup
-            if (viewModel.uiBuildingState.isVisible) {
-                viewModel.uiBuildingState.building?.let { building ->
-                    if (viewModel.uiBuildingState.mode == MapUIMode.PREVIEW) {
-                        BuildingInfoPopup(
-                            building          = building,
-                            uiState           = viewModel.uiBuildingState,
-                            onDismiss         = { viewModel.handleMapTap(null) },
-                            onDirectionsClick = { viewModel.onDirectionsRequested() }
-                        )
-                    } else {
-                        DirectionsInfoPopup(
-                            uiState            = viewModel.uiBuildingState,
-                            onModeChange       = { mode -> viewModel.onTransportModeChanged(mode) },
-                            onStartClick       = { viewModel.toggleSearchExpansion(true, "start") },
-                            onDestinationClick = { viewModel.toggleSearchExpansion(true, "dest") },
-                            onSwapClick        = { viewModel.swapLocations() },
-                            onClose            = { viewModel.onBackToPreview() },
-                            onStartNavigation  = { },
-                            modifier           = Modifier.align(Alignment.BottomCenter)
-                        )
-                    }
-                }
-            }
-
-            // 6. Location permission dialog
-            if (showSettingsDialog && !hasLocationPermission) {
-                AlertDialog(
-                    onDismissRequest = { showSettingsDialog = false },
-                    title   = { Text("Location Required") },
-                    text    = { Text("To see which building you are in, please enable location permissions in the app settings.") },
-                    confirmButton = {
-                        Button(
-                            onClick = { openAppSettings(context) },
-                            colors  = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon)
-                        ) { Text("OPEN SETTINGS") }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showSettingsDialog = false }) {
-                            Text("CANCEL", color = Color.Gray)
-                        }
-                    },
-                    icon = {
-                        Icon(
-                            imageVector        = Icons.Default.MyLocation,
-                            contentDescription = null,
-                            tint               = ConcordiaMaroon
-                        )
-                    }
-                )
             }
         }
+    }
+
+    @Composable
+    private fun BoxScope.MapPreviewOverlays(
+        hasLocationPermission: Boolean,
+        launcher: androidx.activity.result.ActivityResultLauncher<String>,
+        cameraController: TrueCameraController,
+        scope: kotlinx.coroutines.CoroutineScope,
+        onShowSettings: () -> Unit,
+        context: android.content.Context
+    ) {
+        val mode = viewModel.uiBuildingState.mode
+        if (mode == MapUIMode.PREVIEW) {
+            NextClassPill(
+                nextEvent       = calendarViewModel.nextUpcomingEvent,
+                onNavigateClick = {
+                    val event = calendarViewModel.nextUpcomingEvent ?: return@NextClassPill
+                    val dest  = (event.locationResult as? LocationResult.Known)
+                        ?.location?.buildingCode
+                        ?: event.location
+                        ?: return@NextClassPill
+                    viewModel.navigateToEvent(dest)
+                },
+                modifier = Modifier.align(Alignment.BottomStart).padding(start = 12.dp, bottom = 28.dp)
+            )
+        }
+        if (mode != MapUIMode.DIRECTIONS) {
+            CampusToggle(
+                selectedCampusName = viewModel.currentCampus?.name,
+                onCampusClick      = { name -> viewModel.onCampusSelected(name) },
+                modifier           = Modifier.align(Alignment.BottomEnd).padding(end = 12.dp, bottom = 160.dp)
+            )
+            ExtendedFloatingActionButton(
+                onClick = {
+                    handleRecenter(
+                        client         = fusedLocationClient,
+                        hasPermission  = hasLocationPermission,
+                        launcher       = launcher,
+                        context        = context,
+                        onShowSettings = onShowSettings
+                    ) { userLocation ->
+                        scope.launch { cameraController.animateTo(userLocation, 18.5f) }
+                        viewModel.processLocationUpdate(userLocation, isForce = true)
+                    }
+                },
+                modifier       = Modifier.align(Alignment.BottomEnd).padding(end = 12.dp, bottom = 24.dp),
+                containerColor = ConcordiaMaroon,
+                contentColor   = Color.White,
+                icon           = { Icon(Icons.Default.MyLocation, contentDescription = null) },
+                text           = { Text("RECENTER") }
+            )
+        }
+    }
+
+    @Composable
+    private fun BoxScope.MapBuildingOverlay() {
+        if (!viewModel.uiBuildingState.isVisible) return
+        val building = viewModel.uiBuildingState.building ?: return
+        if (viewModel.uiBuildingState.mode == MapUIMode.PREVIEW) {
+            BuildingInfoPopup(
+                building          = building,
+                uiState           = viewModel.uiBuildingState,
+                onDismiss         = { viewModel.handleMapTap(null) },
+                onDirectionsClick = { viewModel.onDirectionsRequested() }
+            )
+        } else {
+            DirectionsInfoPopup(
+                uiState            = viewModel.uiBuildingState,
+                onModeChange       = { mode -> viewModel.onTransportModeChanged(mode) },
+                onStartClick       = { viewModel.toggleSearchExpansion(true, "start") },
+                onDestinationClick = { viewModel.toggleSearchExpansion(true, "dest") },
+                onSwapClick        = { viewModel.swapLocations() },
+                onClose            = { viewModel.onBackToPreview() },
+                onStartNavigation  = { },
+                modifier           = Modifier.align(Alignment.BottomCenter)
+            )
+        }
+    }
+
+    @Composable
+    private fun LocationPermissionDialog(onOpenSettings: () -> Unit, onDismiss: () -> Unit) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title   = { Text("Location Required") },
+            text    = { Text("To see which building you are in, please enable location permissions in the app settings.") },
+            confirmButton = {
+                Button(
+                    onClick = onOpenSettings,
+                    colors  = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon)
+                ) { Text("OPEN SETTINGS") }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) { Text("CANCEL", color = Color.Gray) }
+            },
+            icon = {
+                Icon(Icons.Default.MyLocation, contentDescription = null, tint = ConcordiaMaroon)
+            }
+        )
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

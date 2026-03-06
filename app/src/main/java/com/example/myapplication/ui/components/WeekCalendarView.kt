@@ -52,40 +52,53 @@ private val HeaderHeightDp  = 52.dp
  * Stateless — all data/actions flow in as parameters.
  * Uses [CalendarEvent.locationResult] so the UI never parses strings itself.
  */
+/**
+ * Groups account-related parameters for [WeekCalendarView] so the function
+ * stays within the 7-parameter limit required by static analysis.
+ */
+data class CalendarAccountState(
+    val isSignedIn:     Boolean  = false,
+    val userEmail:      String   = "",
+    val onConnectClick: () -> Unit = {},
+    val onSignOutClick: () -> Unit = {}
+)
+
 @Composable
 fun WeekCalendarView(
-    weekStartMs: Long,
-    events: List<CalendarEvent>,
-    isLoading: Boolean,
-    isSignedIn: Boolean = false,
-    userEmail: String = "",
-    onConnectClick: () -> Unit = {},
-    onSignOutClick: () -> Unit = {},
-    onPreviousWeek: () -> Unit,
-    onNextWeek: () -> Unit,
+    weekStartMs:       Long,
+    events:            List<CalendarEvent>,
+    isLoading:         Boolean,
+    accountState:      CalendarAccountState = CalendarAccountState(),
+    onPreviousWeek:    () -> Unit,
+    onNextWeek:        () -> Unit,
     onNavigateToEvent: (CalendarEvent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier:          Modifier = Modifier
 ) {
     var pendingEvent by remember { mutableStateOf<CalendarEvent?>(null) }
 
     Column(modifier = modifier.fillMaxSize().background(Color.White)) {
-        CalendarTopBar(isSignedIn, userEmail, onConnectClick, onSignOutClick)
+        CalendarTopBar(
+            isSignedIn     = accountState.isSignedIn,
+            userEmail      = accountState.userEmail,
+            onConnectClick = accountState.onConnectClick,
+            onSignOutClick = accountState.onSignOutClick
+        )
         WeekNavigationRow(weekStartMs, onPreviousWeek, onNextWeek)
         DayColumnHeaders(weekStartMs)
         HorizontalDivider(color = GridLineColor, thickness = 0.5.dp)
 
         when {
-            isLoading  -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            isLoading              -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = ConcordiaMaroon, modifier = Modifier.size(32.dp))
             }
-            !isSignedIn -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            !accountState.isSignedIn -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
                     Text("Connect Google Calendar", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     Spacer(Modifier.height(8.dp))
                     Text("Tap the account icon above to sign in", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                     Spacer(Modifier.height(20.dp))
                     Button(
-                        onClick = onConnectClick,
+                        onClick = accountState.onConnectClick,
                         colors  = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon),
                         shape   = RoundedCornerShape(12.dp)
                     ) { Text("Connect") }
@@ -186,30 +199,56 @@ private fun WeekNavigationRow(weekStartMs: Long, onPrev: () -> Unit, onNext: () 
 
 // ── Day column headers ────────────────────────────────────────────────────────
 
+private val DAY_LETTERS = listOf("M", "T", "W", "T", "F", "S", "S")
+
+private fun calendarForDay(weekStartMs: Long, offset: Int): Calendar =
+    Calendar.getInstance().apply { timeInMillis = weekStartMs + offset * 24L * 60 * 60 * 1000 }
+
+private fun isToday(cal: Calendar): Boolean {
+    val today = Calendar.getInstance()
+    return cal.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR) &&
+           cal.get(Calendar.YEAR)        == today.get(Calendar.YEAR)
+}
+
 @Composable
 private fun DayColumnHeaders(weekStartMs: Long) {
-    val letters = listOf("M", "T", "W", "T", "F", "S", "S")
-    val today   = Calendar.getInstance()
     Row(modifier = Modifier.fillMaxWidth()) {
         Spacer(Modifier.width(TimeColumnWidth))
         for (i in 0..6) {
-            val cal = Calendar.getInstance().apply { timeInMillis = weekStartMs + i * 24L * 60 * 60 * 1000 }
-            val isToday = cal.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR) &&
-                          cal.get(Calendar.YEAR) == today.get(Calendar.YEAR)
-            Column(modifier = Modifier.weight(1f).padding(vertical = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(letters[i], fontSize = 10.sp,
-                    color = if (isToday) TodayHighlight else Color(0xFF70757A),
-                    fontWeight = FontWeight.Medium)
-                Spacer(Modifier.height(2.dp))
-                Box(modifier = Modifier.size(26.dp)
-                    .then(if (isToday) Modifier.background(TodayHighlight, RoundedCornerShape(50)) else Modifier),
-                    contentAlignment = Alignment.Center) {
-                    Text(cal.get(Calendar.DAY_OF_MONTH).toString(), fontSize = 13.sp,
-                        fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isToday) Color.White else Color(0xFF3C4043))
-                }
-            }
+            DayHeaderCell(
+                letter    = DAY_LETTERS[i],
+                dayNumber = calendarForDay(weekStartMs, i).get(Calendar.DAY_OF_MONTH),
+                isToday   = isToday(calendarForDay(weekStartMs, i))
+            )
+        }
+    }
+}
+
+@Composable
+private fun RowScope.DayHeaderCell(letter: String, dayNumber: Int, isToday: Boolean) {
+    Column(
+        modifier              = Modifier.weight(1f).padding(vertical = 4.dp),
+        horizontalAlignment   = Alignment.CenterHorizontally
+    ) {
+        Text(
+            letter,
+            fontSize   = 10.sp,
+            color      = if (isToday) TodayHighlight else Color(0xFF70757A),
+            fontWeight = FontWeight.Medium
+        )
+        Spacer(Modifier.height(2.dp))
+        Box(
+            modifier           = Modifier.size(26.dp).then(
+                if (isToday) Modifier.background(TodayHighlight, RoundedCornerShape(50)) else Modifier
+            ),
+            contentAlignment   = Alignment.Center
+        ) {
+            Text(
+                dayNumber.toString(),
+                fontSize   = 13.sp,
+                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
+                color      = if (isToday) Color.White else Color(0xFF3C4043)
+            )
         }
     }
 }

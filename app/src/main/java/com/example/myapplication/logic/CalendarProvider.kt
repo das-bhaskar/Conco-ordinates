@@ -3,7 +3,8 @@ package com.example.myapplication.logic
 import android.content.Context
 import com.example.myapplication.data.CalendarEvent
 import com.example.myapplication.telemetry.CrashReporter
-import kotlinx.coroutines.Dispatchers
+import com.example.myapplication.logic.DefaultDispatcherProvider
+import com.example.myapplication.logic.DispatcherProvider
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -109,7 +110,8 @@ fun currentWeekMonday(): Long {
  */
 class GoogleCalendarProvider(
     private val context: Context,
-    private val tokenProvider: suspend () -> String?
+    private val tokenProvider: suspend () -> String?,
+    private val dispatchers: DispatcherProvider = DefaultDispatcherProvider()
 ) : CalendarProvider {
 
     private val client = OkHttpClient()
@@ -117,7 +119,7 @@ class GoogleCalendarProvider(
 
     // ── Public API ────────────────────────────────────────────────────────────
 
-    override suspend fun getCalendars(): List<CalendarInfo> = withContext(Dispatchers.IO) {
+    override suspend fun getCalendars(): List<CalendarInfo> = withContext(dispatchers.io) {
         val token = tokenProvider() ?: return@withContext emptyList()
 
         return@withContext try {
@@ -133,7 +135,7 @@ class GoogleCalendarProvider(
         calendarId: String,
         afterMs: Long,
         maxResults: Int
-    ): List<CalendarEvent> = withContext(Dispatchers.IO) {
+    ): List<CalendarEvent> = withContext(dispatchers.io) {
         val token = tokenProvider() ?: return@withContext emptyList()
 
         // RFC 3339 timestamp required by the API

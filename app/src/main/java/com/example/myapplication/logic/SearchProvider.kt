@@ -17,14 +17,14 @@ sealed class SearchResult {
 }
 
 class HybridSearchProvider(private val placesClient: PlacesClient) {
-    suspend fun search(query: String, campusRepo: CampusRepo): List<SearchResult> {
+    suspend fun search(query: String): List<SearchResult> {
         if (query.isBlank()) return listOf(SearchResult.CurrentLocation, SearchResult.Home)
 
-        val campusMatches = campusRepo.getAllCampuses().filter { campus ->
+        val campusMatches = CampusRepo.getAllCampuses().filter { campus ->
             campus.name.contains(query, ignoreCase = true)
         }.map { SearchResult.CampusResult(it) }
 
-        val allBuildings = campusRepo.getAllCampuses().flatMap { it.buildings }
+        val allBuildings = CampusRepo.getAllCampuses().flatMap { it.buildings }
         val localMatches = allBuildings.filter { building ->
             building.name.contains(query, ignoreCase = true) ||
                     building.code.contains(query, ignoreCase = true) ||

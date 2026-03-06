@@ -208,7 +208,7 @@ class MapViewModel(
         }
         viewModelScope.launch {
             searchProvider?.let { provider ->
-                searchResults = provider.search(newQuery, CampusRepo)
+                searchResults = provider.search(newQuery)
             }
         }
     }

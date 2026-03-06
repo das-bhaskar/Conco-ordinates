@@ -25,7 +25,6 @@ import org.mockito.kotlin.*
 class HybridSearchProviderTest {
 
     private lateinit var placesClient: PlacesClient
-    private lateinit var campusRepo: CampusRepo
     private lateinit var provider: HybridSearchProvider
 
     private val googleName = "Google"
@@ -55,11 +54,9 @@ class HybridSearchProviderTest {
     @Before
     fun setup() {
         placesClient = mock()
-        campusRepo = mock()
         provider = HybridSearchProvider(placesClient)
 
-        whenever(campusRepo.getAllCampuses()).thenReturn(listOf(testCampus))
-
+        CampusRepo.setTestCampuses(listOf(testCampus))
 
         val primaryText: SpannableString = mock { on { toString() } doReturn googleName }
         val secondaryText: SpannableString = mock { on { toString() } doReturn googleAddress }
@@ -79,7 +76,7 @@ class HybridSearchProviderTest {
     @Test
     fun `search returns GoogleResult`() = runTest {
 
-        val results = provider.search("Whatever", campusRepo)
+        val results = provider.search("Whatever")
 
         val googleResult = results.filterIsInstance<SearchResult.GoogleResult>().firstOrNull()
 
@@ -92,7 +89,7 @@ class HybridSearchProviderTest {
     @Test
     fun `search returns BuildingResults by name`() = runTest {
 
-        val results = provider.search("Hall Building", campusRepo)
+        val results = provider.search("Hall Building")
 
         val buildingResult = results.filterIsInstance<SearchResult.BuildingResult>().firstOrNull()
 
@@ -105,7 +102,7 @@ class HybridSearchProviderTest {
     @Test
     fun `search returns BuildingResults by address`() = runTest {
 
-        val results = provider.search("1455", campusRepo)
+        val results = provider.search("1455")
 
         val buildingResult = results.filterIsInstance<SearchResult.BuildingResult>().firstOrNull()
 
@@ -118,7 +115,7 @@ class HybridSearchProviderTest {
     @Test
     fun `search returns BuildingResults by code`() = runTest {
 
-        val results = provider.search("H", campusRepo)
+        val results = provider.search("H")
 
         val buildingResult = results.filterIsInstance<SearchResult.BuildingResult>().firstOrNull()
 
@@ -131,7 +128,7 @@ class HybridSearchProviderTest {
     @Test
     fun `search returns CampusResults by name`() = runTest {
 
-        val results = provider.search("SGW", campusRepo)
+        val results = provider.search("SGW")
 
         val campusResult = results.filterIsInstance<SearchResult.CampusResult>().firstOrNull()
 
@@ -142,7 +139,7 @@ class HybridSearchProviderTest {
 
     @Test
     fun `search with blank query returns current location and home`() = runTest {
-        val results = provider.search("", campusRepo)
+        val results = provider.search("")
         assertEquals(listOf(SearchResult.CurrentLocation, SearchResult.Home), results)
     }
 

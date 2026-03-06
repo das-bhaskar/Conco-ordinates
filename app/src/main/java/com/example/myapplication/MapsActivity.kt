@@ -327,53 +327,63 @@ class MapsActivity : ComponentActivity() {
                 modifier      = Modifier.align(Alignment.TopCenter).padding(top = 8.dp)
             )
         } else {
-            if (viewModel.uiBuildingState.isSearchExpanded) {
-                DirectionsHeader(
-                    uiState            = viewModel.uiBuildingState,
-                    onBackClick        = { viewModel.toggleSearchExpansion(false) },
-                    onStartQueryChange = { viewModel.onSearchQueryChanged(it, field = "start") },
-                    onDestQueryChange  = { viewModel.onSearchQueryChanged(it, field = "dest") },
-                    modifier           = Modifier.align(Alignment.TopCenter)
-                )
-            }
-            if (mode == MapUIMode.DIRECTIONS) {
-                DirectionsInfoPopup(
-                    uiState            = viewModel.uiBuildingState,
-                    onModeChange       = { viewModel.onTransportModeChanged(it) },
-                    onStartClick       = { viewModel.toggleSearchExpansion(true, "start") },
-                    onDestinationClick = { viewModel.toggleSearchExpansion(true, "dest") },
-                    onSwapClick        = { viewModel.swapLocations() },
-                    onClose            = { viewModel.onBackToPreview() },
-                    onStartNavigation  = { },
-                    modifier           = Modifier.align(Alignment.BottomCenter)
-                )
-            }
-            val currentFieldText = when (viewModel.activeSearchField) {
-                "start" -> viewModel.uiBuildingState.startLocationName
-                "dest"  -> viewModel.uiBuildingState.destinationName
-                else    -> viewModel.searchQuery
-            }
-            if (viewModel.activeSearchField != "main" && currentFieldText.isNotEmpty()) {
-                Card(
-                    modifier  = Modifier.padding(horizontal = 24.dp).offset(y = 190.dp).zIndex(1f),
-                    elevation = CardDefaults.cardElevation(4.dp),
-                    colors    = CardDefaults.cardColors(containerColor = Color.White)
-                ) {
-                    LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp)) {
-                        items(viewModel.searchResults) { result ->
-                            val title = when (result) {
-                                is SearchResult.BuildingResult  -> result.building.name
-                                is SearchResult.CampusResult    -> result.campus.name
-                                is SearchResult.GoogleResult    -> result.title
-                                is SearchResult.CurrentLocation -> "Your position"
-                                is SearchResult.Home            -> "Home"
-                            }
-                            ListItem(
-                                headlineContent = { Text(title) },
-                                modifier        = Modifier.clickable { viewModel.handleSearchResult(result, context) }
-                            )
-                        }
+            DirectionsOverlay(context)
+        }
+    }
+
+    @Composable
+    private fun BoxScope.DirectionsOverlay(context: android.content.Context) {
+        val mode = viewModel.uiBuildingState.mode
+        if (viewModel.uiBuildingState.isSearchExpanded) {
+            DirectionsHeader(
+                uiState            = viewModel.uiBuildingState,
+                onBackClick        = { viewModel.toggleSearchExpansion(false) },
+                onStartQueryChange = { viewModel.onSearchQueryChanged(it, field = "start") },
+                onDestQueryChange  = { viewModel.onSearchQueryChanged(it, field = "dest") },
+                modifier           = Modifier.align(Alignment.TopCenter)
+            )
+        }
+        if (mode == MapUIMode.DIRECTIONS) {
+            DirectionsInfoPopup(
+                uiState            = viewModel.uiBuildingState,
+                onModeChange       = { viewModel.onTransportModeChanged(it) },
+                onStartClick       = { viewModel.toggleSearchExpansion(true, "start") },
+                onDestinationClick = { viewModel.toggleSearchExpansion(true, "dest") },
+                onSwapClick        = { viewModel.swapLocations() },
+                onClose            = { viewModel.onBackToPreview() },
+                onStartNavigation  = { },
+                modifier           = Modifier.align(Alignment.BottomCenter)
+            )
+        }
+        DirectionsSearchResults(context)
+    }
+
+    @Composable
+    private fun BoxScope.DirectionsSearchResults(context: android.content.Context) {
+        val currentFieldText = when (viewModel.activeSearchField) {
+            "start" -> viewModel.uiBuildingState.startLocationName
+            "dest"  -> viewModel.uiBuildingState.destinationName
+            else    -> viewModel.searchQuery
+        }
+        if (viewModel.activeSearchField == "main" || currentFieldText.isEmpty()) return
+        Card(
+            modifier  = Modifier.padding(horizontal = 24.dp).offset(y = 190.dp).zIndex(1f),
+            elevation = CardDefaults.cardElevation(4.dp),
+            colors    = CardDefaults.cardColors(containerColor = Color.White)
+        ) {
+            LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp)) {
+                items(viewModel.searchResults) { result ->
+                    val title = when (result) {
+                        is SearchResult.BuildingResult  -> result.building.name
+                        is SearchResult.CampusResult    -> result.campus.name
+                        is SearchResult.GoogleResult    -> result.title
+                        is SearchResult.CurrentLocation -> "Your position"
+                        is SearchResult.Home            -> "Home"
                     }
+                    ListItem(
+                        headlineContent = { Text(title) },
+                        modifier        = Modifier.clickable { viewModel.handleSearchResult(result, context) }
+                    )
                 }
             }
         }

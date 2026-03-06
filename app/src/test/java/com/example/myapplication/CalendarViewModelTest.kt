@@ -31,7 +31,7 @@ class CalendarViewModelTest {
 
     // ── Test fixtures ─────────────────────────────────────────────────────────
 
-    private val calInfo = CalendarInfo(id = "cal-1", name = "My Courses", isPrimary = true)
+    private val calInfo = CalendarInfo(id = "cal-1", summary = "My Courses")
 
     private fun futureEvent(id: String = "evt-1", location: String = "H 820 SGW") = CalendarEvent(
         id          = id,

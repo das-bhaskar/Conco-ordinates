@@ -1,11 +1,11 @@
 package com.example.myapplication.ui.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import com.example.myapplication.map.TrueCameraController
 import com.example.myapplication.telemetry.CrashReporter
-import com.example.myapplication.ui.viewmodel.MapViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -34,29 +34,43 @@ import kotlinx.coroutines.delay
 fun ObserveLocationUpdates(
     hasLocationPermission: Boolean,
     fusedLocationClient: FusedLocationProviderClient,
-    viewModel: MapViewModel
+    onLocationUpdate: (com.google.android.gms.maps.model.LatLng) -> Unit
 ) {
-    LaunchedEffect(hasLocationPermission) {
+    // DisposableEffect (PR review): ensures removeLocationUpdates is called in
+    // onDispose when the composable leaves the composition or permission is revoked,
+    // preventing a callback leak that LaunchedEffect cannot clean up.
+    DisposableEffect(hasLocationPermission) {
         CrashReporter.setKey("location_permission_granted", hasLocationPermission)
-        if (!hasLocationPermission) return@LaunchedEffect
 
-        val locationRequest = LocationRequest.Builder(
-            Priority.PRIORITY_HIGH_ACCURACY, 5000
-        ).build()
+        // Only register updates when permission is granted.
+        // Either way, onDispose is always the last expression — required by DisposableEffect.
+        val locationCallback: LocationCallback? = if (hasLocationPermission) {
+            val locationRequest = LocationRequest.Builder(
+                Priority.PRIORITY_HIGH_ACCURACY, 5000
+            ).build()
 
-        val locationCallback = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
-                result.lastLocation?.let { loc ->
-                    viewModel.processLocationUpdate(LatLng(loc.latitude, loc.longitude))
+            val callback = object : LocationCallback() {
+                override fun onLocationResult(result: LocationResult) {
+                    result.lastLocation?.let { loc ->
+                        onLocationUpdate(LatLng(loc.latitude, loc.longitude))
+                    }
                 }
             }
+            try {
+                fusedLocationClient.requestLocationUpdates(
+                    locationRequest, callback, android.os.Looper.getMainLooper()
+                )
+            } catch (e: SecurityException) {
+                CrashReporter.recordNonFatal(e, "request_location_updates_failed")
+            }
+            callback
+        } else {
+            null  // permission not granted — nothing to register
         }
-        try {
-            fusedLocationClient.requestLocationUpdates(
-                locationRequest, locationCallback, android.os.Looper.getMainLooper()
-            )
-        } catch (e: SecurityException) {
-            CrashReporter.recordNonFatal(e, "request_location_updates_failed")
+
+        onDispose {
+            // locationCallback is null when permission was never granted — safe no-op
+            locationCallback?.let { fusedLocationClient.removeLocationUpdates(it) }
         }
     }
 }
@@ -80,11 +94,12 @@ fun rememberMapCamera(): CameraPositionState {
 @Composable
 fun ObserveCameraEffects(
     cameraPositionState: CameraPositionState,
-    cameraController: TrueCameraController,
-    viewModel: MapViewModel
+    cameraController:    TrueCameraController,
+    uiState:             com.example.myapplication.ui.models.BuildingUiState,
+    currentCampus:       com.example.myapplication.data.Campus?
 ) {
-    LaunchedEffect(viewModel.uiBuildingState.routeBounds) {
-        val bounds = viewModel.uiBuildingState.routeBounds
+    LaunchedEffect(uiState.routeBounds) {
+        val bounds = uiState.routeBounds
         if (bounds != null) {
             delay(500)
             cameraPositionState.animate(
@@ -93,13 +108,13 @@ fun ObserveCameraEffects(
             )
         }
     }
-    LaunchedEffect(viewModel.currentCampus) {
-        viewModel.currentCampus?.let { campus ->
+    LaunchedEffect(currentCampus) {
+        currentCampus?.let { campus ->
             CrashReporter.setKey("selected_campus", campus.name)
             cameraController.animateTo(campus.getGoogleCenter(), campus.defaultZoom)
         }
     }
-    LaunchedEffect(viewModel.uiBuildingState.mode) {
-        CrashReporter.setKey("map_mode", viewModel.uiBuildingState.mode.name)
+    LaunchedEffect(uiState.mode) {
+        CrashReporter.setKey("map_mode", uiState.mode.name)
     }
 }

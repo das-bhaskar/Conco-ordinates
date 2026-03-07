@@ -23,9 +23,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.components.CalendarScreen
+import com.example.myapplication.ui.components.CalendarActions
+import com.example.myapplication.ui.components.UserAccountState
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.viewmodel.CalendarViewModel
-import com.example.myapplication.ui.viewmodel.MapViewModel
 
 // ── Route definitions ─────────────────────────────────────────────────────────
 // Sealed class keeps all route strings in one place — no magic strings scattered
@@ -48,14 +49,23 @@ sealed class Screen(val route: String) {
  * MapsActivity executes the building code command. No ViewModel knows about
  * the other domain.
  */
+/**
+ * Bundles cross-screen navigation callbacks into one stable object (PR review).
+ *
+ * Grouping them ensures the NavHost always fires both [onNavigateToMap]
+ * AND the NavController switch together — preventing state desync.
+ */
+data class NavigationActions(
+    val onNavigateToMap: (buildingCode: String) -> Unit,
+    val onConnectClick:  () -> Unit,
+    val onSignOutClick:  () -> Unit
+)
+
 @Composable
 fun AppNavigation(
     calendarViewModel: CalendarViewModel,
-    mapViewModel: MapViewModel,
-    userEmail: String,
-    onConnectClick: () -> Unit,
-    onSignOutClick: () -> Unit,
-    onNavigateToMap: (buildingCode: String) -> Unit,
+    userEmail:         String,
+    navigationActions: NavigationActions,
     mapContent: @Composable () -> Unit
 ) {
     val navController = rememberNavController()
@@ -111,28 +121,33 @@ fun AppNavigation(
                 composable(Screen.Calendar.route) {
                     val calId = calendarViewModel.selectedCalendarId
                     CalendarScreen(
-                        calendarState     = calendarViewModel.calendarState,
-                        weekStartMs       = calendarViewModel.currentWeekStartMs,
-                        weekEvents        = calendarViewModel.weekEvents,
-                        isLoading         = calendarViewModel.weekViewLoading,
-                        isSignedIn        = calId != null,
-                        userEmail         = userEmail,
-                        onConnectClick    = onConnectClick,
-                        onSignOutClick    = onSignOutClick,
-                        onCalendarPicked  = calendarViewModel::onCalendarSelected,
-                        onPreviousWeek    = { calId?.let { calendarViewModel.goToPreviousWeek(it) } },
-                        onNextWeek        = { calId?.let { calendarViewModel.goToNextWeek(it) } },
-                        onNavigateToEvent = { buildingCode ->
-                            // Coordinator: emit intent → navigate to Map → execute command
-                            onNavigateToMap(buildingCode)
-                            navController.navigate(Screen.Map.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                        calendarState  = calendarViewModel.calendarState,
+                        weekStartMs    = calendarViewModel.currentWeekStartMs,
+                        weekEvents     = calendarViewModel.weekEvents,
+                        isLoading      = calendarViewModel.weekViewLoading,
+                        accountState   = UserAccountState(
+                            isSignedIn = calId != null,
+                            userEmail  = userEmail
+                        ),
+                        calendarActions = CalendarActions(
+                            onConnectClick   = navigationActions.onConnectClick,
+                            onSignOutClick   = navigationActions.onSignOutClick,
+                            onCalendarPicked = calendarViewModel::onCalendarSelected,
+                            onPreviousWeek   = { calId?.let { calendarViewModel.goToPreviousWeek(it) } },
+                            onNextWeek       = { calId?.let { calendarViewModel.goToNextWeek(it) } },
+                            // NavigationActions guarantees Coordinator callback + NavController
+                            // switch always fire together — prevents state desync (PR review).
+                            onNavigateToEvent = { buildingCode ->
+                                navigationActions.onNavigateToMap(buildingCode)
+                                navController.navigate(Screen.Map.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState    = true
                                 }
-                                launchSingleTop = true
-                                restoreState    = true
                             }
-                        }
+                        )
                     )
                 }
             }

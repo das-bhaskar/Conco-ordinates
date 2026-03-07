@@ -20,7 +20,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.data.ResolvedCalendarEvent
-import java.util.*
 
 private val ConcordiaMaroon = Color(0xFF912338)
 
@@ -29,27 +28,21 @@ private val ConcordiaMaroon = Color(0xFF912338)
  * Tap → immediate navigation to the building.
  * Invisible when [nextEvent] is null.
  *
- * This composable is fully stateless regarding business rules:
- * - [isUrgent] is computed by [CalendarViewModel] (threshold lives there)
- * - [nextEvent] is a [ResolvedCalendarEvent] — location already parsed
+ * Fully stateless regarding business rules (PR review):
+ * - [isUrgent] computed by CalendarViewModel (threshold lives there)
+ * - [timeRemaining] formatted by CalendarViewModel (e.g. "in 12m", "Now")
+ * - [nextEvent] is a ResolvedCalendarEvent — location already parsed
  * The Pill only decides how to render the state it receives.
  */
 @Composable
 fun NextClassPill(
     nextEvent:       ResolvedCalendarEvent?,
     isUrgent:        Boolean,
+    timeRemaining:   String,          // pre-formatted by CalendarViewModel
     onNavigateClick: () -> Unit,
     modifier:        Modifier = Modifier
 ) {
     if (nextEvent == null) return
-
-    val nowMs        = System.currentTimeMillis()
-    val minutesUntil = ((nextEvent.startTimeMs - nowMs) / 60_000).coerceAtLeast(0)
-    val timeLabel    = when {
-        minutesUntil == 0L -> "Now"
-        minutesUntil < 60  -> "in ${minutesUntil}m"
-        else               -> "in ${minutesUntil / 60}h ${minutesUntil % 60}m"
-    }
 
     Row(
         modifier = modifier
@@ -77,7 +70,7 @@ fun NextClassPill(
             modifier   = Modifier.widthIn(max = 160.dp)
         )
         Text(
-            text     = timeLabel,
+            text     = timeRemaining,
             fontSize = 12.sp,
             color    = if (isUrgent) Color.White.copy(alpha = 0.85f) else Color(0xFF5F6368)
         )

@@ -185,7 +185,7 @@ class MapViewModel(
                 }
             }
             is SearchResult.Home -> {
-                val homePos = HOME_POSITION
+                val homePos = LatLng(45.51723868665001, -73.627297124046)
                 mapEvent = homePos
                 uiBuildingState = uiBuildingState.copy(startPoint = homePos)
             }
@@ -290,6 +290,8 @@ class MapViewModel(
         }
     }
 
+    fun calculateRoute() = calculateRouteWithState()
+
     /**
      * Navigate to a building by code — Map domain only, no Calendar awareness.
      *
@@ -301,21 +303,20 @@ class MapViewModel(
      * State is committed in a single atomic copy() to prevent UI flickering.
      */
     fun navigateToBuildingCode(buildingCode: String) {
-        // Single O(1) lookup — no flatMap iteration
+        // O(1) lookup — no flatMap iteration
         val building = buildingIndex[buildingCode.lowercase()]
 
-        // ONE atomic copy() — destination fields + route reset in the same write.
-        // Without the reset, the UI briefly renders DIRECTIONS mode with stale
-        // route data from the previous navigation (partial-update jank).
-        // calculateRouteWithState() is async (coroutine + network) and does the
-        // second write only after the route arrives, so the user always sees a
-        // clean blank-route state before the new polyline appears.
+        // Resolve values first, then commit in ONE atomic copy() (PR review: single-update policy).
+        // Includes route reset so UI never sees DIRECTIONS mode with stale polyline from
+        // a previous navigation — calculateRouteWithState() fills them in asynchronously.
+        val newDestName = building?.name ?: buildingCode
         uiBuildingState = uiBuildingState.copy(
             mode              = MapUIMode.DIRECTIONS,
-            destinationName   = building?.name ?: buildingCode,
+            destinationName   = newDestName,
             building          = building,
             endPoint          = building?.getCenter(),
-            // Reset stale route fields atomically — no partial state visible to UI
+            // Route reset — atomically cleared so the UI shows a clean blank state
+            // before the new polyline arrives from calculateRouteWithState()
             routePoints       = emptyList(),
             routeDuration     = "-- min",
             routeDistance     = "-- m",
@@ -326,8 +327,14 @@ class MapViewModel(
         if (building != null) {
             calculateRouteWithState()
         } else {
-            // Building not in local data — fall back to search
-            onSearchQueryChanged(buildingCode, field = "dest")
+            // Building not in local index — fall back to search.
+            // Do NOT call onSearchQueryChanged() here: it would write uiBuildingState
+            // a second time (destinationName overwrite), violating the single-update policy.
+            // Instead, set only the search fields and trigger the provider directly.
+            activeSearchField = "dest"
+            viewModelScope.launch {
+                searchProvider?.let { searchResults = it.search(buildingCode) }
+            }
         }
     }
 
@@ -370,11 +377,6 @@ class MapViewModel(
     }
 
     // ── Private helpers ────────────────────────────────────────────────────────
-
-    companion object {
-        /** Coordinates used for the "Home" search result quick-action. */
-        val HOME_POSITION = LatLng(45.51723868665001, -73.627297124046)
-    }
 
     private data class ShuttleSnapshot(
         val availability:  com.example.myapplication.data.ShuttleAvailability,

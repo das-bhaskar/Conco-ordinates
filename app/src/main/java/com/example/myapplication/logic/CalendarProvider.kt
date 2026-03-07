@@ -5,6 +5,8 @@ import com.example.myapplication.data.CalendarEvent
 import com.example.myapplication.telemetry.CrashReporter
 import com.example.myapplication.logic.DefaultDispatcherProvider
 import com.example.myapplication.logic.DispatcherProvider
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -73,7 +75,7 @@ interface CalendarProvider {
         calendarId: String,
         weekStartMs: Long = currentWeekMonday()
     ): List<CalendarEvent> {
-        val weekEndMs = weekStartMs + 7L * 24 * 60 * 60 * 1000
+        val weekEndMs = Instant.ofEpochMilli(weekStartMs).plus(7, ChronoUnit.DAYS).toEpochMilli()
         return getUpcomingEvents(calendarId, afterMs = weekStartMs, maxResults = 100)
             .filter { it.startTimeMs < weekEndMs }
     }

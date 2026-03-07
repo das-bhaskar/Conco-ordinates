@@ -1,7 +1,6 @@
 package com.example.myapplication.logic
 
 import com.example.myapplication.data.BuildingNameProvider
-import com.example.myapplication.data.CampusBuildingNameProvider
 import com.example.myapplication.data.LocationResult
 import com.example.myapplication.data.ParsedLocation
 
@@ -22,7 +21,7 @@ private const val CAMPUS_LOYOLA = "Loyola"
  * without touching any ViewModel or data class.
  */
 class LocationResolver(
-    private val buildingNames: BuildingNameProvider = CampusBuildingNameProvider
+    private val buildingNames: BuildingNameProvider  // injected at call-site — no default
 ) {
 
     /**

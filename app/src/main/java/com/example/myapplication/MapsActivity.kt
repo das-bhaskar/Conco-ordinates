@@ -127,7 +127,10 @@ class MapsActivity : ComponentActivity() {
         )
         calendarViewModel = CalendarViewModel(
             calendarProvider    = calendarProvider,
-            calendarPreferences = SharedPrefsCalendarPreferences(this)
+            calendarPreferences = SharedPrefsCalendarPreferences(this),
+            locationResolver    = com.example.myapplication.logic.LocationResolver(
+                com.example.myapplication.data.CampusBuildingNameProvider()
+            )
         )
 
         val placesClient = com.google.android.libraries.places.api.Places.createClient(this)
@@ -136,19 +139,35 @@ class MapsActivity : ComponentActivity() {
         setContent {
             AppNavigation(
                 calendarViewModel = calendarViewModel,
-                mapViewModel      = viewModel,
+                navigationActions = com.example.myapplication.ui.screens.NavigationActions(
+                    onNavigateToMap  = { buildingCode -> viewModel.navigateToBuildingCode(buildingCode) },
+                    onConnectClick   = { connectCalendar() },
+                    onSignOutClick   = { signOutCalendar() }
+                ),
                 userEmail         = authRepository.getSignedInEmail() ?: "",
-                onConnectClick    = { connectCalendar() },
-                onSignOutClick    = { signOutCalendar() },
-                onNavigateToMap   = { buildingCode ->
-                    // Activity executes the navigation command — logic lives in ViewModels
-                    viewModel.navigateToBuildingCode(buildingCode)
-                },
                 mapContent        = {
                     MapScreen(
-                        mapViewModel        = viewModel,
-                        calendarViewModel   = calendarViewModel,
-                        fusedLocationClient = fusedLocationClient
+                        mapViewModel           = viewModel,
+                        currentCampus          = viewModel.currentCampus,
+                        highlightedBuildingName= viewModel.highlightedBuildingName,
+                        searchQuery            = viewModel.searchQuery,
+                        searchResults          = viewModel.searchResults,
+                        activeSearchField      = viewModel.activeSearchField,
+                        nextClassEvent         = calendarViewModel.nextUpcomingEvent,
+                        isNextClassUrgent      = calendarViewModel.isNextClassUrgent,
+                        nextClassTimeRemaining = calendarViewModel.nextClassTimeRemaining,
+                        fusedLocationClient    = fusedLocationClient,
+                        onSearchQueryChanged   = { q, f -> viewModel.onSearchQueryChanged(q, f) },
+                        onSearchResult         = { r, ctx -> viewModel.handleSearchResult(r, ctx) },
+                        onTransportModeChanged = { viewModel.onTransportModeChanged(it) },
+                        onToggleSearchExpansion= { e, f -> viewModel.toggleSearchExpansion(e, f) },
+                        onSwapLocations        = { viewModel.swapLocations() },
+                        onBackToPreview        = { viewModel.onBackToPreview() },
+                        onCampusSelected       = { viewModel.onCampusSelected(it) },
+                        onBuildingDismiss      = { viewModel.handleMapTap(null) },
+                        onDirectionsRequested  = { viewModel.onDirectionsRequested() },
+                        onLocationUpdate       = { loc, force -> viewModel.processLocationUpdate(loc, force) },
+                        onNavigateToBuilding   = { viewModel.navigateToBuildingCode(it) }
                     )
                 }
             )

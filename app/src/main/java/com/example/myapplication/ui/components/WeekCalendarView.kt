@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.components
 
+import com.example.myapplication.logic.DateUtils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -65,6 +66,7 @@ data class CalendarAccountState(
 fun WeekCalendarView(
     weekStartMs:       Long,
     events:            List<ResolvedCalendarEvent>,
+    eventsByDay:       Map<Int, List<ResolvedCalendarEvent>> = emptyMap(), // pre-grouped by ViewModel
     isLoading:         Boolean,
     accountState:      CalendarAccountState = CalendarAccountState(),
     onPreviousWeek:    () -> Unit,
@@ -124,7 +126,7 @@ fun WeekCalendarView(
                     ) { Text("Connect") }
                 }
             }
-            else -> TimeGrid(weekStartMs, events) { clicked -> pendingEvent = clicked }
+            else -> TimeGrid(weekStartMs, events, eventsByDay) { clicked -> pendingEvent = clicked }
         }
     }
 
@@ -207,8 +209,10 @@ private fun CalendarTopBar(
 // ── Week navigation row ───────────────────────────────────────────────────────
 @Composable
 private fun WeekNavigationRow(weekStartMs: Long, onPrev: () -> Unit, onNext: () -> Unit) {
-    val fmt       = SimpleDateFormat("d MMM", Locale.getDefault())
-    val weekEndMs = weekStartMs + 6L * 24 * 60 * 60 * 1000
+    val fmt       = DateUtils.dayMonthFormatter()
+    // DST-safe: Instant.plus(6, DAYS) instead of raw ms arithmetic (PR review)
+    val weekEndMs = java.time.Instant.ofEpochMilli(weekStartMs)
+        .plus(6, java.time.temporal.ChronoUnit.DAYS).toEpochMilli()
     Row(
         modifier          = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -234,7 +238,11 @@ private fun WeekNavigationRow(weekStartMs: Long, onPrev: () -> Unit, onNext: () 
 private val DAY_LETTERS = listOf("M", "T", "W", "T", "F", "S", "S")
 
 private fun calendarForDay(weekStartMs: Long, offset: Int): Calendar =
-    Calendar.getInstance().apply { timeInMillis = weekStartMs + offset * 24L * 60 * 60 * 1000 }
+    Calendar.getInstance().apply {
+        // DST-safe day offset via Instant (PR review)
+        timeInMillis = java.time.Instant.ofEpochMilli(weekStartMs)
+            .plus(offset.toLong(), java.time.temporal.ChronoUnit.DAYS).toEpochMilli()
+    }
 
 private fun isToday(cal: Calendar): Boolean {
     val today = Calendar.getInstance()
@@ -290,6 +298,7 @@ private fun RowScope.DayHeaderCell(letter: String, dayNumber: Int, isToday: Bool
 private fun TimeGrid(
     weekStartMs:  Long,
     events:       List<ResolvedCalendarEvent>,
+    eventsByDay:  Map<Int, List<ResolvedCalendarEvent>>,  // pre-grouped by ViewModel
     onEventClick: (ResolvedCalendarEvent) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -321,13 +330,20 @@ private fun TimeGrid(
         }
         Row(modifier = Modifier.weight(1f)) {
             for (dayIndex in 0..6) {
-                val dayStartMs = weekStartMs + dayIndex * 24L * 60 * 60 * 1000
+                // DST-safe day boundary via Instant (PR review)
+                val dayStartMs = java.time.Instant.ofEpochMilli(weekStartMs)
+                    .plus(dayIndex.toLong(), java.time.temporal.ChronoUnit.DAYS).toEpochMilli()
                 val dayCal     = Calendar.getInstance().apply { timeInMillis = dayStartMs }
                 val isTodayCol = dayCal[Calendar.DAY_OF_YEAR] == today[Calendar.DAY_OF_YEAR] &&
                                  dayCal[Calendar.YEAR]        == today[Calendar.YEAR]
-                val dayEvents  = events.filter {
-                    it.startTimeMs >= dayStartMs &&
-                    it.startTimeMs <  dayStartMs + 24L * 60 * 60 * 1000
+                // eventsByDay pre-grouped by ViewModel — O(1) lookup instead of O(n×7).
+                // Fall back to filtering from events list when eventsByDay not provided.
+                val dayEndMs  = java.time.Instant.ofEpochMilli(dayStartMs)
+                    .plus(1, java.time.temporal.ChronoUnit.DAYS).toEpochMilli()
+                val dayEvents = if (eventsByDay.isNotEmpty()) {
+                    eventsByDay[dayIndex] ?: emptyList()
+                } else {
+                    events.filter { it.startTimeMs >= dayStartMs && it.startTimeMs < dayEndMs }
                 }
                 DayColumn(dayStartMs, dayEvents, isTodayCol, onEventClick, Modifier.weight(1f))
             }
@@ -404,7 +420,7 @@ private fun BoxScope.EventBlock(
             )
             if (heightDp > 30)
                 Text(
-                    SimpleDateFormat("H:mm", Locale.getDefault()).format(Date(event.startTimeMs)),
+                    DateUtils.eventTimeFormatter().format(java.util.Date(event.startTimeMs)),
                     fontSize = 9.sp,
                     color    = Color.White.copy(alpha = 0.85f),
                     maxLines = 1

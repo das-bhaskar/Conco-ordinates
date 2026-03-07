@@ -61,7 +61,17 @@ class CalendarViewModelTest {
         val provider = MockCalendarProvider(calendars = calendars, events = events)
         val vm = CalendarViewModel(
             calendarProvider    = provider,
-            calendarPreferences = prefs
+            calendarPreferences = prefs,
+            locationResolver    = com.example.myapplication.logic.LocationResolver(
+                buildingNames = { code ->
+                    mapOf(
+                        "H"  to "Henry F. Hall Building",
+                        "MB" to "John Molson Building",
+                        "EV" to "Engineering & Visual Arts",
+                        "HC" to "Hingston Hall"
+                    )[code]
+                }
+            )
         )
         return vm to prefs
     }

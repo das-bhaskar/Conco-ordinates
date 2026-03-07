@@ -23,6 +23,12 @@ import org.junit.Test
  * Uses [MockCalendarProvider] and [FakeCalendarPreferences] — zero Android
  * framework dependencies. [StandardTestDispatcher] gives deterministic
  * coroutine execution via [advanceUntilIdle].
+ *
+ * After the PR #282 refactor:
+ *  - [CalendarState.NextClassReady] and [CalendarState.NoUpcomingClass] are
+ *    removed. "Next class" state is exposed as [CalendarViewModel.nextUpcomingEvent]
+ *    (a derived property), so tests assert on that property instead.
+ *  - [FakeCalendarPreferences.saveSelection] now takes [CalendarInfo].
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class CalendarViewModelTest {
@@ -43,13 +49,15 @@ class CalendarViewModelTest {
     )
 
     private fun makeViewModel(
-        calendars: List<CalendarInfo>    = listOf(calInfo),
-        events:    List<CalendarEvent>   = listOf(futureEvent()),
-        savedId:   String?               = null,
-        savedName: String?               = null
+        calendars: List<CalendarInfo>  = listOf(calInfo),
+        events:    List<CalendarEvent> = listOf(futureEvent()),
+        savedId:   String?             = null,
+        savedName: String?             = null
     ): Pair<CalendarViewModel, FakeCalendarPreferences> {
-        val prefs    = FakeCalendarPreferences()
-        if (savedId != null && savedName != null) prefs.saveSelection(savedId, savedName)
+        val prefs = FakeCalendarPreferences()
+        if (savedId != null && savedName != null) {
+            prefs.saveSelection(CalendarInfo(id = savedId, summary = savedName))
+        }
         val provider = MockCalendarProvider(calendars = calendars, events = events)
         val vm = CalendarViewModel(
             calendarProvider    = provider,
@@ -59,21 +67,16 @@ class CalendarViewModelTest {
     }
 
     @Before
-    fun setup() {
-        Dispatchers.setMain(testDispatcher)
-    }
+    fun setup() { Dispatchers.setMain(testDispatcher) }
 
     @After
-    fun tearDown() {
-        Dispatchers.resetMain()
-    }
+    fun tearDown() { Dispatchers.resetMain() }
 
     // ── Initial state ─────────────────────────────────────────────────────────
 
     @Test
     fun `initial state is Idle when no saved selection`() = runTest {
         val (vm, _) = makeViewModel()
-        // init coroutine finds no saved prefs → stays Idle
         advanceUntilIdle()
         assertEquals(CalendarState.Idle, vm.calendarState)
     }
@@ -103,21 +106,25 @@ class CalendarViewModelTest {
     }
 
     @Test
-    fun `restore with upcoming event sets NextClassReady`() = runTest {
+    fun `restore with upcoming event exposes nextUpcomingEvent`() = runTest {
         val (vm, _) = makeViewModel(savedId = "cal-1", savedName = "My Courses")
         advanceUntilIdle()
-        assertTrue(vm.calendarState is CalendarState.NextClassReady)
+        // CalendarState.NextClassReady is removed — next class is a derived property
+        assertNotNull(vm.nextUpcomingEvent)
+        assertEquals(CalendarState.Idle, vm.calendarState)
     }
 
     @Test
-    fun `restore with no upcoming event sets NoUpcomingClass`() = runTest {
+    fun `restore with no upcoming event has null nextUpcomingEvent`() = runTest {
         val (vm, _) = makeViewModel(
             events    = emptyList(),
             savedId   = "cal-1",
             savedName = "My Courses"
         )
         advanceUntilIdle()
-        assertTrue(vm.calendarState is CalendarState.NoUpcomingClass)
+        // CalendarState.NoUpcomingClass is removed — check derived property instead
+        assertNull(vm.nextUpcomingEvent)
+        assertEquals(CalendarState.Idle, vm.calendarState)
     }
 
     // ── loadCalendarsAndAutoSelect ────────────────────────────────────────────
@@ -158,19 +165,21 @@ class CalendarViewModelTest {
     }
 
     @Test
-    fun `onCalendarSelected with events sets NextClassReady`() = runTest {
+    fun `onCalendarSelected with events exposes nextUpcomingEvent`() = runTest {
         val (vm, _) = makeViewModel()
         vm.onCalendarSelected("cal-1", "My Courses")
         advanceUntilIdle()
-        assertTrue(vm.calendarState is CalendarState.NextClassReady)
+        assertNotNull(vm.nextUpcomingEvent)
+        assertEquals(CalendarState.Idle, vm.calendarState)
     }
 
     @Test
-    fun `onCalendarSelected with no events sets NoUpcomingClass`() = runTest {
+    fun `onCalendarSelected with no events has null nextUpcomingEvent`() = runTest {
         val (vm, _) = makeViewModel(events = emptyList())
         vm.onCalendarSelected("cal-1", "My Courses")
         advanceUntilIdle()
-        assertTrue(vm.calendarState is CalendarState.NoUpcomingClass)
+        assertNull(vm.nextUpcomingEvent)
+        assertEquals(CalendarState.Idle, vm.calendarState)
     }
 
     // ── clearSelection ────────────────────────────────────────────────────────
@@ -211,7 +220,7 @@ class CalendarViewModelTest {
 
     @Test
     fun `nextUpcomingEvent returns closest future event with location`() = runTest {
-        val soon  = futureEvent("evt-soon", "H 820 SGW").copy(startTimeMs = System.currentTimeMillis() + 1_000)
+        val soon  = futureEvent("evt-soon",  "H 820 SGW").copy(startTimeMs = System.currentTimeMillis() + 1_000)
         val later = futureEvent("evt-later", "MB S1.401 SGW").copy(startTimeMs = System.currentTimeMillis() + 7_200_000)
         val (vm, _) = makeViewModel(events = listOf(later, soon), savedId = "cal-1", savedName = "My Courses")
         advanceUntilIdle()
@@ -231,6 +240,31 @@ class CalendarViewModelTest {
         val (vm, _) = makeViewModel(events = listOf(noLoc), savedId = "cal-1", savedName = "My Courses")
         advanceUntilIdle()
         assertNull(vm.nextUpcomingEvent)
+    }
+
+    // ── isNextClassUrgent ─────────────────────────────────────────────────────
+
+    @Test
+    fun `isNextClassUrgent is false when no upcoming event`() = runTest {
+        val (vm, _) = makeViewModel(events = emptyList())
+        advanceUntilIdle()
+        assertFalse(vm.isNextClassUrgent)
+    }
+
+    @Test
+    fun `isNextClassUrgent is false when event is more than 15 min away`() = runTest {
+        val farEvent = futureEvent().copy(startTimeMs = System.currentTimeMillis() + 20 * 60_000)
+        val (vm, _) = makeViewModel(events = listOf(farEvent), savedId = "cal-1", savedName = "My Courses")
+        advanceUntilIdle()
+        assertFalse(vm.isNextClassUrgent)
+    }
+
+    @Test
+    fun `isNextClassUrgent is true when event is within 15 min`() = runTest {
+        val urgentEvent = futureEvent().copy(startTimeMs = System.currentTimeMillis() + 5 * 60_000)
+        val (vm, _) = makeViewModel(events = listOf(urgentEvent), savedId = "cal-1", savedName = "My Courses")
+        advanceUntilIdle()
+        assertTrue(vm.isNextClassUrgent)
     }
 
     // ── week navigation ───────────────────────────────────────────────────────

@@ -35,7 +35,7 @@ fun BuildingInfoPopup(
         ) {
             Column {
                 AsyncImage(
-                    model = uiState.imageUrl ?: "https://your-placeholder-url.com/campus.jpg",
+                    model = uiState.imageUrl,
                     contentDescription = null,
                     modifier = Modifier.fillMaxWidth().height(180.dp),
                     contentScale = ContentScale.Crop

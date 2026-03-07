@@ -27,17 +27,27 @@ import com.example.myapplication.ui.models.MapUIMode
  *
  * [ShuttleRouteProvider] is constructed internally but receives its two
  * dependencies via constructor injection, keeping it testable as well.  [#1][#2]
+ *
  */
 class MapViewModel(
     private val locationProvider: com.example.myapplication.logic.LocationProvider? = null,
     private val routeProvider: com.example.myapplication.logic.RouteProvider? = null,
-    private val shuttleService: ShuttleService                // no default – must be injected
+    private val shuttleService: ShuttleService
 ) : ViewModel() {
 
     private val shuttleRouteProvider = ShuttleRouteProvider(
-        shuttleService     = shuttleService,
+        shuttleService      = shuttleService,
         googleRouteProvider = routeProvider ?: SimpleMockRouteProvider()
     )
+
+    // Pre-indexed for O(1) building code lookup — avoids flatMap on every navigation call
+    private val buildingIndex: Map<String, com.example.myapplication.data.Building> by lazy {
+        CampusRepo.getAllCampuses()
+            .flatMap { it.buildings }
+            .associateBy { it.code.lowercase() }
+    }
+
+    // ── Search ─────────────────────────────────────────────────────────────────
 
     var searchQuery by mutableStateOf("")
         private set
@@ -48,7 +58,23 @@ class MapViewModel(
     private var searchProvider: HybridSearchProvider? = null
     private var isManualCampusSelection = false
 
+    // ── Map UI state ───────────────────────────────────────────────────────────
+
     var uiBuildingState by mutableStateOf(BuildingUiState())
+        private set
+
+    var currentCampus by mutableStateOf<Campus?>(CampusRepo.getCampusByName("SGW"))
+        private set
+
+    private var lastProcessedLocation: LatLng? = null
+
+    var highlightedBuildingName by mutableStateOf<String?>(null)
+        private set
+
+    var mapEvent by mutableStateOf<LatLng?>(null)
+        private set
+
+    var activeSearchField by mutableStateOf("main")
         private set
 
     fun handleMapTap(building: Building?, imageUrl: String? = null) {
@@ -60,14 +86,6 @@ class MapViewModel(
             imageUrl  = imageUrl
         )
     }
-
-    var currentCampus by mutableStateOf<Campus?>(CampusRepo.getCampusByName("SGW"))
-        private set
-
-    private var lastProcessedLocation: LatLng? = null
-
-    var highlightedBuildingName by mutableStateOf<String?>(null)
-        private set
 
     fun refreshLocation() {
         locationProvider?.getUserLocation { location ->
@@ -86,26 +104,20 @@ class MapViewModel(
 
     fun processLocationUpdate(userLocation: LatLng, isForce: Boolean = false) {
         if (isForce) isManualCampusSelection = false
-
         lastProcessedLocation = userLocation
         val detected = CampusRepo.getCampus(userLocation)
-
         if (detected != null) {
             if (!isManualCampusSelection) {
                 if (currentCampus?.name != detected.name) currentCampus = detected
             } else {
                 if (detected.name == currentCampus?.name) isManualCampusSelection = false
             }
-
             val buildingAtPos = detected.buildings.firstOrNull { building ->
                 val outline = building.getGoogleOutline()
                 PolyUtil.containsLocation(userLocation, outline, false) ||
                         PolyUtil.isLocationOnPath(userLocation, outline, true, 15.0)
             }
             highlightedBuildingName = buildingAtPos?.name
-
-            // US-2.8: refresh shuttle status on location update,
-            // but only if start point hasn't been manually set
             if (uiBuildingState.selectedTransportMode == "shuttle" &&
                 uiBuildingState.startLocationName == "Your position") {
                 refreshShuttleStatus(userLocation)
@@ -114,9 +126,6 @@ class MapViewModel(
             isManualCampusSelection = false
         }
     }
-
-    var mapEvent by mutableStateOf<LatLng?>(null)
-        private set
 
     fun clearMapEvent() { mapEvent = null }
 
@@ -128,7 +137,6 @@ class MapViewModel(
             is SearchResult.CurrentLocation -> "Your position"
             is SearchResult.Home            -> "Home"
         }
-
         val resultCoords = when (result) {
             is SearchResult.BuildingResult  -> result.building.getCenter()
             is SearchResult.CampusResult    -> result.campus.buildings.firstOrNull()?.getCenter()
@@ -136,26 +144,20 @@ class MapViewModel(
             is SearchResult.Home            -> LatLng(45.51723868665001, -73.627297124046)
             is SearchResult.GoogleResult    -> null
         }
-
         if (uiBuildingState.mode == MapUIMode.DIRECTIONS) {
             val selectedBuilding = if (result is SearchResult.BuildingResult) result.building else null
-
-            uiBuildingState = if (activeSearchField == "start") {
+            // Prepare all new values first, then commit in one atomic copy()
+            val updatedState = if (activeSearchField == "start") {
                 uiBuildingState.copy(startLocationName = resultName, startPoint = resultCoords)
             } else {
                 uiBuildingState.copy(destinationName = resultName, building = selectedBuilding, endPoint = resultCoords)
             }
-
-            resultCoords?.let { setMapEventWithOffset(it) }
-            uiBuildingState = uiBuildingState.copy(isSearchExpanded = false)
-
+            uiBuildingState = updatedState.copy(isSearchExpanded = false)
             searchResults = emptyList()
-
-            // Emit one atomic state update for shuttle + route.           [#8]
+            resultCoords?.let { setMapEventWithOffset(it) }
             calculateRouteWithState()
             return
         }
-
         when (result) {
             is SearchResult.CampusResult -> {
                 onCampusSelected(result.campus.name)
@@ -194,11 +196,8 @@ class MapViewModel(
 
     fun initSearch(client: com.google.android.libraries.places.api.net.PlacesClient) {
         searchProvider = HybridSearchProvider(client)
-        searchResults = listOf(SearchResult.CurrentLocation)
+        searchResults  = listOf(SearchResult.CurrentLocation)
     }
-
-    var activeSearchField by mutableStateOf("main")
-        private set
 
     fun onSearchQueryChanged(newQuery: String, field: String = "main") {
         activeSearchField = field
@@ -236,21 +235,12 @@ class MapViewModel(
         calculateRouteWithState()
     }
 
-    /**
-     * Calculates the route and, if shuttle mode is active, refreshes the
-     * shuttle status in the **same coroutine** so both are committed in a
-     * single [uiBuildingState] assignment – no risk of one update
-     * overwriting the other.                                            [#8]
-     */
     fun calculateRouteWithState() {
-        val start = uiBuildingState.startPoint ?: lastProcessedLocation ?: return
-        val end   = uiBuildingState.endPoint   ?: uiBuildingState.building?.getCenter() ?: return
+        val start     = uiBuildingState.startPoint ?: lastProcessedLocation ?: return
+        val end       = uiBuildingState.endPoint   ?: uiBuildingState.building?.getCenter() ?: return
         val isShuttle = uiBuildingState.selectedTransportMode == "shuttle"
         val provider  = if (isShuttle) shuttleRouteProvider else routeProvider
-
         viewModelScope.launch {
-            // Resolve shuttle status inside the coroutine so both
-            // shuttle fields and route fields are written atomically.   [#8][#9]
             val shuttleSnapshot = if (isShuttle) {
                 val locationToUse = uiBuildingState.startPoint ?: lastProcessedLocation
                 val nearestStop   = shuttleService.resolveNearestStop(locationToUse)
@@ -263,31 +253,29 @@ class MapViewModel(
                     stops         = shuttleService.getAllStops()
                 )
             } else null
-
             val routeData = try {
                 provider?.getRoute(start, end, uiBuildingState.selectedTransportMode)
             } catch (e: Exception) {
-                null // Treat network/API crashes as no route found
+                null // Network / API crash — handled below as unavailable
             }
-            // One atomic copy – shuttle + route fields together.        [#8]
+            val modeName = uiBuildingState.selectedTransportMode
+                .replaceFirstChar { it.uppercase() }
             uiBuildingState = if (routeData != null) {
                 val builder = LatLngBounds.Builder()
                 routeData.points.forEach { builder.include(it) }
                 uiBuildingState.copy(
-                    routePoints   = routeData.points,
-                    routeDuration = routeData.duration,
-                    routeDistance = routeData.distance,
-                    routeBounds   = builder.build(),
+                    routePoints       = routeData.points,
+                    routeDuration     = routeData.duration,
+                    routeDistance     = routeData.distance,
+                    routeBounds       = builder.build(),
                     routeErrorMessage = null
-
                 )
             } else {
-                val modeName = uiBuildingState.selectedTransportMode.replaceFirstChar { it.uppercase() }
                 uiBuildingState.copy(
-                    routePoints   = emptyList(),
-                    routeDuration = "-- min",
-                    routeDistance = "-- m",
-                    routeBounds   = null,
+                    routePoints       = emptyList(),
+                    routeDuration     = "-- min",
+                    routeDistance     = "-- m",
+                    routeBounds       = null,
                     routeErrorMessage = "$modeName route unavailable between these points."
                 )
             }.let { state ->
@@ -302,39 +290,63 @@ class MapViewModel(
         }
     }
 
-    // Keep the old name as an alias so existing call-sites still compile.
     fun calculateRoute() = calculateRouteWithState()
 
     /**
-     * Refreshes only the shuttle status fields (no route recalculation).
-     * Called from [processLocationUpdate] when the user moves while in
-     * shuttle mode – the route itself doesn't need to change.
+     * Navigate to a building by code — Map domain only, no Calendar awareness.
+     *
+     * Accepts a generic building code string so this method works for any
+     * feature that needs map navigation (Calendar, search, deep links, etc.).
+     * The caller is responsible for extracting the code from their domain object.
+     *
+     * Uses [buildingIndex] for O(1) lookup instead of flatMap O(n).
+     * State is committed in a single atomic copy() to prevent UI flickering.
      */
-    private fun refreshShuttleStatus(fromLocation: LatLng?) {
-        val locationToUse = uiBuildingState.startPoint ?: fromLocation
-        val nearestStop   = shuttleService.resolveNearestStop(locationToUse)  // [#9]
-        val fromCampus    = nearestStop?.campus ?: "SGW"
+    fun navigateToBuildingCode(buildingCode: String) {
+        // O(1) lookup — no flatMap iteration
+        val building = buildingIndex[buildingCode.lowercase()]
 
-        // Single atomic copy – all shuttle fields together.             [#8]
+        // Resolve values first, then commit in ONE atomic copy() (PR review: single-update policy).
+        // Includes route reset so UI never sees DIRECTIONS mode with stale polyline from
+        // a previous navigation — calculateRouteWithState() fills them in asynchronously.
+        val newDestName = building?.name ?: buildingCode
         uiBuildingState = uiBuildingState.copy(
-            shuttleAvailability      = shuttleService.checkAvailability(fromCampus),
-            shuttleStatusMessage     = shuttleService.statusMessage(fromCampus),
-            nearestShuttleStopName   = nearestStop?.name   ?: "",
-            nearestShuttleStopCampus = nearestStop?.campus ?: "",
-            shuttleStops             = shuttleService.getAllStops()         // [#6]
+            mode              = MapUIMode.DIRECTIONS,
+            destinationName   = newDestName,
+            building          = building,
+            endPoint          = building?.getCenter(),
+            // Route reset — atomically cleared so the UI shows a clean blank state
+            // before the new polyline arrives from calculateRouteWithState()
+            routePoints       = emptyList(),
+            routeDuration     = "-- min",
+            routeDistance     = "-- m",
+            routeBounds       = null,
+            routeErrorMessage = null
         )
+
+        if (building != null) {
+            calculateRouteWithState()
+        } else {
+            // Building not in local index — fall back to search.
+            // Do NOT call onSearchQueryChanged() here: it would write uiBuildingState
+            // a second time (destinationName overwrite), violating the single-update policy.
+            // Instead, set only the search fields and trigger the provider directly.
+            activeSearchField = "dest"
+            viewModelScope.launch {
+                searchProvider?.let { searchResults = it.search(buildingCode) }
+            }
+        }
     }
 
     fun toggleSearchExpansion(expanded: Boolean, field: String = "main") {
         activeSearchField = field
-        uiBuildingState = uiBuildingState.copy(isSearchExpanded = expanded)
+        uiBuildingState   = uiBuildingState.copy(isSearchExpanded = expanded)
     }
 
     fun swapLocations() {
         val currentStartLatLng  = uiBuildingState.startPoint ?: lastProcessedLocation
         val currentDestLatLng   = uiBuildingState.endPoint   ?: uiBuildingState.building?.getCenter()
         val currentDestBuilding = uiBuildingState.building
-
         uiBuildingState = uiBuildingState.copy(
             startLocationName = uiBuildingState.destinationName,
             destinationName   = uiBuildingState.startLocationName,
@@ -342,11 +354,8 @@ class MapViewModel(
             endPoint          = currentStartLatLng,
             building          = if (!uiBuildingState.isStartCurrentLocation) null else currentDestBuilding
         )
-
         uiBuildingState.endPoint?.let { setMapEventWithOffset(it) }
         highlightedBuildingName = uiBuildingState.building?.name
-
-        // Refresh shuttle + route in one atomic update after swap.      [#8]
         calculateRouteWithState()
     }
 
@@ -354,9 +363,21 @@ class MapViewModel(
         mapEvent = LatLng(target.latitude - 0.005, target.longitude)
     }
 
+    private fun refreshShuttleStatus(fromLocation: LatLng?) {
+        val locationToUse = uiBuildingState.startPoint ?: fromLocation
+        val nearestStop   = shuttleService.resolveNearestStop(locationToUse)
+        val fromCampus    = nearestStop?.campus ?: "SGW"
+        uiBuildingState = uiBuildingState.copy(
+            shuttleAvailability      = shuttleService.checkAvailability(fromCampus),
+            shuttleStatusMessage     = shuttleService.statusMessage(fromCampus),
+            nearestShuttleStopName   = nearestStop?.name   ?: "",
+            nearestShuttleStopCampus = nearestStop?.campus ?: "",
+            shuttleStops             = shuttleService.getAllStops()
+        )
+    }
+
     // ── Private helpers ────────────────────────────────────────────────────────
 
-    /** Transient carrier for shuttle status computed inside the coroutine. */
     private data class ShuttleSnapshot(
         val availability:  com.example.myapplication.data.ShuttleAvailability,
         val statusMessage: String,

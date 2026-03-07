@@ -39,7 +39,7 @@ class ShuttleServiceTest {
     fun setUp() {
         // Inject test data so DefaultShuttleService never sees an empty schedule
         ShuttleRepo.setTestData(testStops, testSchedules)
-        service = DefaultShuttleService()
+        service = DefaultShuttleService(ShuttleRepo)
     }
 
     // ═════════════════════════════════════════════════════════════════════════

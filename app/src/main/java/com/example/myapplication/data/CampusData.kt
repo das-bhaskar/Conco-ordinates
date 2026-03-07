@@ -120,13 +120,27 @@ object CampusRepo {
         allCampuses = campuses
     }
     private fun rayCastIntersect(tap: LatLng, vertA: LatLng, vertB: LatLng): Boolean {
-        val aY = vertA.latitude; val bY = vertB.latitude
+        val aY = vertA.latitude;  val bY = vertB.latitude
         val aX = vertA.longitude; val bX = vertB.longitude
-        val pY = tap.latitude; val pX = tap.longitude
+        val pY = tap.latitude;    val pX = tap.longitude
 
-        // Prevent horizontal lines from causing issues or division by zero
+        // Skip horizontal edges — they never contribute to the crossing count.
         if (aY == bY) return false
 
+        // Vertical edges (aX == bX) have an infinite slope in the x-from-y formula.
+        // Use an epsilon-based check: if the edge is nearly vertical, test directly
+        // whether the ray passes to the left of the edge's x-coordinate.
+        val EPSILON = 1e-10
+        if (kotlin.math.abs(aX - bX) < EPSILON) {
+            // Edge is vertical — only count it if the tap is within the y-range
+            // and the edge is to the right of the tap.
+            val minY = minOf(aY, bY)
+            val maxY = maxOf(aY, bY)
+            return pY in minY..maxY && aX > pX
+        }
+
+        // Standard ray-casting: compute x-intersection of the horizontal ray
+        // from tap with the infinite line through vertA–vertB.
         if ((aY > pY && bY > pY) || (aY < pY && bY < pY) || (aX < pX && bX < pX)) return false
 
         val m = (aY - bY) / (aX - bX)

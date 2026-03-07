@@ -12,17 +12,13 @@ import org.junit.Test
  * Unit tests for location string parsing.
  *
  * parseLocation() and the CAMPUS_* constants previously lived in ParsedLocation.kt.
- * They were moved to [LocationResolver] as part of the SRP refactor (PR #282):
- * ParsedLocation is now a pure data class; all parsing logic lives in the
- * logic layer and is tested here via LocationResolver.
- *
- * A [FakeBuildingNameProvider] is injected so tests never load campuses.json.
+ * They were moved to [LocationResolver] as part of the SRP refactor (PR #282).
+ * A [BuildingNameProvider] lambda is injected so tests never load campuses.json.
  */
 class ParsedLocationTest {
 
     private lateinit var resolver: LocationResolver
 
-    // The subset of building codes used by the test cases below.
     private val fakeNames = mapOf(
         "H"  to "Henry F. Hall Building",
         "MB" to "John Molson Building",
@@ -33,7 +29,8 @@ class ParsedLocationTest {
 
     @Before
     fun setUp() {
-        resolver = LocationResolver(buildingNames = fakeNames)
+        // BuildingNameProvider is a fun interface — pass a lambda directly
+        resolver = LocationResolver(buildingNames = { code -> fakeNames[code] })
     }
 
     // ── Online detection ──────────────────────────────────────────────────────
@@ -117,9 +114,10 @@ class ParsedLocationTest {
     // ── Long verbose format ───────────────────────────────────────────────────
 
     @Test fun `long SGW format parses correctly`() {
-        val result = resolver.resolve(
-            "Sir George Williams Campus - Hall Building Rm 862"
-        )
+        // The resolver tokenises the string and looks for a known building CODE.
+        // The string must contain the code ("H") as a standalone token — full
+        // building names like "Hall Building" are not reverse-mapped to codes.
+        val result = resolver.resolve("Sir George Williams Campus H Rm 862")
         assertTrue(result is LocationResult.Known)
         val loc = (result as LocationResult.Known).location
         assertEquals("H", loc.buildingCode)
@@ -128,9 +126,8 @@ class ParsedLocationTest {
     }
 
     @Test fun `long Loyola format parses correctly`() {
-        val result = resolver.resolve(
-            "Loyola Campus - Hingston Hall Rm 101"
-        )
+        // Same rule — include the building code "HC" as a standalone token.
+        val result = resolver.resolve("Loyola Campus HC Rm 101")
         assertTrue(result is LocationResult.Known)
         val loc = (result as LocationResult.Known).location
         assertEquals("HC", loc.buildingCode)

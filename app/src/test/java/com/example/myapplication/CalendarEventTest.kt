@@ -28,7 +28,7 @@ class CalendarEventTest {
 
     @Before
     fun setUp() {
-        resolver = LocationResolver(buildingNames = fakeNames)
+        resolver = LocationResolver(buildingNames = { code -> fakeNames[code] })
     }
 
     private fun resolved(location: String?) = ResolvedCalendarEvent(

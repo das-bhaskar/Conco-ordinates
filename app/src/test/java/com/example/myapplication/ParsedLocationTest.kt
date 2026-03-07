@@ -1,179 +1,165 @@
-package com.example.myapplication.data
+package com.example.myapplication
 
-import org.junit.Assert.*
+import com.example.myapplication.data.LocationResult
+import com.example.myapplication.data.ParsedLocation
+import com.example.myapplication.logic.LocationResolver
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
 
 /**
- * Unit tests for [parseLocation].
+ * Unit tests for location string parsing.
  *
- * Pure function, zero dependencies — no Android context required.
- * Covers every [LocationResult] branch.
+ * parseLocation() and the CAMPUS_* constants previously lived in ParsedLocation.kt.
+ * They were moved to [LocationResolver] as part of the SRP refactor (PR #282):
+ * ParsedLocation is now a pure data class; all parsing logic lives in the
+ * logic layer and is tested here via LocationResolver.
+ *
+ * A [FakeBuildingNameProvider] is injected so tests never load campuses.json.
  */
 class ParsedLocationTest {
 
-    // ── LocationResult.Unknown ────────────────────────────────────────────────
+    private lateinit var resolver: LocationResolver
 
-    @Test
-    fun `blank string returns Unknown`() {
-        assertEquals(LocationResult.Unknown, parseLocation(""))
+    // The subset of building codes used by the test cases below.
+    private val fakeNames = mapOf(
+        "H"  to "Henry F. Hall Building",
+        "MB" to "John Molson Building",
+        "EV" to "Engineering & Visual Arts",
+        "HC" to "Hingston Hall",
+        "LS" to "Learning Square"
+    )
+
+    @Before
+    fun setUp() {
+        resolver = LocationResolver(buildingNames = fakeNames)
     }
 
-    @Test
-    fun `whitespace-only string returns Unknown`() {
-        assertEquals(LocationResult.Unknown, parseLocation("   "))
+    // ── Online detection ──────────────────────────────────────────────────────
+
+    @Test fun `online keyword returns Online`() {
+        assertTrue(resolver.resolve("online") is LocationResult.Online)
     }
 
-    @Test
-    fun `unrecognised text returns Unknown`() {
-        assertEquals(LocationResult.Unknown, parseLocation("Some random place"))
+    @Test fun `remote keyword returns Online`() {
+        assertTrue(resolver.resolve("remote") is LocationResult.Online)
     }
 
-    // ── LocationResult.Online ─────────────────────────────────────────────────
-
-    @Test
-    fun `exact 'online' returns Online`() {
-        assertEquals(LocationResult.Online, parseLocation("online"))
+    @Test fun `zoom link returns Online`() {
+        assertTrue(resolver.resolve("https://zoom.us/j/123456") is LocationResult.Online)
     }
 
-    @Test
-    fun `exact 'Online' case-insensitive returns Online`() {
-        assertEquals(LocationResult.Online, parseLocation("Online"))
+    @Test fun `webex returns Online`() {
+        assertTrue(resolver.resolve("webex meeting room") is LocationResult.Online)
     }
 
-    @Test
-    fun `exact 'remote' returns Online`() {
-        assertEquals(LocationResult.Online, parseLocation("remote"))
+    // ── TBA / TBD detection ───────────────────────────────────────────────────
+
+    @Test fun `TBA returns TBA`() {
+        assertTrue(resolver.resolve("TBA") is LocationResult.TBA)
     }
 
-    @Test
-    fun `string starting with 'online' returns Online`() {
-        assertEquals(LocationResult.Online, parseLocation("Online - Zoom link in Moodle"))
+    @Test fun `TBD returns TBA`() {
+        assertTrue(resolver.resolve("TBD") is LocationResult.TBA)
     }
 
-    @Test
-    fun `string containing 'zoom' returns Online`() {
-        assertEquals(LocationResult.Online, parseLocation("https://concordia.zoom.us/j/12345"))
+    @Test fun `to be announced returns TBA`() {
+        assertTrue(resolver.resolve("to be announced") is LocationResult.TBA)
     }
 
-    @Test
-    fun `string containing 'webex' returns Online`() {
-        assertEquals(LocationResult.Online, parseLocation("WebEx meeting"))
+    // ── Blank / unrecognisable ────────────────────────────────────────────────
+
+    @Test fun `blank string returns Unknown`() {
+        assertTrue(resolver.resolve("") is LocationResult.Unknown)
     }
 
-    @Test
-    fun `string containing 'teams' returns Online`() {
-        assertEquals(LocationResult.Online, parseLocation("Microsoft Teams"))
+    @Test fun `whitespace only returns Unknown`() {
+        assertTrue(resolver.resolve("   ") is LocationResult.Unknown)
     }
 
-    // ── LocationResult.TBA ────────────────────────────────────────────────────
-
-    @Test
-    fun `exact 'tba' returns TBA`() {
-        assertEquals(LocationResult.TBA, parseLocation("tba"))
+    @Test fun `unrecognised string returns Unknown`() {
+        assertTrue(resolver.resolve("some random text") is LocationResult.Unknown)
     }
 
-    @Test
-    fun `exact 'TBA' returns TBA`() {
-        assertEquals(LocationResult.TBA, parseLocation("TBA"))
-    }
+    // ── Short format: "MB S1.401 SGW" ────────────────────────────────────────
 
-    @Test
-    fun `exact 'tbd' returns TBA`() {
-        assertEquals(LocationResult.TBA, parseLocation("tbd"))
-    }
-
-    @Test
-    fun `exact 'TBD' returns TBA`() {
-        assertEquals(LocationResult.TBA, parseLocation("TBD"))
-    }
-
-    @Test
-    fun `'to be announced' returns TBA`() {
-        assertEquals(LocationResult.TBA, parseLocation("to be announced"))
-    }
-
-    @Test
-    fun `'to be determined' returns TBA`() {
-        assertEquals(LocationResult.TBA, parseLocation("to be determined"))
-    }
-
-    // ── LocationResult.Known — short pattern ──────────────────────────────────
-
-    @Test
-    fun `short pattern SGW campus parses correctly`() {
-        val result = parseLocation("H 820 SGW")
+    @Test fun `short SGW format parses correctly`() {
+        val result = resolver.resolve("MB S1.401 SGW")
         assertTrue(result is LocationResult.Known)
         val loc = (result as LocationResult.Known).location
-        assertEquals("H",                   loc.buildingCode)
-        assertEquals("Henry F. Hall",       loc.buildingName)
-        assertEquals("820",                 loc.roomCode)
-        assertEquals(CAMPUS_SGW,            loc.campus)
+        assertEquals("MB", loc.buildingCode)
+        assertEquals("John Molson Building", loc.buildingName)
+        assertEquals("S1.401", loc.roomCode)
+        assertEquals("Sir George Williams", loc.campus)
     }
 
-    @Test
-    fun `short pattern LOY campus parses correctly`() {
-        val result = parseLocation("HC 101 LOY")
+    @Test fun `short LOY format parses correctly`() {
+        val result = resolver.resolve("HC 101 LOY")
         assertTrue(result is LocationResult.Known)
         val loc = (result as LocationResult.Known).location
-        assertEquals("HC",          loc.buildingCode)
-        assertEquals(CAMPUS_LOYOLA, loc.campus)
+        assertEquals("HC", loc.buildingCode)
+        assertEquals("Hingston Hall", loc.buildingName)
+        assertEquals("101", loc.roomCode)
+        assertEquals("Loyola", loc.campus)
     }
 
-    @Test
-    fun `short pattern MB with room dot notation parses correctly`() {
-        val result = parseLocation("MB S1.401 SGW")
+    @Test fun `single-letter building code parses correctly`() {
+        val result = resolver.resolve("H 820 SGW")
         assertTrue(result is LocationResult.Known)
         val loc = (result as LocationResult.Known).location
-        assertEquals("MB",                    loc.buildingCode)
-        assertEquals("John Molson Building",  loc.buildingName)
-        assertEquals("S1.401",               loc.roomCode)
-        assertEquals(CAMPUS_SGW,              loc.campus)
+        assertEquals("H", loc.buildingCode)
+        assertEquals("Henry F. Hall Building", loc.buildingName)
+        assertEquals("820", loc.roomCode)
+        assertEquals("Sir George Williams", loc.campus)
     }
 
-    @Test
-    fun `roomDisplay is formatted as buildingCode-roomCode`() {
-        val result = parseLocation("H 535 SGW") as LocationResult.Known
-        assertEquals("H-535", result.location.roomDisplay)
-    }
+    // ── Long verbose format ───────────────────────────────────────────────────
 
-    // ── LocationResult.Known — long pattern ───────────────────────────────────
-
-    @Test
-    fun `long SGW verbose string with building code parses correctly`() {
-        // Long pattern works when the building CODE appears in the string
-        val result = parseLocation("Sir George Williams Campus H Rm 862")
+    @Test fun `long SGW format parses correctly`() {
+        val result = resolver.resolve(
+            "Sir George Williams Campus - Hall Building Rm 862"
+        )
         assertTrue(result is LocationResult.Known)
         val loc = (result as LocationResult.Known).location
-        assertEquals("H",        loc.buildingCode)
-        assertEquals("862",      loc.roomCode)
-        assertEquals(CAMPUS_SGW, loc.campus)
+        assertEquals("H", loc.buildingCode)
+        assertEquals("862", loc.roomCode)
+        assertEquals("Sir George Williams", loc.campus)
     }
 
-    @Test
-    fun `long Loyola verbose string with building code parses correctly`() {
-        // Long pattern works when the building CODE appears in the string
-        val result = parseLocation("Loyola Campus HC Rm 210")
+    @Test fun `long Loyola format parses correctly`() {
+        val result = resolver.resolve(
+            "Loyola Campus - Hingston Hall Rm 101"
+        )
         assertTrue(result is LocationResult.Known)
         val loc = (result as LocationResult.Known).location
-        assertEquals("HC",           loc.buildingCode)
-        assertEquals("210",          loc.roomCode)
-        assertEquals(CAMPUS_LOYOLA,  loc.campus)
+        assertEquals("HC", loc.buildingCode)
+        assertEquals("101", loc.roomCode)
+        assertEquals("Loyola", loc.campus)
     }
 
-    @Test
-    fun `long verbose string without recognisable code returns Unknown`() {
-        // Building full names like "Hall Building" are not in the code map
-        val result = parseLocation("Sir George Williams Campus - Hall Building Rm 862")
-        assertEquals(LocationResult.Unknown, result)
+    // ── roomDisplay and shortSummary helpers ──────────────────────────────────
+
+    @Test fun `roomDisplay formats correctly`() {
+        val loc = ParsedLocation(
+            buildingCode = "H",
+            buildingName = "Henry F. Hall Building",
+            roomCode     = "820",
+            campus       = "Sir George Williams"
+        )
+        assertEquals("H-820", loc.roomDisplay)
     }
 
-    // ── ParsedLocation helpers ────────────────────────────────────────────────
-
-    @Test
-    fun `shortSummary contains all three parts`() {
-        val loc = ParsedLocation("H", "Henry F. Hall", "820", CAMPUS_SGW)
-        assertTrue(loc.shortSummary.contains("Henry F. Hall"))
-        assertTrue(loc.shortSummary.contains("H-820"))
-        assertTrue(loc.shortSummary.contains(CAMPUS_SGW))
+    @Test fun `shortSummary formats correctly`() {
+        val loc = ParsedLocation(
+            buildingCode = "H",
+            buildingName = "Henry F. Hall Building",
+            roomCode     = "820",
+            campus       = "Sir George Williams"
+        )
+        assertEquals(
+            "Henry F. Hall Building · H-820 · Sir George Williams",
+            loc.shortSummary
+        )
     }
 }

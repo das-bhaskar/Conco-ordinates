@@ -44,6 +44,17 @@ class SmartlookProvider : AnalyticsProvider {
         }
     }
 
+    override fun trackScreenView(screenName: String) {
+        if (!initialized) return
+
+        runCatching {
+            Smartlook.instance.trackNavigationEnter("screen_$screenName")
+            Smartlook.instance.trackEvent("screen_view_$screenName")
+        }.onFailure { error ->
+            CrashReporter.recordNonFatal(error, "smartlook_track_screen_failed")
+        }
+    }
+
     private fun setTesterIdentifier(testerId: String) {
         runCatching {
             val user = Smartlook.instance.user

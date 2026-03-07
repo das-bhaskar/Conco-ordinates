@@ -146,6 +146,9 @@ class MapsActivity : ComponentActivity() {
                     onConnectClick   = { connectCalendar() },
                     onSignOutClick   = { signOutCalendar() }
                 ),
+                onScreenVisible = { screenRoute ->
+                    AnalyticsRegistry.provider().trackScreenView(screenRoute)
+                },
                 userEmail         = authRepository.getSignedInEmail() ?: "",
                 mapContent        = {
                     MapScreen(

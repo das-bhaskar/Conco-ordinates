@@ -12,6 +12,10 @@ import com.example.myapplication.logic.CalendarInfo
 import com.example.myapplication.logic.CalendarProvider
 import com.example.myapplication.logic.currentWeekMonday
 import com.example.myapplication.ui.models.CalendarState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -38,7 +42,7 @@ import java.time.ZonedDateTime
 class CalendarViewModel(
     private val calendarProvider:    CalendarProvider,
     private val calendarPreferences: CalendarPreferences,
-    private val locationResolver:    LocationResolver = LocationResolver()
+    private val locationResolver:    LocationResolver   // required — inject at call-site
 ) : ViewModel() {
 
     // ── Calendar picker state ─────────────────────────────────────────────────
@@ -62,10 +66,22 @@ class CalendarViewModel(
     var currentWeekStartMs by mutableStateOf(currentWeekMonday())
         private set
 
+    // ── Ticker: emits current time every 60s so NextClassPill stays accurate ──
+    // Without this, nextUpcomingEvent only re-derives when weekEvents changes —
+    // meaning a class that starts while the user is looking at the map would
+    // never expire from the pill until the next data refresh (PR review).
+    private val tickerFlow = flow {
+        while (true) {
+            emit(System.currentTimeMillis())
+            delay(60_000L)
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), System.currentTimeMillis())
+
     // ── Derived: next upcoming event with a location (for NextClassPill) ──────
+    // Recalculated on every ticker tick so the pill expires naturally as time passes.
     val nextUpcomingEvent: ResolvedCalendarEvent?
         get() {
-            val now = System.currentTimeMillis()
+            val now = tickerFlow.value
             return weekEvents
                 .filter { it.startTimeMs >= now && !it.location.isNullOrBlank() }
                 .minByOrNull { it.startTimeMs }
@@ -79,8 +95,24 @@ class CalendarViewModel(
     val isNextClassUrgent: Boolean
         get() {
             val event = nextUpcomingEvent ?: return false
-            val minutesUntil = (event.startTimeMs - System.currentTimeMillis()) / 60_000
+            val minutesUntil = (event.startTimeMs - tickerFlow.value) / 60_000
             return minutesUntil in 0..URGENT_THRESHOLD_MINUTES
+        }
+
+    /**
+     * Pre-formatted time-remaining string for NextClassPill.
+     * Computed here so the UI receives a ready-to-display string (PR review:
+     * minutesUntil / timeLabel logic removed from NextClassPill composable).
+     */
+    val nextClassTimeRemaining: String
+        get() {
+            val event = nextUpcomingEvent ?: return ""
+            val minutesUntil = ((event.startTimeMs - tickerFlow.value) / 60_000).coerceAtLeast(0)
+            return when {
+                minutesUntil == 0L -> "Now"
+                minutesUntil < 60  -> "in ${minutesUntil}m"
+                else               -> "in ${minutesUntil / 60}h ${minutesUntil % 60}m"
+            }
         }
 
     companion object {

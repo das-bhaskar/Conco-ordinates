@@ -3,9 +3,7 @@ package com.example.myapplication.logic
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
-import androidx.core.app.ActivityCompat
 import com.example.myapplication.telemetry.CrashReporter
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
@@ -13,31 +11,32 @@ import com.google.android.gms.maps.model.LatLng
 /**
  * Stateless location utility functions.
  *
- * Extracted from MapsActivity — neither function accesses Activity members
- * or Composable state, making them safe to call from anywhere.
+ * These functions are context-agnostic — they accept only primitive/interface
+ * parameters and do not cast Context to Activity (PR review: unsafe cast removed).
+ * The caller is responsible for computing [shouldShowRationale] using
+ * ActivityCompat.shouldShowRequestPermissionRationale() before calling here.
  */
 
 /**
  * Handles a "recenter" tap:
- * - If permission is missing and rationale should be shown → calls [onShowSettings]
+ * - If permission is missing and [shouldShowRationale] → calls [onShowSettings]
  * - If permission is missing and no rationale needed → launches permission request
  * - If permission is granted → fetches last known location and calls [onLocationFound]
+ *
+ * @param shouldShowRationale Pre-computed by the caller via
+ *   ActivityCompat.shouldShowRequestPermissionRationale(). Passing this as a
+ *   parameter avoids unsafe Context → ComponentActivity casting inside a utility.
  */
 fun handleRecenter(
     client: FusedLocationProviderClient,
     hasPermission: Boolean,
+    shouldShowRationale: Boolean,
     launcher: ActivityResultLauncher<String>,
     context: Context,
     onShowSettings: () -> Unit,
     onLocationFound: (LatLng) -> Unit
 ) {
     if (!hasPermission) {
-        val activity = context as? ComponentActivity
-        val shouldShowRationale = activity?.let {
-            ActivityCompat.shouldShowRequestPermissionRationale(
-                it, Manifest.permission.ACCESS_FINE_LOCATION
-            )
-        } ?: false
         if (shouldShowRationale) onShowSettings()
         else launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         return

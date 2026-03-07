@@ -17,10 +17,13 @@ fun interface BuildingNameProvider {
 /**
  * Production implementation — delegates to [CampusRepo].
  *
+ * Changed from `object` to `class` (PR review) so it can be instantiated and
+ * injected via the ViewModel factory, making state-dependent logic unit-testable.
+ *
  * [CampusRepo] must already be initialised (via [CampusRepo.initialize])
- * before this provider is used. In practice that happens in Application.onCreate.
+ * before this provider is created. In practice that happens in Application.onCreate.
  */
-object CampusBuildingNameProvider : BuildingNameProvider {
+class CampusBuildingNameProvider : BuildingNameProvider {
     override fun nameForCode(code: String): String? =
         CampusRepo.getAllCampuses()
             .flatMap { it.buildings }

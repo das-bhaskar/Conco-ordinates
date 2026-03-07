@@ -304,16 +304,23 @@ class MapViewModel(
         // Single O(1) lookup — no flatMap iteration
         val building = buildingIndex[buildingCode.lowercase()]
 
-        // Determine new state values first, then apply in one atomic copy()
-        val newDestName = building?.name ?: buildingCode
-        val newBuilding = building
-        val newEndPoint = building?.getCenter()
-
+        // ONE atomic copy() — destination fields + route reset in the same write.
+        // Without the reset, the UI briefly renders DIRECTIONS mode with stale
+        // route data from the previous navigation (partial-update jank).
+        // calculateRouteWithState() is async (coroutine + network) and does the
+        // second write only after the route arrives, so the user always sees a
+        // clean blank-route state before the new polyline appears.
         uiBuildingState = uiBuildingState.copy(
-            mode            = MapUIMode.DIRECTIONS,
-            destinationName = newDestName,
-            building        = newBuilding,
-            endPoint        = newEndPoint
+            mode              = MapUIMode.DIRECTIONS,
+            destinationName   = building?.name ?: buildingCode,
+            building          = building,
+            endPoint          = building?.getCenter(),
+            // Reset stale route fields atomically — no partial state visible to UI
+            routePoints       = emptyList(),
+            routeDuration     = "-- min",
+            routeDistance     = "-- m",
+            routeBounds       = null,
+            routeErrorMessage = null
         )
 
         if (building != null) {

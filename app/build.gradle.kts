@@ -98,6 +98,8 @@ dependencies {
 
     // ── Google Sign-In — required for Calendar OAuth token ────────────────────
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+    // ── Jetpack Navigation — replaces hardcoded when(selectedTab) ─────────────
+    implementation("androidx.navigation:navigation-compose:2.7.7")
 
     testImplementation(libs.junit)
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")

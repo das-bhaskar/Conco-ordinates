@@ -12,6 +12,10 @@ import android.content.SharedPreferences
  * - [CalendarViewModel] depends on the interface, not SharedPreferences directly
  * - Swapping to DataStore / Room later only requires a new implementation
  * - Tests can inject [FakeCalendarPreferences] without any Android context
+ *
+ * [CalendarInfo] is passed as a single object rather than separate (id, name)
+ * parameters so the signature stays cohesive: if CalendarInfo gains fields
+ * (e.g. colour, timezone) we extend the data class, not every call-site.
  */
 interface CalendarPreferences {
     /** Returns the persisted calendar ID, or null if none has been saved. */
@@ -23,8 +27,12 @@ interface CalendarPreferences {
     /** True once the user has completed the calendar picker at least once. */
     val hasSelection: Boolean get() = getSelectedCalendarId() != null
 
-    /** Persists the user's calendar selection. */
-    fun saveSelection(calendarId: String, calendarName: String)
+    /**
+     * Persists the user's calendar selection.
+     * Accepts a [CalendarInfo] so callers pass one cohesive object rather than
+     * two unrelated strings that could be accidentally swapped.
+     */
+    fun saveSelection(calendar: CalendarInfo)
 
     /** Clears any persisted selection (e.g. on sign-out). */
     fun clearSelection()
@@ -36,8 +44,7 @@ interface CalendarPreferences {
  * SharedPreferences-backed implementation.
  *
  * Uses MODE_PRIVATE — data is scoped to this app and never shared with
- * other apps. The preference file is named to avoid collisions with other
- * preference files in the project.
+ * other apps.
  */
 class SharedPrefsCalendarPreferences(context: Context) : CalendarPreferences {
 
@@ -51,10 +58,10 @@ class SharedPrefsCalendarPreferences(context: Context) : CalendarPreferences {
     override fun getSelectedCalendarName(): String? =
         prefs.getString(KEY_CALENDAR_NAME, null)
 
-    override fun saveSelection(calendarId: String, calendarName: String) {
+    override fun saveSelection(calendar: CalendarInfo) {
         prefs.edit()
-            .putString(KEY_CALENDAR_ID,   calendarId)
-            .putString(KEY_CALENDAR_NAME, calendarName)
+            .putString(KEY_CALENDAR_ID,   calendar.id)
+            .putString(KEY_CALENDAR_NAME, calendar.summary)
             .apply()   // async write — safe for UI-triggered saves
     }
 
@@ -79,16 +86,11 @@ class SharedPrefsCalendarPreferences(context: Context) : CalendarPreferences {
  * No Android context required — drop into any test with zero setup.
  */
 class FakeCalendarPreferences : CalendarPreferences {
-    private var id:   String? = null
-    private var name: String? = null
+    private var saved: CalendarInfo? = null
 
-    override fun getSelectedCalendarId()   = id
-    override fun getSelectedCalendarName() = name
+    override fun getSelectedCalendarId()   = saved?.id
+    override fun getSelectedCalendarName() = saved?.summary
 
-    override fun saveSelection(calendarId: String, calendarName: String) {
-        id   = calendarId
-        name = calendarName
-    }
-
-    override fun clearSelection() { id = null; name = null }
+    override fun saveSelection(calendar: CalendarInfo) { saved = calendar }
+    override fun clearSelection() { saved = null }
 }

@@ -40,6 +40,13 @@ class MapViewModel(
         googleRouteProvider = routeProvider ?: SimpleMockRouteProvider()
     )
 
+    // Pre-indexed for O(1) building code lookup — avoids flatMap on every navigation call
+    private val buildingIndex: Map<String, com.example.myapplication.data.Building> by lazy {
+        CampusRepo.getAllCampuses()
+            .flatMap { it.buildings }
+            .associateBy { it.code.lowercase() }
+    }
+
     // ── Search ─────────────────────────────────────────────────────────────────
 
     var searchQuery by mutableStateOf("")
@@ -139,14 +146,15 @@ class MapViewModel(
         }
         if (uiBuildingState.mode == MapUIMode.DIRECTIONS) {
             val selectedBuilding = if (result is SearchResult.BuildingResult) result.building else null
-            uiBuildingState = if (activeSearchField == "start") {
+            // Prepare all new values first, then commit in one atomic copy()
+            val updatedState = if (activeSearchField == "start") {
                 uiBuildingState.copy(startLocationName = resultName, startPoint = resultCoords)
             } else {
                 uiBuildingState.copy(destinationName = resultName, building = selectedBuilding, endPoint = resultCoords)
             }
-            resultCoords?.let { setMapEventWithOffset(it) }
-            uiBuildingState = uiBuildingState.copy(isSearchExpanded = false)
+            uiBuildingState = updatedState.copy(isSearchExpanded = false)
             searchResults = emptyList()
+            resultCoords?.let { setMapEventWithOffset(it) }
             calculateRouteWithState()
             return
         }
@@ -177,7 +185,7 @@ class MapViewModel(
                 }
             }
             is SearchResult.Home -> {
-                val homePos = LatLng(45.51723868665001, -73.627297124046)
+                val homePos = HOME_POSITION
                 mapEvent = homePos
                 uiBuildingState = uiBuildingState.copy(startPoint = homePos)
             }
@@ -245,22 +253,30 @@ class MapViewModel(
                     stops         = shuttleService.getAllStops()
                 )
             } else null
-            val routeData = provider?.getRoute(start, end, uiBuildingState.selectedTransportMode)
+            val routeData = try {
+                provider?.getRoute(start, end, uiBuildingState.selectedTransportMode)
+            } catch (e: Exception) {
+                null // Network / API crash — handled below as unavailable
+            }
+            val modeName = uiBuildingState.selectedTransportMode
+                .replaceFirstChar { it.uppercase() }
             uiBuildingState = if (routeData != null) {
                 val builder = LatLngBounds.Builder()
                 routeData.points.forEach { builder.include(it) }
                 uiBuildingState.copy(
-                    routePoints   = routeData.points,
-                    routeDuration = routeData.duration,
-                    routeDistance = routeData.distance,
-                    routeBounds   = builder.build()
+                    routePoints       = routeData.points,
+                    routeDuration     = routeData.duration,
+                    routeDistance     = routeData.distance,
+                    routeBounds       = builder.build(),
+                    routeErrorMessage = null
                 )
             } else {
                 uiBuildingState.copy(
-                    routePoints   = emptyList(),
-                    routeDuration = "-- min",
-                    routeDistance = "-- m",
-                    routeBounds   = null
+                    routePoints       = emptyList(),
+                    routeDuration     = "-- min",
+                    routeDistance     = "-- m",
+                    routeBounds       = null,
+                    routeErrorMessage = "$modeName route unavailable between these points."
                 )
             }.let { state ->
                 if (shuttleSnapshot != null) state.copy(
@@ -274,31 +290,37 @@ class MapViewModel(
         }
     }
 
-    fun calculateRoute() = calculateRouteWithState()
-
     /**
-     * Navigate to a building by code — resolves via CampusRepo, no network.
-     * Falls back to search if the code isn't in local data.
+     * Navigate to a building by code — Map domain only, no Calendar awareness.
+     *
+     * Accepts a generic building code string so this method works for any
+     * feature that needs map navigation (Calendar, search, deep links, etc.).
+     * The caller is responsible for extracting the code from their domain object.
+     *
+     * Uses [buildingIndex] for O(1) lookup instead of flatMap O(n).
+     * State is committed in a single atomic copy() to prevent UI flickering.
      */
-    fun navigateToEvent(location: String) {
-        val building = CampusRepo
-            .getAllCampuses()
-            .flatMap { it.buildings }
-            .firstOrNull { it.code.equals(other = location, ignoreCase = true) }
+    fun navigateToBuildingCode(buildingCode: String) {
+        // Single O(1) lookup — no flatMap iteration
+        val building = buildingIndex[buildingCode.lowercase()]
+
+        // Determine new state values first, then apply in one atomic copy()
+        val newDestName = building?.name ?: buildingCode
+        val newBuilding = building
+        val newEndPoint = building?.getCenter()
+
+        uiBuildingState = uiBuildingState.copy(
+            mode            = MapUIMode.DIRECTIONS,
+            destinationName = newDestName,
+            building        = newBuilding,
+            endPoint        = newEndPoint
+        )
+
         if (building != null) {
-            uiBuildingState = uiBuildingState.copy(
-                mode            = MapUIMode.DIRECTIONS,
-                destinationName = building.name,
-                building        = building,
-                endPoint        = building.getCenter()
-            )
             calculateRouteWithState()
         } else {
-            uiBuildingState = uiBuildingState.copy(
-                mode            = MapUIMode.DIRECTIONS,
-                destinationName = location
-            )
-            onSearchQueryChanged(location, field = "dest")
+            // Building not in local data — fall back to search
+            onSearchQueryChanged(buildingCode, field = "dest")
         }
     }
 
@@ -341,6 +363,11 @@ class MapViewModel(
     }
 
     // ── Private helpers ────────────────────────────────────────────────────────
+
+    companion object {
+        /** Coordinates used for the "Home" search result quick-action. */
+        val HOME_POSITION = LatLng(45.51723868665001, -73.627297124046)
+    }
 
     private data class ShuttleSnapshot(
         val availability:  com.example.myapplication.data.ShuttleAvailability,

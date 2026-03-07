@@ -5,12 +5,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.myapplication.data.CalendarEvent
+import com.example.myapplication.data.ResolvedCalendarEvent
+import com.example.myapplication.logic.LocationResolver
 import com.example.myapplication.logic.CalendarPreferences
+import com.example.myapplication.logic.CalendarInfo
 import com.example.myapplication.logic.CalendarProvider
 import com.example.myapplication.logic.currentWeekMonday
 import com.example.myapplication.ui.models.CalendarState
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 /**
  * Owns all Google Calendar state and operations.
@@ -26,10 +31,14 @@ import kotlinx.coroutines.launch
  *
  * On construction the ViewModel restores the previously selected calendar
  * and silently reloads events — the user never has to re-pick after restart.
+ *
+ * Week navigation uses [ZonedDateTime] instead of raw millisecond arithmetic
+ * to correctly handle DST transitions and leap seconds.
  */
 class CalendarViewModel(
-    private val calendarProvider:   CalendarProvider,
-    private val calendarPreferences: CalendarPreferences
+    private val calendarProvider:    CalendarProvider,
+    private val calendarPreferences: CalendarPreferences,
+    private val locationResolver:    LocationResolver = LocationResolver()
 ) : ViewModel() {
 
     // ── Calendar picker state ─────────────────────────────────────────────────
@@ -44,7 +53,7 @@ class CalendarViewModel(
         private set
 
     // ── Week view state ───────────────────────────────────────────────────────
-    var weekEvents by mutableStateOf<List<CalendarEvent>>(emptyList())
+    var weekEvents by mutableStateOf<List<ResolvedCalendarEvent>>(emptyList())
         private set
 
     var weekViewLoading by mutableStateOf(false)
@@ -54,7 +63,7 @@ class CalendarViewModel(
         private set
 
     // ── Derived: next upcoming event with a location (for NextClassPill) ──────
-    val nextUpcomingEvent: CalendarEvent?
+    val nextUpcomingEvent: ResolvedCalendarEvent?
         get() {
             val now = System.currentTimeMillis()
             return weekEvents
@@ -62,8 +71,23 @@ class CalendarViewModel(
                 .minByOrNull { it.startTimeMs }
         }
 
-    // ── Init: restore persisted selection ────────────────────────────────────
+    /**
+     * Business rule: an upcoming class is "urgent" when it starts within
+     * [URGENT_THRESHOLD_MINUTES]. Defined here — not in the UI — so the
+     * threshold can change in one place without touching any composable.
+     */
+    val isNextClassUrgent: Boolean
+        get() {
+            val event = nextUpcomingEvent ?: return false
+            val minutesUntil = (event.startTimeMs - System.currentTimeMillis()) / 60_000
+            return minutesUntil in 0..URGENT_THRESHOLD_MINUTES
+        }
 
+    companion object {
+        const val URGENT_THRESHOLD_MINUTES = 15L
+    }
+
+    // ── Init: restore persisted selection ────────────────────────────────────
     init {
         restoreSelectionIfAvailable()
     }
@@ -71,23 +95,19 @@ class CalendarViewModel(
     /**
      * If the user previously selected a calendar, restore it silently on
      * startup — no picker shown, events load in the background.
+     *
+     * This replaces the LaunchedEffect(selectedCalendarId) that previously
+     * lived in MapsActivity — the ViewModel handles its own side-effects.
      */
     private fun restoreSelectionIfAvailable() {
         val id   = calendarPreferences.getSelectedCalendarId()   ?: return
         val name = calendarPreferences.getSelectedCalendarName() ?: return
-
         selectedCalendarId   = id
         selectedCalendarName = name
-
         viewModelScope.launch {
             calendarState = CalendarState.Loading
             loadWeekEvents(id)
-            val event = calendarProvider.getNextEventWithLocation(id)
-            calendarState = if (event != null) {
-                CalendarState.NextClassReady(event, name)
-            } else {
-                CalendarState.NoUpcomingClass(name)
-            }
+            calendarState = CalendarState.Idle
         }
     }
 
@@ -119,20 +139,13 @@ class CalendarViewModel(
     fun onCalendarSelected(calendarId: String, calendarName: String) {
         selectedCalendarId   = calendarId
         selectedCalendarName = calendarName
-
         // Persist before the coroutine so it's saved even if the coroutine
         // is cancelled (e.g. user backgrounds the app mid-load).
-        calendarPreferences.saveSelection(calendarId, calendarName)
-
+        calendarPreferences.saveSelection(CalendarInfo(id = calendarId, summary = calendarName))
         viewModelScope.launch {
             calendarState = CalendarState.Loading
             loadWeekEvents(calendarId)
-            val event = calendarProvider.getNextEventWithLocation(calendarId)
-            calendarState = if (event != null) {
-                CalendarState.NextClassReady(event, calendarName)
-            } else {
-                CalendarState.NoUpcomingClass(calendarName)
-            }
+            calendarState = CalendarState.Idle
         }
     }
 
@@ -164,22 +177,49 @@ class CalendarViewModel(
 
     /**
      * Loads all events for the week starting at [weekStartMs].
-     * Called when the Calendar tab opens or the user navigates weeks.
+     * Called on init restore, calendar selection, or week navigation.
      */
     fun loadWeekEvents(calendarId: String, weekStartMs: Long = currentWeekStartMs) {
         currentWeekStartMs = weekStartMs
         viewModelScope.launch {
             weekViewLoading = true
-            weekEvents      = calendarProvider.getWeekEvents(calendarId, weekStartMs)
+            // Resolve location for every event in the ViewModel layer —
+            // UI receives pre-resolved data and never calls parsing logic.
+            weekEvents = calendarProvider.getWeekEvents(calendarId, weekStartMs)
+                .map { event ->
+                    ResolvedCalendarEvent(
+                        event          = event,
+                        locationResult = locationResolver.resolve(event.location)
+                    )
+                }
             weekViewLoading = false
         }
     }
 
+    /**
+     * Navigate to the previous week using [ZonedDateTime] so DST transitions
+     * and leap seconds are handled correctly — never use raw millisecond math
+     * for calendar navigation.
+     */
     fun goToPreviousWeek(calendarId: String) {
-        loadWeekEvents(calendarId, currentWeekStartMs - 7L * 24 * 60 * 60 * 1000)
+        val newStart = ZonedDateTime
+            .ofInstant(Instant.ofEpochMilli(currentWeekStartMs), ZoneId.systemDefault())
+            .minusWeeks(1)
+            .toInstant()
+            .toEpochMilli()
+        loadWeekEvents(calendarId, newStart)
     }
 
+    /**
+     * Navigate to the next week using [ZonedDateTime] — same reasoning as
+     * [goToPreviousWeek].
+     */
     fun goToNextWeek(calendarId: String) {
-        loadWeekEvents(calendarId, currentWeekStartMs + 7L * 24 * 60 * 60 * 1000)
+        val newStart = ZonedDateTime
+            .ofInstant(Instant.ofEpochMilli(currentWeekStartMs), ZoneId.systemDefault())
+            .plusWeeks(1)
+            .toInstant()
+            .toEpochMilli()
+        loadWeekEvents(calendarId, newStart)
     }
 }

@@ -1,82 +1,111 @@
 package com.example.myapplication.data
 
+import com.example.myapplication.logic.LocationResolver
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
 
 /**
- * Unit tests for [CalendarEvent.locationResult] and [CalendarEvent.parsedLocation].
+ * Unit tests for [ResolvedCalendarEvent].
  *
- * Verifies that the lazy properties delegate correctly to [parseLocation]
- * and that the convenience accessor [parsedLocation] only returns non-null
- * for [LocationResult.Known].
+ * After the SRP refactor (PR #282), [CalendarEvent] is a pure data class with
+ * no parsing logic. Location resolution lives in [LocationResolver] and the
+ * result is wrapped in [ResolvedCalendarEvent] by the ViewModel.
+ *
+ * These tests verify:
+ *  - [ResolvedCalendarEvent.locationResult] reflects the injected result
+ *  - [ResolvedCalendarEvent.parsedLocation] convenience accessor
+ *  - Delegate properties forward correctly to the underlying [CalendarEvent]
  */
 class CalendarEventTest {
 
-    private fun event(location: String?) = CalendarEvent(
-        id          = "test-id",
-        calendarId  = "cal-1",
-        title       = "Test Event",
-        startTimeMs = System.currentTimeMillis(),
-        endTimeMs   = System.currentTimeMillis() + 3_600_000,
-        location    = location
+    private lateinit var resolver: LocationResolver
+
+    private val fakeNames = mapOf(
+        "H"  to "Henry F. Hall Building",
+        "MB" to "John Molson Building"
     )
 
-    // ── locationResult delegation ─────────────────────────────────────────────
+    @Before
+    fun setUp() {
+        resolver = LocationResolver(buildingNames = fakeNames)
+    }
+
+    private fun resolved(location: String?) = ResolvedCalendarEvent(
+        event = CalendarEvent(
+            id          = "test-id",
+            calendarId  = "cal-1",
+            title       = "Test Event",
+            startTimeMs = System.currentTimeMillis(),
+            endTimeMs   = System.currentTimeMillis() + 3_600_000,
+            location    = location
+        ),
+        locationResult = resolver.resolve(location)
+    )
+
+    // ── locationResult ────────────────────────────────────────────────────────
 
     @Test
-    fun `null location returns Unknown`() {
-        assertEquals(LocationResult.Unknown, event(null).locationResult)
+    fun `null location resolves to Unknown`() {
+        assertEquals(LocationResult.Unknown, resolved(null).locationResult)
     }
 
     @Test
-    fun `blank location returns Unknown`() {
-        assertEquals(LocationResult.Unknown, event("").locationResult)
+    fun `blank location resolves to Unknown`() {
+        assertEquals(LocationResult.Unknown, resolved("").locationResult)
     }
 
     @Test
-    fun `online location returns Online`() {
-        assertEquals(LocationResult.Online, event("Online").locationResult)
+    fun `online location resolves to Online`() {
+        assertEquals(LocationResult.Online, resolved("Online").locationResult)
     }
 
     @Test
-    fun `TBA location returns TBA`() {
-        assertEquals(LocationResult.TBA, event("TBA").locationResult)
+    fun `TBA location resolves to TBA`() {
+        assertEquals(LocationResult.TBA, resolved("TBA").locationResult)
     }
 
     @Test
-    fun `valid room returns Known`() {
-        val result = event("H 820 SGW").locationResult
-        assertTrue(result is LocationResult.Known)
+    fun `valid room resolves to Known`() {
+        assertTrue(resolved("H 820 SGW").locationResult is LocationResult.Known)
     }
 
     // ── parsedLocation convenience accessor ───────────────────────────────────
 
     @Test
     fun `parsedLocation is non-null for Known result`() {
-        assertNotNull(event("H 820 SGW").parsedLocation)
+        assertNotNull(resolved("H 820 SGW").parsedLocation)
     }
 
     @Test
     fun `parsedLocation is null for Online result`() {
-        assertNull(event("Online").parsedLocation)
+        assertNull(resolved("Online").parsedLocation)
     }
 
     @Test
     fun `parsedLocation is null for TBA result`() {
-        assertNull(event("TBA").parsedLocation)
+        assertNull(resolved("TBA").parsedLocation)
     }
 
     @Test
     fun `parsedLocation is null for Unknown result`() {
-        assertNull(event("").parsedLocation)
+        assertNull(resolved("").parsedLocation)
     }
 
-    // ── lazy evaluation ───────────────────────────────────────────────────────
+    // ── delegate properties ───────────────────────────────────────────────────
 
     @Test
-    fun `locationResult is consistent across multiple accesses`() {
-        val e = event("MB S1.401 SGW")
-        // Access twice — lazy property should return the same instance
-        assertSame(e.locationResult, e.locationResult)
+    fun `id delegates to underlying CalendarEvent`() {
+        assertEquals("test-id", resolved("H 820 SGW").id)
+    }
+
+    @Test
+    fun `title delegates to underlying CalendarEvent`() {
+        assertEquals("Test Event", resolved("H 820 SGW").title)
+    }
+
+    @Test
+    fun `location delegates to underlying CalendarEvent`() {
+        assertEquals("H 820 SGW", resolved("H 820 SGW").location)
     }
 }

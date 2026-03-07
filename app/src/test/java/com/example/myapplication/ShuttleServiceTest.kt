@@ -145,27 +145,27 @@ class ShuttleServiceTest {
 
     @Test
     fun `nearestStop returns LocationUnavailable when location is null`() {
-        val result = service.resolveNearestStop(null)
+        val result = service.nearestStop(null)
         assertTrue(result is NearestStopResult.LocationUnavailable)
     }
 
     @Test
     fun `nearestStop returns Found with SGW stop for user near SGW`() {
-        val result = service.resolveNearestStop(LatLng(45.4970, -73.5790))
+        val result = service.nearestStop(LatLng(45.4970, -73.5790))
         assertTrue(result is NearestStopResult.Found)
         assertEquals("SGW", (result as NearestStopResult.Found).stop.campus)
     }
 
     @Test
     fun `nearestStop returns Found with Loyola stop for user near Loyola`() {
-        val result = service.resolveNearestStop(LatLng(45.4582, -73.6391))
+        val result = service.nearestStop(LatLng(45.4582, -73.6391))
         assertTrue(result is NearestStopResult.Found)
         assertEquals("Loyola", (result as NearestStopResult.Found).stop.campus)
     }
 
     @Test
     fun `nearestStop Found stop id matches injected test data`() {
-        val result = service.resolveNearestStop(LatLng(45.49719, -73.57859))  // Exact SGW coords
+        val result = service.nearestStop(LatLng(45.49719, -73.57859))  // Exact SGW coords
         assertTrue(result is NearestStopResult.Found)
         assertEquals("sgw_main", (result as NearestStopResult.Found).stop.id)
     }
@@ -173,8 +173,8 @@ class ShuttleServiceTest {
     @Test
     fun `nearestStop is deterministic for same input`() {
         val point = LatLng(45.4776, -73.6088)
-        val first  = service.resolveNearestStop(point)
-        val second = service.resolveNearestStop(point)
+        val first  = service.nearestStop(point)
+        val second = service.nearestStop(point)
         val firstId  = first.idOrNull()
         val secondId = second.idOrNull()
         assertNotNull(firstId)
@@ -184,7 +184,7 @@ class ShuttleServiceTest {
     @Test
     fun `nearestStop returns NoStopsAvailable when repo has no stops`() {
         ShuttleRepo.setTestData(emptyList(), emptyMap())
-        val result = service.resolveNearestStop(LatLng(45.49, -73.57))
+        val result = service.nearestStop(LatLng(45.49, -73.57))
         assertTrue(result is NearestStopResult.NoStopsAvailable)
         // Restore for other tests
         ShuttleRepo.setTestData(testStops, testSchedules)

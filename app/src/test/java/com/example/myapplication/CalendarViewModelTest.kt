@@ -273,19 +273,36 @@ class CalendarViewModelTest {
     fun `goToNextWeek advances currentWeekStartMs by 7 days`() = runTest {
         val (vm, _) = makeViewModel(savedId = "cal-1", savedName = "My Courses")
         advanceUntilIdle()
-        val before = vm.currentWeekStartMs
+        val beforeZdt = java.time.ZonedDateTime.ofInstant(
+            java.time.Instant.ofEpochMilli(vm.currentWeekStartMs),
+            java.time.ZoneId.systemDefault()
+        )
         vm.goToNextWeek("cal-1")
         advanceUntilIdle()
-        assertEquals(before + 7L * 24 * 60 * 60 * 1000, vm.currentWeekStartMs)
+        val afterZdt = java.time.ZonedDateTime.ofInstant(
+            java.time.Instant.ofEpochMilli(vm.currentWeekStartMs),
+            java.time.ZoneId.systemDefault()
+        )
+        // ZonedDateTime comparison survives DST transitions — raw ms arithmetic does not.
+        // goToNextWeek uses plusWeeks(1) internally, so the result is exactly 7 calendar
+        // days later regardless of any DST boundary crossed.
+        assertEquals(beforeZdt.plusWeeks(1), afterZdt)
     }
 
     @Test
     fun `goToPreviousWeek rewinds currentWeekStartMs by 7 days`() = runTest {
         val (vm, _) = makeViewModel(savedId = "cal-1", savedName = "My Courses")
         advanceUntilIdle()
-        val before = vm.currentWeekStartMs
+        val beforeZdt = java.time.ZonedDateTime.ofInstant(
+            java.time.Instant.ofEpochMilli(vm.currentWeekStartMs),
+            java.time.ZoneId.systemDefault()
+        )
         vm.goToPreviousWeek("cal-1")
         advanceUntilIdle()
-        assertEquals(before - 7L * 24 * 60 * 60 * 1000, vm.currentWeekStartMs)
+        val afterZdt = java.time.ZonedDateTime.ofInstant(
+            java.time.Instant.ofEpochMilli(vm.currentWeekStartMs),
+            java.time.ZoneId.systemDefault()
+        )
+        assertEquals(beforeZdt.minusWeeks(1), afterZdt)
     }
 }

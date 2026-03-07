@@ -85,10 +85,10 @@ fun DirectionsInfoPopup(
                     onClick = onStartClick
                 )
 
-                Divider(
-                    modifier = Modifier.padding(start = 40.dp),
+                HorizontalDivider(
+                    modifier  = Modifier.padding(start = 40.dp),
                     thickness = 0.5.dp,
-                    color = Color.LightGray
+                    color     = Color.LightGray
                 )
 
                 LocationRow(

@@ -111,11 +111,10 @@ fun currentWeekMonday(): Long {
 class GoogleCalendarProvider(
     private val context: Context,
     private val tokenProvider: suspend () -> String?,
-    private val dispatchers: DispatcherProvider = DefaultDispatcherProvider()
+    private val dispatchers: DispatcherProvider = DefaultDispatcherProvider(),
+    private val httpClient: OkHttpClient = OkHttpClient(),
+    private val baseUrl: String = GOOGLE_CALENDAR_BASE_URL
 ) : CalendarProvider {
-
-    private val client = OkHttpClient()
-    private val baseUrl = "https://www.googleapis.com/calendar/v3"
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -167,7 +166,7 @@ class GoogleCalendarProvider(
             .header("Authorization", "Bearer $token")
             .build()
 
-        val response = client.newCall(request).execute()
+        val response = httpClient.newCall(request).execute()
         val body = response.body?.string() ?: return null
 
         if (!response.isSuccessful) {
@@ -245,7 +244,16 @@ class GoogleCalendarProvider(
     }
 }
 
-// ── Test double ───────────────────────────────────────────────────────────────
+// ── Constants ────────────────────────────────────────────────────────────────
+
+/**
+ * Base URL for Google Calendar REST API v3.
+ * Extracted as a constant so [GoogleCalendarProvider] can be constructed
+ * with a test URL (e.g. a local mock server) without recompiling.
+ */
+const val GOOGLE_CALENDAR_BASE_URL = "https://www.googleapis.com/calendar/v3"
+
+// ── Test double ─────────────────────────────────────────────────────────────────
 
 /**
  * Deterministic stub for unit tests — no network, no auth.

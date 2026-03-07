@@ -18,73 +18,106 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.data.LocationResult
-import com.example.myapplication.data.parseLocation
+import com.example.myapplication.data.ResolvedCalendarEvent
 import com.example.myapplication.logic.CalendarInfo
-import com.example.myapplication.ui.components.CalendarAccountState
-import com.example.myapplication.ui.components.WeekCalendarView
 import com.example.myapplication.ui.models.CalendarState
-import com.example.myapplication.ui.viewmodel.CalendarViewModel
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 
 /**
  * Top-level Schedule tab screen.
  *
- * Delegates to [CalendarPickerScreen] while the user is choosing a calendar,
- * and to [WeekCalendarView] once a calendar is selected.
+ * Fully stateless — receives primitive state and lambda callbacks only.
+ * The ViewModel is never referenced here, satisfying the principle that
+ * composables should not depend on ViewModel types directly.
  *
- * All ViewModel interaction is done via callbacks so this composable
- * remains independently testable.
+ * Call-site (AppNavigation) reads from the ViewModel and passes values down:
+ * ```
+ * CalendarScreen(
+ *     calendarState      = calendarViewModel.calendarState,
+ *     weekStartMs        = calendarViewModel.currentWeekStartMs,
+ *     weekEvents         = calendarViewModel.weekEvents,
+ *     isLoading          = calendarViewModel.weekViewLoading,
+ *     isSignedIn         = calendarViewModel.selectedCalendarId != null,
+ *     userEmail          = ...,
+ *     onConnectClick     = ...,
+ *     onSignOutClick     = ...,
+ *     onCalendarPicked   = calendarViewModel::onCalendarSelected,
+ *     onPreviousWeek     = { calendarViewModel.goToPreviousWeek(id) },
+ *     onNextWeek         = { calendarViewModel.goToNextWeek(id) },
+ *     onNavigateToEvent  = { dest -> ... }
+ * )
+ * ```
  */
 @Composable
 fun CalendarScreen(
-    viewModel: CalendarViewModel,
-    selectedCalendarId: String?,
-    userEmail: String,
-    onConnectClick: () -> Unit,
-    onSignOutClick: () -> Unit,
-    onNavigateToEvent: (String) -> Unit
+    calendarState:     CalendarState,
+    weekStartMs:       Long,
+    weekEvents:        List<ResolvedCalendarEvent>,
+    isLoading:         Boolean,
+    isSignedIn:        Boolean,
+    userEmail:         String,
+    onConnectClick:    () -> Unit,
+    onSignOutClick:    () -> Unit,
+    onCalendarPicked:  (id: String, name: String) -> Unit,
+    onPreviousWeek:    () -> Unit,
+    onNextWeek:        () -> Unit,
+    onNavigateToEvent: (destination: String) -> Unit,
+    modifier:          Modifier = Modifier
 ) {
-    val isSignedIn = selectedCalendarId != null
-    val calState   = viewModel.calendarState
-
-    if (!isSignedIn && calState is CalendarState.SelectingCalendar) {
+    // Calendar picker takes over the whole screen while user selects
+    if (!isSignedIn && calendarState is CalendarState.SelectingCalendar) {
         CalendarPickerScreen(
-            calendars        = calState.calendars,
-            onCalendarPicked = { id, name -> viewModel.onCalendarSelected(id, name) }
+            calendars        = calendarState.calendars,
+            onCalendarPicked = onCalendarPicked
         )
         return
     }
 
     WeekCalendarView(
-        weekStartMs       = viewModel.currentWeekStartMs,
-        events            = viewModel.weekEvents,
-        isLoading         = viewModel.weekViewLoading || calState is CalendarState.Loading,
-        accountState      = CalendarAccountState(
+        weekStartMs    = weekStartMs,
+        events         = weekEvents,
+        isLoading      = isLoading || calendarState is CalendarState.Loading,
+        accountState   = CalendarAccountState(
             isSignedIn     = isSignedIn,
             userEmail      = userEmail,
             onConnectClick = onConnectClick,
             onSignOutClick = onSignOutClick
         ),
-        onPreviousWeek    = { selectedCalendarId?.let { viewModel.goToPreviousWeek(it) } },
-        onNextWeek        = { selectedCalendarId?.let { viewModel.goToNextWeek(it) } },
-        onNavigateToEvent = { event ->
-            val destination = (event.locationResult as? LocationResult.Known)
-                ?.location?.buildingCode
-                ?: event.location?.takeIf { it.isNotBlank() }
-                ?: return@WeekCalendarView
-            onNavigateToEvent(destination)
-        },
-        modifier = Modifier.fillMaxSize()
+        onPreviousWeek    = onPreviousWeek,
+        onNextWeek        = onNextWeek,
+        onNavigateToEvent = { event -> dispatchNavigation(event, onNavigateToEvent) },
+        modifier          = modifier
     )
 }
 
 /**
- * Shows the list of the user's Google Calendars so they can pick the one
- * that contains their courses.
+ * Resolves the navigation destination from a [ResolvedCalendarEvent].
+ *
+ * Prefers the building code from an already-resolved [LocationResult.Known];
+ * falls back to the raw location string for unrecognised rooms so navigation
+ * can still attempt a search. Silently no-ops if no destination can be derived.
+ */
+private fun dispatchNavigation(
+    event:             ResolvedCalendarEvent,
+    onNavigateToEvent: (String) -> Unit
+) {
+    val destination = when (val loc = event.locationResult) {
+        is LocationResult.Known -> loc.location.buildingCode
+        else                    -> event.location?.takeIf { it.isNotBlank() }
+    } ?: return  // Online / TBA / Unknown — no navigation destination
+
+    onNavigateToEvent(destination)
+}
+
+// ── Calendar picker ───────────────────────────────────────────────────────────
+
+/**
+ * Shows the user's Google Calendars so they can pick the one that
+ * contains their courses.
  */
 @Composable
 fun CalendarPickerScreen(
-    calendars: List<CalendarInfo>,
+    calendars:       List<CalendarInfo>,
     onCalendarPicked: (id: String, name: String) -> Unit
 ) {
     Column(
@@ -92,11 +125,8 @@ fun CalendarPickerScreen(
             .fillMaxSize()
             .background(Color.White)
     ) {
-        // ── Header ────────────────────────────────────────────────────────────
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+            modifier          = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
@@ -120,11 +150,10 @@ fun CalendarPickerScreen(
         }
         HorizontalDivider(color = Color(0xFFEEEEEE))
 
-        // ── Calendar list ─────────────────────────────────────────────────────
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(calendars) { calendar ->
                 Row(
-                    modifier = Modifier
+                    modifier          = Modifier
                         .fillMaxWidth()
                         .clickable { onCalendarPicked(calendar.id, calendar.summary) }
                         .padding(horizontal = 20.dp, vertical = 14.dp),

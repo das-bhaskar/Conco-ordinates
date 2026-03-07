@@ -12,29 +12,39 @@ import kotlinx.coroutines.withContext
 /**
  * Encapsulates all Google Sign-In and OAuth token logic.
  *
- * MapsActivity must not know how authentication works — it only calls
- * [buildSignInIntent], [handleSignInResult], and [revokeAndGetSignInIntent].
+ * Callers (MapsActivity) only interact via [buildSignInIntent],
+ * [revokeAndSignIn], and [getCalendarToken] — they never know how
+ * authentication is implemented.
+ *
+ * [signInClient] is injected via the constructor (default: built from
+ * [buildDefaultSignInClient]) so tests can pass a mock without triggering
+ * real Google Play Services calls.
  *
  * [dispatchers] is injected so unit tests can swap in [TestDispatchers]
  * and avoid real IO.
  */
 class AuthRepository(
     private val context: Context,
-    private val dispatchers: DispatcherProvider = DefaultDispatcherProvider()
+    private val signInClient: GoogleSignInClient = buildDefaultSignInClient(context),
+    private val dispatchers: DispatcherProvider  = DefaultDispatcherProvider()
 ) {
     companion object {
         private const val CALENDAR_SCOPE =
             "oauth2:https://www.googleapis.com/auth/calendar.readonly"
-    }
 
-    private val signInOptions: GoogleSignInOptions =
-        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestScopes(Scope("https://www.googleapis.com/auth/calendar.readonly"))
-            .build()
-
-    val signInClient: GoogleSignInClient by lazy {
-        GoogleSignIn.getClient(context, signInOptions)
+        /**
+         * Builds the production [GoogleSignInClient].
+         * Extracted as a top-level factory so the default parameter above
+         * stays readable and the options are defined in one place.
+         */
+        fun buildDefaultSignInClient(context: Context): GoogleSignInClient {
+            val options = GoogleSignInOptions
+                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestScopes(Scope("https://www.googleapis.com/auth/calendar.readonly"))
+                .build()
+            return GoogleSignIn.getClient(context, options)
+        }
     }
 
     /** Returns an Intent that starts the Google account picker. */
@@ -70,7 +80,6 @@ class AuthRepository(
                     token
                 }
             } catch (e: com.google.android.gms.auth.UserRecoverableAuthException) {
-                // Consent was not granted — caller must re-launch sign-in with e.intent
                 android.util.Log.w("AuthRepository", "UserRecoverableAuthException")
                 CrashReporter.recordNonFatal(e, "calendar_user_recoverable_auth")
                 null
@@ -80,6 +89,14 @@ class AuthRepository(
                 null
             }
         }
+
+    /**
+     * Signs the user out of Google.
+     * Calls [onComplete] when finished so the caller can update UI state.
+     */
+    fun signOut(onComplete: () -> Unit) {
+        signInClient.signOut().addOnCompleteListener { onComplete() }
+    }
 
     /** Returns true if there is a currently signed-in Google account. */
     fun isSignedIn(): Boolean =

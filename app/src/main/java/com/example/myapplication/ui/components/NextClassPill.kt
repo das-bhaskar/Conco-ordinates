@@ -19,22 +19,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.myapplication.data.CalendarEvent
-import java.text.SimpleDateFormat
+import com.example.myapplication.data.ResolvedCalendarEvent
 import java.util.*
 
 private val ConcordiaMaroon = Color(0xFF912338)
 
 /**
- * Minimal floating pill — one line: course name + time.
+ * Minimal floating pill — course name + time until class.
  * Tap → immediate navigation to the building.
  * Invisible when [nextEvent] is null.
+ *
+ * This composable is fully stateless regarding business rules:
+ * - [isUrgent] is computed by [CalendarViewModel] (threshold lives there)
+ * - [nextEvent] is a [ResolvedCalendarEvent] — location already parsed
+ * The Pill only decides how to render the state it receives.
  */
 @Composable
 fun NextClassPill(
-    nextEvent: CalendarEvent?,
+    nextEvent:       ResolvedCalendarEvent?,
+    isUrgent:        Boolean,
     onNavigateClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier:        Modifier = Modifier
 ) {
     if (nextEvent == null) return
 
@@ -45,29 +50,28 @@ fun NextClassPill(
         minutesUntil < 60  -> "in ${minutesUntil}m"
         else               -> "in ${minutesUntil / 60}h ${minutesUntil % 60}m"
     }
-    val urgent = minutesUntil <= 15
 
     Row(
         modifier = modifier
             .shadow(4.dp, RoundedCornerShape(50))
             .clip(RoundedCornerShape(50))
-            .background(if (urgent) ConcordiaMaroon else Color.White)
+            .background(if (isUrgent) ConcordiaMaroon else Color.White)
             .clickable { onNavigateClick() }
             .padding(horizontal = 14.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment     = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Icon(
             imageVector        = Icons.Default.School,
             contentDescription = null,
-            tint               = if (urgent) Color.White else ConcordiaMaroon,
+            tint               = if (isUrgent) Color.White else ConcordiaMaroon,
             modifier           = Modifier.size(16.dp)
         )
         Text(
             text       = nextEvent.title,
             fontSize   = 13.sp,
             fontWeight = FontWeight.SemiBold,
-            color      = if (urgent) Color.White else Color(0xFF1C1B1F),
+            color      = if (isUrgent) Color.White else Color(0xFF1C1B1F),
             maxLines   = 1,
             overflow   = TextOverflow.Ellipsis,
             modifier   = Modifier.widthIn(max = 160.dp)
@@ -75,12 +79,12 @@ fun NextClassPill(
         Text(
             text     = timeLabel,
             fontSize = 12.sp,
-            color    = if (urgent) Color.White.copy(alpha = 0.85f) else Color(0xFF5F6368)
+            color    = if (isUrgent) Color.White.copy(alpha = 0.85f) else Color(0xFF5F6368)
         )
         Icon(
             imageVector        = Icons.Default.Directions,
             contentDescription = "Navigate",
-            tint               = if (urgent) Color.White else ConcordiaMaroon,
+            tint               = if (isUrgent) Color.White else ConcordiaMaroon,
             modifier           = Modifier.size(16.dp)
         )
     }

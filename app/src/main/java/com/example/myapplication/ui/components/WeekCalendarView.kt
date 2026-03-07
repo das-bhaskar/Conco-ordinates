@@ -24,10 +24,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.example.myapplication.data.CalendarEvent
 import com.example.myapplication.data.LocationResult
-import com.example.myapplication.data.ParsedLocation
-import com.example.myapplication.data.parseLocation
+import com.example.myapplication.data.ResolvedCalendarEvent
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -47,34 +45,37 @@ private val HourHeightDp    = 60.dp
 private val HeaderHeightDp  = 52.dp
 
 /**
- * Week calendar view.
- *
- * Stateless — all data/actions flow in as parameters.
- * Uses [CalendarEvent.locationResult] so the UI never parses strings itself.
- */
-/**
  * Groups account-related parameters for [WeekCalendarView] so the function
  * stays within the 7-parameter limit required by static analysis.
  */
 data class CalendarAccountState(
-    val isSignedIn:     Boolean  = false,
-    val userEmail:      String   = "",
+    val isSignedIn:     Boolean    = false,
+    val userEmail:      String     = "",
     val onConnectClick: () -> Unit = {},
     val onSignOutClick: () -> Unit = {}
 )
 
+/**
+ * Week calendar view — stateless, all data flows in as parameters.
+ *
+ * Receives [ResolvedCalendarEvent] so this composable never calls any
+ * parsing logic. Location resolution is the ViewModel's responsibility.
+ */
 @Composable
 fun WeekCalendarView(
     weekStartMs:       Long,
-    events:            List<CalendarEvent>,
+    events:            List<ResolvedCalendarEvent>,
     isLoading:         Boolean,
     accountState:      CalendarAccountState = CalendarAccountState(),
     onPreviousWeek:    () -> Unit,
     onNextWeek:        () -> Unit,
-    onNavigateToEvent: (CalendarEvent) -> Unit,
+    onNavigateToEvent: (ResolvedCalendarEvent) -> Unit,
     modifier:          Modifier = Modifier
 ) {
-    var pendingEvent by remember { mutableStateOf<CalendarEvent?>(null) }
+    // pendingEvent drives the confirmation dialog.
+    // Use a single state variable; clear it on ALL exit paths (Confirm/Dismiss/Cancel)
+    // to prevent ghost dialogs and the SonarCloud "assigned but never used" warning.
+    var pendingEvent by remember { mutableStateOf<ResolvedCalendarEvent?>(null) }
 
     Column(modifier = modifier.fillMaxSize().background(Color.White)) {
         CalendarTopBar(
@@ -86,16 +87,35 @@ fun WeekCalendarView(
         WeekNavigationRow(weekStartMs, onPreviousWeek, onNextWeek)
         DayColumnHeaders(weekStartMs)
         HorizontalDivider(color = GridLineColor, thickness = 0.5.dp)
-
         when {
-            isLoading              -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = ConcordiaMaroon, modifier = Modifier.size(32.dp))
+            isLoading -> Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    color    = ConcordiaMaroon,
+                    modifier = Modifier.size(32.dp)
+                )
             }
-            !accountState.isSignedIn -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
-                    Text("Connect Google Calendar", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            !accountState.isSignedIn -> Box(
+                Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier            = Modifier.padding(32.dp)
+                ) {
+                    Text(
+                        "Connect Google Calendar",
+                        style      = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
                     Spacer(Modifier.height(8.dp))
-                    Text("Tap the account icon above to sign in", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                    Text(
+                        "Tap the account icon above to sign in",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
                     Spacer(Modifier.height(20.dp))
                     Button(
                         onClick = accountState.onConnectClick,
@@ -104,21 +124,26 @@ fun WeekCalendarView(
                     ) { Text("Connect") }
                 }
             }
-            else -> TimeGrid(weekStartMs, events) { pendingEvent = it }
+            else -> TimeGrid(weekStartMs, events) { clicked -> pendingEvent = clicked }
         }
     }
 
-    pendingEvent?.let { event ->
+    // Dialog is rendered outside the Column so it overlays the full screen.
+    // pendingEvent is cleared on every exit path: Confirm, Dismiss, and Cancel.
+    val eventToConfirm = pendingEvent
+    if (eventToConfirm != null) {
         NavigationConfirmDialog(
-            event     = event,
-            onConfirm = { pendingEvent = null; onNavigateToEvent(event) },
+            event     = eventToConfirm,
+            onConfirm = {
+                pendingEvent = null          // clear first to avoid ghost dialog
+                onNavigateToEvent(eventToConfirm)
+            },
             onDismiss = { pendingEvent = null }
         )
     }
 }
 
 // ── Top bar ───────────────────────────────────────────────────────────────────
-
 @Composable
 private fun CalendarTopBar(
     isSignedIn:     Boolean,
@@ -131,38 +156,42 @@ private fun CalendarTopBar(
         verticalAlignment     = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text("Schedule",
+        Text(
+            "Schedule",
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             color = Color(0xFF3C4043)
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
-            // Account chip
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
+                modifier          = Modifier
                     .clip(RoundedCornerShape(20.dp))
                     .clickable { onConnectClick() }
                     .padding(horizontal = 10.dp, vertical = 6.dp)
             ) {
-                Icon(Icons.Default.AccountCircle, contentDescription = "Account",
-                    tint = if (isSignedIn) ConcordiaMaroon else Color.Gray,
-                    modifier = Modifier.size(22.dp))
+                Icon(
+                    Icons.Default.AccountCircle,
+                    contentDescription = "Account",
+                    tint               = if (isSignedIn) ConcordiaMaroon else Color.Gray,
+                    modifier           = Modifier.size(22.dp)
+                )
                 Spacer(Modifier.width(4.dp))
                 if (isSignedIn && userEmail.isNotBlank()) {
-                    Text(userEmail, style = MaterialTheme.typography.bodySmall, color = Color(0xFF5F6368),
-                        maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.widthIn(max = 160.dp))
+                    Text(
+                        userEmail,
+                        style    = MaterialTheme.typography.bodySmall,
+                        color    = Color(0xFF5F6368),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.widthIn(max = 160.dp)
+                    )
                 } else {
                     Text("Connect", style = MaterialTheme.typography.labelSmall, color = ConcordiaMaroon)
                 }
             }
-
-            // Sign-out button — only when signed in
             if (isSignedIn) {
                 Spacer(Modifier.width(4.dp))
-                IconButton(
-                    onClick  = onSignOutClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
+                IconButton(onClick = onSignOutClick, modifier = Modifier.size(36.dp)) {
                     Icon(
                         imageVector        = Icons.Default.Logout,
                         contentDescription = "Sign out",
@@ -176,20 +205,24 @@ private fun CalendarTopBar(
 }
 
 // ── Week navigation row ───────────────────────────────────────────────────────
-
 @Composable
 private fun WeekNavigationRow(weekStartMs: Long, onPrev: () -> Unit, onNext: () -> Unit) {
     val fmt       = SimpleDateFormat("d MMM", Locale.getDefault())
     val weekEndMs = weekStartMs + 6L * 24 * 60 * 60 * 1000
-    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier          = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         IconButton(onClick = onPrev, modifier = Modifier.size(36.dp)) {
             Icon(Icons.Default.ChevronLeft, contentDescription = "Prev",
                 tint = Color(0xFF5F6368), modifier = Modifier.size(20.dp))
         }
-        Text("From ${fmt.format(Date(weekStartMs))} to ${fmt.format(Date(weekEndMs))}",
-            style = MaterialTheme.typography.bodySmall, color = Color(0xFF5F6368),
-            modifier = Modifier.weight(1f))
+        Text(
+            "From ${fmt.format(Date(weekStartMs))} to ${fmt.format(Date(weekEndMs))}",
+            style    = MaterialTheme.typography.bodySmall,
+            color    = Color(0xFF5F6368),
+            modifier = Modifier.weight(1f)
+        )
         IconButton(onClick = onNext, modifier = Modifier.size(36.dp)) {
             Icon(Icons.Default.ChevronRight, contentDescription = "Next",
                 tint = Color(0xFF5F6368), modifier = Modifier.size(20.dp))
@@ -198,7 +231,6 @@ private fun WeekNavigationRow(weekStartMs: Long, onPrev: () -> Unit, onNext: () 
 }
 
 // ── Day column headers ────────────────────────────────────────────────────────
-
 private val DAY_LETTERS = listOf("M", "T", "W", "T", "F", "S", "S")
 
 private fun calendarForDay(weekStartMs: Long, offset: Int): Calendar =
@@ -206,8 +238,8 @@ private fun calendarForDay(weekStartMs: Long, offset: Int): Calendar =
 
 private fun isToday(cal: Calendar): Boolean {
     val today = Calendar.getInstance()
-    return cal.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR) &&
-           cal.get(Calendar.YEAR)        == today.get(Calendar.YEAR)
+    return cal[Calendar.DAY_OF_YEAR] == today[Calendar.DAY_OF_YEAR] &&
+           cal[Calendar.YEAR]        == today[Calendar.YEAR]
 }
 
 @Composable
@@ -217,7 +249,7 @@ private fun DayColumnHeaders(weekStartMs: Long) {
         for (i in 0..6) {
             DayHeaderCell(
                 letter    = DAY_LETTERS[i],
-                dayNumber = calendarForDay(weekStartMs, i).get(Calendar.DAY_OF_MONTH),
+                dayNumber = calendarForDay(weekStartMs, i)[Calendar.DAY_OF_MONTH],
                 isToday   = isToday(calendarForDay(weekStartMs, i))
             )
         }
@@ -227,8 +259,8 @@ private fun DayColumnHeaders(weekStartMs: Long) {
 @Composable
 private fun RowScope.DayHeaderCell(letter: String, dayNumber: Int, isToday: Boolean) {
     Column(
-        modifier              = Modifier.weight(1f).padding(vertical = 4.dp),
-        horizontalAlignment   = Alignment.CenterHorizontally
+        modifier            = Modifier.weight(1f).padding(vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             letter,
@@ -238,10 +270,10 @@ private fun RowScope.DayHeaderCell(letter: String, dayNumber: Int, isToday: Bool
         )
         Spacer(Modifier.height(2.dp))
         Box(
-            modifier           = Modifier.size(26.dp).then(
+            modifier         = Modifier.size(26.dp).then(
                 if (isToday) Modifier.background(TodayHighlight, RoundedCornerShape(50)) else Modifier
             ),
-            contentAlignment   = Alignment.Center
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 dayNumber.toString(),
@@ -254,20 +286,36 @@ private fun RowScope.DayHeaderCell(letter: String, dayNumber: Int, isToday: Bool
 }
 
 // ── Scrollable time grid ──────────────────────────────────────────────────────
-
 @Composable
-private fun TimeGrid(weekStartMs: Long, events: List<CalendarEvent>, onEventClick: (CalendarEvent) -> Unit) {
+private fun TimeGrid(
+    weekStartMs:  Long,
+    events:       List<ResolvedCalendarEvent>,
+    onEventClick: (ResolvedCalendarEvent) -> Unit
+) {
     val scrollState = rememberScrollState()
     val today       = Calendar.getInstance()
-    LaunchedEffect(Unit) { scrollState.scrollTo((8f * HourHeightDp.value * 3).toInt()) }
+
+    // Scroll to current hour on first composition so the user always sees
+    // their current time — not an arbitrary magic number.
+    val currentHour = today[Calendar.HOUR_OF_DAY]
+    LaunchedEffect(Unit) {
+        val scrollOffset = ((currentHour - 1).coerceAtLeast(0) * HourHeightDp.value).toInt()
+        scrollState.scrollTo(scrollOffset)
+    }
 
     Row(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
         Column(modifier = Modifier.width(TimeColumnWidth)) {
             Spacer(Modifier.height(HourHeightDp / 2))
             for (hour in 0..23) {
-                Box(modifier = Modifier.height(HourHeightDp).fillMaxWidth().padding(end = 6.dp),
-                    contentAlignment = Alignment.TopEnd) {
-                    if (hour > 0) Text(String.format("%02d:00", hour), fontSize = 9.sp, color = Color(0xFF70757A))
+                Box(
+                    modifier         = Modifier.height(HourHeightDp).fillMaxWidth().padding(end = 6.dp),
+                    contentAlignment = Alignment.TopEnd
+                ) {
+                    if (hour > 0) Text(
+                        String.format("%02d:00", hour),
+                        fontSize = 9.sp,
+                        color    = Color(0xFF70757A)
+                    )
                 }
             }
         }
@@ -275,32 +323,37 @@ private fun TimeGrid(weekStartMs: Long, events: List<CalendarEvent>, onEventClic
             for (dayIndex in 0..6) {
                 val dayStartMs = weekStartMs + dayIndex * 24L * 60 * 60 * 1000
                 val dayCal     = Calendar.getInstance().apply { timeInMillis = dayStartMs }
-                val isToday    = dayCal.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR) &&
-                                 dayCal.get(Calendar.YEAR) == today.get(Calendar.YEAR)
-                val dayEvents  = events.filter { it.startTimeMs >= dayStartMs && it.startTimeMs < dayStartMs + 24L * 60 * 60 * 1000 }
-                DayColumn(dayStartMs, dayEvents, isToday, onEventClick, Modifier.weight(1f))
+                val isTodayCol = dayCal[Calendar.DAY_OF_YEAR] == today[Calendar.DAY_OF_YEAR] &&
+                                 dayCal[Calendar.YEAR]        == today[Calendar.YEAR]
+                val dayEvents  = events.filter {
+                    it.startTimeMs >= dayStartMs &&
+                    it.startTimeMs <  dayStartMs + 24L * 60 * 60 * 1000
+                }
+                DayColumn(dayStartMs, dayEvents, isTodayCol, onEventClick, Modifier.weight(1f))
             }
         }
     }
 }
 
 // ── Single day column ─────────────────────────────────────────────────────────
-
 @Composable
 private fun DayColumn(
-    dayStartMs: Long,
-    events: List<CalendarEvent>,
-    isToday: Boolean,
-    onEventClick: (CalendarEvent) -> Unit,
-    modifier: Modifier = Modifier
+    dayStartMs:   Long,
+    events:       List<ResolvedCalendarEvent>,
+    isToday:      Boolean,
+    onEventClick: (ResolvedCalendarEvent) -> Unit,
+    modifier:     Modifier = Modifier
 ) {
-    Box(modifier = modifier
-        .then(if (isToday) Modifier.background(TodayColumnBg) else Modifier)
-        .border(width = 0.5.dp, color = GridLineColor)) {
+    Box(
+        modifier = modifier
+            .then(if (isToday) Modifier.background(TodayColumnBg) else Modifier)
+            .border(width = 0.5.dp, color = GridLineColor)
+    ) {
         Column {
             Spacer(Modifier.height(HourHeightDp / 2))
             repeat(24) {
-                Box(modifier = Modifier.height(HourHeightDp).fillMaxWidth().border(width = 0.5.dp, color = GridLineColor))
+                Box(modifier = Modifier.height(HourHeightDp).fillMaxWidth()
+                    .border(width = 0.5.dp, color = GridLineColor))
             }
         }
         events.forEachIndexed { idx, event ->
@@ -310,28 +363,23 @@ private fun DayColumn(
 }
 
 // ── Event block ───────────────────────────────────────────────────────────────
-
 @Composable
 private fun BoxScope.EventBlock(
-    event: CalendarEvent,
-    dayStartMs: Long,
-    colorIndex: Int,
-    onEventClick: (CalendarEvent) -> Unit
+    event:        ResolvedCalendarEvent,
+    dayStartMs:   Long,
+    colorIndex:   Int,
+    onEventClick: (ResolvedCalendarEvent) -> Unit
 ) {
     val midnight = Calendar.getInstance().apply {
         timeInMillis = dayStartMs
         set(Calendar.HOUR_OF_DAY, 0); set(Calendar.MINUTE, 0)
         set(Calendar.SECOND, 0);      set(Calendar.MILLISECOND, 0)
     }.timeInMillis
-
     val startMin    = ((event.startTimeMs - midnight) / 60_000f).coerceAtLeast(0f)
-    val durationMin = ((event.endTimeMs - event.startTimeMs) / 60_000f).coerceAtLeast(30f)
-    val topDp       = (startMin / 60f) * HourHeightDp.value
+    val durationMin = ((event.endTimeMs   - event.startTimeMs) / 60_000f).coerceAtLeast(30f)
+    val topDp       = (startMin    / 60f) * HourHeightDp.value
     val heightDp    = (durationMin / 60f) * HourHeightDp.value
     val color       = EventColors[colorIndex]
-
-    // Use pre-parsed domain model — no string splitting in UI
-    val locResult = event.locationResult
 
     Box(
         modifier = Modifier
@@ -345,20 +393,35 @@ private fun BoxScope.EventBlock(
             .padding(horizontal = 3.dp, vertical = 2.dp)
     ) {
         Column {
-            Text(event.title, fontSize = 10.sp, color = Color.White, fontWeight = FontWeight.SemiBold,
-                maxLines = if (heightDp > 40) 2 else 1, overflow = TextOverflow.Ellipsis, lineHeight = 12.sp)
+            Text(
+                event.title,
+                fontSize   = 10.sp,
+                color      = Color.White,
+                fontWeight = FontWeight.SemiBold,
+                maxLines   = if (heightDp > 40) 2 else 1,
+                overflow   = TextOverflow.Ellipsis,
+                lineHeight = 12.sp
+            )
             if (heightDp > 30)
-                Text(SimpleDateFormat("H:mm", Locale.getDefault()).format(Date(event.startTimeMs)),
-                    fontSize = 9.sp, color = Color.White.copy(alpha = 0.85f), maxLines = 1)
+                Text(
+                    SimpleDateFormat("H:mm", Locale.getDefault()).format(Date(event.startTimeMs)),
+                    fontSize = 9.sp,
+                    color    = Color.White.copy(alpha = 0.85f),
+                    maxLines = 1
+                )
             if (heightDp > 46) {
-                when (locResult) {
-                    is LocationResult.Known   ->
-                        Text(locResult.location.roomCode, fontSize = 9.sp, color = Color.White.copy(alpha = 0.80f), maxLines = 1)
-                    LocationResult.Online     ->
-                        Text("🌐 Online", fontSize = 9.sp, color = Color.White.copy(alpha = 0.80f), maxLines = 1)
-                    LocationResult.TBA        ->
-                        Text("📍 TBA", fontSize = 9.sp, color = Color.White.copy(alpha = 0.80f), maxLines = 1)
-                    LocationResult.Unknown    -> { /* nothing */ }
+                // locationResult was pre-resolved by ViewModel — no parsing here
+                when (val loc = event.locationResult) {
+                    is LocationResult.Known ->
+                        Text(loc.location.roomCode, fontSize = 9.sp,
+                            color = Color.White.copy(alpha = 0.80f), maxLines = 1)
+                    LocationResult.Online ->
+                        Text("🌐 Online", fontSize = 9.sp,
+                            color = Color.White.copy(alpha = 0.80f), maxLines = 1)
+                    LocationResult.TBA ->
+                        Text("📍 TBA", fontSize = 9.sp,
+                            color = Color.White.copy(alpha = 0.80f), maxLines = 1)
+                    LocationResult.Unknown -> { /* no location to show */ }
                 }
             }
         }
@@ -366,62 +429,77 @@ private fun BoxScope.EventBlock(
 }
 
 // ── Navigation confirmation dialog ────────────────────────────────────────────
-
 @Composable
-private fun NavigationConfirmDialog(event: CalendarEvent, onConfirm: () -> Unit, onDismiss: () -> Unit) {
-    // Use pre-parsed domain model from CalendarEvent — no string parsing in UI
-    val locResult = event.locationResult
-    val timeFmt   = SimpleDateFormat("h:mm a", Locale.getDefault())
-
+private fun NavigationConfirmDialog(
+    event:     ResolvedCalendarEvent,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    val timeFmt = SimpleDateFormat("h:mm a", Locale.getDefault())
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = RoundedCornerShape(20.dp), color = Color.White, shadowElevation = 8.dp) {
             Column(modifier = Modifier.padding(24.dp)) {
-                Text(event.title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                Text(
+                    event.title,
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
                 Spacer(Modifier.height(4.dp))
-                Text(timeFmt.format(Date(event.startTimeMs)), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                Text(
+                    timeFmt.format(Date(event.startTimeMs)),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray
+                )
                 Spacer(Modifier.height(16.dp))
                 HorizontalDivider(color = GridLineColor)
                 Spacer(Modifier.height(16.dp))
-
-                when (locResult) {
+                // locationResult pre-resolved — UI only switches on result type
+                when (val loc = event.locationResult) {
                     is LocationResult.Known -> {
-                        val loc = locResult.location
-                        LocationInfoRow("Building", "${loc.buildingCode} – ${loc.buildingName}")
+                        LocationInfoRow("Building", "${loc.location.buildingCode} – ${loc.location.buildingName}")
                         Spacer(Modifier.height(6.dp))
-                        LocationInfoRow("Room",     loc.roomCode)
+                        LocationInfoRow("Room",     loc.location.roomCode)
                         Spacer(Modifier.height(6.dp))
-                        LocationInfoRow("Campus",   loc.campus)
+                        LocationInfoRow("Campus",   loc.location.campus)
                     }
                     LocationResult.Online -> {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text("🌐", fontSize = 20.sp)
                             Spacer(Modifier.width(8.dp))
-                            Text("This class is online", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                            Text("This class is online",
+                                style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         }
                     }
                     LocationResult.TBA -> {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text("📍", fontSize = 20.sp)
                             Spacer(Modifier.width(8.dp))
-                            Text("Location not yet announced", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
+                            Text("Location not yet announced",
+                                style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
                         }
                     }
-                    LocationResult.Unknown -> {
-                        Text("No location info", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-                    }
+                    LocationResult.Unknown ->
+                        Text("No location info",
+                            style = MaterialTheme.typography.bodySmall, color = Color.Gray)
                 }
-
                 Spacer(Modifier.height(20.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = onDismiss, modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(12.dp)) { Text("Cancel") }
-
-                    // Navigate button only makes sense for known physical locations
-                    if (locResult is LocationResult.Known) {
-                        Button(onClick = onConfirm, modifier = Modifier.weight(1f),
-                            colors = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon),
-                            shape  = RoundedCornerShape(12.dp)) {
-                            Icon(Icons.Default.Directions, contentDescription = null, modifier = Modifier.size(16.dp))
+                Row(
+                    modifier             = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick  = onDismiss,
+                        modifier = Modifier.weight(1f),
+                        shape    = RoundedCornerShape(12.dp)
+                    ) { Text("Cancel") }
+                    if (event.locationResult is LocationResult.Known) {
+                        Button(
+                            onClick  = onConfirm,
+                            modifier = Modifier.weight(1f),
+                            colors   = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon),
+                            shape    = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.Directions, contentDescription = null,
+                                modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(6.dp))
                             Text("Navigate")
                         }
@@ -435,8 +513,12 @@ private fun NavigationConfirmDialog(event: CalendarEvent, onConfirm: () -> Unit,
 @Composable
 private fun LocationInfoRow(label: String, value: String) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = Color.Gray,
-            modifier = Modifier.width(64.dp))
+        Text(
+            label,
+            style    = MaterialTheme.typography.labelSmall,
+            color    = Color.Gray,
+            modifier = Modifier.width(64.dp)
+        )
         Text(value, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
     }
 }

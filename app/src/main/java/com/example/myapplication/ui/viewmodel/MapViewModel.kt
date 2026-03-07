@@ -4,6 +4,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.myapplication.analytics.AnalyticsProvider
+import com.example.myapplication.analytics.NoOpAnalyticsProvider
 import com.example.myapplication.data.Building
 import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
@@ -32,7 +34,8 @@ import com.example.myapplication.ui.models.MapUIMode
 class MapViewModel(
     private val locationProvider: com.example.myapplication.logic.LocationProvider? = null,
     private val routeProvider: com.example.myapplication.logic.RouteProvider? = null,
-    private val shuttleService: ShuttleService
+    private val shuttleService: ShuttleService,
+    private val analyticsProvider: AnalyticsProvider = NoOpAnalyticsProvider
 ) : ViewModel() {
 
     private val shuttleRouteProvider = ShuttleRouteProvider(
@@ -212,6 +215,9 @@ class MapViewModel(
     }
 
     fun onDirectionsRequested() {
+        if (uiBuildingState.mode != MapUIMode.DIRECTIONS) {
+            analyticsProvider.trackNavigationEnter("map_directions")
+        }
         uiBuildingState = uiBuildingState.copy(
             mode            = MapUIMode.DIRECTIONS,
             destinationName = uiBuildingState.building?.name ?: ""
@@ -303,6 +309,9 @@ class MapViewModel(
      * State is committed in a single atomic copy() to prevent UI flickering.
      */
     fun navigateToBuildingCode(buildingCode: String) {
+        if (uiBuildingState.mode != MapUIMode.DIRECTIONS) {
+            analyticsProvider.trackNavigationEnter("calendar_to_directions")
+        }
         // O(1) lookup — no flatMap iteration
         val building = buildingIndex[buildingCode.lowercase()]
 

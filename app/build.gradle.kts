@@ -33,9 +33,17 @@ android {
         val myKey: String = System.getenv("MAPS_API_KEY")
             ?: properties.getProperty("MAPS_API_KEY")
             ?: "DUMMY_KEY"
+        val smartlookProjectKey: String = System.getenv("SMARTLOOK_PROJECT_KEY")
+            ?: properties.getProperty("SMARTLOOK_PROJECT_KEY")
+            ?: ""
+        val smartlookTesterId: String = System.getenv("SMARTLOOK_TESTER_ID")
+            ?: properties.getProperty("SMARTLOOK_TESTER_ID")
+            ?: ""
 
         manifestPlaceholders["mapsApiKey"] = myKey
         buildConfigField("String", "MAPS_API_KEY", "\"$myKey\"")
+        buildConfigField("String", "SMARTLOOK_PROJECT_KEY", "\"$smartlookProjectKey\"")
+        buildConfigField("String", "SMARTLOOK_TESTER_ID", "\"$smartlookTesterId\"")
     }
 
     buildTypes {
@@ -98,6 +106,7 @@ dependencies {
 
     // ── Google Sign-In — required for Calendar OAuth token ────────────────────
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("com.smartlook.android:smartlook-analytics:2.3.4")
     // ── Jetpack Navigation — replaces hardcoded when(selectedTab) ─────────────
     implementation("androidx.navigation:navigation-compose:2.7.7")
 

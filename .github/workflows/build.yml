@@ -5,25 +5,33 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   build:
-    name: Build and analyze
+    name: Build, Test, and Analyze
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: "zulu"
+
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
       - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
@@ -32,19 +40,39 @@ jobs:
             ~/.gradle/wrapper
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: ${{ runner.os }}-gradle
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
+
       - name: Create local.properties
         env:
-          # This maps the secret to a variable. If secret is missing, it uses 'unused'
           MAPS_VAR: ${{ secrets.MAPS_API_KEY || 'unused' }}
         run: echo "MAPS_API_KEY=\"$MAPS_VAR\"" > local.properties
-      - name: Build
-        run: ./gradlew build --info
-      - name: Run SonarQube analysis
-        uses: SonarSource/sonarcloud-github-action@master
+
+      - name: Run tests with coverage
+        run: ./gradlew jacocoTestReport --info
+
+      - name: Verify coverage report exists
+        run: |
+          echo "=== Looking for JaCoCo XML reports ==="
+          find . -name "*.xml" -path "*/jacoco*" -type f
+          echo ""
+          echo "=== Checking expected path ==="
+          ls -la app/build/reports/jacoco/jacocoTestReport/ || echo "Directory does not exist"
+          echo ""
+          echo "=== Checking .exec files ==="
+          find . -name "*.exec" -type f
+
+      - name: PR Coverage Reporter
+        uses: madrapps/jacoco-report@v1.7.1
         with:
-          args: -Dsonar.branch.name=main -Dsonar.branch.autoconfig.enabled=true
+          paths: ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Unit Test Coverage Report"
+          update-comment: true
+
+      - name: Run SonarCloud analysis (main)
+        uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

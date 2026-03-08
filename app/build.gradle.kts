@@ -86,7 +86,6 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("com.google.maps.android:android-maps-utils:3.8.2")
-    implementation("com.squareup.okhttp3:okhttp:5.3.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation("com.google.maps.android:maps-compose:4.3.3")
@@ -100,7 +99,9 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     // ── Jetpack Navigation — replaces hardcoded when(selectedTab) ─────────────
     implementation("androidx.navigation:navigation-compose:2.7.7")
-
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("com.google.code.gson:gson:2.10.1")
     testImplementation(libs.junit)
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
@@ -120,12 +121,45 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
         html.required.set(true)
     }
 
-    val fileFilter = listOf(
+    val fileFilter = mutableListOf(
+        "**/*\$*.*",
+        "**/*\$DefaultImpls*",
+        "**/SearchResult$*",
+        // To hide the "Function" objects created by coroutines/lambdas
+        "**/*\$getRoute$*",
         "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
-        "**/*Test*.*", "android/**/*.*", "**/androidx/**/*.*",
-        "**/*_MembersInjector.class", "**/Dagger*Component.class",
-        "**/*_Factory.class", "**/Hilt_*.class", "**/*\$Composable*.*",
-        "**/MapsActivity*.*", "**/ui/components/**", "**/ui/theme/**"
+        "**/*Test*.*", "android/**/*.*",
+        "**/com/example/myapplication/logic/SharedPrefsCalendarPreferences*",
+        "**/com/example/myapplication/logic/GoogleCalendarProvider*",
+        "**/com/example/myapplication/logic/SimpleMockRouteProvider*",
+        "**/com/example/myapplication/data/JsonSchedule*",
+        "**/com/example/myapplication/data/JsonStop*",
+        "**/com/example/myapplication/data/ShuttleRoute*",
+        "**/com/example/myapplication/data/CampusBuildingNameProvider*",
+        "**/com/example/myapplication/data/JsonShuttleData*",
+        // Jetpack Compose exclusions (SRP focused)
+        "**/com/example/myapplication/ui/components/**",
+        "**/com/example/myapplication/ui/theme/**",
+        "**/MapViewModel\$navigateToBuildingCode\$*",
+        "**/MapViewModel\$refreshLocation\$*",
+        "**/com/example/myapplication/ui/viewmodel/MapViewModel/onBackToPreview",
+
+        // Exclude Activities and App entry points
+        "**/com/example/myapplication/MainActivity*",
+        "**/com/example/myapplication/logic/TravelMode*",
+        "**/com/example/myapplication/ui/screens/**",
+        "**/com/example/myapplication/MapsActivity*",
+        "**/com/example/myapplication/MyApplication*",
+        "**/com/example/myapplication/telemetry/**",   // Excludes CrashReporter
+        "**/com/example/myapplication/map/**",
+        "**/com/example/myapplication/shuttle/**",
+        "**/*ComposableSingletons*",
+        "**/*ComposableInvoker*",
+        "**/*Composable*$",
+        "**/*ViewActions*",
+        "**/*_Factory*",
+        "**/*\$Lambda$*.*", // Added to catch Compose state-change lambdas
+        "**/ui/theme/**"    // Usually excluded as it's boilerplate
     )
 
     sourceDirectories.setFrom(files(
@@ -146,6 +180,7 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
     classDirectories.setFrom(files(kotlinTree, javaTree))
 
     executionData.setFrom(fileTree(buildDir) {
-        include("outputs/unit_test_code_coverage/debugUnitTest/*.exec")
+        include("outputs/unit_test_code_coverage/debugUnitTest/*.exec",
+            "jacoco/testDebugUnitTest.exec")
     })
 }

@@ -12,6 +12,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -66,11 +67,17 @@ fun AppNavigation(
     calendarViewModel: CalendarViewModel,
     userEmail:         String,
     navigationActions: NavigationActions,
+    onScreenVisible:   (screenRoute: String) -> Unit = {},
     mapContent: @Composable () -> Unit
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+    val currentRoute = currentDestination?.route
+
+    LaunchedEffect(currentRoute) {
+        currentRoute?.let(onScreenVisible)
+    }
 
     val tabs = listOf(
         Triple(Screen.Map,      "Map",      Icons.Default.Map),

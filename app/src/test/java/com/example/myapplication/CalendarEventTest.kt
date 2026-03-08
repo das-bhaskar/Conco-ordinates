@@ -108,4 +108,46 @@ class CalendarEventTest {
     fun `location delegates to underlying CalendarEvent`() {
         assertEquals("H 820 SGW", resolved("H 820 SGW").location)
     }
+
+    // ── destinationBuildingCode logic ─────────────────────────────────────────
+
+    @Test
+    fun `destinationBuildingCode returns buildingCode when known`() {
+        val res = resolved("H 820 SGW")
+        assertEquals("H", res.destinationBuildingCode)
+    }
+
+
+
+    @Test
+    fun `destinationBuildingCode returns raw location when unknown`() {
+        val res = resolved("Random Street Address")
+        assertEquals("Random Street Address", res.destinationBuildingCode)
+    }
+
+    @Test
+    fun `destinationBuildingCode is null for Online or TBA`() {
+        assertNull(resolved("Online").destinationBuildingCode)
+        assertNull(resolved("TBA").destinationBuildingCode)
+    }
+
+    @Test
+    fun `destinationBuildingCode is null if location is blank and unknown`() {
+        val res = resolved("   ")
+        assertNull(res.destinationBuildingCode)
+    }
+    @Test
+    fun `remaining properties delegate correctly`() {
+        val res = resolved("H 820")
+        assertTrue(res.startTimeMs > 0)
+        assertTrue(res.endTimeMs > res.startTimeMs)
+        assertEquals("cal-1", res.calendarId)
+    }
+    @Test
+    fun `verify data class boilerplate`() {
+        val res = resolved("H 820")
+        val copy = res.event.copy(id = "new-id")
+        assertNotEquals(res.event, copy)
+        assertNotNull(res.toString())
+    }
 }

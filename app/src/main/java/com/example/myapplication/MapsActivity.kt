@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.content.ContextCompat
+import com.example.myapplication.analytics.AnalyticsRegistry
 import com.example.myapplication.data.CampusRepo
 import com.example.myapplication.data.LocationResult
 import com.example.myapplication.data.ShuttleRepo
@@ -123,7 +124,8 @@ class MapsActivity : ComponentActivity() {
         viewModel = MapViewModel(
             locationProvider = locationProvider,
             routeProvider    = routeProvider,
-            shuttleService   = DefaultShuttleService(ShuttleRepo)
+            shuttleService   = DefaultShuttleService(ShuttleRepo),
+            analyticsProvider = AnalyticsRegistry.provider()
         )
         calendarViewModel = CalendarViewModel(
             calendarProvider    = calendarProvider,
@@ -144,6 +146,9 @@ class MapsActivity : ComponentActivity() {
                     onConnectClick   = { connectCalendar() },
                     onSignOutClick   = { signOutCalendar() }
                 ),
+                onScreenVisible = { screenRoute ->
+                    AnalyticsRegistry.provider().trackScreenView(screenRoute)
+                },
                 userEmail         = authRepository.getSignedInEmail() ?: "",
                 mapContent        = {
                     MapScreen(

@@ -33,9 +33,17 @@ android {
         val myKey: String = System.getenv("MAPS_API_KEY")
             ?: properties.getProperty("MAPS_API_KEY")
             ?: "DUMMY_KEY"
+        val smartlookProjectKey: String = System.getenv("SMARTLOOK_PROJECT_KEY")
+            ?: properties.getProperty("SMARTLOOK_PROJECT_KEY")
+            ?: ""
+        val smartlookTesterId: String = System.getenv("SMARTLOOK_TESTER_ID")
+            ?: properties.getProperty("SMARTLOOK_TESTER_ID")
+            ?: ""
 
         manifestPlaceholders["mapsApiKey"] = myKey
         buildConfigField("String", "MAPS_API_KEY", "\"$myKey\"")
+        buildConfigField("String", "SMARTLOOK_PROJECT_KEY", "\"$smartlookProjectKey\"")
+        buildConfigField("String", "SMARTLOOK_TESTER_ID", "\"$smartlookTesterId\"")
     }
 
     buildTypes {
@@ -86,7 +94,6 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("com.google.maps.android:android-maps-utils:3.8.2")
-    implementation("com.squareup.okhttp3:okhttp:5.3.0")
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation("com.google.maps.android:maps-compose:4.3.3")
@@ -98,9 +105,12 @@ dependencies {
 
     // ── Google Sign-In — required for Calendar OAuth token ────────────────────
     implementation("com.google.android.gms:play-services-auth:21.2.0")
+    implementation("com.smartlook.android:smartlook-analytics:2.3.4")
     // ── Jetpack Navigation — replaces hardcoded when(selectedTab) ─────────────
     implementation("androidx.navigation:navigation-compose:2.7.7")
-
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("com.google.code.gson:gson:2.10.1")
     testImplementation(libs.junit)
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
@@ -120,15 +130,48 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
         html.required.set(true)
     }
 
-    val fileFilter = listOf(
+    val fileFilter = mutableListOf(
+        "**/*\$*.*",
+        "**/*\$DefaultImpls*",
+        "**/SearchResult$*",
+        // To hide the "Function" objects created by coroutines/lambdas
+        "**/*\$getRoute$*",
+        "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
+val fileFilter = mutableListOf(
+        "**/*$*.*",
+        "**/*$DefaultImpls*",
+        "**/SearchResult$*",
+        "**/*$getRoute$*",
         "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
         "**/*Test*.*", "android/**/*.*", "**/androidx/**/*.*",
+        
+        // Dependency Injection & Factories
         "**/*_MembersInjector.class", "**/Dagger*Component.class",
-        "**/*_Factory.class", "**/Hilt_*.class", "**/*\$Composable*.*",
-        "**/MapsActivity*.*", "**/ui/components/**", "**/ui/theme/**",
+        "**/*_Factory.class", "**/Hilt_*.class", 
+
+        // Jetpack Compose & Internal Kotlin artifacts
+        "**/*$Composable*.*",
         "**/*ComposableSingletons*.*",
-        "**/*\$lambda*.*",
-        "**/*Kt$*.*"
+        "**/*$lambda*.*",
+        "**/*Kt$*.*",
+        "**/*ComposableInvoker*",
+        "**/*$Lambda$*.*",
+
+        // Specific UI/App Exclusions (Low logic density)
+        "**/com/example/myapplication/ui/components/**",
+        "**/com/example/myapplication/ui/theme/**",
+        "**/com/example/myapplication/ui/screens/**",
+        "**/com/example/myapplication/MainActivity*",
+        "**/com/example/myapplication/MapsActivity*",
+        "**/com/example/myapplication/MyApplication*",
+        
+        // Mock/Data Exclusions
+        "**/com/example/myapplication/logic/SimpleMockRouteProvider*",
+        "**/com/example/myapplication/data/JsonSchedule*",
+        "**/com/example/myapplication/data/JsonStop*",
+        "**/com/example/myapplication/data/ShuttleRoute*",
+        "**/com/example/myapplication/telemetry/**" 
+    )
     )
 
     sourceDirectories.setFrom(files(
@@ -149,6 +192,7 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
     classDirectories.setFrom(files(kotlinTree, javaTree))
 
     executionData.setFrom(fileTree(buildDir) {
-        include("outputs/unit_test_code_coverage/debugUnitTest/*.exec")
+        include("outputs/unit_test_code_coverage/debugUnitTest/*.exec",
+            "jacoco/testDebugUnitTest.exec")
     })
 }

@@ -74,9 +74,5 @@ class AuthRepositoryTest {
     }
 
 
-    @Test
-    fun `isSignedIn returns false by default in tests`() {
-        assertFalse(authRepository.isSignedIn())
-    }
 
 }

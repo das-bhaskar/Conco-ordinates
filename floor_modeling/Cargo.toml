@@ -1,0 +1,8 @@
+[package]
+name = "floor_modeling"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy_egui = "0.39.1"
+bevy = "0.18.1"

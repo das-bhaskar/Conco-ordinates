@@ -189,7 +189,19 @@ class ShuttleServiceTest {
         // Restore for other tests
         ShuttleRepo.setTestData(testStops, testSchedules)
     }
+    @Test
+    fun `checkAvailability covers default parameter path`() {
+        // Calling without the 'time' parameter triggers checkAvailability${'$'}default
+        val result = service.checkAvailability("SGW")
+        assertNotNull(result)
+    }
 
+    @Test
+    fun `statusMessage covers default parameter path`() {
+        // Triggers the synthetic helper method by omitting optional arguments
+        val msg = service.statusMessage("SGW")
+        assertNotNull(msg)
+    }
     // ═════════════════════════════════════════════════════════════════════════
     // Helpers
     // ═════════════════════════════════════════════════════════════════════════

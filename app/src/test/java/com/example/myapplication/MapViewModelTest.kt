@@ -224,5 +224,5 @@ class MapViewModelTest {
         assertEquals(initialCampus, viewModel.currentCampus)
     }
 
-  
+
 }

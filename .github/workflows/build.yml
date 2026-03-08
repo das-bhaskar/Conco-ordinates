@@ -55,19 +55,16 @@ jobs:
       - name: Run tests with coverage
         run: ./gradlew jacocoTestReport --info
 
-      - name: Verify coverage report and binaries
+      - name: Verify binaries and coverage exist
         run: |
-          echo "=== JaCoCo XML reports ==="
-          find . -name "*.xml" -path "*/jacoco*" -type f
+          echo "=== Kotlin classes ==="
+          find app/build/intermediates/built_in_kotlinc -name "*.class" 2>/dev/null | head -5 || echo "NO KOTLIN CLASSES FOUND"
           echo ""
-          echo "=== .exec files ==="
-          find . -name "*.exec" -type f
+          echo "=== Java classes ==="
+          find app/build/intermediates/javac/debug -name "*.class" 2>/dev/null | head -5 || echo "NO JAVA CLASSES FOUND"
           echo ""
-          echo "=== Kotlin classes dir ==="
-          ls app/build/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes/ 2>/dev/null | head -20 || echo "NOT FOUND"
-          echo ""
-          echo "=== Java classes dir ==="
-          ls app/build/intermediates/javac/debug/classes/ 2>/dev/null | head -20 || echo "NOT FOUND"
+          echo "=== JaCoCo XML content check ==="
+          head -50 app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml 2>/dev/null || echo "XML NOT FOUND"
 
       - name: PR Coverage Reporter
         if: github.event_name == 'pull_request'

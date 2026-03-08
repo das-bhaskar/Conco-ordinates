@@ -76,6 +76,7 @@ android {
         unitTests.all {
             it.ignoreFailures = true
         }
+    }
 }
 
 dependencies {

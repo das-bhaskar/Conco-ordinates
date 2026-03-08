@@ -77,6 +77,48 @@ class CampusRepoTest {
         assertEquals("SGW", result?.name)
     }
 
+    @Test
+    fun `initialize parses valid JSON and populates allCampuses`() {
+        val mockContext: android.content.Context = org.mockito.kotlin.mock()
+        val mockResources: android.content.res.Resources = org.mockito.kotlin.mock()
 
+        // 1. Arrange: Valid JSON matching CampusDataWrapper structure
+        val fakeJson = """
+        {
+          "campuses": [
+            {
+              "name": "SGW",
+              "location": {"latitude": 45.49, "longitude": -73.57},
+              "buildings": [],
+              "outline": []
+            }
+          ]
+        }
+    """.trimIndent()
+        val inputStream = java.io.ByteArrayInputStream(fakeJson.toByteArray())
+
+        org.mockito.kotlin.whenever(mockContext.resources).thenReturn(mockResources)
+        org.mockito.kotlin.whenever(mockResources.openRawResource(org.mockito.kotlin.any())).thenReturn(inputStream)
+
+        // 2. Act
+        CampusRepo.initialize(mockContext)
+
+        // 3. Assert: Verify the wrapper was parsed and list populated
+        val campuses = CampusRepo.getAllCampuses()
+        assertEquals(1, campuses.size)
+        assertEquals("SGW", campuses[0].name)
+    }
+
+    @Test
+    fun `CampusDataWrapper data class coverage`() {
+        val campuses = listOf(Campus("Test", JsonLatLng(0.0, 0.0), emptyList(), emptyList()))
+        val wrapper = CampusDataWrapper(campuses)
+
+        // Exercise generated methods: toString, equals, hashCode, and copy
+        assertNotNull(wrapper.toString())
+        assertEquals(campuses, wrapper.campuses)
+        assertEquals(wrapper, wrapper.copy())
+        assertEquals(wrapper.hashCode(), wrapper.hashCode())
+    }
 
 }

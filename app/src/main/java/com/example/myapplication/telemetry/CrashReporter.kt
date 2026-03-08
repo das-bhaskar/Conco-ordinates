@@ -3,6 +3,7 @@ package com.example.myapplication.telemetry
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 object CrashReporter {
+    var isTesting: Boolean = false
     private val crashlytics: FirebaseCrashlytics by lazy { FirebaseCrashlytics.getInstance() }
 
     fun log(message: String) {

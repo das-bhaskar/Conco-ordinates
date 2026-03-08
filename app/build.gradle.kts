@@ -131,13 +131,6 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
     }
 
     val fileFilter = mutableListOf(
-        "**/*\$*.*",
-        "**/*\$DefaultImpls*",
-        "**/SearchResult$*",
-        // To hide the "Function" objects created by coroutines/lambdas
-        "**/*\$getRoute$*",
-        "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
-val fileFilter = mutableListOf(
         "**/*$*.*",
         "**/*$DefaultImpls*",
         "**/SearchResult$*",
@@ -171,7 +164,6 @@ val fileFilter = mutableListOf(
         "**/com/example/myapplication/data/JsonStop*",
         "**/com/example/myapplication/data/ShuttleRoute*",
         "**/com/example/myapplication/telemetry/**" 
-    )
     )
 
     sourceDirectories.setFrom(files(

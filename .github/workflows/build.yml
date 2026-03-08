@@ -53,7 +53,7 @@ jobs:
         run: ./gradlew compileDebugKotlin compileDebugJavaWithJavac --info
 
       - name: Run tests with coverage
-        run: ./gradlew jacocoTestReport --info
+        run: ./gradlew jacocoTestReport --info --continue
 
       - name: Verify binaries and coverage exist
         run: |

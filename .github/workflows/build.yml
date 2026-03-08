@@ -50,7 +50,7 @@ jobs:
         run: echo "MAPS_API_KEY=\"$MAPS_VAR\"" > local.properties
 
       - name: Run tests with coverage
-        run: ./gradlew jacocoTestReport --info --continue
+        run: ./gradlew testDebugUnitTest jacocoTestReport --info --continue
 
       - name: Verify coverage report exists
         run: |

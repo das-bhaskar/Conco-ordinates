@@ -49,25 +49,21 @@ jobs:
           MAPS_VAR: ${{ secrets.MAPS_API_KEY || 'unused' }}
         run: echo "MAPS_API_KEY=\"$MAPS_VAR\"" > local.properties
 
-      - name: Compile debug classes
-        run: ./gradlew compileDebugKotlin compileDebugJavaWithJavac --info
-
       - name: Run tests with coverage
-        run: ./gradlew jacocoTestReport --info --continue
+        run: ./gradlew jacocoTestReport --info
 
-      - name: Verify binaries and coverage exist
+      - name: Verify coverage report exists
         run: |
-          echo "=== Kotlin classes ==="
-          find app/build/intermediates/built_in_kotlinc -name "*.class" 2>/dev/null | head -5 || echo "NO KOTLIN CLASSES FOUND"
+          echo "=== Looking for JaCoCo XML reports ==="
+          find . -name "*.xml" -path "*/jacoco*" -type f
           echo ""
-          echo "=== Java classes ==="
-          find app/build/intermediates/javac/debug -name "*.class" 2>/dev/null | head -5 || echo "NO JAVA CLASSES FOUND"
+          echo "=== Checking expected path ==="
+          ls -la app/build/reports/jacoco/jacocoTestReport/ || echo "Directory does not exist"
           echo ""
-          echo "=== JaCoCo XML content check ==="
-          head -50 app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml 2>/dev/null || echo "XML NOT FOUND"
+          echo "=== Checking .exec files ==="
+          find . -name "*.exec" -type f
 
       - name: PR Coverage Reporter
-        if: github.event_name == 'pull_request'
         uses: madrapps/jacoco-report@v1.7.1
         with:
           paths: ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
@@ -76,7 +72,8 @@ jobs:
           update-comment: true
 
       - name: Run SonarCloud analysis
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io

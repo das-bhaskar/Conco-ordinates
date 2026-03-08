@@ -73,9 +73,6 @@ android {
 
     testOptions {
         unitTests.isReturnDefaultValues = true
-        unitTests.all {
-            it.ignoreFailures = true
-        }
     }
 }
 

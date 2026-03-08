@@ -19,20 +19,42 @@ class DateUtilsTest {
         assertEquals("7 Mar", result)
     }
 
-    @Test
-    fun `eventTimeFormatter formats correctly for 24h style`() {
-        val formatter = DateUtils.eventTimeFormatter(Locale.US)
-        val result = formatter.format(Date(testTimestamp))
-        // Expecting "14:30" (H:mm is 24-hour)
-        assertEquals("14:30", result)
-    }
+    private val testTimeZone = TimeZone.getTimeZone("America/New_York")
+    private val testLocale = Locale.US
 
     @Test
     fun `fullTimeFormatter formats correctly with AM-PM`() {
-        val formatter = DateUtils.fullTimeFormatter(Locale.US)
-        val result = formatter.format(Date(testTimestamp))
-        // Expecting "2:30 PM"
+        // 1. Arrange: Setup formatter with fixed constraints
+        val formatter = DateUtils.fullTimeFormatter(testLocale).apply {
+            timeZone = testTimeZone
+        }
+
+        // 2. Arrange: Setup a specific moment in time (March 8, 2026, 2:30 PM)
+        val calendar = Calendar.getInstance(testTimeZone).apply {
+            set(2026, Calendar.MARCH, 8, 14, 30, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        // 3. Act
+        val result = formatter.format(calendar.time)
+
+        // 4. Assert
         assertEquals("2:30 PM", result)
+    }
+
+    @Test
+    fun `eventTimeFormatter formats correctly for 24h style`() {
+        val formatter = DateUtils.eventTimeFormatter(testLocale).apply {
+            timeZone = testTimeZone
+        }
+
+        val calendar = Calendar.getInstance(testTimeZone).apply {
+            set(2026, Calendar.MARCH, 8, 14, 30, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        val result = formatter.format(calendar.time)
+        assertEquals("14:30", result)
     }
     @Test
     fun `test formatters with default parameters for full coverage`() {

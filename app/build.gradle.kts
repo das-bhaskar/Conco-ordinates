@@ -129,12 +129,11 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
         xml.required.set(true)
         html.required.set(true)
     }
-
-    val fileFilter = mutableListOf(
-        "**/*$*.*",
-        "**/*$DefaultImpls*",
-        "**/SearchResult$*",
-        "**/*$getRoute$*",
+val fileFilter = mutableListOf(
+        "**/*\$*.*",                      // Added \ before $
+        "**/*\$DefaultImpls*",           // Added \ before $
+        "**/SearchResult\$*",            // Added \ before $
+        "**/*\$getRoute\$*",             // Added \ before $
         "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
         "**/*Test*.*", "android/**/*.*", "**/androidx/**/*.*",
         
@@ -143,14 +142,14 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
         "**/*_Factory.class", "**/Hilt_*.class", 
 
         // Jetpack Compose & Internal Kotlin artifacts
-        "**/*$Composable*.*",
+        "**/*\$Composable*.*",           // Added \ before $
         "**/*ComposableSingletons*.*",
-        "**/*$lambda*.*",
-        "**/*Kt$*.*",
+        "**/*\$lambda*.*",               // Added \ before $
+        "**/*Kt\$*.*",                   // Added \ before $
         "**/*ComposableInvoker*",
-        "**/*$Lambda$*.*",
+        "**/*\$Lambda\$*.*",              // Added \ before $
 
-        // Specific UI/App Exclusions (Low logic density)
+        // Specific UI/App Exclusions
         "**/com/example/myapplication/ui/components/**",
         "**/com/example/myapplication/ui/theme/**",
         "**/com/example/myapplication/ui/screens/**",

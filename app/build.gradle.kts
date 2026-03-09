@@ -157,6 +157,8 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
         "**/com/example/myapplication/MainActivity*",
         "**/com/example/myapplication/logic/TravelMode*",
         "**/com/example/myapplication/ui/screens/**",
+        "**/com/example/myapplication/analytics/**",
+        "**/MyCustomApplication.*",
         "**/com/example/myapplication/MapsActivity*",
         "**/com/example/myapplication/MyApplication*",
         "**/com/example/myapplication/telemetry/**",   // Excludes CrashReporter

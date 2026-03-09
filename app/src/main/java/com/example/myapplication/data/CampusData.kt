@@ -149,4 +149,8 @@ object CampusRepo {
         return xIntersection > pX
     }
     fun getAllCampuses(): List<Campus> = allCampuses
+
+    fun getBuildingByName(name: String): Building? {
+        return allCampuses.flatMap {it.buildings}.find {it.name.trim().equals(name.trim(), ignoreCase = true)}
+    }
 }

@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.myapplication.data.ShuttleAvailability
 import com.example.myapplication.shuttle.ShuttleStatusCard
@@ -48,7 +49,7 @@ fun DirectionsInfoPopup(
             .padding(horizontal = 12.dp, vertical = 20.dp)
     ) {
         Surface(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().testTag("dir_info_popup"),
             shape = RoundedCornerShape(28.dp),
             color = Color.White.copy(alpha = 0.92f),
             shadowElevation = 10.dp
@@ -65,7 +66,7 @@ fun DirectionsInfoPopup(
                         "Directions",
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
                     )
-                    IconButton(onClick = onClose) {
+                    IconButton(onClick = onClose, modifier = Modifier.testTag("dir_close_button")) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.Black)
                     }
                 }
@@ -82,7 +83,9 @@ fun DirectionsInfoPopup(
                     iconColor = Color(0xFF4285F4),
                     trailingIcon = Icons.Default.ImportExport,
                     onTrailingIconClick = onSwapClick,
-                    onClick = onStartClick
+                    onClick = onStartClick,
+                    fieldTag = "dir_start_field",
+                    iconTag = "swap_button"
                 )
 
                 HorizontalDivider(
@@ -96,7 +99,8 @@ fun DirectionsInfoPopup(
                     icon = Icons.Default.LocationOn,
                     iconColor = Color(0xFFEA4335),
                     trailingIcon = Icons.Default.Menu,
-                    onClick = onDestinationClick
+                    onClick = onDestinationClick,
+                    fieldTag = "dir_dest_field"
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -235,13 +239,16 @@ fun LocationRow(
     iconColor: Color,
     trailingIcon: ImageVector = Icons.Default.Menu,
     onTrailingIconClick: () -> Unit = {},
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    fieldTag: String = "",
+    iconTag: String = ""
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(vertical = 12.dp),
+            .padding(vertical = 12.dp)
+            .then(if (fieldTag.isNotEmpty()) Modifier.testTag(fieldTag) else Modifier),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp))
@@ -253,7 +260,7 @@ fun LocationRow(
             overflow = TextOverflow.Ellipsis
         )
         Spacer(modifier = Modifier.weight(1f))
-        IconButton(onClick = onTrailingIconClick) {
+        IconButton(onClick = onTrailingIconClick, modifier = if (iconTag.isNotEmpty()) Modifier.testTag(iconTag) else Modifier) {
             Icon(trailingIcon, contentDescription = null, tint = Color.LightGray, modifier = Modifier.size(22.dp))
         }
     }
@@ -285,7 +292,8 @@ fun TransportModeToggle(selectedMode: String, onModeChange: (String) -> Unit) {
                     modifier = Modifier
                         .height(40.dp)
                         .weight(1f)
-                        .clickable { onModeChange(mode) },
+                        .clickable { onModeChange(mode) }
+                        .testTag("transport_$mode"),
                     color = if (isSelected) Color(0xFF1A73E8) else Color.Transparent,
                     shape = RoundedCornerShape(20.dp)
                 ) {

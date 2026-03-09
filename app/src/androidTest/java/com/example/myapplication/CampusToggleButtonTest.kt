@@ -1,8 +1,11 @@
 package com.example.myapplication
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
@@ -11,8 +14,12 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.platform.app.InstrumentationRegistry
+import com.example.myapplication.data.Building
 import com.example.myapplication.data.CampusRepo
+import com.example.myapplication.data.ShuttleRepo
+import com.example.myapplication.logic.InterpolatingMockRouteProvider
 import com.example.myapplication.logic.MockLocationProvider
+import com.example.myapplication.map.CameraController
 import com.example.myapplication.ui.components.CampusToggle
 import com.example.myapplication.ui.viewmodel.MapViewModel
 import com.google.android.gms.maps.model.LatLng
@@ -30,72 +37,142 @@ class CampusToggleButtonTest {
     val composeTestRule = createComposeRule()
 
     private lateinit var mockLocation: LatLng
-    private lateinit var mockLocationProvider: MockLocationProvider
     private lateinit var viewModel: MapViewModel
-    private lateinit var testCameraController: CameraControllerTest
+    private lateinit var mockLocationProvider: MockLocationProvider
+    private lateinit var mockShuttleService: MockShuttleService
+
+    private val testCameraController: CameraControllerTest = CameraControllerTest()
+
 
     @Before
     fun setup() {
-        mockLocationProvider = MockLocationProvider()
-        viewModel = MapViewModel(mockLocationProvider)
-        testCameraController = CameraControllerTest()
-
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         CampusRepo.initialize(context)
+        ShuttleRepo.initialize(context)
+        mockLocationProvider = MockLocationProvider()
+        mockShuttleService = MockShuttleService()
+        viewModel = MapViewModel(
+            locationProvider = mockLocationProvider,
+            routeProvider = InterpolatingMockRouteProvider(4u),
+            shuttleService = mockShuttleService
+            )
+    }
+
+    fun setContent() {
+        composeTestRule.setContent {
+            Box(modifier = Modifier.fillMaxSize()) {
+                CampusToggle(
+                    selectedCampusName = viewModel.currentCampus?.name,
+                    onCampusClick = {viewModel.onCampusSelected(it)},
+                    modifier = Modifier.align(Alignment.TopStart)
+                )
+            }
+        }
+        composeTestRule.waitForIdle()
     }
 
     @Test
-    fun noToggleOptionSelectedDefault() {
+    fun defaultNoCampusToggleOptionSelected() {
+        setContent()
 
-        // Set up screen
-        composeTestRule.setContent {
-
-            val scope = rememberCoroutineScope()
-
-            LaunchedEffect(Unit) {
-                mockLocationProvider.getUserLocation { location ->
-                    location?.let {
-                        scope.launch {
-                            testCameraController.animateTo(it, 15f)
-                        }
-                    }
-                }
-            }
-
-            LaunchedEffect(viewModel.currentCampus) {
-                if (viewModel.currentCampus != null) {
-                    testCameraController.animateTo(viewModel.currentCampus!!.getGoogleCenter(), 17f)
-                }
-                else {
-                    mockLocationProvider.getUserLocation { location ->
-                        location?.let {
-                            scope.launch {
-                                testCameraController.animateTo(it, 15f)
-                            }
-                        }
-                    }
-                }
-            }
-
-            Box {
-                CampusToggle(
-                    selectedCampusName = viewModel.currentCampus?.name,
-                    onCampusClick = {name -> viewModel.onCampusSelected(name)}
-                )
-            }
-
-        }
-
-        // Make sure required components are properly displayed
-        composeTestRule.waitForIdle()
         composeTestRule.onNodeWithTag("campus_toggle").assertIsDisplayed()
         composeTestRule.onNodeWithTag("SGW_button").assertIsDisplayed()
         composeTestRule.onNodeWithTag("LOY_button").assertIsDisplayed()
 
-        // Check that no option is selected as default
         composeTestRule.onNodeWithTag("SGW_button").assertIsNotSelected()
         composeTestRule.onNodeWithTag("LOY_button").assertIsNotSelected()
 
+    }
+
+    @Test
+    fun loyolaCampusSelectsAndUnselectsOnClick() {
+        setContent()
+
+        assertEquals(null, viewModel.currentCampus?.name)
+
+        composeTestRule.onNodeWithTag("LOY_button").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("LOY_button").assertIsSelected()
+        composeTestRule.onNodeWithTag("SGW_button").assertIsNotSelected()
+        assertEquals("Loyola", viewModel.currentCampus?.name)
+
+        composeTestRule.onNodeWithTag("LOY_button").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("LOY_button").assertIsNotSelected()
+        composeTestRule.onNodeWithTag("SGW_button").assertIsNotSelected()
+        assertEquals(null, viewModel.currentCampus?.name)
+
+    }
+
+    @Test
+    fun sgwCampusSelectsAndUnselectsOnClick() {
+        setContent()
+
+        assertEquals(null, viewModel.currentCampus?.name)
+
+        composeTestRule.onNodeWithTag("SGW_button").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("SGW_button").assertIsSelected()
+        composeTestRule.onNodeWithTag("LOY_button").assertIsNotSelected()
+        assertEquals("SGW", viewModel.currentCampus?.name)
+
+        composeTestRule.onNodeWithTag("SGW_button").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("SGW_button").assertIsNotSelected()
+        composeTestRule.onNodeWithTag("LOY_button").assertIsNotSelected()
+        assertEquals(null, viewModel.currentCampus?.name)
+
+    }
+
+    @Test
+    fun sgwCampusSelectsFromLoyolaAndUnselectsLoyola() {
+        setContent()
+
+        assertEquals(null, viewModel.currentCampus?.name)
+
+        composeTestRule.onNodeWithTag("LOY_button").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("LOY_button").assertIsSelected()
+        composeTestRule.onNodeWithTag("SGW_button").assertIsNotSelected()
+        assertEquals("Loyola", viewModel.currentCampus?.name)
+
+        composeTestRule.onNodeWithTag("SGW_button").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("SGW_button").assertIsSelected()
+        composeTestRule.onNodeWithTag("LOY_button").assertIsNotSelected()
+        assertEquals("SGW", viewModel.currentCampus?.name)
+
+    }
+
+    @Test
+    fun loyolaCampusSelectsFromSGWAndUnselectsSGW() {
+        setContent()
+
+        assertEquals(null, viewModel.currentCampus?.name)
+
+        composeTestRule.onNodeWithTag("SGW_button").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("SGW_button").assertIsSelected()
+        composeTestRule.onNodeWithTag("LOY_button").assertIsNotSelected()
+        assertEquals("SGW", viewModel.currentCampus?.name)
+
+        composeTestRule.onNodeWithTag("LOY_button").performClick()
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("LOY_button").assertIsSelected()
+        composeTestRule.onNodeWithTag("SGW_button").assertIsNotSelected()
+        assertEquals("Loyola", viewModel.currentCampus?.name)
+    }
+
+    @Test
+    fun toggleVisibleInDirectionsMode() {
+        setContent()
+        val hbuilding = CampusRepo.getBuildingByName("Henry F. Hall Building")
+        composeTestRule.runOnUiThread {
+            viewModel.handleMapTap(hbuilding)
+            viewModel.onDirectionsRequested()
+        }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag("campus_toggle").assertIsDisplayed()
     }
 
     @Test

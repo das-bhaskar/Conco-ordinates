@@ -14,6 +14,7 @@ import com.example.myapplication.data.Building
 import com.example.myapplication.ui.models.BuildingUiState
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import coil.compose.AsyncImage
 
 @Composable
@@ -28,7 +29,7 @@ fun BuildingInfoPopup(
         contentAlignment = Alignment.BottomCenter
     ) {
         Card(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(12.dp).testTag("building_popup"),
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(12.dp)
@@ -49,10 +50,10 @@ fun BuildingInfoPopup(
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         // Wired the click here
-                        ActionButton(Icons.Default.Directions, "Directions", onDirectionsClick)
-                        ActionButton(Icons.Default.Save, "Save") {}
-                        ActionButton(Icons.Default.PinDrop, "PIN") {}
-                        ActionButton(Icons.Default.Share, "Share") {}
+                        ActionButton(Icons.Default.Directions, "Directions", modifier = Modifier.testTag("directions_button"), onDirectionsClick)
+                        ActionButton(Icons.Default.Save, "Save", modifier = Modifier.testTag("save_button")) {}
+                        ActionButton(Icons.Default.PinDrop, "PIN", modifier = Modifier.testTag("pin_button")) {}
+                        ActionButton(Icons.Default.Share, "Share", modifier = Modifier.testTag("share_button")) {}
                     }
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), thickness = 1.dp, color = Color.LightGray)
@@ -68,11 +69,12 @@ fun BuildingInfoPopup(
 }
 
 @Composable
-fun ActionButton(icon: ImageVector, label: String, onClick: () -> Unit) {
+fun ActionButton(icon: ImageVector, label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val concordiaBlue = Color(0xFF1652f0)
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         FilledTonalIconButton(
             onClick = onClick,
+            modifier = modifier,
             colors = IconButtonDefaults.filledTonalIconButtonColors(
                 containerColor = concordiaBlue.copy(alpha = 0.1f),
                 contentColor = concordiaBlue

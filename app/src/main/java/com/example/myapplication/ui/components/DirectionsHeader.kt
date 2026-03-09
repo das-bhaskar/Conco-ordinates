@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.ui.models.BuildingUiState
 
@@ -25,14 +26,15 @@ fun DirectionsHeader(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(16.dp)
+            .testTag("dir_header"),
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = onBackClick) { Icon(Icons.Default.ArrowBack, null) }
+                IconButton(onClick = onBackClick, modifier = Modifier.testTag("dir_header_back")) { Icon(Icons.Default.ArrowBack, null) }
                 Text("Directions", style = MaterialTheme.typography.titleMedium)
             }
 
@@ -42,7 +44,8 @@ fun DirectionsHeader(
                 value = uiState.startLocationName,
                 onValueChange = { onStartQueryChange(it) },
                 icon = Icons.Default.MyLocation,
-                iconColor = Color.Blue
+                iconColor = Color.Blue,
+                testTag = "dir_start"
             )
 
             Spacer(Modifier.height(8.dp))
@@ -53,7 +56,8 @@ fun DirectionsHeader(
                 value = uiState.destinationName,
                 onValueChange = { onDestQueryChange(it) },
                 icon = Icons.Default.LocationOn,
-                iconColor = Color.Red
+                iconColor = Color.Red,
+                testTag = "dir_dest"
             )
         }
     }
@@ -64,12 +68,13 @@ private fun SearchInput(
     value: String,
     onValueChange: (String) -> Unit,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    iconColor: Color
+    iconColor: Color,
+    testTag: String
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp).testTag(testTag),
         label = { Text(label) },
         leadingIcon = { Icon(icon, null, tint = iconColor) },
         shape = RoundedCornerShape(8.dp),

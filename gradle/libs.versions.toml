@@ -14,7 +14,6 @@ constraintlayout = "2.1.4"
 googleServices = "4.4.2"
 firebaseBom = "33.1.2"
 firebaseCrashlyticsGradle = "3.0.6"
-sonarqube = "6.0.1.5171"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,4 +43,3 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 secrets-gradle = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version = "2.0.1" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsGradle" }
-sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }

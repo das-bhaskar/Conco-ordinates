@@ -9,7 +9,7 @@ on:
 permissions:
   contents: read
   pull-requests: write
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -39,8 +39,8 @@ jobs:
         run: ./gradlew assembleDebug
 
       - name: Run Tests and Generate Coverage
-        run: ./gradlew jacocoTestReport
-          
+        run: ./gradlew testDebugUnitTest jacocoTestReport --info --continue
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -53,7 +53,6 @@ jobs:
           name: jacoco-report
           path: app/build/reports/jacoco/jacocoTestReport/html/
 
-    
       - name: PR Coverage Reporter
         uses: madrapps/jacoco-report@v1.7.1
         with:

@@ -18,7 +18,6 @@ import com.example.myapplication.logic.SimpleMockRouteProvider
 import kotlinx.coroutines.launch
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
-import com.google.maps.android.PolyUtil
 import com.example.myapplication.ui.models.BuildingUiState
 import com.example.myapplication.ui.models.MapUIMode
 
@@ -66,7 +65,7 @@ class MapViewModel(
     var uiBuildingState by mutableStateOf(BuildingUiState())
         private set
 
-    var currentCampus by mutableStateOf<Campus?>(CampusRepo.getCampusByName("SGW"))
+    var currentCampus by mutableStateOf<Campus?>(null)
         private set
 
     private var lastProcessedLocation: LatLng? = null
@@ -90,12 +89,6 @@ class MapViewModel(
         )
     }
 
-    fun refreshLocation() {
-        locationProvider?.getUserLocation { location ->
-            location?.let { processLocationUpdate(it) }
-        }
-    }
-
     fun onCampusSelected(name: String) {
         val found = CampusRepo.getCampusByName(name)
         if (found != null) {
@@ -108,29 +101,36 @@ class MapViewModel(
     fun processLocationUpdate(userLocation: LatLng, isForce: Boolean = false) {
         if (isForce) isManualCampusSelection = false
         lastProcessedLocation = userLocation
+
         val detected = CampusRepo.getCampus(userLocation)
+
         if (detected != null) {
+            // Logic for when user IS at a campus
             if (!isManualCampusSelection) {
-                if (currentCampus?.name != detected.name) currentCampus = detected
+                if (currentCampus?.name != detected.name) {
+                    currentCampus = detected
+                }
             } else {
-                if (detected.name == currentCampus?.name) isManualCampusSelection = false
+
+                if (detected.name == currentCampus?.name) {
+                    isManualCampusSelection = false
+                }
             }
+
+            // Existing building highlight logic...
             val buildingAtPos = detected.buildings.firstOrNull { building ->
                 val outline = building.getGoogleOutline()
-                PolyUtil.containsLocation(userLocation, outline, false) ||
-                        PolyUtil.isLocationOnPath(userLocation, outline, true, 15.0)
+                com.google.maps.android.PolyUtil.containsLocation(userLocation, outline, false)
             }
             highlightedBuildingName = buildingAtPos?.name
-            if (uiBuildingState.selectedTransportMode == "shuttle" &&
-                uiBuildingState.startLocationName == "Your position") {
-                refreshShuttleStatus(userLocation)
-            }
+
         } else {
+            // BUG FIX: Logic for when user is NOT at a campus
             isManualCampusSelection = false
+            currentCampus = null // This unselects SGW/LOY buttons
+            highlightedBuildingName = null
         }
     }
-
-    fun clearMapEvent() { mapEvent = null }
 
     fun handleSearchResult(result: SearchResult, context: android.content.Context) {
         val resultName = when (result) {
@@ -232,10 +232,6 @@ class MapViewModel(
         uiBuildingState = uiBuildingState.copy(startLocationName = newQuery)
     }
 
-    fun onDestinationQueryChanged(newQuery: String) {
-        uiBuildingState = uiBuildingState.copy(destinationName = newQuery)
-    }
-
     fun onTransportModeChanged(mode: String) {
         uiBuildingState = uiBuildingState.copy(selectedTransportMode = mode)
         calculateRouteWithState()
@@ -295,8 +291,6 @@ class MapViewModel(
             }
         }
     }
-
-    fun calculateRoute() = calculateRouteWithState()
 
     /**
      * Navigate to a building by code — Map domain only, no Calendar awareness.
@@ -372,20 +366,6 @@ class MapViewModel(
         mapEvent = LatLng(target.latitude - 0.005, target.longitude)
     }
 
-    private fun refreshShuttleStatus(fromLocation: LatLng?) {
-        val locationToUse = uiBuildingState.startPoint ?: fromLocation
-        val nearestStop   = shuttleService.resolveNearestStop(locationToUse)
-        val fromCampus    = nearestStop?.campus ?: "SGW"
-        uiBuildingState = uiBuildingState.copy(
-            shuttleAvailability      = shuttleService.checkAvailability(fromCampus),
-            shuttleStatusMessage     = shuttleService.statusMessage(fromCampus),
-            nearestShuttleStopName   = nearestStop?.name   ?: "",
-            nearestShuttleStopCampus = nearestStop?.campus ?: "",
-            shuttleStops             = shuttleService.getAllStops()
-        )
-    }
-
-    // ── Private helpers ────────────────────────────────────────────────────────
 
     private data class ShuttleSnapshot(
         val availability:  com.example.myapplication.data.ShuttleAvailability,

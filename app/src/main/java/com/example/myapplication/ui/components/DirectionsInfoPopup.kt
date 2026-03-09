@@ -49,7 +49,7 @@ fun DirectionsInfoPopup(
             .padding(horizontal = 12.dp, vertical = 20.dp)
     ) {
         Surface(
-            modifier = Modifier.fillMaxWidth().testTag("dir_info_popup"),
+            modifier = Modifier.fillMaxWidth().testTag("dir_popup_info"),
             shape = RoundedCornerShape(28.dp),
             color = Color.White.copy(alpha = 0.92f),
             shadowElevation = 10.dp

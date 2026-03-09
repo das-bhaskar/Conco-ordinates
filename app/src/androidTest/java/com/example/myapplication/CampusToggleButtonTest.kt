@@ -21,6 +21,7 @@ import com.example.myapplication.logic.InterpolatingMockRouteProvider
 import com.example.myapplication.logic.MockLocationProvider
 import com.example.myapplication.map.CameraController
 import com.example.myapplication.ui.components.CampusToggle
+import com.example.myapplication.ui.models.MapUIMode
 import com.example.myapplication.ui.viewmodel.MapViewModel
 import com.google.android.gms.maps.model.LatLng
 import junit.framework.TestCase.assertEquals
@@ -61,11 +62,13 @@ class CampusToggleButtonTest {
     fun setContent() {
         composeTestRule.setContent {
             Box(modifier = Modifier.fillMaxSize()) {
-                CampusToggle(
-                    selectedCampusName = viewModel.currentCampus?.name,
-                    onCampusClick = {viewModel.onCampusSelected(it)},
-                    modifier = Modifier.align(Alignment.TopStart)
-                )
+                if (viewModel.uiBuildingState.mode != MapUIMode.DIRECTIONS) {
+                    CampusToggle(
+                        selectedCampusName = viewModel.currentCampus?.name,
+                        onCampusClick = {viewModel.onCampusSelected(it)},
+                        modifier = Modifier.align(Alignment.TopStart)
+                    )
+                }
             }
         }
         composeTestRule.waitForIdle()
@@ -164,7 +167,7 @@ class CampusToggleButtonTest {
     }
 
     @Test
-    fun toggleVisibleInDirectionsMode() {
+    fun toggleNotVisibleInDirectionsMode() {
         setContent()
         val hbuilding = CampusRepo.getBuildingByName("Henry F. Hall Building")
         composeTestRule.runOnUiThread {
@@ -172,7 +175,7 @@ class CampusToggleButtonTest {
             viewModel.onDirectionsRequested()
         }
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("campus_toggle").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("campus_toggle").assertDoesNotExist()
     }
 
     @Test

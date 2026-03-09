@@ -9,6 +9,10 @@ plugins {
     alias(libs.plugins.firebase.crashlytics)
 }
 
+jacoco {
+        toolVersion = "0.8.11"
+    }
+
 android {
     namespace = "com.example.myapplication"
     compileSdk = 36
@@ -72,11 +76,16 @@ android {
     }
 
     testOptions {
-        unitTests.isReturnDefaultValues = true
-        unitTests.all {
-            it.ignoreFailures = true
+    unitTests.isReturnDefaultValues = true
+    unitTests.all {
+        it.ignoreFailures = true
+
+        it.extensions.configure(JacocoTaskExtension::class) {
+            isIncludeNoLocationClasses = true
+            excludes = listOf("jdk.internal.*")
         }
     }
+}
 }
 
 dependencies {
@@ -192,7 +201,10 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
     classDirectories.setFrom(files(kotlinTree, javaTree))
 
     executionData.setFrom(fileTree(buildDir) {
-        include("outputs/unit_test_code_coverage/debugUnitTest/*.exec",
-            "jacoco/testDebugUnitTest.exec")
+    include(
+        "outputs/unit_test_code_coverage/debugUnitTest/*.exec",
+        "jacoco/testDebugUnitTest.exec",
+        "jacoco/testDebugUnitTestUnitTest.exec"
+        )
     })
 }

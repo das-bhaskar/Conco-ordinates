@@ -2,7 +2,10 @@ package com.example.myapplication.ui.viewmodel
 
 import android.content.Context
 import com.example.myapplication.data.Building
+import com.example.myapplication.data.Campus
+import com.example.myapplication.data.CampusRepo
 import com.example.myapplication.data.JsonLatLng
+import com.example.myapplication.data.ShuttleAvailability
 import com.example.myapplication.logic.*
 import com.example.myapplication.ui.models.MapUIMode
 import com.google.android.gms.maps.model.LatLng
@@ -14,6 +17,8 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.*
+import com.example.myapplication.data.ShuttleStop
+import kotlin.collections.emptyList
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MapViewModelTest {
@@ -42,6 +47,12 @@ class MapViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+
+        // FIX: Initialize the Repo so getCampusByName doesn't return null
+        val loyola = Campus("LOYOLA", JsonLatLng(45.458, -73.640), emptyList(), emptyList())
+        val sgw = Campus("SGW", JsonLatLng(45.497, -73.579), emptyList(), emptyList())
+        CampusRepo.setTestCampuses(listOf(loyola, sgw))
+
         viewModel = MapViewModel(
             locationProvider = mockLocationProvider,
             routeProvider = mockRouteProvider,
@@ -223,6 +234,79 @@ class MapViewModelTest {
         // Assert: The state should not have changed from whatever it was
         assertEquals(initialCampus, viewModel.currentCampus)
     }
+    // ── Fixed New Tests ──────────────────────────────────────────────────────
 
 
+    @Test
+    fun `processLocationUpdate unselects campus when user moves away`() {
+        val nowhere = LatLng(0.0, 0.0)
+        viewModel.processLocationUpdate(nowhere)
+
+        assertNull("Current campus should be null when far away", viewModel.currentCampus)
+        assertFalse("UI should not show building info", viewModel.uiBuildingState.isVisible)
+    }
+
+    @Test
+    fun `MapsToBuildingCode updates state for known building`() = runTest {
+        val buildingCode = "H"
+        viewModel.navigateToBuildingCode(buildingCode)
+
+        assertEquals(MapUIMode.DIRECTIONS, viewModel.uiBuildingState.mode)
+        assertEquals(buildingCode, viewModel.uiBuildingState.destinationName)
+    }
+
+    @Test
+    fun `handleSearchResult for CampusResult updates currentCampus`() {
+        // Mode must NOT be DIRECTIONS for campus logic to trigger in your VM
+        val campus = Campus("LOYOLA", JsonLatLng(0.0, 0.0), emptyList(), emptyList())
+        val result = SearchResult.CampusResult(campus)
+
+        // Ensure we are in PREVIEW mode
+        viewModel.onBackToPreview()
+        viewModel.handleSearchResult(result, mockContext)
+
+        assertEquals("LOYOLA", viewModel.currentCampus?.name)
+    }
+    @Test
+    fun `calculateRouteWithState handles API exceptions gracefully`() = runTest {
+        whenever(mockRouteProvider.getRoute(any(), any(), any()))
+            .thenThrow(RuntimeException("API Down"))
+
+        viewModel.onDirectionsRequested()
+        viewModel.processLocationUpdate(LatLng(45.0, -73.0), isForce = true)
+
+        val destBuilding = createTestBuilding("Destination")
+        viewModel.handleSearchResult(SearchResult.BuildingResult(destBuilding), mockContext)
+
+        viewModel.onTransportModeChanged("walking")
+        advanceUntilIdle()
+
+        val error = viewModel.uiBuildingState.routeErrorMessage
+        assertNotNull("Error message should be set when provider throws", error)
+        assertTrue("Error should contain 'unavailable'", error!!.contains("unavailable"))
+    }
+
+    @Test
+    fun `shuttle route calculation updates shuttle state`() = runTest {
+        val userLoc = LatLng(45.497, -73.579)
+        val mockStop = ShuttleStop("s1", "SGW Stop", "SGW", userLoc)
+
+        whenever(mockShuttleService.resolveNearestStop(anyOrNull())).thenReturn(mockStop)
+
+        whenever(mockShuttleService.statusMessage(any(), anyOrNull())).thenReturn("On time")
+
+        whenever(mockShuttleService.checkAvailability(any(), anyOrNull())).thenReturn(ShuttleAvailability.Active(10))
+
+        viewModel.onDirectionsRequested()
+        viewModel.processLocationUpdate(userLoc, isForce = true)
+
+        val destBuilding = createTestBuilding("Hall Building")
+        viewModel.handleSearchResult(SearchResult.BuildingResult(destBuilding), mockContext)
+
+        viewModel.onTransportModeChanged("shuttle")
+        advanceUntilIdle()
+
+        assertEquals("SGW Stop", viewModel.uiBuildingState.nearestShuttleStopName)
+        assertEquals("On time", viewModel.uiBuildingState.shuttleStatusMessage)
+    }
 }

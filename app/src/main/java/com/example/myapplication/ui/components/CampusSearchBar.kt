@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.myapplication.logic.SearchResult
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.ui.platform.testTag
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +37,7 @@ fun CampusSearchBar(
         onActiveChange = { active = it },
         placeholder = { Text("Search buildings or addresses...") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-        modifier = modifier.fillMaxWidth().padding(16.dp),
+        modifier = modifier.fillMaxWidth().padding(16.dp).testTag("search_bar"),
         colors = SearchBarDefaults.colors(containerColor = Color.White)
     ) {
         LazyColumn(modifier = Modifier.fillMaxWidth()) {

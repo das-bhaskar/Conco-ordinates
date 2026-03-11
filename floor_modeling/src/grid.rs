@@ -16,10 +16,8 @@ pub fn draw_grid(
     let (global_transform, projection) = camera_query.into_inner();
 
     let scale = match projection {
-        Projection::Orthographic(ortho) => {
-            ortho.scale
-        }
-        _ => panic!("Camera projection was not orthographic. This shouldn't be possible.")
+        Projection::Orthographic(ortho) => ortho.scale,
+        _ => panic!("Camera projection was not orthographic. This shouldn't be possible."),
     };
 
     let size = settings.cell_size;
@@ -51,6 +49,14 @@ pub fn draw_grid(
         gizmos.line_2d(Vec2::new(min_x, y), Vec2::new(max_x, y), settings.color);
     }
 
-    gizmos.line_2d(Vec2::new(min_x, 0.0), Vec2::new(max_x, 0.0), settings.origin_color);
-    gizmos.line_2d(Vec2::new(0.0, min_y), Vec2::new(0.0, max_y), settings.origin_color);
+    gizmos.line_2d(
+        Vec2::new(min_x, 0.0),
+        Vec2::new(max_x, 0.0),
+        settings.origin_color,
+    );
+    gizmos.line_2d(
+        Vec2::new(0.0, min_y),
+        Vec2::new(0.0, max_y),
+        settings.origin_color,
+    );
 }

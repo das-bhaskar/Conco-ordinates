@@ -1,14 +1,11 @@
-use bevy::prelude::*;
 use bevy::camera::{CameraOutputMode, visibility::RenderLayers};
 use bevy::input::mouse::{MouseMotion, MouseWheel};
+use bevy::prelude::*;
 use bevy_egui::{EguiContext, EguiGlobalSettings, PrimaryEguiContext};
 
 use crate::state::{EditorSettings, EditorState};
 
-pub fn setup_camera(
-    mut commands: Commands,
-    mut egui_global_settings: ResMut<EguiGlobalSettings>,
-) {
+pub fn setup_camera(mut commands: Commands, mut egui_global_settings: ResMut<EguiGlobalSettings>) {
     egui_global_settings.auto_create_primary_context = false;
 
     // World camera.
@@ -17,7 +14,7 @@ pub fn setup_camera(
         Camera::default(),
         Transform::from_translation(Vec3::new(0.0, 0.0, 999.0)),
     ));
-    
+
     // Egui camera.
     commands.spawn((
         PrimaryEguiContext,
@@ -52,7 +49,7 @@ pub fn camera_movement(
             let scale = ortho.scale;
             (ortho, scale)
         }
-        _ => panic!("Camera projection was not orthographic. This shouldn't be possible.")
+        _ => panic!("Camera projection was not orthographic. This shouldn't be possible."),
     };
 
     // Pan with right mouse button or wasd

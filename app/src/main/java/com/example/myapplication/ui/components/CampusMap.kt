@@ -15,6 +15,7 @@ import com.example.myapplication.ui.theme.ConcordiaGreen
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.ui.models.MapUIMode
 
 @Composable
 fun CampusMap(
@@ -41,6 +42,11 @@ fun CampusMap(
         ),
         onMapClick = { latLng -> MapInteractionHandler.processClick(latLng, viewModel, context) }
     ) {
+        NavigationCameraHandler(
+            cameraPositionState = cameraPositionState,
+            isNavigating = viewModel.uiBuildingState.mode == MapUIMode.ACTIVE_NAVIGATION,
+            onManualMove = { viewModel.toggleAutoCenter(false) }
+        )
         // 1. THE ROUTE LINE
         if (viewModel.uiBuildingState.routePoints.isNotEmpty()) {
             val transportMode = viewModel.uiBuildingState.selectedTransportMode

@@ -8,7 +8,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.app.ActivityCompat
@@ -32,6 +35,7 @@ import com.example.myapplication.ui.components.CampusToggle
 import com.example.myapplication.ui.components.DirectionsHeader
 import com.example.myapplication.ui.components.DirectionsInfoPopup
 import com.example.myapplication.ui.components.LocationPermissionDialog
+import com.example.myapplication.ui.components.NavigationOverlay
 import com.example.myapplication.ui.components.NextClassPill
 import com.example.myapplication.ui.components.ObserveCameraEffects
 import com.example.myapplication.ui.components.ObserveLocationUpdates
@@ -78,7 +82,8 @@ fun MapScreen(
     onBuildingDismiss:      () -> Unit,
     onDirectionsRequested:  () -> Unit,
     onLocationUpdate:       (com.google.android.gms.maps.model.LatLng, Boolean) -> Unit,
-    onNavigateToBuilding:   (String) -> Unit
+    onNavigateToBuilding:   (String) -> Unit,
+    onStartNavigationActions: () -> Unit,
 ) {
     val uiState = mapViewModel.uiBuildingState
     val context = LocalContext.current
@@ -106,15 +111,20 @@ fun MapScreen(
         cameraPositionState = cameraPositionState,
         cameraController    = cameraController,
         uiState             = uiState,
-        currentCampus       = currentCampus
+        currentCampus       = currentCampus,
+        mapEvent            = mapViewModel.mapEvent,
+        navBearing          = mapViewModel.currentNavBearing
     )
 
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted -> hasLocationPermission = isGranted }
 
-    val mapPaddingBottom = if (uiState.mode == MapUIMode.DIRECTIONS) 600 else 0
-
+    val mapPaddingBottom = when (uiState.mode) {
+        MapUIMode.DIRECTIONS -> 600
+        MapUIMode.ACTIVE_NAVIGATION -> 100 // Padding for the Exit button row
+        else -> 0
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         CampusMap(
             currentCampus           = currentCampus,
@@ -125,50 +135,82 @@ fun MapScreen(
             contentPadding          = PaddingValues(bottom = mapPaddingBottom.dp),
             modifier                = Modifier.testTag("campus_map")
         )
-        MapSearchOverlay(
-            context              = context,
-            uiState              = uiState,
-            searchQuery          = searchQuery,
-            searchResults        = searchResults,
-            activeSearchField    = activeSearchField,
-            onSearchQueryChanged = onSearchQueryChanged,
-            onSearchResult       = onSearchResult,
-            onTransportModeChanged   = onTransportModeChanged,
-            onToggleSearchExpansion  = onToggleSearchExpansion,
-            onSwapLocations          = onSwapLocations,
-            onBackToPreview          = onBackToPreview
-        )
-        MapPreviewOverlays(
-            uiState               = uiState,
-            currentCampus         = currentCampus,
-            nextClassEvent        = nextClassEvent,
-            isNextClassUrgent     = isNextClassUrgent,
-            nextClassTimeRemaining= nextClassTimeRemaining,
-            fusedLocationClient   = fusedLocationClient,
-            shouldShowRationale   = shouldShowRationale,
-            hasLocationPermission = hasLocationPermission,
-            launcher              = launcher,
-            cameraController      = cameraController,
-            scope                 = scope,
-            onShowSettings        = { showSettingsDialog = true },
-            context               = context,
-            onLocationUpdate      = onLocationUpdate,
-            onCampusSelected      = onCampusSelected,
-            onNavigateToBuilding  = onNavigateToBuilding
-        )
-        MapBuildingOverlay(
-            uiState              = uiState,
-            onDismiss            = onBuildingDismiss,
-            onDirectionsRequested= onDirectionsRequested,
-            onTransportModeChanged   = onTransportModeChanged,
-            onToggleSearchExpansion  = onToggleSearchExpansion,
-            onSwapLocations          = onSwapLocations,
-            onBackToPreview          = onBackToPreview
-        )
+        if (uiState.mode != MapUIMode.ACTIVE_NAVIGATION) {
+            MapSearchOverlay(
+                context = context,
+                uiState = uiState,
+                searchQuery = searchQuery,
+                searchResults = searchResults,
+                activeSearchField = activeSearchField,
+                onSearchQueryChanged = onSearchQueryChanged,
+                onSearchResult = onSearchResult,
+                onTransportModeChanged = onTransportModeChanged,
+                onToggleSearchExpansion = onToggleSearchExpansion,
+                onSwapLocations = onSwapLocations,
+                onBackToPreview = onBackToPreview,
+                onStartNavigationActions = onStartNavigationActions
+            )
+
+            MapPreviewOverlays(
+                uiState = uiState,
+                currentCampus = currentCampus,
+                nextClassEvent = nextClassEvent,
+                isNextClassUrgent = isNextClassUrgent,
+                nextClassTimeRemaining = nextClassTimeRemaining,
+                fusedLocationClient = fusedLocationClient,
+                shouldShowRationale = shouldShowRationale,
+                hasLocationPermission = hasLocationPermission,
+                launcher = launcher,
+                cameraController = cameraController,
+                scope = scope,
+                onShowSettings = { showSettingsDialog = true },
+                context = context,
+                onLocationUpdate = onLocationUpdate,
+                onCampusSelected = onCampusSelected,
+                onNavigateToBuilding = onNavigateToBuilding
+            )
+            MapBuildingOverlay(
+                uiState = uiState,
+                onDismiss = onBuildingDismiss,
+                onDirectionsRequested = onDirectionsRequested,
+                onTransportModeChanged = onTransportModeChanged,
+                onToggleSearchExpansion = onToggleSearchExpansion,
+                onSwapLocations = onSwapLocations,
+                onBackToPreview = onBackToPreview,
+                onStartNavigationActions = onStartNavigationActions
+            )
+        }
+        else {
+            // This calls the NavigationOverlay.kt file you showed me earlier
+            NavigationOverlay(
+                navState = uiState.navState,
+                onRecenterClick = { mapViewModel.forceRecenter() },
+                onExit = { onBackToPreview() }
+            )
+        }
+
         if (showSettingsDialog && !hasLocationPermission) {
             LocationPermissionDialog(
                 onOpenSettings = { openAppSettings(context) },
                 onDismiss      = { showSettingsDialog = false }
+            )
+        }
+
+
+        if (uiState.navState.hasArrived) {
+            AlertDialog(
+                onDismissRequest = { /* Force action */ },
+                title = { Text("Destination Reached") },
+                text = { Text("You have arrived at ${uiState.destinationName}") },
+                confirmButton = {
+                    Button(
+                        onClick = { onBackToPreview() },
+                        colors = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon)
+                    ) {
+                        Text("END TRIP")
+                    }
+                },
+                shape = RoundedCornerShape(16.dp)
             )
         }
     }
@@ -188,7 +230,8 @@ private fun BoxScope.MapSearchOverlay(
     onTransportModeChanged:   (String) -> Unit,
     onToggleSearchExpansion:  (Boolean, String) -> Unit,
     onSwapLocations:          () -> Unit,
-    onBackToPreview:          () -> Unit
+    onBackToPreview:          () -> Unit,
+    onStartNavigationActions: () -> Unit
 ) {
     if (uiState.mode == MapUIMode.PREVIEW) {
         CampusSearchBar(
@@ -210,7 +253,8 @@ private fun BoxScope.MapSearchOverlay(
             onSwapLocations         = onSwapLocations,
             onBackToPreview         = onBackToPreview,
             onSearchResult          = onSearchResult,
-            onSearchQueryChanged    = onSearchQueryChanged
+            onSearchQueryChanged    = onSearchQueryChanged,
+            onStartNavigationActions = onStartNavigationActions
         )
     }
 }
@@ -226,6 +270,7 @@ private fun BoxScope.DirectionsOverlay(
     onToggleSearchExpansion:  (Boolean, String) -> Unit,
     onSwapLocations:          () -> Unit,
     onBackToPreview:          () -> Unit,
+    onStartNavigationActions: () -> Unit,
     onSearchResult:           (com.example.myapplication.logic.SearchResult, android.content.Context) -> Unit,
     onSearchQueryChanged:     (String, String) -> Unit
 ) {
@@ -246,7 +291,7 @@ private fun BoxScope.DirectionsOverlay(
             onDestinationClick = { onToggleSearchExpansion(true, "dest") },
             onSwapClick        = onSwapLocations,
             onClose            = onBackToPreview,
-            onStartNavigation  = { },
+            onStartNavigation  = onStartNavigationActions,
             modifier           = Modifier.align(Alignment.BottomCenter)
         )
     }
@@ -317,6 +362,7 @@ private fun BoxScope.MapPreviewOverlays(
     onNavigateToBuilding:  (String) -> Unit
 ) {
     val mode = uiState.mode
+    if (mode == MapUIMode.ACTIVE_NAVIGATION) return
     if (mode == MapUIMode.PREVIEW) {
         NextClassPill(
             nextEvent      = nextClassEvent,
@@ -367,7 +413,8 @@ private fun BoxScope.MapBuildingOverlay(
     onTransportModeChanged:   (String) -> Unit,
     onToggleSearchExpansion:  (Boolean, String) -> Unit,
     onSwapLocations:          () -> Unit,
-    onBackToPreview:          () -> Unit
+    onBackToPreview:          () -> Unit,
+    onStartNavigationActions: () -> Unit
 ) {
     if (!uiState.isVisible) return
     val building = uiState.building ?: return
@@ -386,7 +433,7 @@ private fun BoxScope.MapBuildingOverlay(
             onDestinationClick = { onToggleSearchExpansion(true, "dest") },
             onSwapClick        = onSwapLocations,
             onClose            = onBackToPreview,
-            onStartNavigation  = { },
+            onStartNavigation  = onStartNavigationActions,
             modifier           = Modifier.align(Alignment.BottomCenter)
         )
     }

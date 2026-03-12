@@ -10,6 +10,7 @@ import com.example.myapplication.data.Building
 import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
 import androidx.lifecycle.viewModelScope
+import com.example.myapplication.logic.CampusNavigationEngine
 import com.example.myapplication.logic.SearchResult
 import com.example.myapplication.logic.HybridSearchProvider
 import com.example.myapplication.logic.ShuttleRouteProvider
@@ -20,6 +21,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.example.myapplication.ui.models.BuildingUiState
 import com.example.myapplication.ui.models.MapUIMode
+import com.example.myapplication.ui.models.NavigationState
 
 /**
  * [shuttleService] has no default value so callers must inject a concrete
@@ -34,7 +36,8 @@ class MapViewModel(
     private val locationProvider: com.example.myapplication.logic.LocationProvider? = null,
     private val routeProvider: com.example.myapplication.logic.RouteProvider? = null,
     private val shuttleService: ShuttleService,
-    private val analyticsProvider: AnalyticsProvider = NoOpAnalyticsProvider
+    private val analyticsProvider: AnalyticsProvider = NoOpAnalyticsProvider,
+    private val navigationEngine: com.example.myapplication.logic.NavigationEngine = CampusNavigationEngine()
 ) : ViewModel() {
 
     private val shuttleRouteProvider = ShuttleRouteProvider(
@@ -52,6 +55,9 @@ class MapViewModel(
     // ── Search ─────────────────────────────────────────────────────────────────
 
     var searchQuery by mutableStateOf("")
+        private set
+
+    var currentNavBearing by mutableStateOf(0f)
         private set
 
     var searchResults by mutableStateOf<List<SearchResult>>(emptyList())
@@ -102,33 +108,58 @@ class MapViewModel(
         if (isForce) isManualCampusSelection = false
         lastProcessedLocation = userLocation
 
+        // 1. Detect Campus & Handle Manual Selection (Preserved)
         val detected = CampusRepo.getCampus(userLocation)
-
         if (detected != null) {
-            // Logic for when user IS at a campus
             if (!isManualCampusSelection) {
                 if (currentCampus?.name != detected.name) {
                     currentCampus = detected
                 }
-            } else {
-
-                if (detected.name == currentCampus?.name) {
-                    isManualCampusSelection = false
-                }
+            } else if (detected.name == currentCampus?.name) {
+                isManualCampusSelection = false
             }
-
-            // Existing building highlight logic...
-            val buildingAtPos = detected.buildings.firstOrNull { building ->
-                val outline = building.getGoogleOutline()
-                com.google.maps.android.PolyUtil.containsLocation(userLocation, outline, false)
-            }
-            highlightedBuildingName = buildingAtPos?.name
-
         } else {
-            // BUG FIX: Logic for when user is NOT at a campus
             isManualCampusSelection = false
-            currentCampus = null // This unselects SGW/LOY buttons
-            highlightedBuildingName = null
+            currentCampus = null
+        }
+
+        // 2. HIGHLIGHT LOGIC (Surgical Fix: Moved outside campus block so it works everywhere)
+        val buildingAtPos = detected?.buildings?.firstOrNull { building ->
+            val outline = building.getGoogleOutline()
+            com.google.maps.android.PolyUtil.containsLocation(userLocation, outline, false)
+        }
+        highlightedBuildingName = buildingAtPos?.name
+
+        if (uiBuildingState.mode == MapUIMode.ACTIVE_NAVIGATION) {
+            val engine = navigationEngine as CampusNavigationEngine
+            val arrived = engine.checkArrivalWithBuilding(userLocation, uiBuildingState.building)
+
+            if (arrived && !uiBuildingState.navState.hasArrived) {
+                uiBuildingState = uiBuildingState.copy(
+                    navState = uiBuildingState.navState.copy(hasArrived = true)
+                )
+            }
+
+            // 1. Calculate the distance moved since the last API call
+            val distanceMoved = lastRouteUpdateLocation?.let {
+                com.google.maps.android.SphericalUtil.computeDistanceBetween(it, userLocation)
+            } ?: Float.MAX_VALUE.toDouble()
+
+            // 2. Only refresh if the user moved > 15 meters (Prevents buffering/jitter)
+            if (distanceMoved > 15.0 || isForce) {
+                lastRouteUpdateLocation = userLocation
+                calculateRouteWithState() // This forces the blue line to start from your CURRENT feet
+            }
+
+            // 3. Update camera bearing
+            val newBearing = engine.calculateBearing(userLocation, uiBuildingState.routePoints)
+            uiBuildingState = uiBuildingState.copy(
+                navState = uiBuildingState.navState.copy(currentBearing = newBearing)
+            )
+
+            if (uiBuildingState.navState.isAutoCenterEnabled) {
+                mapEvent = userLocation
+            }
         }
     }
 
@@ -225,9 +256,11 @@ class MapViewModel(
     }
 
     fun onBackToPreview() {
-        uiBuildingState = uiBuildingState.copy(mode = MapUIMode.PREVIEW)
+        uiBuildingState = uiBuildingState.copy(
+            mode = MapUIMode.PREVIEW,
+            navState = NavigationState() // This clears hasArrived and currentBearing
+        )
     }
-
     fun onStartQueryChanged(newQuery: String) {
         uiBuildingState = uiBuildingState.copy(startLocationName = newQuery)
     }
@@ -238,8 +271,14 @@ class MapViewModel(
     }
 
     fun calculateRouteWithState() {
-        val start     = uiBuildingState.startPoint ?: lastProcessedLocation ?: return
-        val end       = uiBuildingState.endPoint   ?: uiBuildingState.building?.getCenter() ?: return
+        val start = if (uiBuildingState.mode == MapUIMode.ACTIVE_NAVIGATION) {
+            lastProcessedLocation
+        } else {
+            uiBuildingState.startPoint ?: lastProcessedLocation
+        } ?: return
+
+        val end = uiBuildingState.endPoint ?: uiBuildingState.building?.getCenter() ?: return
+        // ... rest of the function remains the same ...
         val isShuttle = uiBuildingState.selectedTransportMode == "shuttle"
         val provider  = if (isShuttle) shuttleRouteProvider else routeProvider
         viewModelScope.launch {
@@ -262,17 +301,20 @@ class MapViewModel(
             }
             val modeName = uiBuildingState.selectedTransportMode
                 .replaceFirstChar { it.uppercase() }
+
             uiBuildingState = if (routeData != null) {
-                val builder = LatLngBounds.Builder()
-                routeData.points.forEach { builder.include(it) }
+                // This is the Google API instruction for the NEXT turn
+                val nextInstruction = routeData.instructions.firstOrNull() ?: "Follow the path"
+
                 uiBuildingState.copy(
-                    routePoints       = routeData.points,
-                    routeDuration     = routeData.duration,
-                    routeDistance     = routeData.distance,
-                    routeBounds       = builder.build(),
-                    routeErrorMessage = null
+                    routePoints = routeData.points,
+                    // ... distance/duration updates ...
+                    navState = uiBuildingState.navState.copy(
+                        currentInstruction = nextInstruction // This pushes the NEW message to the top box
+                    )
                 )
-            } else {
+            }
+            else {
                 uiBuildingState.copy(
                     routePoints       = emptyList(),
                     routeDuration     = "-- min",
@@ -345,7 +387,28 @@ class MapViewModel(
         activeSearchField = field
         uiBuildingState   = uiBuildingState.copy(isSearchExpanded = expanded)
     }
+    private var lastRouteUpdateLocation: LatLng? = null
 
+    fun startNavigation() {
+        val userLoc = lastProcessedLocation ?: return
+        val target = uiBuildingState.building ?: return
+
+        uiBuildingState = uiBuildingState.copy(
+            mode = MapUIMode.ACTIVE_NAVIGATION,
+            navState = NavigationState(
+                hasArrived = false, // CRITICAL: Reset the gate
+                isAutoCenterEnabled = true,
+                currentInstruction = "Follow the path to ${target.name}"
+            )
+        )
+        calculateRouteWithState()
+    }
+    fun forceRecenter() {
+        toggleAutoCenter(true)
+        lastProcessedLocation?.let {
+            mapEvent = it
+        }
+    }
     fun swapLocations() {
         val currentStartLatLng  = uiBuildingState.startPoint ?: lastProcessedLocation
         val currentDestLatLng   = uiBuildingState.endPoint   ?: uiBuildingState.building?.getCenter()
@@ -366,6 +429,11 @@ class MapViewModel(
         mapEvent = LatLng(target.latitude - 0.005, target.longitude)
     }
 
+    fun toggleAutoCenter(enabled: Boolean) {
+        uiBuildingState = uiBuildingState.copy(
+            navState = uiBuildingState.navState.copy(isAutoCenterEnabled = enabled)
+        )
+    }
 
     private data class ShuttleSnapshot(
         val availability:  com.example.myapplication.data.ShuttleAvailability,

@@ -6,7 +6,8 @@ import com.example.myapplication.data.ShuttleStop
 
 enum class MapUIMode {
     PREVIEW,    // Just looking at a building
-    DIRECTIONS  // Choosing start/end and travel mode
+    DIRECTIONS,  // Choosing start/end and travel mode
+    ACTIVE_NAVIGATION
 }
 
 data class BuildingUiState(
@@ -28,6 +29,8 @@ data class BuildingUiState(
     val routeDistance: String = "-- m",
     val routeErrorMessage: String? = null,
 
+    val navState: NavigationState = NavigationState(), // Modular extension
+
     // ── Shuttle (US-2.6 / US-2.7 / US-2.8) ───────────────────────────────────
     val shuttleAvailability: ShuttleAvailability = ShuttleAvailability.ScheduleUnavailable,
     val shuttleStatusMessage: String = "",
@@ -38,3 +41,4 @@ data class BuildingUiState(
      *  data layer directly (MVVM).                                      [#6] */
     val shuttleStops: List<ShuttleStop> = emptyList()
 )
+

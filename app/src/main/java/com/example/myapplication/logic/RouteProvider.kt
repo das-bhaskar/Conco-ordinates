@@ -5,7 +5,8 @@ import com.google.android.gms.maps.model.LatLng
 data class RouteData(
     val points: List<LatLng>,
     val duration: String,
-    val distance: String
+    val distance: String,
+    val instructions: List<String> = emptyList()
 )
 
 interface RouteProvider {
@@ -27,6 +28,7 @@ class InterpolatingMockRouteProvider(private var steps: UInt) : RouteProvider {
         val points = (0..steps.toInt()).map { i ->
             LatLng(start.latitude + latStep * i, start.longitude + lngStep * i)
         }
-        return RouteData(points, "0 mins", "0 km")
+        // FIXED: Added emptyList() to match the RouteData constructor
+        return RouteData(points, "0 mins", "0 km", emptyList())
     }
 }

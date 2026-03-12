@@ -172,7 +172,8 @@ class MapsActivity : ComponentActivity() {
                         onBuildingDismiss      = { viewModel.handleMapTap(null) },
                         onDirectionsRequested  = { viewModel.onDirectionsRequested() },
                         onLocationUpdate       = { loc, force -> viewModel.processLocationUpdate(loc, force) },
-                        onNavigateToBuilding   = { viewModel.navigateToBuildingCode(it) }
+                        onNavigateToBuilding   = { viewModel.navigateToBuildingCode(it) },
+                        onStartNavigationActions      = { viewModel.startNavigation() }
                     )
                 }
             )

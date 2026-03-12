@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import com.example.myapplication.map.TrueCameraController
 import com.example.myapplication.telemetry.CrashReporter
+import com.example.myapplication.ui.models.MapUIMode
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -14,6 +15,7 @@ import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.CameraMoveStartedReason
 import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.delay
@@ -96,25 +98,79 @@ fun ObserveCameraEffects(
     cameraPositionState: CameraPositionState,
     cameraController:    TrueCameraController,
     uiState:             com.example.myapplication.ui.models.BuildingUiState,
-    currentCampus:       com.example.myapplication.data.Campus?
+    currentCampus:       com.example.myapplication.data.Campus?,
+    mapEvent:            LatLng?,
+    navBearing:          Float
 ) {
+    // 1. Handle Route Bounds (Only if NOT navigating)
     LaunchedEffect(uiState.routeBounds) {
-        val bounds = uiState.routeBounds
-        if (bounds != null) {
+        // Fix: Don't zoom out to see the whole route if we are already in Nav mode
+        if (uiState.mode == MapUIMode.ACTIVE_NAVIGATION) return@LaunchedEffect
+
+        uiState.routeBounds?.let { bounds ->
             delay(500)
             cameraPositionState.animate(
-                update     = CameraUpdateFactory.newLatLngBounds(bounds, 400),
+                update = CameraUpdateFactory.newLatLngBounds(bounds, 400),
                 durationMs = 1000
             )
         }
     }
+
+    // 2. Handle Campus Selection
     LaunchedEffect(currentCampus) {
         currentCampus?.let { campus ->
             CrashReporter.setKey("selected_campus", campus.name)
             cameraController.animateTo(campus.getGoogleCenter(), campus.defaultZoom)
         }
     }
+
+    // 3. Handle Mode Changes (Nav Start/End)
     LaunchedEffect(uiState.mode) {
         CrashReporter.setKey("map_mode", uiState.mode.name)
+        when (uiState.mode) {
+            MapUIMode.PREVIEW -> {
+                mapEvent?.let { cameraController.resetToFlat(it) }
+            }
+            MapUIMode.ACTIVE_NAVIGATION -> {
+                // Initial jump into Nav mode
+                mapEvent?.let { target ->
+                    cameraController.enterNavMode(target, cameraPositionState.position.bearing)
+                }
+            }
+            else -> {}
+        }
+    }
+
+    LaunchedEffect(mapEvent) {
+        if (uiState.mode == MapUIMode.ACTIVE_NAVIGATION && uiState.navState.isAutoCenterEnabled) {
+            mapEvent?.let { target ->
+                cameraPositionState.animate(
+                    update = CameraUpdateFactory.newCameraPosition(
+                        CameraPosition.Builder()
+                            .target(target)
+                            .zoom(18.5f)
+                            .tilt(60f) // Increased tilt for better perspective
+                            .bearing(uiState.navState.currentBearing) // THIS ROTATES THE MAP
+                            .build()
+                    ),
+                    durationMs = 1000 // Smoother transition
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun NavigationCameraHandler(
+    cameraPositionState: CameraPositionState,
+    isNavigating: Boolean,
+    onManualMove: () -> Unit
+) {
+    LaunchedEffect(cameraPositionState.isMoving) {
+        if (cameraPositionState.isMoving &&
+            cameraPositionState.cameraMoveStartedReason == CameraMoveStartedReason.GESTURE &&
+            isNavigating) {
+            onManualMove()
+        }
     }
 }

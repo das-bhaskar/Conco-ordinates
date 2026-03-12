@@ -45,16 +45,25 @@ class GoogleRouteProvider(private val apiKey: String) : RouteProvider {
             if (routes.length() > 0) {
                 val route = routes.getJSONObject(0)
                 val leg = route.getJSONArray("legs").getJSONObject(0)
+                val steps = leg.getJSONArray("steps")
+
+                val firstInstruction = if (steps.length() > 0) {
+                    steps.getJSONObject(0).getString("html_instructions")
+                        .replace(Regex("<[^>]*>"), "") // Remove HTML tags like <b>
+                } else "Follow the path"
 
                 val durationText = leg.getJSONObject("duration").getString("text")
                 val distanceText = leg.getJSONObject("distance").getString("text")
-
                 val overviewPolyline = route.getJSONObject("overview_polyline").getString("points")
                 val decodedPoints = PolyUtil.decode(overviewPolyline)
 
-                // Return the custom object
-                return@withContext RouteData(decodedPoints, durationText, distanceText)
-            }
+                // Updated RouteData to include the instruction
+                return@withContext RouteData(
+                    points = decodedPoints,
+                    duration = durationText,
+                    distance = distanceText,
+                    instructions = listOf(firstInstruction)
+                )            }
         } catch (e: Exception) {
             android.util.Log.e("ROUTE_DEBUG", "Exception: ${e.message}")
             CrashReporter.setKey("route_mode", transportMode)

@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowRightAlt
-import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -23,7 +22,7 @@ fun NavigationOverlay(
     navState: NavigationState,
     onRecenterClick: () -> Unit,
     onExit: () -> Unit,
-    mapViewModel:        com.example.myapplication.ui.viewmodel.MapViewModel,
+    destinationName: () -> Unit
 
     ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -115,14 +114,14 @@ fun NavigationOverlay(
             }
         }
     }
-    val uiState = mapViewModel.uiBuildingState
+    val uiState = destinationName
 
     // Inside NavigationOverlay.kt -> at the end of the Box { ... }
     if (navState.hasArrived) {
         AlertDialog(
             onDismissRequest = { /* Force the user to click the button */ },
             title = { Text("Destination Reached", fontWeight = FontWeight.Bold) },
-               text = { Text("You have arrived at ${uiState.destinationName}") },
+               text = { Text("You have arrived at ${destinationName}") },
             confirmButton = {
                 Button(
                     onClick = onExit,

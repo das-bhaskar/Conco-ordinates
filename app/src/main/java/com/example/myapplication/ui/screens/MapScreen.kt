@@ -181,12 +181,11 @@ fun MapScreen(
             )
         }
         else {
-            // This calls the NavigationOverlay.kt file you showed me earlier
             NavigationOverlay(
                 navState = uiState.navState,
                 onRecenterClick = { mapViewModel.forceRecenter() },
                 onExit = { onBackToPreview() },
-                mapViewModel= mapViewModel
+                destinationName = {mapViewModel.uiBuildingState.destinationName}
             )
         }
 
@@ -196,7 +195,7 @@ fun MapScreen(
                 onDismiss      = { showSettingsDialog = false }
             )
         }
-        
+
     }
 }
 

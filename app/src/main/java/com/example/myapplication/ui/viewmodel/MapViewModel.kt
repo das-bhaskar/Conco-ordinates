@@ -318,15 +318,16 @@ class MapViewModel(
                 .replaceFirstChar { it.uppercase() }
 
             uiBuildingState = if (routeData != null) {
-                // This is the Google API instruction for the NEXT turn
                 val nextInstruction = routeData.instructions.firstOrNull() ?: "Follow the path"
 
                 uiBuildingState.copy(
                     routePoints = routeData.points,
-                    // ... distance/duration updates ...
+                    routeDuration = routeData.duration, // ADD THIS
+                    routeDistance = routeData.distance, // ADD THIS
                     navState = uiBuildingState.navState.copy(
-                        currentInstruction = nextInstruction // This pushes the NEW message to the top box
-                    )
+                        currentInstruction = nextInstruction
+                    ),
+                    routeErrorMessage = null // Clear any previous errors
                 )
             }
             else {
@@ -405,7 +406,6 @@ class MapViewModel(
     private var lastRouteUpdateLocation: LatLng? = null
 
     fun startNavigation() {
-        val userLoc = lastProcessedLocation ?: return
         val target = uiBuildingState.building ?: return
 
         uiBuildingState = uiBuildingState.copy(

@@ -14,7 +14,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.ui.models.NavigationState
-import com.example.myapplication.ui.theme.ConcordiaBlue
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 
 @Composable
@@ -22,7 +21,7 @@ fun NavigationOverlay(
     navState: NavigationState,
     onRecenterClick: () -> Unit,
     onExit: () -> Unit,
-    destinationName: () -> Unit
+    destinationName: () -> String
 
     ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -114,14 +113,13 @@ fun NavigationOverlay(
             }
         }
     }
-    val uiState = destinationName
 
     // Inside NavigationOverlay.kt -> at the end of the Box { ... }
     if (navState.hasArrived) {
         AlertDialog(
             onDismissRequest = { /* Force the user to click the button */ },
             title = { Text("Destination Reached", fontWeight = FontWeight.Bold) },
-               text = { Text("You have arrived at ${destinationName}") },
+            text = { Text("You have arrived at ${destinationName()}") },
             confirmButton = {
                 Button(
                     onClick = onExit,

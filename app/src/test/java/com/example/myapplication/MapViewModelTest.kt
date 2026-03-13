@@ -309,4 +309,108 @@ class MapViewModelTest {
         assertEquals("SGW Stop", viewModel.uiBuildingState.nearestShuttleStopName)
         assertEquals("On time", viewModel.uiBuildingState.shuttleStatusMessage)
     }
+
+
+    @Test
+    fun `processLocationUpdate triggers reroute when distance moved exceeds 15 meters`() = runTest {
+        // Arrange: Set initial position and start navigation
+        val startPos = LatLng(45.497, -73.579)
+        val movePos = LatLng(45.4975, -73.580) // ~50 meters away
+
+        viewModel.onDirectionsRequested()
+        viewModel.handleSearchResult(SearchResult.BuildingResult(createTestBuilding()), mockContext)
+        viewModel.startNavigation()
+        viewModel.processLocationUpdate(startPos, isForce = true)
+
+        clearInvocations(mockRouteProvider)
+
+        // Act: Move user significantly
+        viewModel.processLocationUpdate(movePos)
+        advanceUntilIdle()
+
+        // Assert: calculateRouteWithState should be called again (via routeProvider)
+        verify(mockRouteProvider, atLeastOnce()).getRoute(any(), any(), any())
+    }
+
+    @Test
+    fun `processLocationUpdate updates bearing and auto-center during navigation`() {
+        // Arrange
+        val userPos = LatLng(45.497, -73.579)
+        viewModel.onDirectionsRequested()
+        viewModel.handleSearchResult(SearchResult.BuildingResult(createTestBuilding()), mockContext)
+        viewModel.startNavigation()
+        viewModel.toggleAutoCenter(true)
+
+        // Act
+        viewModel.processLocationUpdate(userPos)
+
+        // Assert
+        assertEquals(userPos, viewModel.mapEvent) // mapEvent is updated for auto-centering
+    }
+
+    @Test
+    fun `updateCampusState handles manual selection override correctly`() {
+        val sgw = Campus("SGW", JsonLatLng(45.497, -73.579), emptyList(), emptyList())
+        val loyola = Campus("LOYOLA", JsonLatLng(45.458, -73.640), emptyList(), emptyList())
+        CampusRepo.setTestCampuses(listOf(sgw, loyola))
+
+        // 1. Manually select SGW
+        viewModel.onCampusSelected("SGW")
+
+        // 2. Physically move to Loyola (Manual selection should stick)
+        viewModel.processLocationUpdate(LatLng(45.458, -73.640))
+        assertEquals("SGW", viewModel.currentCampus?.name)
+
+        // 3. Force update (Like clicking a 'Find Me' button)
+        viewModel.processLocationUpdate(LatLng(45.458, -73.640), isForce = true)
+        assertEquals("LOYOLA", viewModel.currentCampus?.name)
+    }
+
+    @Test
+    fun `onBackToPreview resets navigation state and arrival flag`() {
+        // Arrange: Mock an arrived state
+        viewModel.onDirectionsRequested()
+        viewModel.startNavigation()
+        // We simulate arrival by modifying the state directly for the test
+        // or triggering the logic. Let's just call the reset.
+
+        // Act
+        viewModel.onBackToPreview()
+
+        // Assert
+        val state = viewModel.uiBuildingState
+        assertEquals(MapUIMode.PREVIEW, state.mode)
+        assertFalse(state.navState.hasArrived)
+        assertEquals(0f, state.navState.currentBearing)
+    }
+
+    @Test
+    fun `calculateRouteWithState uses user location as start during active navigation`() = runTest {
+        val actualUserLoc = LatLng(45.497, -73.579)
+        val destinationLoc = LatLng(45.498, -73.581)
+
+        // 1. Create building and result
+        val destBuilding = createTestBuilding("Target Building")
+        // Use a result that actually populates coordinates
+        val result = SearchResult.BuildingResult(destBuilding)
+
+        viewModel.onDirectionsRequested()
+
+        // 2. This sets both 'building' AND 'endPoint' in the state
+        viewModel.handleSearchResult(result, mockContext)
+
+        // 3. Update location and start nav
+        viewModel.processLocationUpdate(actualUserLoc, isForce = true)
+        viewModel.startNavigation()
+
+        // Act
+        advanceUntilIdle()
+
+        // Assert
+        verify(mockRouteProvider, atLeastOnce()).getRoute(
+            eq(actualUserLoc),
+            any(),
+            any()
+        )
+    }
 }

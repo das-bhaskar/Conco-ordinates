@@ -20,7 +20,7 @@ class CampusNavigationEngine : NavigationEngine {
         val destination = targetBuilding.getCenter()
         val distance = com.google.maps.android.SphericalUtil.computeDistanceBetween(userPos, destination)
 
-        // Just one simple check. 15 meters is roughly the width of a small building.
+        // Just one simple check. 50 meters is roughly the width of a small building.
         return distance < 50.0
     }
     override fun checkArrival(userPos: LatLng, destination: LatLng): Boolean {

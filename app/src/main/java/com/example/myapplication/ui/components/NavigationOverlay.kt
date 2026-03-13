@@ -21,8 +21,10 @@ import com.example.myapplication.ui.theme.ConcordiaMaroon
 fun NavigationOverlay(
     navState: NavigationState,
     onRecenterClick: () -> Unit,
-    onExit: () -> Unit
-) {
+    onExit: () -> Unit,
+    mapViewModel:        com.example.myapplication.ui.viewmodel.MapViewModel,
+
+    ) {
     Box(modifier = Modifier.fillMaxSize()) {
         // Top Instruction Box
         Surface(
@@ -112,16 +114,18 @@ fun NavigationOverlay(
             }
         }
     }
+    val uiState = mapViewModel.uiBuildingState
+
     // Inside NavigationOverlay.kt -> at the end of the Box { ... }
     if (navState.hasArrived) {
         AlertDialog(
             onDismissRequest = { /* Force the user to click the button */ },
             title = { Text("Destination Reached", fontWeight = FontWeight.Bold) },
-            text = { Text("You have arrived at your destination.") },
+               text = { Text("You have arrived at ${uiState.destinationName}") },
             confirmButton = {
                 Button(
                     onClick = onExit,
-                    colors = ButtonDefaults.buttonColors(containerColor = com.example.myapplication.ui.theme.ConcordiaMaroon)
+                    colors = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon)
                 ) {
                     Text("END TRIP", color = Color.White)
                 }

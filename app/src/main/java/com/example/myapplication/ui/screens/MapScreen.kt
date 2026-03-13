@@ -185,7 +185,8 @@ fun MapScreen(
             NavigationOverlay(
                 navState = uiState.navState,
                 onRecenterClick = { mapViewModel.forceRecenter() },
-                onExit = { onBackToPreview() }
+                onExit = { onBackToPreview() },
+                mapViewModel= mapViewModel
             )
         }
 
@@ -195,24 +196,7 @@ fun MapScreen(
                 onDismiss      = { showSettingsDialog = false }
             )
         }
-
-
-        if (uiState.navState.hasArrived) {
-            AlertDialog(
-                onDismissRequest = { /* Force action */ },
-                title = { Text("Destination Reached") },
-                text = { Text("You have arrived at ${uiState.destinationName}") },
-                confirmButton = {
-                    Button(
-                        onClick = { onBackToPreview() },
-                        colors = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon)
-                    ) {
-                        Text("END TRIP")
-                    }
-                },
-                shape = RoundedCornerShape(16.dp)
-            )
-        }
+        
     }
 }
 

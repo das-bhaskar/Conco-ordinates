@@ -9,8 +9,7 @@ import kotlin.math.roundToInt
 interface NavigationEngine {
     fun calculateNextInstruction(userPos: LatLng, route: List<LatLng>): String
     fun checkArrival(userPos: LatLng, destination: LatLng): Boolean
-    fun calculateBearing(userPos: LatLng, route: List<LatLng>): Float
-}
+    fun calculateBearing(userPos: LatLng, route: List<LatLng>, currentBearing: Float): Float}
 class CampusNavigationEngine : NavigationEngine {
 
     // 1. ARRIVAL: Use the "Inside Building" logic you requested
@@ -28,11 +27,17 @@ class CampusNavigationEngine : NavigationEngine {
         return SphericalUtil.computeDistanceBetween(userPos, destination) < 15.0
     }
 
-    override fun calculateBearing(userPos: LatLng, route: List<LatLng>): Float {
+    override fun calculateBearing(userPos: LatLng, route: List<LatLng>, currentBearing: Float): Float {
+        // Find a point on the path at least 12 meters ahead
         val target = route.firstOrNull { SphericalUtil.computeDistanceBetween(userPos, it) > 12.0 }
+
         return if (target != null) {
             SphericalUtil.computeHeading(userPos, target).toFloat()
-        } else 0f
+        } else {
+            // Instead of returning 0f (North), we return the existing bearing
+            // to keep the map locked in its last stable orientation.
+            currentBearing
+        }
     }
 
     // 2. INSTRUCTIONS: We only use this if Google API fails

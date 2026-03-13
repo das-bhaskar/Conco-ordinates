@@ -152,7 +152,11 @@ class MapViewModel(
             }
 
             // 3. Update camera bearing
-            val newBearing = engine.calculateBearing(userLocation, uiBuildingState.routePoints)
+            val newBearing = engine.calculateBearing(
+                userLocation,
+                uiBuildingState.routePoints,
+                uiBuildingState.navState.currentBearing // Pass the old one here
+            )
             uiBuildingState = uiBuildingState.copy(
                 navState = uiBuildingState.navState.copy(currentBearing = newBearing)
             )

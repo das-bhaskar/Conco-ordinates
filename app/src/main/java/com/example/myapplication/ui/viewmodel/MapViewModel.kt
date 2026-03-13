@@ -108,62 +108,73 @@ class MapViewModel(
         if (isForce) isManualCampusSelection = false
         lastProcessedLocation = userLocation
 
-        // 1. Detect Campus & Handle Manual Selection (Preserved)
-        val detected = CampusRepo.getCampus(userLocation)
-        if (detected != null) {
-            if (!isManualCampusSelection) {
-                if (currentCampus?.name != detected.name) {
-                    currentCampus = detected
-                }
-            } else if (detected.name == currentCampus?.name) {
-                isManualCampusSelection = false
-            }
-        } else {
-            isManualCampusSelection = false
-            currentCampus = null
-        }
+        // 1. Handle Campus State
+        updateCampusState(userLocation)
 
-        // 2. HIGHLIGHT LOGIC (Surgical Fix: Moved outside campus block so it works everywhere)
+        // 2. Handle Building Highlighting
+        val detected = CampusRepo.getCampus(userLocation)
         val buildingAtPos = detected?.buildings?.firstOrNull { building ->
-            val outline = building.getGoogleOutline()
-            com.google.maps.android.PolyUtil.containsLocation(userLocation, outline, false)
+            com.google.maps.android.PolyUtil.containsLocation(userLocation, building.getGoogleOutline(), false)
         }
         highlightedBuildingName = buildingAtPos?.name
 
+        // 3. Handle Navigation Logic (Only if in ACTIVE_NAVIGATION mode)
         if (uiBuildingState.mode == MapUIMode.ACTIVE_NAVIGATION) {
-            val engine = navigationEngine as CampusNavigationEngine
-            val arrived = engine.checkArrivalWithBuilding(userLocation, uiBuildingState.building)
+            handleActiveNavigationUpdate(userLocation, isForce)
+        }
+    }
 
-            if (arrived && !uiBuildingState.navState.hasArrived) {
-                uiBuildingState = uiBuildingState.copy(
-                    navState = uiBuildingState.navState.copy(hasArrived = true)
-                )
+    private fun updateCampusState(userLocation: LatLng) {
+        val detected = CampusRepo.getCampus(userLocation)
+        if (detected == null) {
+            isManualCampusSelection = false
+            currentCampus = null
+            return
+        }
+
+        if (!isManualCampusSelection) {
+            if (currentCampus?.name != detected.name) {
+                currentCampus = detected
             }
+        } else if (detected.name == currentCampus?.name) {
+            isManualCampusSelection = false
+        }
+    }
 
-            // 1. Calculate the distance moved since the last API call
-            val distanceMoved = lastRouteUpdateLocation?.let {
-                com.google.maps.android.SphericalUtil.computeDistanceBetween(it, userLocation)
-            } ?: Float.MAX_VALUE.toDouble()
+    private fun handleActiveNavigationUpdate(userLocation: LatLng, isForce: Boolean) {
+        val engine = navigationEngine as CampusNavigationEngine
 
-            // 2. Only refresh if the user moved > 15 meters (Prevents buffering/jitter)
-            if (distanceMoved > 15.0 || isForce) {
-                lastRouteUpdateLocation = userLocation
-                calculateRouteWithState() // This forces the blue line to start from your CURRENT feet
-            }
-
-            // 3. Update camera bearing
-            val newBearing = engine.calculateBearing(
-                userLocation,
-                uiBuildingState.routePoints,
-                uiBuildingState.navState.currentBearing // Pass the old one here
-            )
+        // Arrival Check
+        val arrived = engine.checkArrivalWithBuilding(userLocation, uiBuildingState.building)
+        if (arrived && !uiBuildingState.navState.hasArrived) {
             uiBuildingState = uiBuildingState.copy(
-                navState = uiBuildingState.navState.copy(currentBearing = newBearing)
+                navState = uiBuildingState.navState.copy(hasArrived = true)
             )
+        }
 
-            if (uiBuildingState.navState.isAutoCenterEnabled) {
-                mapEvent = userLocation
-            }
+        // Route Refresh Logic
+        val distanceMoved = lastRouteUpdateLocation?.let {
+            com.google.maps.android.SphericalUtil.computeDistanceBetween(it, userLocation)
+        } ?: Double.MAX_VALUE
+
+        if (distanceMoved > 15.0 || isForce) {
+            lastRouteUpdateLocation = userLocation
+            calculateRouteWithState()
+        }
+
+        // Camera/Bearing Logic
+        val newBearing = engine.calculateBearing(
+            userLocation,
+            uiBuildingState.routePoints,
+            uiBuildingState.navState.currentBearing
+        )
+
+        uiBuildingState = uiBuildingState.copy(
+            navState = uiBuildingState.navState.copy(currentBearing = newBearing)
+        )
+
+        if (uiBuildingState.navState.isAutoCenterEnabled) {
+            mapEvent = userLocation
         }
     }
 

@@ -1,6 +1,7 @@
 package com.example.myapplication.analytics
 
 import android.content.Context
+import android.util.Log
 import com.example.myapplication.BuildConfig
 import com.smartlook.android.core.api.Smartlook
 import com.example.myapplication.telemetry.CrashReporter
@@ -14,11 +15,18 @@ class SmartlookProvider : AnalyticsProvider {
             return
         }
 
+        val testerId = BuildConfig.SMARTLOOK_TESTER_ID.trim()
+        if (testerId == "do not record") {
+            Log.i("Smartlook", "SMARTLOOK_TESTER_ID is 'do not record', Smartlook will not be started.")
+            CrashReporter.log("smartlook_init_skipped_do_not_record")
+            return
+        }
+
         runCatching {
             Smartlook.instance.preferences.projectKey = projectKey
             CrashReporter.setKey("smartlook_project_key_present", true)
             CrashReporter.setKey("smartlook_project_key_length", projectKey.length)
-            val testerId = BuildConfig.SMARTLOOK_TESTER_ID.trim()
+
             if (testerId.isNotEmpty()) {
                 setTesterIdentifier(testerId)
                 CrashReporter.setKey("smartlook_tester_id_present", true)

@@ -1,14 +1,28 @@
 use std::collections::HashSet;
 
-use bevy::prelude::*;
-use petgraph::{Undirected, graph::{EdgeIndex, NodeIndex}, stable_graph::StableGraph};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+use bevy::prelude::*;
+use petgraph::{
+    Undirected,
+    graph::{EdgeIndex, NodeIndex},
+    stable_graph::StableGraph,
+};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub enum MouseClickStart {
     ClickVertex(NodeIndex),
     ClickEdge(EdgeIndex),
     #[default]
     ClickNothing,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ShortcutStart {
+    CtrlZ,
+    CtrlY,
+    U,
+    CtrlR,
 }
 
 #[derive(Resource)]
@@ -26,9 +40,10 @@ impl Default for EditorSettings {
     }
 }
 
-#[derive(Resource)]
+#[derive(Resource, Serialize, Deserialize)]
 pub struct EditorState {
     pub mouse_click_start: Option<MouseClickStart>,
+    pub shortcut_start: Option<ShortcutStart>,
     pub ui_hovered: bool,
     pub mouse_pos: Option<Vec2>,
 }
@@ -37,23 +52,26 @@ impl Default for EditorState {
     fn default() -> Self {
         Self {
             mouse_click_start: None,
+            shortcut_start: None,
             ui_hovered: false,
             mouse_pos: None,
         }
     }
 }
 
+#[derive(Clone, Serialize, Deserialize)]
 pub struct VertexData {
-    pub label: String,
+    pub labels: Vec<String>,
     pub transform: Vec2,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
 pub struct EdgeData {
-    pub label: String,
+    pub labels: Vec<String>,
     pub weight: f32,
 }
 
-#[derive(Resource, Default)]
+#[derive(Clone, Resource, Default, Serialize, Deserialize)]
 pub struct Graph {
     pub graph: StableGraph<VertexData, EdgeData, Undirected>,
 }
@@ -70,14 +88,19 @@ impl Graph {
     }
 
     pub fn closest_edge_dist(&self, point: Vec2) -> Option<(EdgeIndex, f32)> {
-        let Some((min, dist_sqr)) = self.graph.edge_indices().map(|index| {
-            let dist = self.edge_distance(index, point);
-            (index, dist)
-        }).min_by(|(_, dist_sqr_a), (_, dist_sqr_b)| {
-            dist_sqr_a
-                .partial_cmp(&dist_sqr_b)
-                .unwrap_or(std::cmp::Ordering::Equal)
-        }) else {
+        let Some((min, dist_sqr)) = self
+            .graph
+            .edge_indices()
+            .map(|index| {
+                let dist = self.edge_distance(index, point);
+                (index, dist)
+            })
+            .min_by(|(_, dist_sqr_a), (_, dist_sqr_b)| {
+                dist_sqr_a
+                    .partial_cmp(&dist_sqr_b)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            })
+        else {
             return None;
         };
 
@@ -85,16 +108,20 @@ impl Graph {
     }
 
     pub fn closest_edge_in_radius(&self, point: Vec2, radius: f32) -> Option<(EdgeIndex, f32)> {
-        let Some((min, dist_sqr)) = self.graph.edge_indices().map(|index| {
-            let dist = self.edge_distance(index, point);
-            (index, dist)
-        }).filter(|(_, dist)| {
-            *dist < radius
-        }).min_by(|(_, dist_sqr_a), (_, dist_sqr_b)| {
-            dist_sqr_a
-                .partial_cmp(&dist_sqr_b)
-                .unwrap_or(std::cmp::Ordering::Equal)
-        }) else {
+        let Some((min, dist_sqr)) = self
+            .graph
+            .edge_indices()
+            .map(|index| {
+                let dist = self.edge_distance(index, point);
+                (index, dist)
+            })
+            .filter(|(_, dist)| *dist < radius)
+            .min_by(|(_, dist_sqr_a), (_, dist_sqr_b)| {
+                dist_sqr_a
+                    .partial_cmp(&dist_sqr_b)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            })
+        else {
             return None;
         };
 
@@ -119,14 +146,19 @@ impl Graph {
     }
 
     pub fn closest_vertex_dist(&self, point: Vec2) -> Option<(NodeIndex, f32)> {
-        let Some((min, dist_sqr)) = self.graph.node_indices().map(|index| {
-            let dist_sqr = point.distance_squared(self.graph[index].transform);
-            (index, dist_sqr)
-        }).min_by(|(_, dist_sqr_a), (_, dist_sqr_b)| {
-            dist_sqr_a
-                .partial_cmp(&dist_sqr_b)
-                .unwrap_or(std::cmp::Ordering::Equal)
-        }) else {
+        let Some((min, dist_sqr)) = self
+            .graph
+            .node_indices()
+            .map(|index| {
+                let dist_sqr = point.distance_squared(self.graph[index].transform);
+                (index, dist_sqr)
+            })
+            .min_by(|(_, dist_sqr_a), (_, dist_sqr_b)| {
+                dist_sqr_a
+                    .partial_cmp(&dist_sqr_b)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            })
+        else {
             return None;
         };
 
@@ -134,16 +166,20 @@ impl Graph {
     }
 
     pub fn closest_vertex_in_radius(&self, point: Vec2, radius: f32) -> Option<(NodeIndex, f32)> {
-        let Some((min, dist_sqr)) = self.graph.node_indices().map(|index| {
-            let dist_sqr = point.distance_squared(self.graph[index].transform);
-            (index, dist_sqr)
-        }).filter(|(_, dist_sqr)| {
-            *dist_sqr < radius * radius
-        }).min_by(|(_, dist_sqr_a), (_, dist_sqr_b)| {
-            dist_sqr_a
-                .partial_cmp(&dist_sqr_b)
-                .unwrap_or(std::cmp::Ordering::Equal)
-        }) else {
+        let Some((min, dist_sqr)) = self
+            .graph
+            .node_indices()
+            .map(|index| {
+                let dist_sqr = point.distance_squared(self.graph[index].transform);
+                (index, dist_sqr)
+            })
+            .filter(|(_, dist_sqr)| *dist_sqr < radius * radius)
+            .min_by(|(_, dist_sqr_a), (_, dist_sqr_b)| {
+                dist_sqr_a
+                    .partial_cmp(&dist_sqr_b)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            })
+        else {
             return None;
         };
 
@@ -151,22 +187,20 @@ impl Graph {
     }
 
     pub fn edges(&self) -> Vec<(&EdgeData, &VertexData, &VertexData)> {
-        self.graph.edge_indices()
-        .map(
-            |index| {
+        self.graph
+            .edge_indices()
+            .map(|index| {
                 let (left, right) = self.graph.edge_endpoints(index).unwrap();
                 (&self.graph[index], &self.graph[left], &self.graph[right])
-            }
-        ).collect()
+            })
+            .collect()
     }
 
     pub fn vertices(&self) -> Vec<&VertexData> {
-        self.graph.node_indices()
-        .map(
-            |index| {
-                &self.graph[index]
-            }
-        ).collect()
+        self.graph
+            .node_indices()
+            .map(|index| &self.graph[index])
+            .collect()
     }
 
     pub fn edge_indices(&self) -> Vec<EdgeIndex> {
@@ -207,17 +241,17 @@ fn dist_from_segment(point: Vec2, a: Vec2, b: Vec2) -> f32 {
     (point - projection).length()
 }
 
-#[derive(Resource, Default)]
+#[derive(Resource, Default, Serialize, Deserialize)]
 pub struct SelectedVertices {
     pub indices: HashSet<NodeIndex>,
 }
 
-#[derive(Resource, Default)]
+#[derive(Resource, Default, Serialize, Deserialize)]
 pub struct SelectedEdges {
     pub indices: HashSet<EdgeIndex>,
 }
 
-#[derive(Resource)]
+#[derive(Resource, Serialize, Deserialize)]
 pub struct GraphSettings {
     pub vertex_color: Color,
     pub vertex_radius: f32,
@@ -240,7 +274,7 @@ impl Default for GraphSettings {
     }
 }
 
-#[derive(Resource)]
+#[derive(Resource, Serialize, Deserialize)]
 pub struct GridSettings {
     pub cell_size: f32,
     pub visible: bool,
@@ -257,4 +291,83 @@ impl Default for GridSettings {
             origin_color: Color::srgba(0.6, 0.6, 0.0, 0.6),
         }
     }
+}
+
+#[derive(Component, Serialize, Deserialize)]
+pub struct BackgroundImage;
+
+#[derive(Resource, Serialize, Deserialize)]
+pub struct BackgroundImageSettings {
+    pub visible: bool,
+    pub width_meters: f32,
+    pub opacity: f32,
+    pub image_path: Option<String>,
+    #[serde(skip)]
+    pub input_path: Option<String>,
+    #[serde(skip)]
+    pub image_handle: Option<Handle<Image>>,
+    pub aspect_ratio: Option<f32>,
+}
+
+impl Default for BackgroundImageSettings {
+    fn default() -> Self {
+        Self {
+            visible: true,
+            width_meters: 100.0,
+            opacity: 0.5,
+            image_path: None,
+            input_path: None,
+            image_handle: None,
+            aspect_ratio: None,
+        }
+    }
+}
+
+
+#[derive(Serialize)]
+pub struct SaveDataRef<'a> {
+    pub graph: &'a Graph,
+    pub selected_vertices: &'a SelectedVertices,
+    pub selected_edges: &'a SelectedEdges,
+    pub graph_settings: &'a GraphSettings,
+    pub grid_settings: &'a GridSettings,
+    pub background_settings: &'a BackgroundImageSettings,
+}
+
+#[derive(Deserialize)]
+pub struct SaveData {
+    pub graph: Graph,
+    pub selected_vertices: SelectedVertices,
+    pub selected_edges: SelectedEdges,
+    pub graph_settings: GraphSettings,
+    pub grid_settings: GridSettings,
+    pub background_settings: BackgroundImageSettings,
+}
+
+pub fn save_to_file(
+    path: &str,
+    graph: &Graph,
+    selected_vertices: &SelectedVertices,
+    selected_edges: &SelectedEdges,
+    graph_settings: &GraphSettings,
+    grid_settings: &GridSettings,
+    background_settings: &BackgroundImageSettings,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let data = SaveDataRef {
+        graph,
+        selected_vertices,
+        selected_edges,
+        graph_settings,
+        grid_settings,
+        background_settings,
+    };
+    let json = serde_json::to_string_pretty(&data)?;
+    std::fs::write(path, json)?;
+    Ok(())
+}
+
+pub fn load_from_file(path: &str) -> Result<SaveData, Box<dyn std::error::Error>> {
+    let json = std::fs::read_to_string(path)?;
+    let data: SaveData = serde_json::from_str(&json)?;
+    Ok(data)
 }

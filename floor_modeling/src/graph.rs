@@ -1,14 +1,16 @@
 use std::collections::HashSet;
 
-use bevy::{
-    prelude::*,
-};
+use bevy::prelude::*;
 use bevy_egui::EguiContext;
 
-use crate::state::{EdgeData, EditorSettings, EditorState, Graph, GraphSettings, MouseClickStart, SelectedEdges, SelectedVertices, VertexData};
+use crate::{events::EventQueue, state::{
+    EdgeData, EditorSettings, EditorState, Graph, GraphSettings, MouseClickStart, SelectedEdges,
+    SelectedVertices, VertexData,
+}};
 
 pub fn graph_operations(
     mut editor: ResMut<EditorState>,
+    mut event_queue: ResMut<EventQueue>,
     editor_settings: Res<EditorSettings>,
     mut graph: ResMut<Graph>,
     mut selected_vertices: ResMut<SelectedVertices>,
@@ -28,7 +30,7 @@ pub fn graph_operations(
         selected_edges.indices = HashSet::new();
         selected_vertices.indices = HashSet::new();
     }
-    
+
     if editor.ui_hovered {
         return;
     }
@@ -53,9 +55,11 @@ pub fn graph_operations(
 
     editor.mouse_pos = Some(cursor_world_pos);
 
-    let closest_edge = graph.closest_edge_in_radius(cursor_world_pos, editor_settings.select_threshold);
+    let closest_edge =
+        graph.closest_edge_in_radius(cursor_world_pos, editor_settings.select_threshold);
 
-    let closest_vertex = graph.closest_vertex_in_radius(cursor_world_pos, editor_settings.select_threshold);
+    let closest_vertex =
+        graph.closest_vertex_in_radius(cursor_world_pos, editor_settings.select_threshold);
 
     match editor.mouse_click_start {
         Some(being_clicked) => {
@@ -69,45 +73,47 @@ pub fn graph_operations(
                                     // Dragged to new vertex
                                     let start_transform = graph.vertex(prev_index).transform;
                                     let end_transform = graph.vertex(vertex).transform;
-                                    let label = "".to_string();
-                                    graph.graph.add_edge(prev_index, vertex, EdgeData {
-                                        label: label,
-                                        weight: end_transform.distance(start_transform).abs(),
-                                    });
+                                    graph.graph.add_edge(
+                                        prev_index,
+                                        vertex,
+                                        EdgeData {
+                                            labels: vec![],
+                                            weight: end_transform.distance(start_transform).abs(),
+                                        },
+                                    );
                                 }
-                            },
-                            _ => {},
+                            }
+                            _ => {}
                         }
                         editor.mouse_click_start = None;
                     }
-                },
+                }
                 crate::state::MouseClickStart::ClickEdge(_) => {
                     // Already clicking an edge before this frame
                     if mouse_button.just_released(MouseButton::Left) {
                         editor.mouse_click_start = None;
                     }
-                },
+                }
                 crate::state::MouseClickStart::ClickNothing => {
                     // Already clicking nothing before this frame
                     if mouse_button.just_released(MouseButton::Left) {
                         match (closest_edge, closest_vertex) {
                             (None, None) => {
                                 // Draw vertex
-                                let label = "".to_string();
                                 graph.graph.add_node(VertexData {
-                                    label: label,
+                                    labels: vec![],
                                     transform: cursor_world_pos,
                                 });
-                            },
+                            }
                             _ => {
                                 // Released mouse but can't draw
-                            },
+                            }
                         }
                         editor.mouse_click_start = None;
                     }
-                },
+                }
             }
-        },
+        }
         None => {
             // Not clicking before this frame
             if mouse_button.just_pressed(MouseButton::Left) {
@@ -119,21 +125,23 @@ pub fn graph_operations(
                 }
 
                 // Begun clicking
-                if let Some((v_index, v_dist)) = closest_vertex && v_dist < editor_settings.select_threshold {
+                if let Some((v_index, v_dist)) = closest_vertex
+                    && v_dist < editor_settings.select_threshold
+                {
                     // Clicking vertex
                     editor.mouse_click_start = Some(MouseClickStart::ClickVertex(v_index));
                     selected_vertices.indices.insert(v_index);
-                }
-                else if let Some((e_index, e_dist)) = closest_edge && e_dist < editor_settings.select_threshold {
+                } else if let Some((e_index, e_dist)) = closest_edge
+                    && e_dist < editor_settings.select_threshold
+                {
                     // Clicking vertex
                     editor.mouse_click_start = Some(MouseClickStart::ClickEdge(e_index));
                     selected_edges.indices.insert(e_index);
-                }
-                else {
+                } else {
                     editor.mouse_click_start = Some(MouseClickStart::ClickNothing);
                 }
             }
-        },
+        }
     }
 }
 
@@ -164,9 +172,15 @@ pub fn render_graph(
         gizmos.line_2d(left.transform, right.transform, color);
     }
 
-    if let Some(click_type) = editor.mouse_click_start && let MouseClickStart::ClickVertex(clicked_v) = click_type {
+    if let Some(click_type) = editor.mouse_click_start
+        && let MouseClickStart::ClickVertex(clicked_v) = click_type
+    {
         if let Some(mouse_pos) = editor.mouse_pos {
-            gizmos.line_2d(graph.vertex(clicked_v).transform, mouse_pos, settings.edge_drawing_color);
+            gizmos.line_2d(
+                graph.vertex(clicked_v).transform,
+                mouse_pos,
+                settings.edge_drawing_color,
+            );
         }
     }
 }

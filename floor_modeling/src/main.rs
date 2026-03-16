@@ -1,8 +1,10 @@
+mod background;
 mod camera;
 mod graph;
 mod grid;
 mod state;
 mod ui;
+mod events;
 
 use bevy::prelude::*;
 use bevy_egui::{EguiPlugin, EguiPrimaryContextPass};
@@ -27,15 +29,29 @@ fn main() {
         .init_resource::<Graph>()
         .init_resource::<SelectedVertices>()
         .init_resource::<SelectedEdges>()
+        .init_resource::<state::BackgroundImageSettings>()
         .add_systems(Startup, camera::setup_camera)
-        .add_systems(EguiPrimaryContextPass, ui::ui_system)
+        .add_systems(
+            EguiPrimaryContextPass, 
+            (
+                ui::ui_system, 
+                ui::render_labels
+            )
+        )
         .add_systems(
             Update,
             (
                 camera::camera_movement,
                 graph::graph_operations,
+                background::background_image_system,
             ),
         )
-        .add_systems(PostUpdate, (grid::draw_grid, graph::render_graph.after(graph::graph_operations)))
+        .add_systems(
+            PostUpdate,
+            (
+                grid::draw_grid,
+                graph::render_graph.after(graph::graph_operations),
+            ),
+        )
         .run();
 }

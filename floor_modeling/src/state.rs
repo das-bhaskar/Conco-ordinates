@@ -9,6 +9,8 @@ use petgraph::{
     stable_graph::StableGraph,
 };
 
+use crate::events::EventQueue;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub enum MouseClickStart {
     ClickVertex(NodeIndex),
@@ -330,6 +332,7 @@ pub struct SaveDataRef<'a> {
     pub graph_settings: &'a GraphSettings,
     pub grid_settings: &'a GridSettings,
     pub background_settings: &'a BackgroundImageSettings,
+    pub event_queue: &'a EventQueue,
 }
 
 #[derive(Deserialize)]
@@ -340,6 +343,7 @@ pub struct SaveData {
     pub graph_settings: GraphSettings,
     pub grid_settings: GridSettings,
     pub background_settings: BackgroundImageSettings,
+    pub event_queue: EventQueue,
 }
 
 pub fn save_to_file(
@@ -350,6 +354,7 @@ pub fn save_to_file(
     graph_settings: &GraphSettings,
     grid_settings: &GridSettings,
     background_settings: &BackgroundImageSettings,
+    event_queue: &EventQueue,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let data = SaveDataRef {
         graph,
@@ -358,6 +363,7 @@ pub fn save_to_file(
         graph_settings,
         grid_settings,
         background_settings,
+        event_queue,
     };
     let json = serde_json::to_string_pretty(&data)?;
     std::fs::write(path, json)?;

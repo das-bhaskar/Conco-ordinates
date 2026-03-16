@@ -96,6 +96,7 @@ pub fn ui_system(
                         &graph_settings,
                         &grid_settings,
                         &bg_settings,
+                        &event_queue,
                     ) {
                         eprintln!("Failed to save project: {}", e);
                     }
@@ -119,6 +120,7 @@ pub fn ui_system(
                             if let Some(p) = reload_path {
                                 bg_settings.input_path = Some(p);
                             }
+                            *event_queue = data.event_queue;
                         }
                         Err(e) => eprintln!("Failed to load project: {}", e),
                     }

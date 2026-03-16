@@ -3,7 +3,7 @@ use std::collections::HashSet;
 use bevy::prelude::*;
 use bevy_egui::EguiContext;
 
-use crate::{events::EventQueue, state::{
+use crate::{events::{EventQueue, Event}, state::{
     EdgeData, EditorSettings, EditorState, Graph, GraphSettings, MouseClickStart, SelectedEdges,
     SelectedVertices, VertexData,
 }};
@@ -22,10 +22,10 @@ pub fn graph_operations(
 ) {
     if keyboard.just_pressed(KeyCode::Delete) {
         for edge in selected_edges.indices.clone() {
-            graph.graph.remove_edge(edge);
+            event_queue.push(Event::RemoveEdge(edge));
         }
         for vertex in selected_vertices.indices.clone() {
-            graph.graph.remove_node(vertex);
+            event_queue.push(Event::RemoveVertex(vertex));
         }
         selected_edges.indices = HashSet::new();
         selected_vertices.indices = HashSet::new();
@@ -73,14 +73,12 @@ pub fn graph_operations(
                                     // Dragged to new vertex
                                     let start_transform = graph.vertex(prev_index).transform;
                                     let end_transform = graph.vertex(vertex).transform;
-                                    graph.graph.add_edge(
-                                        prev_index,
-                                        vertex,
-                                        EdgeData {
+                                    let new_edge = EdgeData {
                                             labels: vec![],
                                             weight: end_transform.distance(start_transform).abs(),
-                                        },
-                                    );
+                                        };
+
+                                    event_queue.push(Event::AddEdge(prev_index, vertex, new_edge));
                                 }
                             }
                             _ => {}
@@ -100,10 +98,12 @@ pub fn graph_operations(
                         match (closest_edge, closest_vertex) {
                             (None, None) => {
                                 // Draw vertex
-                                graph.graph.add_node(VertexData {
+                                let new_vertex = VertexData {
                                     labels: vec![],
                                     transform: cursor_world_pos,
-                                });
+                                };
+
+                                event_queue.push(Event::AddVertex(new_vertex));
                             }
                             _ => {
                                 // Released mouse but can't draw

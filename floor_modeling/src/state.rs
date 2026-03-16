@@ -59,13 +59,13 @@ impl Default for EditorState {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct VertexData {
     pub labels: Vec<String>,
     pub transform: Vec2,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct EdgeData {
     pub labels: Vec<String>,
     pub weight: f32,
@@ -298,7 +298,6 @@ pub struct BackgroundImage;
 
 #[derive(Resource, Serialize, Deserialize)]
 pub struct BackgroundImageSettings {
-    pub visible: bool,
     pub width_meters: f32,
     pub opacity: f32,
     pub image_path: Option<String>,
@@ -312,7 +311,6 @@ pub struct BackgroundImageSettings {
 impl Default for BackgroundImageSettings {
     fn default() -> Self {
         Self {
-            visible: true,
             width_meters: 100.0,
             opacity: 0.5,
             image_path: None,

@@ -39,6 +39,7 @@ pub fn camera_movement(
     editor: Res<EditorState>,
     editor_settings: Res<EditorSettings>,
     time: Res<Time<Fixed>>,
+    mut contexts: bevy_egui::EguiContexts,
     mut mouse_motion: MessageReader<MouseMotion>,
     mut scroll_events: MessageReader<MouseWheel>,
 ) {
@@ -52,26 +53,31 @@ pub fn camera_movement(
         _ => panic!("Camera projection was not orthographic. This shouldn't be possible."),
     };
 
-    // Pan with right mouse button or wasd
-    if mouse_button.pressed(MouseButton::Right) {
-        for ev in mouse_motion.read() {
-            transform.translation.x -= ev.delta.x * scale;
-            transform.translation.y += ev.delta.y * scale;
+    let typing = contexts.ctx_mut().map(|ctx| ctx.wants_keyboard_input()).unwrap_or(false);
+
+    if !typing {
+        // Pan with right mouse button or wasd
+        if mouse_button.pressed(MouseButton::Right) {
+            for ev in mouse_motion.read() {
+                transform.translation.x -= ev.delta.x * scale;
+                transform.translation.y += ev.delta.y * scale;
+            }
+        } else {
+            if keyboard.pressed(KeyCode::KeyW) {
+                transform.translation.y += editor_settings.camera_wasd_speed * time.delta_secs();
+            }
+            if keyboard.pressed(KeyCode::KeyS) {
+                transform.translation.y -= editor_settings.camera_wasd_speed * time.delta_secs();
+            }
+            if keyboard.pressed(KeyCode::KeyA) {
+                transform.translation.x -= editor_settings.camera_wasd_speed * time.delta_secs();
+            }
+            if keyboard.pressed(KeyCode::KeyD) {
+                transform.translation.x += editor_settings.camera_wasd_speed * time.delta_secs();
+            }
         }
-    } else {
-        if keyboard.pressed(KeyCode::KeyW) {
-            transform.translation.y += editor_settings.camera_wasd_speed * time.delta_secs();
-        }
-        if keyboard.pressed(KeyCode::KeyS) {
-            transform.translation.y -= editor_settings.camera_wasd_speed * time.delta_secs();
-        }
-        if keyboard.pressed(KeyCode::KeyA) {
-            transform.translation.x -= editor_settings.camera_wasd_speed * time.delta_secs();
-        }
-        if keyboard.pressed(KeyCode::KeyD) {
-            transform.translation.x += editor_settings.camera_wasd_speed * time.delta_secs();
-        }
-    }
+
+}
 
     // Zoom with scroll wheel
     for ev in scroll_events.read() {

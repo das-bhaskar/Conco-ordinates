@@ -30,6 +30,7 @@ fn main() {
         .init_resource::<SelectedVertices>()
         .init_resource::<SelectedEdges>()
         .init_resource::<state::BackgroundImageSettings>()
+        .init_resource::<events::EventQueue>()
         .add_systems(Startup, camera::setup_camera)
         .add_systems(
             EguiPrimaryContextPass, 
@@ -51,6 +52,12 @@ fn main() {
             (
                 grid::draw_grid,
                 graph::render_graph.after(graph::graph_operations),
+            ),
+        )
+        .add_systems(
+            Last,
+            (
+                events::event_system,
             ),
         )
         .run();

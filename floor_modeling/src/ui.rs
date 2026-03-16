@@ -2,7 +2,7 @@ use bevy::{prelude::*, window::PrimaryWindow};
 use bevy_egui::{EguiContext, EguiContexts, egui::{self, Color32}};
 use bevy::color::Srgba;
 
-use crate::state::{
+use crate::{events::EventQueue, state::{
     BackgroundImageSettings, 
     EditorState, 
     Graph, 
@@ -10,7 +10,7 @@ use crate::state::{
     GridSettings,
     SelectedEdges, 
     SelectedVertices,
-};
+}};
 
 pub fn ui_system(
     mut contexts: EguiContexts,
@@ -19,6 +19,7 @@ pub fn ui_system(
     mut bg_settings: ResMut<BackgroundImageSettings>,
     mut graph_settings: ResMut<GraphSettings>,
     mut graph: ResMut<Graph>,
+    mut event_queue: ResMut<EventQueue>,
     mut selected_vertices: ResMut<SelectedVertices>,
     mut selected_edges: ResMut<SelectedEdges>,
     mut grid_settings: ResMut<GridSettings>,
@@ -51,20 +52,32 @@ pub fn ui_system(
                 ui.label(format!("File: {}", file_name));
             }
 
-            ui.add(
-                egui::Slider::new(&mut bg_settings.width_meters, 1.0..=1000.0).text("Width (m)"),
+            let mut width = bg_settings.width_meters;
+
+            let response = ui.add(
+                egui::Slider::new(&mut width, 1.0..=3000.0).text("Width (m)"),
             );
+            if response.changed() {
+                event_queue.push(crate::events::Event::SetBackgroundWidth(width));
+            }
             ui.add(egui::Slider::new(&mut bg_settings.opacity, 0.0..=1.0).text("Opacity"));
-            ui.checkbox(&mut bg_settings.visible, "Visible");
 
             ui.separator();
 
             ui.heading("Graph Colors");
 
-            color_picker(ui, "Vertex", &mut graph_settings.vertex_color);
-            color_picker(ui, "Edge", &mut graph_settings.edge_color);
-            color_picker(ui, "Selected", &mut graph_settings.selected_color);
-            color_picker(ui, "Edge Drawing", &mut graph_settings.edge_drawing_color);
+            if let Some(c) = color_picker(ui, "Vertex", &mut graph_settings.vertex_color) {
+                event_queue.push(crate::events::Event::SetVertexColors(c));
+            }
+            if let Some(c) = color_picker(ui, "Edge", &mut graph_settings.edge_color) {
+                event_queue.push(crate::events::Event::SetEdgeColors(c));
+            }
+            if let Some(c) = color_picker(ui, "Selected", &mut graph_settings.selected_color) {
+                event_queue.push(crate::events::Event::SetSelectedColors(c));
+            }
+            if let Some(c) = color_picker(ui, "Edge Drawing", &mut graph_settings.edge_drawing_color) {
+                event_queue.push(crate::events::Event::SetDrawingColors(c));
+            }
 
             ui.separator();
 
@@ -122,20 +135,23 @@ pub fn ui_system(
                     let vertex = &mut graph.graph[index];
                     let label_color = ui.visuals().text_color();
                     ui.label(egui::RichText::new("Vertex Labels").color(label_color));
-                    let mut remove_idx = None;
                     for (i, label) in vertex.labels.iter_mut().enumerate() {
                         ui.horizontal(|ui| {
-                            ui.text_edit_singleline(label);
+                            let text_response = ui.text_edit_singleline(label);
+                            if text_response.lost_focus() {
+                                event_queue.push(crate::events::Event::UpdateVertexLabel(index, i, label.clone()));
+                            }
                             if ui.small_button("X").clicked() {
-                                remove_idx = Some(i);
+                                event_queue.push(crate::events::Event::RemoveVertexLabel(index, i));
+                            }
+                            if ui.small_button("+").clicked() {
+                                event_queue.push(crate::events::Event::AddVertexLabel(index, i));
                             }
                         });
                     }
-                    if let Some(i) = remove_idx {
-                        vertex.labels.remove(i);
-                    }
                     if ui.small_button("+ Add Label").clicked() {
-                        vertex.labels.push(String::new());
+                        let vertex = &mut graph.graph[index];
+                        event_queue.push(crate::events::Event::AddVertexLabel(index, vertex.labels.len()));
                     }
                 } else if selected_vertices.indices.len() > 1 {
                     ui.label(format!("{} vertices selected", selected_vertices.indices.len()));
@@ -146,20 +162,23 @@ pub fn ui_system(
                     let edge = &mut graph.graph[index];
                     let label_color = ui.visuals().text_color();
                     ui.label(egui::RichText::new("Edge Labels").color(label_color));
-                    let mut remove_idx = None;
                     for (i, label) in edge.labels.iter_mut().enumerate() {
                         ui.horizontal(|ui| {
-                            ui.text_edit_singleline(label);
+                            let text_response = ui.text_edit_singleline(label);
+                            if text_response.lost_focus() {
+                                event_queue.push(crate::events::Event::UpdateEdgeLabel(index, i, label.clone()));
+                            }
                             if ui.small_button("X").clicked() {
-                                remove_idx = Some(i);
+                                event_queue.push(crate::events::Event::RemoveEdgeLabel(index, i));
+                            }
+                            if ui.small_button("+").clicked() {
+                                event_queue.push(crate::events::Event::AddEdgeLabel(index, i));
                             }
                         });
                     }
-                    if let Some(i) = remove_idx {
-                        edge.labels.remove(i);
-                    }
                     if ui.small_button("+ Add Label").clicked() {
-                        edge.labels.push(String::new());
+                        let edge = &mut graph.graph[index];
+                        event_queue.push(crate::events::Event::AddEdgeLabel(index, edge.labels.len()));
                     }
                 } else if selected_edges.indices.len() > 1 {
                     ui.label(format!("{} edges selected", selected_edges.indices.len()));
@@ -168,7 +187,31 @@ pub fn ui_system(
                 ui.separator();
             }
 
-            ui.allocate_rect(ui.available_rect_before_wrap(), egui::Sense::hover());
+            ui.heading("Event Queue");
+            let target = event_queue.target();
+            let state = event_queue.state();
+            let events = event_queue.events();
+            
+            egui::ScrollArea::vertical()
+                .auto_shrink([false; 2])
+                .max_height(ui.available_height())
+                .show(ui, |ui| {
+                    for (i, event) in events.iter().enumerate() {
+                        let text = format!("{}: {}", i, event);
+                        let label = if i == target {
+                            ui.separator();
+                            egui::RichText::new(text)
+                                .color(egui::Color32::YELLOW)
+                                .strong()
+                        } else if i < state {
+                            egui::RichText::new(text)
+                                .color(egui::Color32::DARK_GRAY)
+                        } else {
+                            egui::RichText::new(text)
+                        };
+                        ui.label(label);
+                    }
+                });
         })
         .response
         .rect
@@ -239,7 +282,7 @@ pub fn render_labels(
     Ok(())
 }
 
-fn color_picker(ui: &mut egui::Ui, label: &str, color: &mut Color) {
+fn color_picker(ui: &mut egui::Ui, label: &str, color: &mut Color) -> Option<Color> {
     let srgba = Srgba::from(*color);
     let mut c32 = egui::Color32::from_rgba_unmultiplied(
         (srgba.red * 255.0) as u8,
@@ -247,17 +290,25 @@ fn color_picker(ui: &mut egui::Ui, label: &str, color: &mut Color) {
         (srgba.blue * 255.0) as u8,
         (srgba.alpha * 255.0) as u8,
     );
+    let mut changed = false;
     ui.horizontal(|ui| {
-        egui::color_picker::color_edit_button_srgba(ui, &mut c32, egui::color_picker::Alpha::OnlyBlend);
+        let response = egui::color_picker::color_edit_button_srgba(ui, &mut c32, egui::color_picker::Alpha::OnlyBlend);
+        if response.changed() {
+            changed = true;
+        }
         ui.label(label);
     });
-    let [r, g, b, a] = c32.to_srgba_unmultiplied();
-    *color = Color::srgba(
-        r as f32 / 255.0,
-        g as f32 / 255.0,
-        b as f32 / 255.0,
-        a as f32 / 255.0,
-    );
+    if changed {
+        let [r, g, b, a] = c32.to_srgba_unmultiplied();
+        Some(Color::srgba(
+            r as f32 / 255.0,
+            g as f32 / 255.0,
+            b as f32 / 255.0,
+            a as f32 / 255.0,
+        ))
+    } else {
+        None
+    }
 }
 
 fn bevy_color_to_egui(color: Color) -> Color32 {

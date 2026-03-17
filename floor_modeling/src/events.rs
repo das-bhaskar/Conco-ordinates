@@ -2,7 +2,7 @@ use bevy::{color::Color, ecs::resource::Resource, sprite::Anchor};
 use petgraph::graph::{EdgeIndex, NodeIndex};
 use serde::{Deserialize, Serialize};
 
-use crate::{background::load_image_from_path, state::{BackgroundImage, BackgroundImageSettings, EdgeData, EditorState, Graph, GraphSettings, GridSettings, SelectedEdges, SelectedVertices, ShortcutStart, VertexData}};
+use crate::{background::load_image_from_path, state::{BackgroundImage, BackgroundImageSettings, EdgeData, EditorSettings, EditorState, Graph, GraphSettings, GridSettings, SelectedEdges, SelectedVertices, ShortcutStart, VertexData}};
 
 use bevy::prelude::*;
 
@@ -41,6 +41,7 @@ impl Event {
         images: &mut ResMut<Assets<Image>>,
         bg_query: &mut Query<(Entity, &mut Sprite), With<BackgroundImage>>,
         commands: &mut Commands,
+        editor_settings: &Res<EditorSettings>,
     ) {
         match self {
             Event::AddVertex(vertex_data) => {
@@ -91,7 +92,7 @@ impl Event {
                         bg_settings.aspect_ratio = Some(aspect_ratio);
                         bg_settings.image_path = Some(background_path.to_string());
 
-                        let w = bg_settings.width_meters;
+                        let w = bg_settings.width_meters * editor_settings.units_per_meter;
                         let h = w / aspect_ratio;
 
                         commands.spawn((
@@ -116,7 +117,10 @@ impl Event {
                 if let Some(aspect_ratio) = bg_settings.aspect_ratio {
                     let h = w / aspect_ratio;
                     for (_, mut sprite) in bg_query.iter_mut() {
-                        sprite.custom_size = Some(Vec2::new(*w, h));
+                        sprite.custom_size = Some(Vec2::new(
+                            *w * editor_settings.units_per_meter, 
+                            h * editor_settings.units_per_meter
+                        ));
                     }
                 }
             },
@@ -146,6 +150,8 @@ pub struct EventQueue {
     events: Vec<Event>,
     state: usize,
     target: usize,
+    #[serde(skip)]
+    needs_replay: bool,
 }
 
 impl EventQueue {
@@ -154,6 +160,7 @@ impl EventQueue {
             events: vec![],
             state: 0,
             target: 0,
+            needs_replay: false,
         }
     }
 
@@ -173,8 +180,13 @@ impl EventQueue {
         self.events[self.state..self.target].to_vec()
     }
 
+    pub fn needs_replay(&self) -> bool {
+        self.needs_replay
+    }
+
     pub fn set_state_to_target(&mut self) {
         self.state = self.target;
+        self.needs_replay = false;
         self.assertions();
     }
 
@@ -183,13 +195,15 @@ impl EventQueue {
         if self.target != 0 {
             self.target -= 1;
         }
+        self.needs_replay = true;
         self.assertions();
     }
 
     pub fn redo(&mut self) {
-        self.state = 0;
+        // self.state = 0;
         self.target += 1;
         self.target = self.target.min(self.events.len());
+        // self.needs_replay = true;
         self.assertions();
     }
 
@@ -198,6 +212,7 @@ impl EventQueue {
         self.events.push(event);
         self.target = 0.max(self.events.len());
         self.state = self.state.min(self.target);
+        // self.needs_replay = true;
         self.assertions();
     }
 
@@ -245,6 +260,7 @@ pub fn event_system(
     mut contexts: bevy_egui::EguiContexts,
     mut event_queue: ResMut<EventQueue>,
     keyboard: Res<ButtonInput<KeyCode>>,
+    editor_settings: Res<EditorSettings>,
 ) {
     let typing = contexts.ctx_mut().map(|ctx| ctx.wants_keyboard_input()).unwrap_or(false);
 
@@ -310,7 +326,7 @@ pub fn event_system(
 
     let events_todo = event_queue.remaining_to_target();
 
-    if event_queue.state() == 0 {
+    if event_queue.needs_replay() {
         graph.graph.clear();
         graph_settings.vertex_color = GraphSettings::default().vertex_color;
         graph_settings.edge_color = GraphSettings::default().edge_color;
@@ -325,7 +341,7 @@ pub fn event_system(
     }
 
     for event in events_todo {
-        event.execute_event(&mut graph, &mut bg_settings, &mut graph_settings, &mut images, &mut bg_query, &mut commands);
+        event.execute_event(&mut graph, &mut bg_settings, &mut graph_settings, &mut images, &mut bg_query, &mut commands, &editor_settings);
     }
 
     event_queue.set_state_to_target();

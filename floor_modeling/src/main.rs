@@ -58,7 +58,8 @@ fn main() {
             Last,
             (
                 events::event_system,
-            ),
+                background::background_sprite_sync,
+            ).chain(),
         )
         .run();
 }

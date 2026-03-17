@@ -55,11 +55,13 @@ pub fn graph_operations(
 
     editor.mouse_pos = Some(cursor_world_pos);
 
+    let cursor_pos_meters = cursor_world_pos / editor_settings.units_per_meter;
+
     let closest_edge =
-        graph.closest_edge_in_radius(cursor_world_pos, editor_settings.select_threshold);
+        graph.closest_edge_in_radius(cursor_pos_meters, editor_settings.select_threshold_m);
 
     let closest_vertex =
-        graph.closest_vertex_in_radius(cursor_world_pos, editor_settings.select_threshold);
+        graph.closest_vertex_in_radius(cursor_pos_meters, editor_settings.select_threshold_m);
 
     match editor.mouse_click_start {
         Some(being_clicked) => {
@@ -100,7 +102,7 @@ pub fn graph_operations(
                                 // Draw vertex
                                 let new_vertex = VertexData {
                                     labels: vec![],
-                                    transform: cursor_world_pos,
+                                    transform: cursor_pos_meters,
                                 };
 
                                 event_queue.push(Event::AddVertex(new_vertex));
@@ -126,13 +128,13 @@ pub fn graph_operations(
 
                 // Begun clicking
                 if let Some((v_index, v_dist)) = closest_vertex
-                    && v_dist < editor_settings.select_threshold
+                    && v_dist < editor_settings.select_threshold_m
                 {
                     // Clicking vertex
                     editor.mouse_click_start = Some(MouseClickStart::ClickVertex(v_index));
                     selected_vertices.indices.insert(v_index);
                 } else if let Some((e_index, e_dist)) = closest_edge
-                    && e_dist < editor_settings.select_threshold
+                    && e_dist < editor_settings.select_threshold_m
                 {
                     // Clicking vertex
                     editor.mouse_click_start = Some(MouseClickStart::ClickEdge(e_index));
@@ -152,14 +154,15 @@ pub fn render_graph(
     selected_edges: Res<SelectedEdges>,
     settings: Res<GraphSettings>,
     editor: Res<EditorState>,
+    editor_settings: Res<EditorSettings>,
 ) {
     for index in graph.vertex_indices() {
         let (color, radius) = if selected_vertices.indices.contains(&index) {
-            (settings.selected_color, settings.vertex_selected_radius)
+            (settings.selected_color, settings.vertex_selected_radius_m * editor_settings.units_per_meter)
         } else {
-            (settings.vertex_color, settings.vertex_radius)
+            (settings.vertex_color, settings.vertex_radius_m * editor_settings.units_per_meter)
         };
-        gizmos.circle_2d(graph.vertex(index).transform, radius, color);
+        gizmos.circle_2d(graph.vertex(index).transform * editor_settings.units_per_meter, radius, color);
     }
 
     for index in graph.edge_indices() {
@@ -169,7 +172,7 @@ pub fn render_graph(
             settings.edge_color
         };
         let (left, right) = graph.edge_vertex_pair(index);
-        gizmos.line_2d(left.transform, right.transform, color);
+        gizmos.line_2d(left.transform * editor_settings.units_per_meter, right.transform * editor_settings.units_per_meter, color);
     }
 
     if let Some(click_type) = editor.mouse_click_start
@@ -177,7 +180,7 @@ pub fn render_graph(
     {
         if let Some(mouse_pos) = editor.mouse_pos {
             gizmos.line_2d(
-                graph.vertex(clicked_v).transform,
+                graph.vertex(clicked_v).transform * editor_settings.units_per_meter,
                 mouse_pos,
                 settings.edge_drawing_color,
             );

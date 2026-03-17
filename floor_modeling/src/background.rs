@@ -6,7 +6,7 @@ use bevy::prelude::*;
 use bevy::sprite::Anchor;
 
 use crate::events::EventQueue;
-use crate::state::{BackgroundImage, BackgroundImageSettings};
+use crate::state::{BackgroundImage, BackgroundImageSettings, EditorSettings};
 
 pub fn background_image_system(
     mut bg_settings: ResMut<BackgroundImageSettings>,
@@ -17,6 +17,24 @@ pub fn background_image_system(
             event_queue.push(crate::events::Event::ImportBackround(path))
         }
         None => {
+        }
+    }
+}
+
+pub fn background_sprite_sync(
+    bg_settings: Res<BackgroundImageSettings>,
+    editor_settings: Res<EditorSettings>,
+    mut bg_query: Query<&mut Sprite, With<BackgroundImage>>,
+) {
+    if !bg_settings.is_changed() {
+        return;
+    }
+    if let Some(aspect_ratio) = bg_settings.aspect_ratio {
+        let w = bg_settings.width_meters * editor_settings.units_per_meter;
+        let h = w / aspect_ratio;
+        for mut sprite in bg_query.iter_mut() {
+            sprite.custom_size = Some(Vec2::new(w, h));
+            sprite.color = Color::srgba(1.0, 1.0, 1.0, bg_settings.opacity);
         }
     }
 }

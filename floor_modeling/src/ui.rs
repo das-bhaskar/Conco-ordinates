@@ -3,13 +3,7 @@ use bevy_egui::{EguiContext, EguiContexts, egui::{self, Color32}};
 use bevy::color::Srgba;
 
 use crate::{events::EventQueue, state::{
-    BackgroundImageSettings, 
-    EditorState, 
-    Graph, 
-    GraphSettings, 
-    GridSettings,
-    SelectedEdges, 
-    SelectedVertices,
+    BackgroundImageSettings, EditorSettings, EditorState, Graph, GraphSettings, GridSettings, SelectedEdges, SelectedVertices
 }};
 
 pub fn ui_system(
@@ -231,6 +225,7 @@ pub fn render_labels(
     graph: Res<Graph>,
     settings: Res<GraphSettings>,
     camera_query: Single<(&Camera, &GlobalTransform), (With<Camera2d>, Without<EguiContext>)>,
+    editor_settings: Res<EditorSettings>,
 ) -> Result {
     let ctx = contexts.ctx_mut()?;
     let painter = ctx.layer_painter(egui::LayerId::background());
@@ -244,7 +239,10 @@ pub fn render_labels(
         if vertex.labels.is_empty() {
             continue;
         }
-        if let Ok(screen_pos) = camera.world_to_viewport(global_transform, vertex.transform.extend(0.0)) {
+        if let Ok(screen_pos) = camera.world_to_viewport(
+            global_transform, 
+            vertex.transform.extend(0.0) * editor_settings.units_per_meter
+        ) {
             let color = bevy_color_to_egui(settings.vertex_color);
             let base_y = screen_pos.y - 10.0;
             for (i, label) in vertex.labels.iter().rev().enumerate() {
@@ -266,7 +264,10 @@ pub fn render_labels(
         }
         let (left, right) = graph.edge_vertex_pair(index);
         let midpoint = (left.transform + right.transform) / 2.0;
-        if let Ok(screen_pos) = camera.world_to_viewport(global_transform, midpoint.extend(0.0)) {
+        if let Ok(screen_pos) = camera.world_to_viewport(
+            global_transform, 
+            midpoint.extend(0.0) * editor_settings.units_per_meter
+        ) {
             let color = bevy_color_to_egui(settings.edge_color);
             let base_y = screen_pos.y - 10.0;
             for (i, label) in edge.labels.iter().rev().enumerate() {
@@ -285,32 +286,47 @@ pub fn render_labels(
 }
 
 fn color_picker(ui: &mut egui::Ui, label: &str, color: &mut Color) -> Option<Color> {
-    let srgba = Srgba::from(*color);
-    let mut c32 = egui::Color32::from_rgba_unmultiplied(
-        (srgba.red * 255.0) as u8,
-        (srgba.green * 255.0) as u8,
-        (srgba.blue * 255.0) as u8,
-        (srgba.alpha * 255.0) as u8,
-    );
-    let mut changed = false;
-    ui.horizontal(|ui| {
-        let response = egui::color_picker::color_edit_button_srgba(ui, &mut c32, egui::color_picker::Alpha::OnlyBlend);
-        if response.changed() {
-            changed = true;
-        }
+    let mut egui_color = bevy_color_to_egui(*color);
+
+    let response = ui.horizontal(|ui| {
         ui.label(label);
-    });
-    if changed {
-        let [r, g, b, a] = c32.to_srgba_unmultiplied();
-        Some(Color::srgba(
-            r as f32 / 255.0,
-            g as f32 / 255.0,
-            b as f32 / 255.0,
-            a as f32 / 255.0,
-        ))
+        ui.color_edit_button_srgba(&mut egui_color)
+    }).inner;
+
+    let popup_id = response.id.with("popup");
+    let is_open = egui::Popup::is_id_open(ui.ctx(), popup_id);
+
+    let was_open_id = response.id.with("was_open");
+    let orig_color_id = response.id.with("orig_color");
+
+    let was_open: bool = ui.data(|d| d.get_temp(was_open_id).unwrap_or(false));
+
+    if is_open && !was_open {
+        ui.data_mut(|d| d.insert_temp(orig_color_id, egui_color));
+    }
+
+    let new_color = Color::srgba(
+        egui_color.r() as f32 / 255.0,
+        egui_color.g() as f32 / 255.0,
+        egui_color.b() as f32 / 255.0,
+        egui_color.a() as f32 / 255.0,
+    );
+    *color = new_color;
+
+    let result = if was_open && !is_open {
+        let original: Color32 = ui.data(|d| d.get_temp(orig_color_id).unwrap_or(egui_color));
+        if original != egui_color {
+            Some(new_color)
+        } else {
+            None
+        }
     } else {
         None
-    }
+    };
+
+    ui.data_mut(|d| d.insert_temp(was_open_id, is_open));
+
+    result
 }
 
 fn bevy_color_to_egui(color: Color) -> Color32 {

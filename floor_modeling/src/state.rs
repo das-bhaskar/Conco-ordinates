@@ -30,15 +30,23 @@ pub enum ShortcutStart {
 #[derive(Resource)]
 pub struct EditorSettings {
     pub camera_wasd_speed: f32,
-    pub select_threshold: f32,
+    pub select_threshold_m: f32,
+    pub units_per_meter: f32,
 }
 
 impl Default for EditorSettings {
     fn default() -> Self {
         Self {
             camera_wasd_speed: 500.0,
-            select_threshold: 10.0,
+            select_threshold_m: 0.8,
+            units_per_meter: 50.0,
         }
+    }
+}
+
+impl EditorSettings {
+    pub fn select_threshold_world(&self) -> f32 {
+        self.select_threshold_m * self.units_per_meter
     }
 }
 
@@ -256,10 +264,10 @@ pub struct SelectedEdges {
 #[derive(Resource, Serialize, Deserialize)]
 pub struct GraphSettings {
     pub vertex_color: Color,
-    pub vertex_radius: f32,
+    pub vertex_radius_m: f32,
     pub edge_color: Color,
     pub selected_color: Color,
-    pub vertex_selected_radius: f32,
+    pub vertex_selected_radius_m: f32,
     pub edge_drawing_color: Color,
 }
 
@@ -267,10 +275,10 @@ impl Default for GraphSettings {
     fn default() -> Self {
         Self {
             vertex_color: Color::srgb(0.9, 0.9, 0.9),
-            vertex_radius: 3.0,
+            vertex_radius_m: 0.08,
             edge_color: Color::srgb(0.9, 0.9, 0.9),
             selected_color: Color::srgb(0.2, 0.6, 1.0),
-            vertex_selected_radius: 4.0,
+            vertex_selected_radius_m: 0.1,
             edge_drawing_color: Color::srgba(1.0, 1.0, 0.0, 0.7),
         }
     }

@@ -3,10 +3,15 @@ package com.example.myapplication.analytics
 import android.content.Context
 import android.util.Log
 import com.example.myapplication.BuildConfig
-import com.smartlook.android.core.api.Smartlook
 import com.example.myapplication.telemetry.CrashReporter
+import com.smartlook.android.core.api.Smartlook
 
 class SmartlookProvider : AnalyticsProvider {
+    private companion object {
+        const val TAG = "Smartlook"
+        const val DO_NOT_RECORD_TESTER_ID = "do not record"
+    }
+
     private var initialized: Boolean = false
 
     override fun initialize(context: Context, projectKey: String) {
@@ -16,14 +21,16 @@ class SmartlookProvider : AnalyticsProvider {
         }
 
         val testerId = BuildConfig.SMARTLOOK_TESTER_ID.trim()
-        if (testerId == "do not record") {
-            Log.i("Smartlook", "SMARTLOOK_TESTER_ID is 'do not record', Smartlook will not be started.")
+        if (testerId == DO_NOT_RECORD_TESTER_ID) {
+            Log.i(TAG, "SMARTLOOK_TESTER_ID is 'do not record', Smartlook will not be started.")
             CrashReporter.log("smartlook_init_skipped_do_not_record")
             return
         }
 
         runCatching {
-            Smartlook.instance.preferences.projectKey = projectKey
+            val smartlook = Smartlook.instance
+
+            smartlook.preferences.projectKey = projectKey
             CrashReporter.setKey("smartlook_project_key_present", true)
             CrashReporter.setKey("smartlook_project_key_length", projectKey.length)
 
@@ -33,8 +40,9 @@ class SmartlookProvider : AnalyticsProvider {
             } else {
                 CrashReporter.setKey("smartlook_tester_id_present", false)
             }
-            Smartlook.instance.start()
-            Smartlook.instance.trackEvent("smartlook_sdk_started")
+
+            smartlook.start()
+            smartlook.trackEvent("smartlook_sdk_started")
             initialized = true
             CrashReporter.log("smartlook_initialized")
         }.onFailure { error ->
@@ -43,23 +51,15 @@ class SmartlookProvider : AnalyticsProvider {
     }
 
     override fun trackNavigationEnter(source: String) {
-        if (!initialized) return
-
-        runCatching {
+        trackSafely("smartlook_track_failed") {
             Smartlook.instance.trackEvent("navigation_entered_$source")
-        }.onFailure { error ->
-            CrashReporter.recordNonFatal(error, "smartlook_track_failed")
         }
     }
 
     override fun trackScreenView(screenName: String) {
-        if (!initialized) return
-
-        runCatching {
+        trackSafely("smartlook_track_screen_failed") {
             Smartlook.instance.trackNavigationEnter("screen_$screenName")
             Smartlook.instance.trackEvent("screen_view_$screenName")
-        }.onFailure { error ->
-            CrashReporter.recordNonFatal(error, "smartlook_track_screen_failed")
         }
     }
 
@@ -74,6 +74,14 @@ class SmartlookProvider : AnalyticsProvider {
             setter.invoke(user, testerId)
         }.onFailure { error ->
             CrashReporter.recordNonFatal(error, "smartlook_set_tester_id_failed")
+        }
+    }
+
+    private inline fun trackSafely(failureKey: String, block: () -> Unit) {
+        if (!initialized) return
+
+        runCatching(block).onFailure { error ->
+            CrashReporter.recordNonFatal(error, failureKey)
         }
     }
 }

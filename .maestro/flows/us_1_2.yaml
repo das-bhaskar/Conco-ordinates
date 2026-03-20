@@ -1,6 +1,5 @@
 
-# US-1.1: As a Student, I want the ability to access the map of SGW Campus so I can easily navigate within the campus.
-
+# US-1.2: As a Student, I want the ability to access the map of Loyola Campus so I can easily navigate within the Loyola campus.
 appId: com.example.myapplication
 ---
 - launchApp:
@@ -19,12 +18,12 @@ appId: com.example.myapplication
 - assertVisible:
     id: "app_nav"
 - assertVisible:
-   id: "map_option"
+    id: "map_option"
 - assertVisible:
     id: "schedule_option"
 
 - tapOn:
-    id: "SGW_button"
+    id: "LOY_button"
 - waitForAnimationToEnd:
     timeout: 5000
 

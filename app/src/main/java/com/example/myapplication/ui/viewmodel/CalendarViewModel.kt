@@ -79,41 +79,41 @@ class CalendarViewModel(
 
     // ── Derived: next upcoming event with a location (for NextClassPill) ──────
     // Recalculated on every ticker tick so the pill expires naturally as time passes.
-    val nextUpcomingEvent: ResolvedCalendarEvent?
-        get() {
-            val now = tickerFlow.value
-            return weekEvents
-                .filter { it.startTimeMs >= now && !it.location.isNullOrBlank() }
-                .minByOrNull { it.startTimeMs }
-        }
+    // ── Derived: next upcoming event with a location (for NextClassPill) ──────
+// We use mutableStateOf for these so the UI actually "sees" the change
+// when the ticker ticks.
+    var nextUpcomingEvent by mutableStateOf<ResolvedCalendarEvent?>(null)
+        private set
 
-    /**
-     * Business rule: an upcoming class is "urgent" when it starts within
-     * [URGENT_THRESHOLD_MINUTES]. Defined here — not in the UI — so the
-     * threshold can change in one place without touching any composable.
-     */
-    val isNextClassUrgent: Boolean
-        get() {
-            val event = nextUpcomingEvent ?: return false
-            val minutesUntil = (event.startTimeMs - tickerFlow.value) / 60_000
-            return minutesUntil in 0..URGENT_THRESHOLD_MINUTES
-        }
+    var isNextClassUrgent by mutableStateOf(false)
+        private set
 
-    /**
-     * Pre-formatted time-remaining string for NextClassPill.
-     * Computed here so the UI receives a ready-to-display string (PR review:
-     * minutesUntil / timeLabel logic removed from NextClassPill composable).
-     */
-    val nextClassTimeRemaining: String
-        get() {
-            val event = nextUpcomingEvent ?: return ""
-            val minutesUntil = ((event.startTimeMs - tickerFlow.value) / 60_000).coerceAtLeast(0)
-            return when {
+    var nextClassTimeRemaining by mutableStateOf("")
+        private set
+
+    // ── Update Logic ──
+    private fun refreshPillState(now: Long) {
+        val event = weekEvents
+            .filter { it.startTimeMs >= now && !it.location.isNullOrBlank() }
+            .minByOrNull { it.startTimeMs }
+
+        nextUpcomingEvent = event
+
+        if (event != null) {
+            val minutesUntil = ((event.startTimeMs - now) / 60_000).coerceAtLeast(0)
+
+            isNextClassUrgent = minutesUntil in 0..URGENT_THRESHOLD_MINUTES
+
+            nextClassTimeRemaining = when {
                 minutesUntil == 0L -> "Now"
                 minutesUntil < 60  -> "in ${minutesUntil}m"
                 else               -> "in ${minutesUntil / 60}h ${minutesUntil % 60}m"
             }
+        } else {
+            nextClassTimeRemaining = ""
+            isNextClassUrgent = false
         }
+    }
 
     companion object {
         const val URGENT_THRESHOLD_MINUTES = 15L
@@ -122,6 +122,11 @@ class CalendarViewModel(
     // ── Init: restore persisted selection ────────────────────────────────────
     init {
         restoreSelectionIfAvailable()
+        viewModelScope.launch {
+            tickerFlow.collect { now ->
+                refreshPillState(now)
+            }
+        }
     }
 
     /**

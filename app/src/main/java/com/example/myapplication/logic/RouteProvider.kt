@@ -6,7 +6,8 @@ data class RouteData(
     val points: List<LatLng>,
     val duration: String,
     val distance: String,
-    val instructions: List<String> = emptyList()
+    val instructions: List<String> = emptyList(),
+    val segments: List<RouteSegment> = emptyList()
 )
 
 interface RouteProvider {
@@ -32,3 +33,8 @@ class InterpolatingMockRouteProvider(private var steps: UInt) : RouteProvider {
         return RouteData(points, "0 mins", "0 km", emptyList())
     }
 }
+
+data class RouteSegment(
+    val points: List<LatLng>,
+    val mode: String // "walk" or "shuttle"
+)

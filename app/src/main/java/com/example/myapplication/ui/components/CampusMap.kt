@@ -48,7 +48,22 @@ fun CampusMap(
             onManualMove = { viewModel.toggleAutoCenter(false) }
         )
         // 1. THE ROUTE LINE
-        if (viewModel.uiBuildingState.routePoints.isNotEmpty()) {
+        val segments = viewModel.uiBuildingState.routeSegments
+
+        if (segments.isNotEmpty()) {
+            segments.forEach { segment ->
+                Polyline(
+                    points = segment.points,
+                    color = if (segment.mode == "shuttle") ConcordiaMaroon else com.example.myapplication.ui.theme.ConcordiaBlue,
+                    width = 12f,
+                    jointType = com.google.android.gms.maps.model.JointType.ROUND,
+                    pattern = if (segment.mode == "walk") {
+                        listOf(com.google.android.gms.maps.model.Dash(20f), com.google.android.gms.maps.model.Gap(20f))
+                    } else null
+                )
+            }
+        } else if (viewModel.uiBuildingState.routePoints.isNotEmpty()) {
+            // SAFE FALLBACK: If no segments exist (standard walking), use original logic
             val transportMode = viewModel.uiBuildingState.selectedTransportMode
             Polyline(
                 points = viewModel.uiBuildingState.routePoints,
@@ -93,7 +108,7 @@ fun CampusMap(
         }
 
         // 3. NAVIGATION MARKERS
-        if (viewModel.uiBuildingState.mode == com.example.myapplication.ui.models.MapUIMode.DIRECTIONS) {
+        if (viewModel.uiBuildingState.mode == MapUIMode.DIRECTIONS) {
 
             if (isShuttleMode) {
                 // SHUTTLE MODE: show only the two fixed stop markers (US-2.8)
@@ -106,8 +121,8 @@ fun CampusMap(
                         title = stop.name,
                         snippet = if (isNearest) "Nearest stop" else null,
                         icon = BitmapDescriptorFactory.defaultMarker(
-                            if (isNearest) BitmapDescriptorFactory.HUE_GREEN
-                            else           BitmapDescriptorFactory.HUE_ORANGE
+                            if (isNearest) BitmapDescriptorFactory.HUE_BLUE
+                            else           BitmapDescriptorFactory.HUE_RED
                         )
                     )
                 }

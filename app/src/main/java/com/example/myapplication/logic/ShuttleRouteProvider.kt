@@ -17,35 +17,44 @@ import com.google.android.gms.maps.model.LatLng
  */
 class ShuttleRouteProvider(
     private val shuttleService: ShuttleService,
-    private val googleRouteProvider: RouteProvider   // injected – no OkHttpClient here
+    private val googleRouteProvider: RouteProvider
 ) : RouteProvider {
-
-    companion object {
-        private const val SHUTTLE_RIDE_MINUTES = 20
-        private const val SHUTTLE_DISTANCE     = "11.0 km"
-    }
 
     override suspend fun getRoute(start: LatLng, end: LatLng, mode: String): RouteData? {
         val boardingStop  = shuttleService.resolveNearestStop(start) ?: return null
         val alightingStop = shuttleService.resolveNearestStop(end)   ?: return null
 
-        // Delegate to the shared GoogleRouteProvider – single source of truth
-        // for all Google Directions API calls.
-        val road = googleRouteProvider.getRoute(
-            boardingStop.location,
-            alightingStop.location,
-            "drive"
-        ) ?: RouteData(
-            // Fallback: straight line between stops if network call fails
-            points   = listOf(boardingStop.location, alightingStop.location),
-            duration = "$SHUTTLE_RIDE_MINUTES min",
-            distance = SHUTTLE_DISTANCE
-        )
+        // Leg 1: Walk to Shuttle
+        val walkToStop = googleRouteProvider.getRoute(start, boardingStop.location, "walk")
 
-        // Override duration/distance with the known shuttle timetable values
-        return road.copy(
-            duration = "$SHUTTLE_RIDE_MINUTES min",
-            distance = SHUTTLE_DISTANCE
+        // Leg 2: The Shuttle (Drive)
+        val shuttleRide = googleRouteProvider.getRoute(boardingStop.location, alightingStop.location, "drive")
+
+        // Leg 3: Walk to Destination
+        val walkToDest = googleRouteProvider.getRoute(alightingStop.location, end, "walk")
+
+        // Stitch them together
+        val allPoints = mutableListOf<LatLng>()
+        val segments = mutableListOf<RouteSegment>()
+
+        walkToStop?.let {
+            allPoints.addAll(it.points)
+            segments.add(RouteSegment(it.points, "walk"))
+        }
+        shuttleRide?.let {
+            allPoints.addAll(it.points)
+            segments.add(RouteSegment(it.points, "shuttle"))
+        }
+        walkToDest?.let {
+            allPoints.addAll(it.points)
+            segments.add(RouteSegment(it.points, "walk"))
+        }
+
+        return RouteData(
+            points = allPoints,
+            duration = "Approx 30 min", // You can sum up the durations here if needed
+            distance = "Multi-leg",
+            segments = segments
         )
     }
 }

@@ -1,0 +1,73 @@
+
+# US-1.3: As a Student, when I am looking at the outdoor campus map, I want that all the campus buildings have distinct shapes so that I can easily distinguish them from the city buildings.
+appId: com.example.myapplication
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "search_bar"
+- assertVisible:
+    id: "campus_map"
+- assertVisible:
+    id: "campus_toggle"
+- assertVisible:
+    id: "LOY_button"
+- assertVisible:
+    id: "SGW_button"
+- assertVisible: "RECENTER"
+- assertVisible:
+    id: "app_nav"
+- assertVisible:
+    id: "map_option"
+- assertVisible:
+    id: "schedule_option"
+
+- tapOn:
+    id: "SGW_button"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "search_bar"
+- assertVisible:
+    id: "campus_map"
+- assertVisible:
+    id: "campus_toggle"
+- assertVisible:
+    id: "LOY_button"
+- assertVisible:
+    id: "SGW_button"
+- assertVisible: "RECENTER"
+- assertVisible:
+    id: "app_nav"
+- assertVisible:
+    id: "map_option"
+- assertVisible:
+    id: "schedule_option"
+- assertVisible:
+    id: "google_map"
+
+- tapOn:
+    id: "SGW_button"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "search_bar"
+- assertVisible:
+    id: "campus_map"
+- assertVisible:
+    id: "campus_toggle"
+- assertVisible:
+    id: "LOY_button"
+- assertVisible:
+    id: "SGW_button"
+- assertVisible: "RECENTER"
+- assertVisible:
+    id: "app_nav"
+- assertVisible:
+    id: "map_option"
+- assertVisible:
+    id: "schedule_option"
+- assertVisible:
+    id: "google_map"

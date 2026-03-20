@@ -1,0 +1,76 @@
+
+# US-1.6: As a campus map user, I want to see additional information for each building, so that I can learn more about campus facilities.
+
+appId: com.example.myapplication
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "search_bar"
+- assertVisible:
+    id: "campus_map"
+- assertVisible:
+    id: "campus_toggle"
+- assertVisible:
+    id: "LOY_button"
+- assertVisible:
+    id: "SGW_button"
+- assertVisible: "RECENTER"
+- assertVisible:
+    id: "app_nav"
+- assertVisible:
+    id: "map_option"
+- assertVisible:
+    id: "schedule_option"
+
+- tapOn:
+    id: "SGW_button"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Tap on Hall building
+- tapOn:
+    point: 50% 47%
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "search_bar"
+- assertVisible:
+    id: "campus_map"
+- assertVisible:
+    id: "app_nav"
+- assertVisible:
+    id: "map_option"
+- assertVisible:
+    id: "schedule_option"
+- assertVisible:
+    id: "google_map"
+- assertVisible:
+    id: "building_info_popup"
+
+# Tap out of the popup info
+- tapOn:
+    point: 35% 50%
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "search_bar"
+- assertVisible:
+    id: "campus_map"
+- assertVisible:
+    id: "campus_toggle"
+- assertVisible:
+    id: "LOY_button"
+- assertVisible:
+    id: "SGW_button"
+- assertVisible: "RECENTER"
+- assertVisible:
+    id: "app_nav"
+- assertVisible:
+    id: "map_option"
+- assertVisible:
+    id: "schedule_option"
+- assertVisible:
+    id: "google_map"

@@ -11,6 +11,7 @@ import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.logic.CampusNavigationEngine
+import com.example.myapplication.logic.DateUtils
 import com.example.myapplication.logic.SearchResult
 import com.example.myapplication.logic.HybridSearchProvider
 import com.example.myapplication.logic.ShuttleRouteProvider
@@ -325,11 +326,14 @@ class MapViewModel(
                     routeSegments = routeData.segments,
                     routeDuration = routeData.duration,
                     routeDistance = routeData.distance,
+                    routeDurationSeconds = routeData.durationSeconds,
                     navState = uiBuildingState.navState.copy(
                         currentInstruction = nextInstruction
                     ),
                     routeErrorMessage = null // Clear any previous errors
-                )
+                ).also {
+                    startLiveEtaUpdates()
+                }
             }
             else {
                 uiBuildingState.copy(
@@ -452,6 +456,29 @@ class MapViewModel(
         )
     }
 
+    // Inside MapViewModel.kt
+    private var tickerJob: kotlinx.coroutines.Job? = null
+
+    private fun startLiveEtaUpdates() {
+        tickerJob?.cancel()
+        tickerJob = viewModelScope.launch {
+            DateUtils.minuteTicker.collect {
+                val currentSeconds = uiBuildingState.routeDurationSeconds
+                if (currentSeconds > 60) {
+                    val updatedSeconds = currentSeconds - 60
+                    uiBuildingState = uiBuildingState.copy(
+                        routeDurationSeconds = updatedSeconds,
+                        routeDuration = "${updatedSeconds / 60} min"
+                    )
+                } else if (currentSeconds > 0) {
+                    uiBuildingState = uiBuildingState.copy(
+                        routeDurationSeconds = 0,
+                        routeDuration = "1 min" // Floor it at 1 min
+                    )
+                }
+            }
+        }
+    }
     private data class ShuttleSnapshot(
         val availability:  com.example.myapplication.data.ShuttleAvailability,
         val statusMessage: String,

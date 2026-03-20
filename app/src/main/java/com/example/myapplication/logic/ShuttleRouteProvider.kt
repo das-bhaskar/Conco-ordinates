@@ -74,11 +74,14 @@ class ShuttleRouteProvider(
                 segments.add(RouteSegment(it.points, type))
             }
         }
-
+        val totalSeconds = (walkToStop?.durationSeconds ?: 0L) +
+                (shuttleRide?.durationSeconds ?: 0L) +
+                (walkToDest?.durationSeconds ?: 0L)
         return RouteData(
             points = allPoints,
             duration = "$totalTime min", // Now dynamic based on Google + Shuttle wait
             distance = "Multi-leg journey",
+            durationSeconds = totalSeconds,
             segments = segments
         )
     }

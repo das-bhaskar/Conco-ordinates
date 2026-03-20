@@ -25,6 +25,7 @@ data class BuildingUiState(
     val isSearchExpanded: Boolean = false,
     val isStartCurrentLocation: Boolean = false,
     val routeBounds: com.google.android.gms.maps.model.LatLngBounds? = null,
+    val routeDurationSeconds: Long = 0L,
     val routeDuration: String = "-- min",
     val routeDistance: String = "-- m",
     val routeErrorMessage: String? = null,

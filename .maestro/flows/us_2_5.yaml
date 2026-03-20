@@ -1,9 +1,5 @@
 
-# US-2.3: As a campus map user, I want directions to be shown on the map, so that I can visually follow the route.
-# US-2.4: As a campus map user, I want to get directions between SGW and Loyola campuses, so that I can travel between campuses.
-#
-# This test covers both user stories 2.3 and 2.4. Implementing an e2e test for US-2.4 would be redundant since it
-# is tested through US-2.3 e2e test.
+# US-2.5: As a campus map user, I want to be able to choose between walking, driving, and public transportation, so that I can travel using my preferred method based on the weather or my schedule.
 
 appId: com.example.myapplication
 ---
@@ -59,34 +55,54 @@ appId: com.example.myapplication
     id: "directions_dest_field"
 - assertVisible:
     text: "PREVIEW"
+- assertVisible:
+    id: "transport_mode_walk"
+- assertVisible:
+    id: "transport_mode_drive"
+- assertVisible:
+    id: "transport_mode_public"
+- assertVisible:
+    id: "transport_mode_shuttle"
 
 - tapOn:
-    id: "directions_close_button"
+    id: "transport_mode_drive"
 - waitForAnimationToEnd:
-    timeout: 2000
+    timeout: 5000
 
-- assertNotVisible:
+- assertVisible:
+    id: "transport_mode_drive"
+- assertVisible:
     id: "directions_info_popup"
-- assertNotVisible:
-    id: "buildings_info_popup"
+
+- tapOn:
+    id: "transport_mode_public"
+- waitForAnimationToEnd:
+    timeout: 5000
 
 - assertVisible:
-    id: "search_bar"
+    id: "transport_mode_public"
 - assertVisible:
-    id: "campus_map"
+    id: "directions_info_popup"
+
+- tapOn:
+    id: "transport_mode_shuttle"
+- waitForAnimationToEnd:
+    timeout: 5000
+
 - assertVisible:
-    id: "campus_toggle"
+    id: "transport_mode_shuttle"
 - assertVisible:
-    id: "LOY_button"
+    id: "directions_info_popup"
+
+- tapOn:
+    id: "transport_mode_walk"
+- waitForAnimationToEnd:
+    timeout: 5000
+
 - assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
+    id: "transport_mode_walk"
 - assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
+    id: "directions_info_popup"
 
 # Scenario 2: Search for a building and get directions
 - launchApp:
@@ -140,31 +156,51 @@ appId: com.example.myapplication
     id: "directions_dest_field"
 - assertVisible:
     text: "PREVIEW"
+- assertVisible:
+    id: "transport_mode_walk"
+- assertVisible:
+    id: "transport_mode_drive"
+- assertVisible:
+    id: "transport_mode_public"
+- assertVisible:
+    id: "transport_mode_shuttle"
 
 - tapOn:
-    id: "directions_close_button"
+    id: "transport_mode_drive"
 - waitForAnimationToEnd:
-    timeout: 2000
+    timeout: 5000
 
-- assertNotVisible:
+- assertVisible:
+    id: "transport_mode_drive"
+- assertVisible:
     id: "directions_info_popup"
-- assertNotVisible:
-    id: "buildings_info_popup"
+
+- tapOn:
+    id: "transport_mode_public"
+- waitForAnimationToEnd:
+    timeout: 5000
 
 - assertVisible:
-    id: "search_bar"
+    id: "transport_mode_public"
 - assertVisible:
-    id: "campus_map"
+    id: "directions_info_popup"
+
+- tapOn:
+    id: "transport_mode_shuttle"
+- waitForAnimationToEnd:
+    timeout: 5000
+
 - assertVisible:
-    id: "campus_toggle"
+    id: "transport_mode_shuttle"
 - assertVisible:
-    id: "LOY_button"
+    id: "directions_info_popup"
+
+- tapOn:
+    id: "transport_mode_walk"
+- waitForAnimationToEnd:
+    timeout: 5000
+
 - assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
+    id: "transport_mode_walk"
 - assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
+    id: "directions_info_popup"

@@ -36,6 +36,7 @@ fun ShuttleStatusCard(
     statusMessage: String,
     nearestStopName: String,
     nearestStopCampus: String,
+    routeDuration: String,
     modifier: Modifier = Modifier
 ) {
     val isActive   = availability is ShuttleAvailability.Active
@@ -100,10 +101,12 @@ fun ShuttleStatusCard(
                         shape = RoundedCornerShape(12.dp),
                         color = accentColor.copy(alpha = 0.12f)
                     ) {
+                        // Calculate total time: Wait Time + Travel Time
+                        val waitTime = if (availability is ShuttleAvailability.Active) availability.nextDepartureMinutes else 0
+                        val direction = if (nearestStopCampus == "SGW") "SGW → Loyola" else "Loyola → SGW"
+
                         Text(
-                            // Determine direction from nearestStopCampus
-                            text = if (nearestStopCampus == "SGW") "SGW → Loyola · ~20 min"
-                                   else                            "Loyola → SGW · ~20 min",
+                            text = "$direction · $routeDuration (+$waitTime min wait)",
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                             style = MaterialTheme.typography.labelMedium.copy(
                                 color = accentColor,

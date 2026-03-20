@@ -254,4 +254,12 @@ class CalendarViewModel(
             .toEpochMilli()
         loadWeekEvents(calendarId, newStart)
     }
+    fun setAuthError(message: String) {
+        calendarState = CalendarState.Error(message)
+    }
+
+    // Add this so the UI can dismiss the error popup
+    fun dismissError() {
+        calendarState = CalendarState.Idle
+    }
 }

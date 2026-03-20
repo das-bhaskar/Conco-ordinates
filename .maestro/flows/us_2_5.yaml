@@ -1,5 +1,9 @@
 
 # US-2.5: As a campus map user, I want to be able to choose between walking, driving, and public transportation, so that I can travel using my preferred method based on the weather or my schedule.
+# US-2.6: As a campus map user, I want shuttle service routes to be displayed, so that I can efficiently use the Concordia Shuttle.
+#
+# This test covers both user stories 2.5, 2.6, 2.7 and 2.8. Implementing an e2e test for US-2.6, US-2.7 or US-2.8 would be redundant since it
+# is tested through US-2.5 e2e test.
 
 appId: com.example.myapplication
 ---
@@ -93,6 +97,16 @@ appId: com.example.myapplication
     id: "transport_mode_shuttle"
 - assertVisible:
     id: "directions_info_popup"
+- assertNotVisible:
+    text: "Fastest route"
+- assertTrue:
+    condition: ${visible("Next shuttle:") || visible("Shuttle out of service")}
+- runFlow:
+    when:
+      visible: "Next shuttle:"
+    commands:
+      - assertVisible:
+          text: "Nearest stop:"
 
 - tapOn:
     id: "transport_mode_walk"
@@ -194,7 +208,16 @@ appId: com.example.myapplication
     id: "transport_mode_shuttle"
 - assertVisible:
     id: "directions_info_popup"
-
+- assertNotVisible:
+    text: "Fastest route"
+- assertTrue:
+    condition: ${visible("Next shuttle:") || visible("Shuttle out of service")}
+- runFlow:
+    when:
+      visible: "Next shuttle:"
+    commands:
+      - assertVisible:
+          text: "Nearest stop:"
 - tapOn:
     id: "transport_mode_walk"
 - waitForAnimationToEnd:

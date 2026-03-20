@@ -101,11 +101,14 @@ fun DirectionsInfoPopup(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+
+                val hasShuttleSegment = uiState.routeSegments.any { it.mode == "shuttle" }
+                val isRouteLoaded = uiState.routePoints.isNotEmpty()
+
                 // ── Shuttle status card (US-2.7 + US-2.8) ────────────────────
                 // Fades in when shuttle mode is selected, fades out otherwise.
                 AnimatedVisibility(
-                    visible = uiState.selectedTransportMode == "shuttle",
-                    enter = fadeIn(),
+                    visible = uiState.selectedTransportMode == "shuttle" && hasShuttleSegment,                    enter = fadeIn(),
                     exit = fadeOut()
                 ) {
                     Column {
@@ -122,8 +125,7 @@ fun DirectionsInfoPopup(
 
                 // ── ETA card (hidden when shuttle mode is active) ─────────────
                 AnimatedVisibility(
-                    visible = uiState.selectedTransportMode != "shuttle",
-                    enter = fadeIn(),
+                    visible = uiState.selectedTransportMode != "shuttle" || (isRouteLoaded && !hasShuttleSegment),                    enter = fadeIn(),
                     exit = fadeOut()
                 ) {
                     Column {

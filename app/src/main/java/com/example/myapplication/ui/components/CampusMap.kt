@@ -110,23 +110,23 @@ fun CampusMap(
         // 3. NAVIGATION MARKERS
         if (viewModel.uiBuildingState.mode == MapUIMode.DIRECTIONS) {
 
-            if (isShuttleMode) {
-                // SHUTTLE MODE: show only the two fixed stop markers (US-2.8)
-                // Stops come from ViewModel state – Map must not query the data
-                // layer directly (MVVM).                                  [#6]
-                viewModel.uiBuildingState.shuttleStops.forEach { stop ->
-                    val isNearest = stop.name == viewModel.uiBuildingState.nearestShuttleStopName
-                    Marker(
-                        state = MarkerState(position = stop.location),
-                        title = stop.name,
-                        snippet = if (isNearest) "Nearest stop" else null,
-                        icon = BitmapDescriptorFactory.defaultMarker(
-                            if (isNearest) BitmapDescriptorFactory.HUE_BLUE
-                            else           BitmapDescriptorFactory.HUE_RED
-                        )
-                    )
-                }
-            } else {
+//            if (isShuttleMode) {
+//                // SHUTTLE MODE: show only the two fixed stop markers (US-2.8)
+//                // Stops come from ViewModel state – Map must not query the data
+//                // layer directly (MVVM).                                  [#6]
+//                viewModel.uiBuildingState.shuttleStops.forEach { stop ->
+//                    val isNearest = stop.name == viewModel.uiBuildingState.nearestShuttleStopName
+//                    Marker(
+//                        state = MarkerState(position = stop.location),
+//                        title = stop.name,
+//                        snippet = if (isNearest) "Nearest stop" else null,
+//                        icon = BitmapDescriptorFactory.defaultMarker(
+//                            if (isNearest) BitmapDescriptorFactory.HUE_AZURE
+//                            else           BitmapDescriptorFactory.HUE_RED
+//                        )
+//                    )
+//                }
+//            } else {
                 // NORMAL MODE: start and destination markers
                 viewModel.uiBuildingState.startPoint?.let { startPos ->
                     Marker(
@@ -142,7 +142,7 @@ fun CampusMap(
                         icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
                     )
                 }
-            }
+            //}
         }
     }
 }

@@ -138,6 +138,7 @@ fun AppNavigation(
                         ),
                         calendarActions = CalendarActions(
                             onConnectClick   = navigationActions.onConnectClick,
+                            onDismissError = { calendarViewModel.dismissError() },
                             onSignOutClick   = navigationActions.onSignOutClick,
                             onCalendarPicked = calendarViewModel::onCalendarSelected,
                             onPreviousWeek   = { calId?.let { calendarViewModel.goToPreviousWeek(it) } },

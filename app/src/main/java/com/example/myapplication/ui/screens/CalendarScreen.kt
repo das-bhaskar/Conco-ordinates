@@ -42,7 +42,8 @@ data class CalendarActions(
     val onCalendarPicked:  (id: String, name: String) -> Unit,
     val onPreviousWeek:    () -> Unit,
     val onNextWeek:        () -> Unit,
-    val onNavigateToEvent: (destination: String) -> Unit
+    val onNavigateToEvent: (destination: String) -> Unit,
+    val onDismissError:    () -> Unit //
 )
 
 /**
@@ -62,8 +63,28 @@ fun CalendarScreen(
     isLoading:      Boolean,
     accountState:   UserAccountState,
     calendarActions: CalendarActions,
+    onDismissError: () -> Unit = {},
     modifier:       Modifier = Modifier
 ) {
+
+
+    //handling error state
+    if (calendarState is CalendarState.Error) {
+        AlertDialog(
+            // 2. Use the action bundled in calendarActions
+            onDismissRequest = { calendarActions.onDismissError() },
+            title = { Text("Connection Problem") },
+            text = { Text(calendarState.message) },
+            confirmButton = {
+                TextButton(onClick = { calendarActions.onDismissError() }) {
+                    Text("OK", color = ConcordiaMaroon)
+                }
+            },
+            shape = RoundedCornerShape(28.dp),
+            containerColor = Color.White
+        )
+    }
+
     // Calendar picker takes over the whole screen while user selects
     if (!accountState.isSignedIn && calendarState is CalendarState.SelectingCalendar) {
         CalendarPickerScreen(

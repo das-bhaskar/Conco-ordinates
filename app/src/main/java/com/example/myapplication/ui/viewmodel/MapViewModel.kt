@@ -322,8 +322,9 @@ class MapViewModel(
 
                 uiBuildingState.copy(
                     routePoints = routeData.points,
-                    routeDuration = routeData.duration, // ADD THIS
-                    routeDistance = routeData.distance, // ADD THIS
+                    routeSegments = routeData.segments,
+                    routeDuration = routeData.duration,
+                    routeDistance = routeData.distance,
                     navState = uiBuildingState.navState.copy(
                         currentInstruction = nextInstruction
                     ),
@@ -335,6 +336,7 @@ class MapViewModel(
                     routePoints       = emptyList(),
                     routeDuration     = "-- min",
                     routeDistance     = "-- m",
+                    routeSegments = emptyList(),
                     routeBounds       = null,
                     routeErrorMessage = "$modeName route unavailable between these points."
                 )

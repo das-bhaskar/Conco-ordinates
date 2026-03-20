@@ -45,6 +45,7 @@ class GoogleRouteProvider(private val apiKey: String) : RouteProvider {
             if (routes.length() > 0) {
                 val route = routes.getJSONObject(0)
                 val leg = route.getJSONArray("legs").getJSONObject(0)
+                val durationObject = leg.getJSONObject("duration")
                 val steps = leg.getJSONArray("steps")
 
                 val firstInstruction = if (steps.length() > 0) {
@@ -53,6 +54,7 @@ class GoogleRouteProvider(private val apiKey: String) : RouteProvider {
                 } else "Follow the path"
 
                 val durationText = leg.getJSONObject("duration").getString("text")
+                val durationValue = durationObject.getLong("value")
                 val distanceText = leg.getJSONObject("distance").getString("text")
                 val overviewPolyline = route.getJSONObject("overview_polyline").getString("points")
                 val decodedPoints = PolyUtil.decode(overviewPolyline)
@@ -62,6 +64,7 @@ class GoogleRouteProvider(private val apiKey: String) : RouteProvider {
                     points = decodedPoints,
                     duration = durationText,
                     distance = distanceText,
+                    durationSeconds = durationValue,
                     instructions = listOf(firstInstruction)
                 )            }
         } catch (e: Exception) {

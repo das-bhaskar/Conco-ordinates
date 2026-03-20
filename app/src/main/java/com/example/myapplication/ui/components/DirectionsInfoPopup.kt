@@ -113,7 +113,8 @@ fun DirectionsInfoPopup(
                             availability      = uiState.shuttleAvailability,
                             statusMessage     = uiState.shuttleStatusMessage,
                             nearestStopName   = uiState.nearestShuttleStopName,
-                            nearestStopCampus = uiState.nearestShuttleStopCampus
+                            nearestStopCampus = uiState.nearestShuttleStopCampus,
+                            routeDuration = uiState.routeDuration
                         )
                         Spacer(Modifier.height(16.dp))
                     }

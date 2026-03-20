@@ -1,5 +1,7 @@
 package com.example.myapplication.logic
 
+import com.example.myapplication.data.CampusRepo
+import com.example.myapplication.data.ShuttleAvailability
 import com.google.android.gms.maps.model.LatLng
 
 /**
@@ -21,39 +23,62 @@ class ShuttleRouteProvider(
 ) : RouteProvider {
 
     override suspend fun getRoute(start: LatLng, end: LatLng, mode: String): RouteData? {
-        val boardingStop  = shuttleService.resolveNearestStop(start) ?: return null
-        val alightingStop = shuttleService.resolveNearestStop(end)   ?: return null
+        val startCampus = CampusRepo.getCampus(start)
+        val endCampus = CampusRepo.getCampus(end)
 
-        // Leg 1: Walk to Shuttle
+        // 1. Same-campus check (Returns actual walk time)
+        if (startCampus != null && startCampus == endCampus) {
+            val walkOnly = googleRouteProvider.getRoute(start, end, "walk")
+            return walkOnly?.copy(segments = listOf(RouteSegment(walkOnly.points, "walk")))
+        }
+
+        val boardingStop = shuttleService.resolveNearestStop(start) ?: return null
+        val alightingStop = shuttleService.resolveNearestStop(end) ?: return null
+
+        // 2. Fetch the 3 real legs from Google
         val walkToStop = googleRouteProvider.getRoute(start, boardingStop.location, "walk")
-
-        // Leg 2: The Shuttle (Drive)
-        val shuttleRide = googleRouteProvider.getRoute(boardingStop.location, alightingStop.location, "drive")
-
-        // Leg 3: Walk to Destination
+        val shuttleRide =
+            googleRouteProvider.getRoute(boardingStop.location, alightingStop.location, "drive")
         val walkToDest = googleRouteProvider.getRoute(alightingStop.location, end, "walk")
 
-        // Stitch them together
         val allPoints = mutableListOf<LatLng>()
         val segments = mutableListOf<RouteSegment>()
 
-        walkToStop?.let {
-            allPoints.addAll(it.points)
-            segments.add(RouteSegment(it.points, "walk"))
+        // Helper to extract "5" from "5 mins" or "1 hour 2 mins"
+        fun parseMinutes(duration: String?): Int {
+            if (duration == null) return 0
+            return duration.split(" ").firstOrNull { it.all { char -> char.isDigit() } }
+                ?.toIntOrNull() ?: 0
         }
-        shuttleRide?.let {
-            allPoints.addAll(it.points)
-            segments.add(RouteSegment(it.points, "shuttle"))
-        }
-        walkToDest?.let {
-            allPoints.addAll(it.points)
-            segments.add(RouteSegment(it.points, "walk"))
+
+        // 3. Sum up the travel durations
+        val travelTime = parseMinutes(walkToStop?.duration) +
+                parseMinutes(shuttleRide?.duration) +
+                parseMinutes(walkToDest?.duration)
+
+        // 4. Get the real-time shuttle wait
+        val availability = shuttleService.checkAvailability(startCampus?.name ?: "")
+        val waitTime =
+            if (availability is ShuttleAvailability.Active) availability.nextDepartureMinutes else 0
+
+        val totalTime = travelTime //+ waitTime
+
+        // Stitch points and segments
+        listOf(
+            walkToStop to "walk",
+            shuttleRide to "shuttle",
+            walkToDest to "walk"
+        ).forEach { (data, type) ->
+            data?.let {
+                allPoints.addAll(it.points)
+                segments.add(RouteSegment(it.points, type))
+            }
         }
 
         return RouteData(
             points = allPoints,
-            duration = "Approx 30 min", // You can sum up the durations here if needed
-            distance = "Multi-leg",
+            duration = "$totalTime min", // Now dynamic based on Google + Shuttle wait
+            distance = "Multi-leg journey",
             segments = segments
         )
     }

@@ -91,6 +91,7 @@ class MapViewModelTest {
         val fakeRoute = RouteData(
             points = listOf(start, end),
             duration = "10 mins",
+            durationSeconds = 600L,
             distance = "1.2 km"
         )
 

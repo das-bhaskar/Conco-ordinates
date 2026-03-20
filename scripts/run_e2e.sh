@@ -81,3 +81,22 @@ echo " Passed: $PASSED / $TOTAL"
 echo " Failed: $FAILED / $TOTAL"
 echo "==============================="
 echo ""
+
+if [ ${#FAILED_FLOWS[@]} -gt 0 ]; then
+  echo ""
+  echo " Failed flows:"
+  for flow in "${FAILED_FLOWS[@]}"; do
+    echo "  $flow"
+    echo "  See ${RECORDING_DIR}/${flow}.mp4"
+  done
+  echo ""
+fi
+
+echo " Recording: $RECORDING_DIR/"
+echo " Report: $REPORT_DIR/report.xml"
+echo "==============================="
+echo ""
+
+if [ "$FAILED" -gt 0 ]; then
+  exit 1
+fi

@@ -1,0 +1,47 @@
+
+# US-1.1: As a Student, I want the ability to access the map of SGW Campus so I can easily navigate within the campus.
+
+appId: com.example.myapplication
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "search_bar"
+- assertVisible:
+    id: "campus_map"
+- assertVisible:
+    id: "campus_toggle"
+- assertVisible:
+    id: "LOY_button"
+- assertVisible:
+    id: "SGW_button"
+- assertVisible: "RECENTER"
+- assertVisible:
+    id: "app_nav"
+- assertVisible:
+   id: "map_option"
+- assertVisible:
+    id: "schedule_option"
+
+- tapOn:
+    id: "LOY_button"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    id: "search_bar"
+- assertVisible:
+    id: "campus_map"
+- assertVisible:
+    id: "campus_toggle"
+- assertVisible:
+    id: "LOY_button"
+- assertVisible:
+    id: "SGW_button"
+- assertVisible: "RECENTER"
+- assertVisible:
+    id: "app_nav"
+- assertVisible:
+    id: "map_option"
+- assertVisible:
+    id: "schedule_option"

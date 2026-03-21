@@ -47,6 +47,7 @@ fun CampusSearchBar(
                     is SearchResult.GoogleResult -> result.title
                     is SearchResult.CurrentLocation -> "Your position"
                     is SearchResult.Home -> "Home"
+                    is SearchResult.IndoorRoomResult -> result.label
                 }
 
                 val icon = when(result) {
@@ -55,6 +56,7 @@ fun CampusSearchBar(
                     is SearchResult.GoogleResult -> Icons.Default.LocationOn
                     is SearchResult.CurrentLocation -> Icons.Default.MyLocation
                     is SearchResult.Home -> Icons.Default.Home
+                    is SearchResult.IndoorRoomResult -> Icons.Default.LocationOn
                 }
 
                 val tintColor = if (result is SearchResult.CurrentLocation || result is SearchResult.Home) {

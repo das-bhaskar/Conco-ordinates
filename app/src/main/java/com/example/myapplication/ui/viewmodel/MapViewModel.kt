@@ -458,9 +458,13 @@ class MapViewModel(
 
     // Inside MapViewModel.kt
     private var tickerJob: kotlinx.coroutines.Job? = null
-
     private fun startLiveEtaUpdates() {
         tickerJob?.cancel()
+
+        // FIX: Don't start the infinite ticker if there's no time to count down.
+        // This prevents tests from "buffering" indefinitely.
+        if (uiBuildingState.routeDurationSeconds <= 0) return
+
         tickerJob = viewModelScope.launch {
             DateUtils.minuteTicker.collect {
                 val currentSeconds = uiBuildingState.routeDurationSeconds
@@ -470,11 +474,14 @@ class MapViewModel(
                         routeDurationSeconds = updatedSeconds,
                         routeDuration = "${updatedSeconds / 60} min"
                     )
-                } else if (currentSeconds > 0) {
+                } else {
+                    // Once we hit 1 min or 0, we should stop the ticker
+                    // to save battery and allow tests to finish.
                     uiBuildingState = uiBuildingState.copy(
                         routeDurationSeconds = 0,
-                        routeDuration = "1 min" // Floor it at 1 min
+                        routeDuration = "1 min"
                     )
+                    tickerJob?.cancel() // Stop the loop
                 }
             }
         }

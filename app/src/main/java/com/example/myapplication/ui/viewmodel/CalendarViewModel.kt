@@ -12,6 +12,8 @@ import com.example.myapplication.logic.CalendarInfo
 import com.example.myapplication.logic.CalendarProvider
 import com.example.myapplication.logic.currentWeekMonday
 import com.example.myapplication.ui.models.CalendarState
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
@@ -42,9 +44,14 @@ import java.time.ZonedDateTime
 class CalendarViewModel(
     private val calendarProvider:    CalendarProvider,
     private val calendarPreferences: CalendarPreferences,
-    private val locationResolver:    LocationResolver   // required — inject at call-site
+    private val locationResolver:    LocationResolver,   // required — inject at call-site
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : ViewModel() {
 
+
+    private fun launchOnMain(block: suspend kotlinx.coroutines.CoroutineScope.() -> Unit) {
+        viewModelScope.launch(dispatcher) { block() }
+    }
     // ── Calendar picker state ─────────────────────────────────────────────────
     var calendarState by mutableStateOf<CalendarState>(CalendarState.Idle)
         private set
@@ -75,8 +82,7 @@ class CalendarViewModel(
             emit(System.currentTimeMillis())
             delay(60_000L)
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), System.currentTimeMillis())
-
+    }
     // ── Derived: next upcoming event with a location (for NextClassPill) ──────
     // Recalculated on every ticker tick so the pill expires naturally as time passes.
     // ── Derived: next upcoming event with a location (for NextClassPill) ──────
@@ -112,6 +118,7 @@ class CalendarViewModel(
         } else {
             nextClassTimeRemaining = ""
             isNextClassUrgent = false
+            tickerJob?.cancel()
         }
     }
 
@@ -122,11 +129,6 @@ class CalendarViewModel(
     // ── Init: restore persisted selection ────────────────────────────────────
     init {
         restoreSelectionIfAvailable()
-        viewModelScope.launch {
-            tickerFlow.collect { now ->
-                refreshPillState(now)
-            }
-        }
     }
 
     /**
@@ -137,14 +139,34 @@ class CalendarViewModel(
      * lived in MapsActivity — the ViewModel handles its own side-effects.
      */
     private fun restoreSelectionIfAvailable() {
-        val id   = calendarPreferences.getSelectedCalendarId()   ?: return
+        val id = calendarPreferences.getSelectedCalendarId() ?: return
         val name = calendarPreferences.getSelectedCalendarName() ?: return
-        selectedCalendarId   = id
+        selectedCalendarId = id
         selectedCalendarName = name
-        viewModelScope.launch {
+        launchOnMain {
             calendarState = CalendarState.Loading
             loadWeekEvents(id)
             calendarState = CalendarState.Idle
+        }
+    }
+    private var tickerJob: kotlinx.coroutines.Job? = null
+
+    private fun startTicker() {
+        tickerJob?.cancel()
+
+        // 1. If no events are loaded, don't even start the loop.
+        // This fixes most of your test timeouts immediately.
+        if (weekEvents.isEmpty() || nextUpcomingEvent == null) return
+
+        tickerJob = viewModelScope.launch(dispatcher) {
+            tickerFlow.collect { now ->
+                refreshPillState(now)
+
+                // 2. If the last class of the day is over, kill the ticker.
+                if (nextUpcomingEvent == null) {
+                    tickerJob?.cancel()
+                }
+            }
         }
     }
 
@@ -158,7 +180,7 @@ class CalendarViewModel(
      * which one contains their courses.
      */
     fun loadCalendarsAndAutoSelect() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher){
             calendarState = CalendarState.Loading
             val calendars = calendarProvider.getCalendars()
             calendarState = if (calendars.isEmpty()) {
@@ -179,7 +201,7 @@ class CalendarViewModel(
         // Persist before the coroutine so it's saved even if the coroutine
         // is cancelled (e.g. user backgrounds the app mid-load).
         calendarPreferences.saveSelection(CalendarInfo(id = calendarId, summary = calendarName))
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher){
             calendarState = CalendarState.Loading
             loadWeekEvents(calendarId)
             calendarState = CalendarState.Idle
@@ -216,12 +238,12 @@ class CalendarViewModel(
      * Loads all events for the week starting at [weekStartMs].
      * Called on init restore, calendar selection, or week navigation.
      */
+    private var loadJob: kotlinx.coroutines.Job? = null
     fun loadWeekEvents(calendarId: String, weekStartMs: Long = currentWeekStartMs) {
         currentWeekStartMs = weekStartMs
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob=viewModelScope.launch(dispatcher){
             weekViewLoading = true
-            // Resolve location for every event in the ViewModel layer —
-            // UI receives pre-resolved data and never calls parsing logic.
             weekEvents = calendarProvider.getWeekEvents(calendarId, weekStartMs)
                 .map { event ->
                     ResolvedCalendarEvent(
@@ -230,6 +252,7 @@ class CalendarViewModel(
                     )
                 }
             weekViewLoading = false
+            startTicker()
         }
     }
 
@@ -266,5 +289,10 @@ class CalendarViewModel(
     // Add this so the UI can dismiss the error popup
     fun dismissError() {
         calendarState = CalendarState.Idle
+    }
+    override fun onCleared() {
+        super.onCleared()
+        loadJob?.cancel()
+        tickerJob?.cancel()
     }
 }

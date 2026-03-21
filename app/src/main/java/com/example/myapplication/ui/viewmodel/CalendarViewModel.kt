@@ -14,10 +14,12 @@ import com.example.myapplication.logic.currentWeekMonday
 import com.example.myapplication.ui.models.CalendarState
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -77,12 +79,12 @@ class CalendarViewModel(
     // Without this, nextUpcomingEvent only re-derives when weekEvents changes —
     // meaning a class that starts while the user is looking at the map would
     // never expire from the pill until the next data refresh (PR review).
-    private val tickerFlow = flow {
-        while (true) {
-            emit(System.currentTimeMillis())
-            delay(60_000L)
-        }
-    }
+//    private val tickerFlow = flow {
+//        while (true) {
+//            emit(System.currentTimeMillis())
+//            delay(60_000L)
+//        }
+//    }
     // ── Derived: next upcoming event with a location (for NextClassPill) ──────
     // Recalculated on every ticker tick so the pill expires naturally as time passes.
     // ── Derived: next upcoming event with a location (for NextClassPill) ──────
@@ -151,25 +153,29 @@ class CalendarViewModel(
     }
     private var tickerJob: kotlinx.coroutines.Job? = null
 
+    // Change your tickerFlow to just emit once immediately
+    private val tickerFlow = flow {
+        emit(System.currentTimeMillis())
+    }
+
     private fun startTicker() {
         tickerJob?.cancel()
-
-        // 1. If no events are loaded, don't even start the loop.
-        // This fixes most of your test timeouts immediately.
-        if (weekEvents.isEmpty() || nextUpcomingEvent == null) return
-
         tickerJob = viewModelScope.launch(dispatcher) {
-            tickerFlow.collect { now ->
-                refreshPillState(now)
+            refreshPillState(System.currentTimeMillis())
+            while (true) {
+                refreshPillState(System.currentTimeMillis())
 
-                // 2. If the last class of the day is over, kill the ticker.
-                if (nextUpcomingEvent == null) {
-                    tickerJob?.cancel()
+                // The Break Condition:
+                // If we aren't loading and have no events (or the day is over),
+                // kill the loop so tests don't hang.
+                if (!weekViewLoading && (weekEvents.isEmpty() || nextUpcomingEvent == null)) {
+                    break
                 }
+
+                delay(60_000L)
             }
         }
     }
-
     // ─────────────────────────────────────────────────────────────────────────
     // Calendar picker
     // ─────────────────────────────────────────────────────────────────────────

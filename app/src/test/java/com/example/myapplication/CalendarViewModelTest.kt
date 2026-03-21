@@ -4,6 +4,7 @@ import com.example.myapplication.data.CalendarEvent
 import com.example.myapplication.logic.CalendarInfo
 import com.example.myapplication.logic.FakeCalendarPreferences
 import com.example.myapplication.logic.MockCalendarProvider
+import com.example.myapplication.logic.currentWeekMonday
 import com.example.myapplication.ui.models.CalendarState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,8 +45,9 @@ class CalendarViewModelTest {
         id          = id,
         calendarId  = "cal-1",
         title       = "SOEN 357 Lecture",
-        startTimeMs = System.currentTimeMillis() + 3_600_000, // 1 hour from now
-        endTimeMs   = System.currentTimeMillis() + 7_200_000,
+        // Use the same time source as the ViewModel's currentWeekStartMs
+        startTimeMs = currentWeekMonday() + 3_600_000,
+        endTimeMs   = currentWeekMonday() + 7_200_000,
         location    = location
     )
 
@@ -93,8 +95,13 @@ class CalendarViewModelTest {
 
     fun `initial state is Idle when no saved selection`() = runTest {
         val (vm, _) = makeViewModel()
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         assertEquals(CalendarState.Idle, vm.calendarState)
 
@@ -105,8 +112,13 @@ class CalendarViewModelTest {
 
     fun `initial selectedCalendarId is null when no saved selection`() = runTest {
         val (vm, _) = makeViewModel()
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         assertNull(vm.selectedCalendarId)
 
@@ -119,8 +131,13 @@ class CalendarViewModelTest {
 
     fun `restores saved selection on init`() = runTest {
         val (vm, _) = makeViewModel(savedId = "cal-1", savedName = "My Courses")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         assertEquals("cal-1",      vm.selectedCalendarId)
         assertEquals("My Courses", vm.selectedCalendarName)
@@ -129,18 +146,7 @@ class CalendarViewModelTest {
 
     }
 
-    @Test(timeout = 5000)
 
-    fun `restore loads week events`() = runTest {
-        val (vm, _) = makeViewModel(savedId = "cal-1", savedName = "My Courses")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
-
-        assertTrue(vm.weekEvents.isNotEmpty())
-
-
-        testDispatcher.cancelChildren()
-    }
 
 
 
@@ -152,8 +158,13 @@ class CalendarViewModelTest {
             savedId   = "cal-1",
             savedName = "My Courses"
         )
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         // CalendarState.NoUpcomingClass is removed — check derived property instead
 
@@ -171,8 +182,13 @@ class CalendarViewModelTest {
     fun `loadCalendarsAndAutoSelect sets SelectingCalendar when calendars found`() = runTest {
         val (vm, _) = makeViewModel()
         vm.loadCalendarsAndAutoSelect()
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         assertTrue(vm.calendarState is CalendarState.SelectingCalendar)
 
@@ -185,8 +201,13 @@ class CalendarViewModelTest {
     fun `loadCalendarsAndAutoSelect sets Error when no calendars`() = runTest {
         val (vm, _) = makeViewModel(calendars = emptyList())
         vm.loadCalendarsAndAutoSelect()
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         assertTrue(vm.calendarState is CalendarState.Error)
 
@@ -201,8 +222,13 @@ class CalendarViewModelTest {
     fun `onCalendarSelected updates selectedCalendarId`() = runTest {
         val (vm, _) = makeViewModel()
         vm.onCalendarSelected("cal-1", "My Courses")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         assertEquals("cal-1", vm.selectedCalendarId)
 
@@ -215,8 +241,13 @@ class CalendarViewModelTest {
     fun `onCalendarSelected persists selection to prefs`() = runTest {
         val (vm, prefs) = makeViewModel()
         vm.onCalendarSelected("cal-1", "My Courses")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         assertEquals("cal-1",      prefs.getSelectedCalendarId())
         assertEquals("My Courses", prefs.getSelectedCalendarName())
@@ -232,8 +263,13 @@ class CalendarViewModelTest {
     fun `onCalendarSelected with no events has null nextUpcomingEvent`() = runTest {
         val (vm, _) = makeViewModel(events = emptyList())
         vm.onCalendarSelected("cal-1", "My Courses")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         assertNull(vm.nextUpcomingEvent)
         assertEquals(CalendarState.Idle, vm.calendarState)
@@ -248,8 +284,13 @@ class CalendarViewModelTest {
 
     fun `clearSelection resets state to Idle`() = runTest {
         val (vm, _) = makeViewModel(savedId = "cal-1", savedName = "My Courses")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         vm.clearSelection()
         assertEquals(CalendarState.Idle, vm.calendarState)
@@ -262,8 +303,13 @@ class CalendarViewModelTest {
 
     fun `clearSelection clears selectedCalendarId`() = runTest {
         val (vm, _) = makeViewModel(savedId = "cal-1", savedName = "My Courses")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         vm.clearSelection()
         assertNull(vm.selectedCalendarId)
@@ -276,8 +322,13 @@ class CalendarViewModelTest {
 
     fun `clearSelection clears prefs`() = runTest {
         val (vm, prefs) = makeViewModel(savedId = "cal-1", savedName = "My Courses")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         vm.clearSelection()
         assertNull(prefs.getSelectedCalendarId())
@@ -290,8 +341,13 @@ class CalendarViewModelTest {
 
     fun `clearSelection empties weekEvents`() = runTest {
         val (vm, _) = makeViewModel(savedId = "cal-1", savedName = "My Courses")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         vm.clearSelection()
         assertTrue(vm.weekEvents.isEmpty())
@@ -308,8 +364,13 @@ class CalendarViewModelTest {
 
     fun `nextUpcomingEvent is null when weekEvents is empty`() = runTest {
         val (vm, _) = makeViewModel(events = emptyList())
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         assertNull(vm.nextUpcomingEvent)
 
@@ -322,8 +383,13 @@ class CalendarViewModelTest {
     fun `nextUpcomingEvent ignores events with no location`() = runTest {
         val noLoc = futureEvent("evt-noloc", location = "")
         val (vm, _) = makeViewModel(events = listOf(noLoc), savedId = "cal-1", savedName = "My Courses")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         assertNull(vm.nextUpcomingEvent)
         testDispatcher.cancelChildren()
@@ -337,8 +403,13 @@ class CalendarViewModelTest {
 
     fun `isNextClassUrgent is false when no upcoming event`() = runTest {
         val (vm, _) = makeViewModel(events = emptyList())
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         assertFalse(vm.isNextClassUrgent)
 
@@ -347,36 +418,59 @@ class CalendarViewModelTest {
     }
 
     @Test(timeout = 5000)
+    fun `restore loads week events`() = runTest {
+        // 1. Setup
+        val (vm, _) = makeViewModel(savedId = "cal-1", savedName = "My Courses")
 
-    fun `isNextClassUrgent is false when event is more than 15 min away`() = runTest {
-        val farEvent = futureEvent().copy(startTimeMs = System.currentTimeMillis() + 20 * 60_000)
-        val (vm, _) = makeViewModel(events = listOf(farEvent), savedId = "cal-1", savedName = "My Courses")
-        testDispatcher.scheduler.advanceTimeBy(1000)
+        // 2. Advance the virtual clock to allow the restore coroutine AND
+        // the ticker's first refresh to execute.
+        testDispatcher.scheduler.advanceUntilIdle()
 
-
-        assertFalse(vm.isNextClassUrgent)
+        // 3. Assert
+        assertTrue("Events should not be empty after restore", vm.weekEvents.isNotEmpty())
 
         testDispatcher.cancelChildren()
-
     }
 
+    @Test(timeout = 5000)
+    fun `isNextClassUrgent is false when event is more than 15 min away`() = runTest {
+        // Manually set a time relative to the virtual clock
+        val now = testDispatcher.scheduler.currentTime
+        val farEvent = futureEvent().copy(startTimeMs = now + 20 * 60_000)
 
+        val (vm, _) = makeViewModel(events = listOf(farEvent), savedId = "cal-1", savedName = "My Courses")
+
+        advanceUntilIdle()
+
+        assertFalse(vm.isNextClassUrgent)
+        testDispatcher.cancelChildren()
+    }
     // ── week navigation ───────────────────────────────────────────────────────
 
     @Test(timeout = 5000)
 
     fun `goToNextWeek advances currentWeekStartMs by 7 days`() = runTest {
         val (vm, _) = makeViewModel(savedId = "cal-1", savedName = "My Courses")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         val beforeZdt = java.time.ZonedDateTime.ofInstant(
             java.time.Instant.ofEpochMilli(vm.currentWeekStartMs),
             java.time.ZoneId.systemDefault()
         )
         vm.goToNextWeek("cal-1")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         val afterZdt = java.time.ZonedDateTime.ofInstant(
             java.time.Instant.ofEpochMilli(vm.currentWeekStartMs),
@@ -395,16 +489,26 @@ class CalendarViewModelTest {
 
     fun `goToPreviousWeek rewinds currentWeekStartMs by 7 days`() = runTest {
         val (vm, _) = makeViewModel(savedId = "cal-1", savedName = "My Courses")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         val beforeZdt = java.time.ZonedDateTime.ofInstant(
             java.time.Instant.ofEpochMilli(vm.currentWeekStartMs),
             java.time.ZoneId.systemDefault()
         )
         vm.goToPreviousWeek("cal-1")
-        testDispatcher.scheduler.advanceTimeBy(1000)
-
+runCurrent() 
+    
+    // 2. Advance time by 61 seconds to ensure the tickerFlow triggers
+    testDispatcher.scheduler.advanceTimeBy(61_000)
+    
+    // 3. Run the code that was scheduled by that time jump
+    runCurrent()
 
         val afterZdt = java.time.ZonedDateTime.ofInstant(
             java.time.Instant.ofEpochMilli(vm.currentWeekStartMs),

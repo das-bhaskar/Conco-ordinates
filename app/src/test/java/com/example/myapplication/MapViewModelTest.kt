@@ -18,13 +18,13 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.*
 import com.example.myapplication.data.ShuttleStop
+import kotlinx.coroutines.cancelChildren
 import kotlin.collections.emptyList
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MapViewModelTest {
 
-    private val testDispatcher = StandardTestDispatcher()
-
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val mockLocationProvider: LocationProvider = mock()
     private val mockRouteProvider: RouteProvider = mock()
     private val mockShuttleService: ShuttleService = mock()
@@ -62,8 +62,10 @@ class MapViewModelTest {
 
     @After
     fun tearDown() {
+        testDispatcher.cancelChildren()
         Dispatchers.resetMain()
     }
+
 
     @Test
     fun `handleMapTap updates state correctly`() {
@@ -108,8 +110,8 @@ class MapViewModelTest {
         viewModel.handleSearchResult(result, mockContext)
 
         // Act
-        advanceUntilIdle() // Process coroutines launched in viewModelScope
-
+        advanceTimeBy(1000L)
+        runCurrent()
         // Assert
         val state = viewModel.uiBuildingState
         assertEquals("10 mins", state.routeDuration)
@@ -151,7 +153,8 @@ class MapViewModelTest {
 
         // Act
         viewModel.onTransportModeChanged("walking")
-        advanceUntilIdle()
+        advanceTimeBy(1000L) 
+runCurrent()
 
         // Assert
         verify(mockRouteProvider, atLeastOnce()).getRoute(any(), any(), eq("walking"))
@@ -217,7 +220,8 @@ class MapViewModelTest {
 
         // Act
         viewModel.calculateRouteWithState()
-        advanceUntilIdle()
+        advanceTimeBy(1000L) 
+runCurrent()
 
         // Assert: Verify UI shows fallback values ("-- min")
         assertEquals("-- min", viewModel.uiBuildingState.routeDuration)
@@ -280,7 +284,8 @@ class MapViewModelTest {
         viewModel.handleSearchResult(SearchResult.BuildingResult(destBuilding), mockContext)
 
         viewModel.onTransportModeChanged("walking")
-        advanceUntilIdle()
+        advanceTimeBy(1000L) 
+runCurrent()
 
         val error = viewModel.uiBuildingState.routeErrorMessage
         assertNotNull("Error message should be set when provider throws", error)
@@ -305,10 +310,12 @@ class MapViewModelTest {
         viewModel.handleSearchResult(SearchResult.BuildingResult(destBuilding), mockContext)
 
         viewModel.onTransportModeChanged("shuttle")
-        advanceUntilIdle()
+        runCurrent()
 
         assertEquals("SGW Stop", viewModel.uiBuildingState.nearestShuttleStopName)
         assertEquals("On time", viewModel.uiBuildingState.shuttleStatusMessage)
+
+        testDispatcher.cancelChildren()
     }
 
 
@@ -327,7 +334,8 @@ class MapViewModelTest {
 
         // Act: Move user significantly
         viewModel.processLocationUpdate(movePos)
-        advanceUntilIdle()
+        advanceTimeBy(1000L) 
+runCurrent()
 
         // Assert: calculateRouteWithState should be called again (via routeProvider)
         verify(mockRouteProvider, atLeastOnce()).getRoute(any(), any(), any())
@@ -405,7 +413,8 @@ class MapViewModelTest {
         viewModel.startNavigation()
 
         // Act
-        advanceUntilIdle()
+        advanceTimeBy(1000L) 
+runCurrent()
 
         // Assert
         verify(mockRouteProvider, atLeastOnce()).getRoute(

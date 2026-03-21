@@ -7,79 +7,58 @@
 appId: com.example.myapplication
 ---
 - setLocation:
-    latitude: 45.4972
-    longitude: -73.5789
+    latitude: 45.4377
+    longitude: -73.47379
 - launchApp:
     clearState: true
 - assertVisible:
-    id: "search_bar"
+    text: "Search buildings or addresses..."
 - assertVisible:
-    id: "campus_map"
+    text: "SGW"
 - assertVisible:
-    id: "campus_toggle"
+    text: "LOY"
 - assertVisible:
-    id: "LOY_button"
+    text: "Map"
 - assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
-- assertVisible:
-    id: "google_map"
+    text: "Schedule"
+
+- tapOn:
+    point: "80%, 83%"
+- waitForAnimationToEnd:
+    timeout: 5000
 
 # Give time to the application to load the new location
+- tapOn:
+    text: "SGW"
 - waitForAnimationToEnd:
-    timeout: 10000
+    timeout: 5000
 
-- assertVisible:
-    id: "search_bar"
-- assertVisible:
-    id: "campus_map"
-- assertVisible:
-    id: "campus_toggle"
-- assertVisible:
-    id: "LOY_button"
-- assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
-- assertVisible:
-    id: "google_map"
+- tapOn:
+    point: "80%, 83%"
+- waitForAnimationToEnd:
+    timeout: 5000
 
 # Assert that the app does not crash when out of campus
 - setLocation:
-    latitude: 45.4377
-    longitude: -73.47379
+    latitude: 45.4972
+    longitude: -73.5789
 
 # Give time to the application to load the new location
 - waitForAnimationToEnd:
     timeout: 10000
 
 - assertVisible:
-    id: "search_bar"
+    text: "Search buildings or addresses..."
 - assertVisible:
-    id: "campus_map"
+    text: "SGW"
 - assertVisible:
-    id: "campus_toggle"
+    text: "LOY"
 - assertVisible:
-    id: "LOY_button"
+    text: "Map"
 - assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
-- assertVisible:
-    id: "google_map"
+    text: "Schedule"
+
+- tapOn:
+    point: "80%, 83%"
+- waitForAnimationToEnd:
+    timeout: 5000

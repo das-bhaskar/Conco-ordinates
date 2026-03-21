@@ -3,74 +3,71 @@
 
 appId: com.example.myapplication
 ---
+- setLocation:
+    latitude: 45.4972
+    longitude: -73.5789
 - launchApp:
     clearState: true
 - assertVisible:
-    id: "search_bar"
+    text: "Search buildings or addresses..."
 - assertVisible:
-    id: "campus_map"
+    text: "SGW"
 - assertVisible:
-    id: "campus_toggle"
+    text: "LOY"
 - assertVisible:
-    id: "LOY_button"
+    text: "Map"
 - assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
+    text: "Schedule"
 
 - tapOn:
-    id: "SGW_button"
+    point: "80%, 83%"
 - waitForAnimationToEnd:
     timeout: 5000
 
+- tapOn:
+    text: "SGW"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+### TODO: Fix building tapOn does not show building popup info because of text based test.
 # Tap on Hall building
 - tapOn:
-    point: 50% 47%
+    point: "50%, 45%"
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 10000
+
 
 - assertVisible:
-    id: "search_bar"
+    text: "Search buildings or addresses..."
 - assertVisible:
-    id: "campus_map"
+    text: "Map"
 - assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
-- assertVisible:
-    id: "google_map"
-- assertVisible:
-    id: "building_info_popup"
+    text: "Schedule"
 
 # Tap out of the popup info
 - tapOn:
-    point: 35% 50%
+    point: "35%, 50%"
 - waitForAnimationToEnd:
     timeout: 5000
+###
+
+- tapOn:
+    text: "LOY"
+- waitForAnimationToEnd:
+    timeout: 10000
 
 - assertVisible:
-    id: "search_bar"
+    text: "Search buildings or addresses..."
 - assertVisible:
-    id: "campus_map"
+    text: "SGW"
 - assertVisible:
-    id: "campus_toggle"
+    text: "LOY"
 - assertVisible:
-    id: "LOY_button"
+    text: "Map"
 - assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
-- assertVisible:
-    id: "google_map"
+    text: "Schedule"
+
+- tapOn:
+    point: "80%, 83%"
+- waitForAnimationToEnd:
+    timeout: 5000

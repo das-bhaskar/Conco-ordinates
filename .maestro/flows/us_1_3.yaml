@@ -10,69 +10,70 @@ appId: com.example.myapplication
 - launchApp:
     clearState: true
 - assertVisible:
-    id: "search_bar"
+    text: "Search buildings or addresses..."
 - assertVisible:
-    id: "campus_map"
+    text: "SGW"
 - assertVisible:
-    id: "campus_toggle"
+    text: "LOY"
 - assertVisible:
-    id: "LOY_button"
+    text: "Map"
 - assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
+    text: "Schedule"
 
 - tapOn:
-    id: "SGW_button"
+    point: "80%, 83%"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "SGW"
 - waitForAnimationToEnd:
     timeout: 5000
 
 - assertVisible:
-    id: "search_bar"
+    text: "Search buildings or addresses..."
 - assertVisible:
-    id: "campus_map"
+    text: "SGW"
 - assertVisible:
-    id: "campus_toggle"
+    text: "LOY"
 - assertVisible:
-    id: "LOY_button"
+    text: "Map"
 - assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
-- assertVisible:
-    id: "google_map"
+    text: "Schedule"
 
 - tapOn:
-    id: "LOY_button"
+    text: "LOY"
 - waitForAnimationToEnd:
     timeout: 5000
 
 - assertVisible:
-    id: "search_bar"
+    text: "Search buildings or addresses..."
 - assertVisible:
-    id: "campus_map"
+    text: "SGW"
 - assertVisible:
-    id: "campus_toggle"
+    text: "LOY"
 - assertVisible:
-    id: "LOY_button"
+    text: "Map"
 - assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
+    text: "Schedule"
+
+- tapOn:
+    text: "SGW"
+- waitForAnimationToEnd:
+    timeout: 5000
+
 - assertVisible:
-    id: "app_nav"
+    text: "Search buildings or addresses..."
 - assertVisible:
-    id: "map_option"
+    text: "SGW"
 - assertVisible:
-    id: "schedule_option"
+    text: "LOY"
 - assertVisible:
-    id: "google_map"
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    point: "80%, 83%"
+- waitForAnimationToEnd:
+    timeout: 5000

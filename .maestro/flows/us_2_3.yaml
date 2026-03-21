@@ -38,7 +38,7 @@ appId: com.example.myapplication
 
 # Tap on Hall building
 - tapOn:
-    point: 50% 47%
+    point: "50%, 47%"
 - waitForAnimationToEnd:
     timeout: 5000
 

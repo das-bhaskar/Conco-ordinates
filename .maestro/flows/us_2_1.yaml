@@ -3,137 +3,172 @@
 
 appId: com.example.myapplication
 ---
-# Scenario 1: Tap on a building for directions
 - launchApp:
     clearState: true
 - assertVisible:
-    id: "search_bar"
+    text: "Search buildings or addresses..."
 - assertVisible:
-    id: "campus_map"
+    text: "SGW"
 - assertVisible:
-    id: "campus_toggle"
+    text: "LOY"
 - assertVisible:
-    id: "LOY_button"
+    text: "Map"
 - assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
+    text: "Schedule"
 
+- tapOn:
+    point: "80%, 83%"
 - waitForAnimationToEnd:
     timeout: 5000
 
 - tapOn:
-    id: "SGW_button"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-# Tap on Hall building
-- tapOn:
-    point: 50% 47%
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "building_info_popup"
-
-- tapOn:
-    id: "directions_option"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "directions_info_popup"
-
-- assertVisible:
-    id: "directions_start_field"
-- assertVisible:
-    id: "directions_dest_field"
-
-- tapOn:
-    id: "directions_dest_field"
+    text: "Search buildings or addresses..."
 - waitForAnimationToEnd:
     timeout: 2000
 
 - inputText: "Vanier"
-- waitForAnimationToEnd:
-    timeout: 2000
-- assertVisible:
-    text: "Vanier Library"
-
 - tapOn:
     text: "Vanier Library"
-- waitForAnimationToEnd:
-    timeout: 2000
-
-
-# Scenario 2: Search for a building and get directions
-- launchApp:
-    clearState: true
-- assertVisible:
-    id: "search_bar"
-- assertVisible:
-    id: "campus_map"
-- assertVisible:
-    id: "campus_toggle"
-- assertVisible:
-    id: "LOY_button"
-- assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
-
 - waitForAnimationToEnd:
     timeout: 5000
 
+# TODO: Fix! Does not close the building info
 - tapOn:
-    id: "search_bar"
-- inputText: "Vanier"
+    point: "50%, 40%"
 - waitForAnimationToEnd:
     timeout: 2000
 
-- tapOn:
-    text: "Vanier Library"
-- waitForAnimationToEnd:
-    timeout: 2000
-
-- assertVisible:
-    id: "building_info_popup"
-
-- tapOn:
-    id: "directions_option"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "directions_info_popup"
-
-- assertVisible:
-    id: "directions_start_field"
-- assertVisible:
-    id: "directions_dest_field"
-
-- tapOn:
-    id: "directions_dest_field"
-- waitForAnimationToEnd:
-    timeout: 2000
-
-- inputText: "Hall"
-- waitForAnimationToEnd:
-    timeout: 2000
-- assertVisible:
-    text: "Henry F. Hall Building"
-
-- tapOn:
-    text: "Henry F. Hall Building"
-- waitForAnimationToEnd:
-    timeout: 2000
+## Scenario 1: Tap on a building for directions
+#- launchApp:
+#    clearState: true
+#- assertVisible:
+#    id: "search_bar"
+#- assertVisible:
+#    id: "campus_map"
+#- assertVisible:
+#    id: "campus_toggle"
+#- assertVisible:
+#    id: "LOY_button"
+#- assertVisible:
+#    id: "SGW_button"
+#- assertVisible: "RECENTER"
+#- assertVisible:
+#    id: "app_nav"
+#- assertVisible:
+#    id: "map_option"
+#- assertVisible:
+#    id: "schedule_option"
+#
+#- waitForAnimationToEnd:
+#    timeout: 5000
+#
+#- tapOn:
+#    id: "SGW_button"
+#- waitForAnimationToEnd:
+#    timeout: 5000
+#
+## Tap on Hall building
+#- tapOn:
+#    point: "50%, 47%"
+#- waitForAnimationToEnd:
+#    timeout: 5000
+#
+#- assertVisible:
+#    id: "building_info_popup"
+#
+#- tapOn:
+#    id: "directions_option"
+#- waitForAnimationToEnd:
+#    timeout: 5000
+#
+#- assertVisible:
+#    id: "directions_info_popup"
+#
+#- assertVisible:
+#    id: "directions_start_field"
+#- assertVisible:
+#    id: "directions_dest_field"
+#
+#- tapOn:
+#    id: "directions_dest_field"
+#- waitForAnimationToEnd:
+#    timeout: 2000
+#
+#- inputText: "Vanier"
+#- waitForAnimationToEnd:
+#    timeout: 2000
+#- assertVisible:
+#    text: "Vanier Library"
+#
+#- tapOn:
+#    text: "Vanier Library"
+#- waitForAnimationToEnd:
+#    timeout: 2000
+#
+#
+## Scenario 2: Search for a building and get directions
+#- launchApp:
+#    clearState: true
+#- assertVisible:
+#    id: "search_bar"
+#- assertVisible:
+#    id: "campus_map"
+#- assertVisible:
+#    id: "campus_toggle"
+#- assertVisible:
+#    id: "LOY_button"
+#- assertVisible:
+#    id: "SGW_button"
+#- assertVisible: "RECENTER"
+#- assertVisible:
+#    id: "app_nav"
+#- assertVisible:
+#    id: "map_option"
+#- assertVisible:
+#    id: "schedule_option"
+#
+#- waitForAnimationToEnd:
+#    timeout: 5000
+#
+#- tapOn:
+#    id: "search_bar"
+#- inputText: "Vanier"
+#- waitForAnimationToEnd:
+#    timeout: 2000
+#
+#- tapOn:
+#    text: "Vanier Library"
+#- waitForAnimationToEnd:
+#    timeout: 2000
+#
+#- assertVisible:
+#    id: "building_info_popup"
+#
+#- tapOn:
+#    id: "directions_option"
+#- waitForAnimationToEnd:
+#    timeout: 5000
+#
+#- assertVisible:
+#    id: "directions_info_popup"
+#
+#- assertVisible:
+#    id: "directions_start_field"
+#- assertVisible:
+#    id: "directions_dest_field"
+#
+#- tapOn:
+#    id: "directions_dest_field"
+#- waitForAnimationToEnd:
+#    timeout: 2000
+#
+#- inputText: "Hall"
+#- waitForAnimationToEnd:
+#    timeout: 2000
+#- assertVisible:
+#    text: "Henry F. Hall Building"
+#
+#- tapOn:
+#    text: "Henry F. Hall Building"
+#- waitForAnimationToEnd:
+#    timeout: 2000

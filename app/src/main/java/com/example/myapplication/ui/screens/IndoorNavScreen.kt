@@ -8,6 +8,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +25,7 @@ import com.example.myapplication.logic.TransferPreference
 import com.example.myapplication.ui.components.IndoorMapCanvas
 import com.example.myapplication.ui.components.IndoorNavViewModel
 import kotlinx.coroutines.launch
+
 
 private val Maroon = Color(0xFF912338)
 
@@ -46,15 +48,13 @@ fun IndoorNavScreen(
 ) {
     val state by vm.state.collectAsState()
 
-    // Reset and start navigation. building is passed explicitly to navigateTo
-    // (Bug 4) so the route builder never reads a stale state.currentBuilding
-    // from a previous session that hasn't been overwritten yet.
+    // Initial navigation
     LaunchedEffect(building, destination, startNodeId) {
         vm.resetForNewSession(
             building   = building,
             floor      = initialFloor,
             floors     = availableFloors,
-            isExitLeg  = onConfirmExit != null   // exit leg when onConfirmExit is provided
+            isExitLeg  = onConfirmExit != null
         )
         if (destination != null && startNodeId != null) {
             vm.navigateTo(
@@ -215,8 +215,8 @@ fun IndoorNavScreen(
             // ── segment progress bar ───────────────────────────────────────
             state.fullRoute?.let { route ->
                 SegmentProgressBar(
-                    current = state.currentSegmentIdx + 1,
-                    total   = route.totalSteps,
+                    current = state.stepOffset + state.currentStepIdx + 1,
+                    total   = state.totalStepCount.takeIf { it > 0 } ?: route.totalSteps,
                     modifier = Modifier.align(Alignment.TopCenter).padding(top = 4.dp)
                 )
             }
@@ -238,9 +238,30 @@ fun IndoorNavScreen(
                 }
             }
 
+            // ── mid-step "Next Step" button ────────────────────────────────
+            // Shown when there are more turn steps within the current walk segment.
+            // Lighter than SegmentAdvanceCard — just a small button at bottom.
+            val hasMoreSteps = state.currentSteps.isNotEmpty()
+                    && state.currentStepIdx < state.currentSteps.size - 1
+                    && state.pendingFloorChange == null
+                    && !state.hasArrived
+            AnimatedVisibility(
+                visible  = hasMoreSteps,
+                enter    = slideInVertically { it } + fadeIn(),
+                exit     = slideOutVertically { it } + fadeOut(),
+                modifier = Modifier.align(Alignment.BottomCenter)
+            ) {
+                val nextStep = state.currentSteps.getOrNull(state.currentStepIdx + 1)
+                NextStepCard(
+                    nextInstruction = nextStep?.instruction ?: "",
+                    distanceM       = state.currentSteps.getOrNull(state.currentStepIdx)?.distanceM ?: 0f,
+                    onConfirm       = { vm.advanceStep() }
+                )
+            }
+
             // ── segment advance card ───────────────────────────────────────
-            // Shown after each Walk segment so user confirms they physically
-            // reached the transfer point or the final destination.
+            // Shown at the last step of a walk segment — user confirms arrival
+            // at transfer point (elevator) or final destination.
             AnimatedVisibility(
                 visible  = state.pendingSegmentAdvance != null
                         && state.pendingFloorChange == null
@@ -298,6 +319,7 @@ fun IndoorNavScreen(
                                 startNodeId = startNodeId,
                                 startFloor  = startFloorNum
                             )
+                            vm.dismissRoom()  // close the popup after starting navigation
                         }
                     )
                 }
@@ -515,6 +537,52 @@ private fun RoomCard(
  * - Exit leg:  "Have you reached the exit?"     → "Yes, I'm at the Exit"
  * - Final:     "Have you arrived at your destination?" → "Yes, I've Arrived"
  */
+
+@Composable
+private fun NextStepCard(
+    nextInstruction: String,
+    distanceM:       Float,
+    onConfirm:       () -> Unit
+) {
+    val distText = when {
+        distanceM < 5f   -> ""
+        distanceM < 100f -> "In ~${distanceM.toInt()}m"
+        else             -> "In ~${(distanceM / 10).toInt() * 10}m"
+    }
+    Surface(
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+        shape = RoundedCornerShape(16.dp),
+        shadowElevation = 6.dp
+    ) {
+        Row(
+            Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment     = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Column(Modifier.weight(1f)) {
+                if (distText.isNotEmpty()) {
+                    Text(distText, fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(.5f))
+                }
+                Text(
+                    "→  $nextInstruction",
+                    fontSize   = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color      = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Button(
+                onClick = onConfirm,
+                colors  = ButtonDefaults.buttonColors(containerColor = Maroon),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text("I'm here", color = Color.White, fontSize = 13.sp)
+            }
+        }
+    }
+}
+
+
 @Composable
 private fun SegmentAdvanceCard(prompt: String, onConfirm: () -> Unit) {
     val isExit  = prompt.startsWith("Have you reached the exit")

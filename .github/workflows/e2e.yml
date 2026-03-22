@@ -55,11 +55,13 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
+          target: default
           arch: x86_64
-          profile: pixel_6
+          profile: pixel_4
           avd-name: maestro_ci
+          force-avd-creation: false
           emulator-boot-timeout: 600
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudit -no-boot-anim
+          emulator-options: -no-snapshot-save -no-window -noaudio -no-boot-anim
           disable-animations: true
           script: |
             adb install -r app/build/outputs/apk/debug/app-debug.apk
@@ -67,10 +69,10 @@ jobs:
             # Enable location permission
             adb shell pm grant com.example.myapplication \
               android.permission.ACCESS_FINE_LOCATION
-            
+          
             mkdir -p e2e-video-recordings e2e-report
-            
             chmod +x scripts/run_e2e.sh
+            bash scripts/run_e2e.sh
             
       - name: Upload recordings
         if: always()

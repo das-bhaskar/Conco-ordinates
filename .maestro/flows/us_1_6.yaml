@@ -3,9 +3,10 @@
 
 appId: com.example.myapplication
 ---
+# User is at the LOYOLA campus (Vanier Library)
 - setLocation:
-    latitude: 45.4972
-    longitude: -73.5789
+    latitude: 45.459081
+    longitude: -73.638709
 - launchApp:
     clearState: true
 - assertVisible:
@@ -20,39 +21,29 @@ appId: com.example.myapplication
     text: "Schedule"
 
 - tapOn:
-    point: "80%, 83%"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- tapOn:
     text: "SGW"
 - waitForAnimationToEnd:
     timeout: 10000
 
-### TODO: Fix building tapOn does not show building popup info because of text based test.
 # Tap on Hall building
 - tapOn:
-    point: "50%, 45%"
+    point: "50%, 47%"
 - waitForAnimationToEnd:
     timeout: 10000
 
-
 - assertVisible:
-    text: "Search buildings or addresses..."
+    text: "Henry F. Hall Building"
 - assertVisible:
-    text: "Map"
+    text: "Directions"
 - assertVisible:
-    text: "Schedule"
-
-# Tap out of the popup info
-- tapOn:
-    point: "35%, 50%"
-- waitForAnimationToEnd:
-    timeout: 5000
-###
+    text: "Save"
+- assertVisible:
+    text: "PIN"
+- assertVisible:
+    text: "Share"
 
 - tapOn:
-    text: "LOY"
+    point: "90%, 30%"
 - waitForAnimationToEnd:
     timeout: 10000
 
@@ -66,8 +57,3 @@ appId: com.example.myapplication
     text: "Map"
 - assertVisible:
     text: "Schedule"
-
-- tapOn:
-    point: "80%, 83%"
-- waitForAnimationToEnd:
-    timeout: 5000

@@ -3,6 +3,10 @@
 
 appId: com.example.myapplication
 ---
+# Set user location out of campus (Starbucks, Brossard)
+- setLocation:
+    latitude: 45.4377
+    longitude: -73.47379
 - launchApp:
     clearState: true
 - assertVisible:

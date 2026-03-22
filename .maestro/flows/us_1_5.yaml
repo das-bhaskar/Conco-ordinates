@@ -1,11 +1,9 @@
 
 # US-1.5: As a campus map user, I want the map to show the building I am currently located in, so that I know my current position on campus.
-#
-# We cannot test the color of buildings directly but we can make sure the application does not crash when a users
-# location is a campus building.
 
 appId: com.example.myapplication
 ---
+# Set user location out of campus (Starbucks, Brossard)
 - setLocation:
     latitude: 45.4377
     longitude: -73.47379
@@ -27,7 +25,6 @@ appId: com.example.myapplication
 - waitForAnimationToEnd:
     timeout: 5000
 
-# Give time to the application to load the new location
 - tapOn:
     text: "SGW"
 - waitForAnimationToEnd:
@@ -38,11 +35,12 @@ appId: com.example.myapplication
 - waitForAnimationToEnd:
     timeout: 5000
 
-# Assert that the app does not crash when out of campus
+# Set user location to Hall Building
 - setLocation:
     latitude: 45.4972
     longitude: -73.5789
-
+- launchApp:
+    clearState: true
 # Give time to the application to load the new location
 - waitForAnimationToEnd:
     timeout: 10000

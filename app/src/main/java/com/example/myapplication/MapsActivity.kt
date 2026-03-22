@@ -45,14 +45,25 @@ class MapsActivity : ComponentActivity() {
     ) { result ->
         val task = com.google.android.gms.auth.api.signin.GoogleSignIn
             .getSignedInAccountFromIntent(result.data)
+
         if (task.isSuccessful) {
             calendarViewModel.clearSelection()
             calendarViewModel.loadCalendarsAndAutoSelect()
         } else {
-            CrashReporter.recordNonFatal(
-                task.exception ?: Exception("Sign-in cancelled"),
-                "google_sign_in_failed"
-            )
+            // SURGERY: Instead of just logging, update the UI state
+            val exception = task.exception
+            val errorMessage = when {
+                // Check if user cancelled or if it's a network issue
+                exception is com.google.android.gms.common.api.ApiException -> {
+                    "Connection failed. Please check your internet or try again."
+                }
+                else -> "Login cancelled or failed."
+            }
+
+            // Notify the ViewModel so the UI can show the error
+            calendarViewModel.setAuthError(errorMessage)
+
+            CrashReporter.recordNonFatal(exception ?: Exception("Sign-in failed"), "google_sign_in_failed")
         }
     }
 

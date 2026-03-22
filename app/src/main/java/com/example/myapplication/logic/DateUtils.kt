@@ -1,7 +1,10 @@
 package com.example.myapplication.logic
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 import java.text.SimpleDateFormat
 import java.util.Locale
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * Centralised date/time formatters (PR review).
@@ -18,6 +21,7 @@ import java.util.Locale
  */
 object DateUtils {
 
+
     /** "3 Mar" — used in WeekNavigationRow header range label. */
     fun dayMonthFormatter(locale: Locale = Locale.getDefault()): SimpleDateFormat =
         SimpleDateFormat("d MMM", locale)
@@ -33,4 +37,11 @@ object DateUtils {
     /** "EEE d" — used in DayColumnHeaders for abbreviated day + date. */
     fun dayHeaderFormatter(locale: Locale = Locale.getDefault()): SimpleDateFormat =
         SimpleDateFormat("EEE d", locale)
+
+    val minuteTicker = flow {
+        while (true) {
+            emit(System.currentTimeMillis())
+            delay(1.minutes)
+        }
+    }
 }

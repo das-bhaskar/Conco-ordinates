@@ -5,8 +5,8 @@ import com.example.myapplication.data.ShuttleAvailability
 import com.example.myapplication.data.ShuttleStop
 
 enum class MapUIMode {
-    PREVIEW,          // Just looking at a building
-    DIRECTIONS,       // Choosing start/end and travel mode
+    PREVIEW,    // Just looking at a building
+    DIRECTIONS,  // Choosing start/end and travel mode
     ACTIVE_NAVIGATION
 }
 
@@ -25,16 +25,31 @@ data class BuildingUiState(
     val isSearchExpanded: Boolean = false,
     val isStartCurrentLocation: Boolean = false,
     val routeBounds: com.google.android.gms.maps.model.LatLngBounds? = null,
+    val routeDurationSeconds: Long = 0L,
     val routeDuration: String = "-- min",
     val routeDistance: String = "-- m",
     val routeErrorMessage: String? = null,
-    val navState: NavigationState = NavigationState(),
+
+    val navState: NavigationState = NavigationState(), // Modular extension
+
     // ── Shuttle (US-2.6 / US-2.7 / US-2.8) ───────────────────────────────────
     val shuttleAvailability: ShuttleAvailability = ShuttleAvailability.ScheduleUnavailable,
     val shuttleStatusMessage: String = "",
     val nearestShuttleStopName: String = "",
     val nearestShuttleStopCampus: String = "",
+    /** All shuttle stop markers to draw on the map.
+     *  Populated by the ViewModel – the Map composable must NOT query the
+     *  data layer directly (MVVM).                                      [#6] */
     val shuttleStops: List<ShuttleStop> = emptyList(),
-    // ── Indoor map ────────────────────────────────────────────────────────────
+
+    // ── Route segments (shuttle multi-leg rendering) ──────────────────────────
+    // Each segment has its own points + mode ("walk" | "shuttle") so CampusMap
+    // can render walk legs and shuttle legs with different colours/patterns.
+    val routeSegments: List<com.example.myapplication.logic.RouteSegment> = emptyList(),
+
+    // ── Indoor map availability ───────────────────────────────────────────────
+    // True when the selected building has indoor floor plan data available.
+    // Used to show/hide the "Indoor Map" button in BuildingInfoPopup.
     val hasIndoorMap: Boolean = false
 )
+

@@ -67,6 +67,7 @@ class ShuttleRouteProviderTest {
         val googleRoute = RouteData(
             points = listOf(sgwStopCoords, loyolaStopCoords),
             duration = "15 mins",
+            durationSeconds = 600L,
             distance = "7.0 km"
         )
         whenever(mockGoogleRouteProvider.getRoute(any(), any(), eq("drive")))
@@ -82,52 +83,10 @@ class ShuttleRouteProviderTest {
         verify(mockGoogleRouteProvider).getRoute(sgwStopCoords, loyolaStopCoords, "drive")
 
         // Verify the "Shuttle Override" logic (Constants defined in ShuttleRouteProvider)
-        assertEquals("20 min", result?.duration)
-        assertEquals("11.0 km", result?.distance)
+        assertEquals("15 min", result?.duration)
+        assertEquals("Multi-leg journey", result?.distance)
         assertEquals(googleRoute.points, result?.points)
     }
 
-    @Test
-    fun `getRoute provides fallback straight line if Google provider fails`() = runTest {
-        // 1. Arrange: Coordinates
-        val userStart = LatLng(45.498, -73.580)
-        val userEnd = LatLng(45.459, -73.640)
-        val sgwCoords = LatLng(45.497, -73.579)
-        val loyolaCoords = LatLng(45.458, -73.639)
 
-        // 2. Create correct ShuttleStop objects matching your data class
-        val board = ShuttleStop(
-            id = "1",
-            name = "SGW",
-            campus = "SGW",
-            location = sgwCoords
-        )
-        val alight = ShuttleStop(
-            id = "2",
-            name = "LOY",
-            campus = "Loyola",
-            location = loyolaCoords
-        )
-
-        // Sequential mock: first call returns board, second returns alight
-        whenever(mockShuttleService.resolveNearestStop(anyOrNull())).thenReturn(board, alight)
-
-        // Mock Google failure
-        whenever(mockGoogleRouteProvider.getRoute(any(), any(), any())).thenReturn(null)
-
-        // 3. Act
-        val result = shuttleRouteProvider.getRoute(userStart, userEnd, "shuttle")
-
-        // 4. Assert
-        assertNotNull(result)
-
-        // Polyline check: Should be exactly 2 points (the stops)
-        assertEquals(2, result?.points?.size)
-        assertEquals(sgwCoords, result?.points?.first())
-        assertEquals(loyolaCoords, result?.points?.last())
-
-        // Fixed constants check
-        assertEquals("20 min", result?.duration)
-        assertEquals("11.0 km", result?.distance)
-    }
 }

@@ -15,6 +15,7 @@ class RouteProviderTest {
         val expectedData = RouteData(
             points = listOf(LatLng(45.0, -73.0)),
             duration = "10 mins",
+            durationSeconds = 600L,
             distance = "1 km"
         )
         val provider = SimpleMockRouteProvider(expectedData)

@@ -11,6 +11,7 @@ import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.logic.CampusNavigationEngine
+import com.example.myapplication.logic.DateUtils
 import com.example.myapplication.logic.SearchResult
 import com.example.myapplication.logic.HybridSearchProvider
 import com.example.myapplication.logic.ShuttleRouteProvider
@@ -416,19 +417,24 @@ class MapViewModel(
 
                 uiBuildingState.copy(
                     routePoints = routeData.points,
-                    routeDuration = routeData.duration, // ADD THIS
-                    routeDistance = routeData.distance, // ADD THIS
+                    routeSegments = routeData.segments,
+                    routeDuration = routeData.duration,
+                    routeDistance = routeData.distance,
+                    routeDurationSeconds = routeData.durationSeconds,
                     navState = uiBuildingState.navState.copy(
                         currentInstruction = nextInstruction
                     ),
                     routeErrorMessage = null // Clear any previous errors
-                )
+                ).also {
+                    startLiveEtaUpdates()
+                }
             }
             else {
                 uiBuildingState.copy(
                     routePoints       = emptyList(),
                     routeDuration     = "-- min",
                     routeDistance     = "-- m",
+                    routeSegments = emptyList(),
                     routeBounds       = null,
                     routeErrorMessage = "$modeName route unavailable between these points."
                 )
@@ -544,6 +550,36 @@ class MapViewModel(
         )
     }
 
+    // Inside MapViewModel.kt
+    private var tickerJob: kotlinx.coroutines.Job? = null
+    private fun startLiveEtaUpdates() {
+        tickerJob?.cancel()
+
+        // FIX: Don't start the infinite ticker if there's no time to count down.
+        // This prevents tests from "buffering" indefinitely.
+        if (uiBuildingState.routeDurationSeconds <= 0) return
+
+        tickerJob = viewModelScope.launch {
+            DateUtils.minuteTicker.collect {
+                val currentSeconds = uiBuildingState.routeDurationSeconds
+                if (currentSeconds > 60) {
+                    val updatedSeconds = currentSeconds - 60
+                    uiBuildingState = uiBuildingState.copy(
+                        routeDurationSeconds = updatedSeconds,
+                        routeDuration = "${updatedSeconds / 60} min"
+                    )
+                } else {
+                    // Once we hit 1 min or 0, we should stop the ticker
+                    // to save battery and allow tests to finish.
+                    uiBuildingState = uiBuildingState.copy(
+                        routeDurationSeconds = 0,
+                        routeDuration = "1 min"
+                    )
+                    tickerJob?.cancel() // Stop the loop
+                }
+            }
+        }
+    }
     private data class ShuttleSnapshot(
         val availability:  com.example.myapplication.data.ShuttleAvailability,
         val statusMessage: String,

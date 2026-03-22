@@ -1,5 +1,7 @@
 package com.example.myapplication.logic
 
+import com.example.myapplication.data.CampusRepo
+import com.example.myapplication.data.ShuttleAvailability
 import com.google.android.gms.maps.model.LatLng
 
 /**
@@ -17,35 +19,70 @@ import com.google.android.gms.maps.model.LatLng
  */
 class ShuttleRouteProvider(
     private val shuttleService: ShuttleService,
-    private val googleRouteProvider: RouteProvider   // injected – no OkHttpClient here
+    private val googleRouteProvider: RouteProvider
 ) : RouteProvider {
 
-    companion object {
-        private const val SHUTTLE_RIDE_MINUTES = 20
-        private const val SHUTTLE_DISTANCE     = "11.0 km"
-    }
-
     override suspend fun getRoute(start: LatLng, end: LatLng, mode: String): RouteData? {
-        val boardingStop  = shuttleService.resolveNearestStop(start) ?: return null
-        val alightingStop = shuttleService.resolveNearestStop(end)   ?: return null
+        val startCampus = CampusRepo.getCampus(start)
+        val endCampus = CampusRepo.getCampus(end)
 
-        // Delegate to the shared GoogleRouteProvider – single source of truth
-        // for all Google Directions API calls.
-        val road = googleRouteProvider.getRoute(
-            boardingStop.location,
-            alightingStop.location,
-            "drive"
-        ) ?: RouteData(
-            // Fallback: straight line between stops if network call fails
-            points   = listOf(boardingStop.location, alightingStop.location),
-            duration = "$SHUTTLE_RIDE_MINUTES min",
-            distance = SHUTTLE_DISTANCE
-        )
+        // 1. Same-campus check (Returns actual walk time)
+        if (startCampus != null && startCampus == endCampus) {
+            val walkOnly = googleRouteProvider.getRoute(start, end, "walk")
+            return walkOnly?.copy(segments = listOf(RouteSegment(walkOnly.points, "walk")))
+        }
 
-        // Override duration/distance with the known shuttle timetable values
-        return road.copy(
-            duration = "$SHUTTLE_RIDE_MINUTES min",
-            distance = SHUTTLE_DISTANCE
+        val boardingStop = shuttleService.resolveNearestStop(start) ?: return null
+        val alightingStop = shuttleService.resolveNearestStop(end) ?: return null
+
+        // 2. Fetch the 3 real legs from Google
+        val walkToStop = googleRouteProvider.getRoute(start, boardingStop.location, "walk")
+        val shuttleRide =
+            googleRouteProvider.getRoute(boardingStop.location, alightingStop.location, "drive")
+        val walkToDest = googleRouteProvider.getRoute(alightingStop.location, end, "walk")
+
+        val allPoints = mutableListOf<LatLng>()
+        val segments = mutableListOf<RouteSegment>()
+
+        // Helper to extract "5" from "5 mins" or "1 hour 2 mins"
+        fun parseMinutes(duration: String?): Int {
+            if (duration == null) return 0
+            return duration.split(" ").firstOrNull { it.all { char -> char.isDigit() } }
+                ?.toIntOrNull() ?: 0
+        }
+
+        // 3. Sum up the travel durations
+        val travelTime = parseMinutes(walkToStop?.duration) +
+                parseMinutes(shuttleRide?.duration) +
+                parseMinutes(walkToDest?.duration)
+
+        // 4. Get the real-time shuttle wait
+        val availability = shuttleService.checkAvailability(startCampus?.name ?: "")
+        val waitTime =
+            if (availability is ShuttleAvailability.Active) availability.nextDepartureMinutes else 0
+
+        val totalTime = travelTime //+ waitTime
+
+        // Stitch points and segments
+        listOf(
+            walkToStop to "walk",
+            shuttleRide to "shuttle",
+            walkToDest to "walk"
+        ).forEach { (data, type) ->
+            data?.let {
+                allPoints.addAll(it.points)
+                segments.add(RouteSegment(it.points, type))
+            }
+        }
+        val totalSeconds = (walkToStop?.durationSeconds ?: 0L) +
+                (shuttleRide?.durationSeconds ?: 0L) +
+                (walkToDest?.durationSeconds ?: 0L)
+        return RouteData(
+            points = allPoints,
+            duration = "$totalTime min", // Now dynamic based on Google + Shuttle wait
+            distance = "Multi-leg journey",
+            durationSeconds = totalSeconds,
+            segments = segments
         )
     }
 }

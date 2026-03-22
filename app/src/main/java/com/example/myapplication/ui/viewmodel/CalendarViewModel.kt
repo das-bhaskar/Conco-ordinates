@@ -12,10 +12,14 @@ import com.example.myapplication.logic.CalendarInfo
 import com.example.myapplication.logic.CalendarProvider
 import com.example.myapplication.logic.currentWeekMonday
 import com.example.myapplication.ui.models.CalendarState
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -42,9 +46,14 @@ import java.time.ZonedDateTime
 class CalendarViewModel(
     private val calendarProvider:    CalendarProvider,
     private val calendarPreferences: CalendarPreferences,
-    private val locationResolver:    LocationResolver   // required — inject at call-site
+    private val locationResolver:    LocationResolver,   // required — inject at call-site
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ) : ViewModel() {
 
+
+    private fun launchOnMain(block: suspend kotlinx.coroutines.CoroutineScope.() -> Unit) {
+        viewModelScope.launch(dispatcher) { block() }
+    }
     // ── Calendar picker state ─────────────────────────────────────────────────
     var calendarState by mutableStateOf<CalendarState>(CalendarState.Idle)
         private set
@@ -70,50 +79,50 @@ class CalendarViewModel(
     // Without this, nextUpcomingEvent only re-derives when weekEvents changes —
     // meaning a class that starts while the user is looking at the map would
     // never expire from the pill until the next data refresh (PR review).
-    private val tickerFlow = flow {
-        while (true) {
-            emit(System.currentTimeMillis())
-            delay(60_000L)
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), System.currentTimeMillis())
-
+//    private val tickerFlow = flow {
+//        while (true) {
+//            emit(System.currentTimeMillis())
+//            delay(60_000L)
+//        }
+//    }
     // ── Derived: next upcoming event with a location (for NextClassPill) ──────
     // Recalculated on every ticker tick so the pill expires naturally as time passes.
-    val nextUpcomingEvent: ResolvedCalendarEvent?
-        get() {
-            val now = tickerFlow.value
-            return weekEvents
-                .filter { it.startTimeMs >= now && !it.location.isNullOrBlank() }
-                .minByOrNull { it.startTimeMs }
-        }
+    // ── Derived: next upcoming event with a location (for NextClassPill) ──────
+// We use mutableStateOf for these so the UI actually "sees" the change
+// when the ticker ticks.
+    var nextUpcomingEvent by mutableStateOf<ResolvedCalendarEvent?>(null)
+        private set
 
-    /**
-     * Business rule: an upcoming class is "urgent" when it starts within
-     * [URGENT_THRESHOLD_MINUTES]. Defined here — not in the UI — so the
-     * threshold can change in one place without touching any composable.
-     */
-    val isNextClassUrgent: Boolean
-        get() {
-            val event = nextUpcomingEvent ?: return false
-            val minutesUntil = (event.startTimeMs - tickerFlow.value) / 60_000
-            return minutesUntil in 0..URGENT_THRESHOLD_MINUTES
-        }
+    var isNextClassUrgent by mutableStateOf(false)
+        private set
 
-    /**
-     * Pre-formatted time-remaining string for NextClassPill.
-     * Computed here so the UI receives a ready-to-display string (PR review:
-     * minutesUntil / timeLabel logic removed from NextClassPill composable).
-     */
-    val nextClassTimeRemaining: String
-        get() {
-            val event = nextUpcomingEvent ?: return ""
-            val minutesUntil = ((event.startTimeMs - tickerFlow.value) / 60_000).coerceAtLeast(0)
-            return when {
+    var nextClassTimeRemaining by mutableStateOf("")
+        private set
+
+    // ── Update Logic ──
+    private fun refreshPillState(now: Long) {
+        val event = weekEvents
+            .filter { it.startTimeMs >= now && !it.location.isNullOrBlank() }
+            .minByOrNull { it.startTimeMs }
+
+        nextUpcomingEvent = event
+
+        if (event != null) {
+            val minutesUntil = ((event.startTimeMs - now) / 60_000).coerceAtLeast(0)
+
+            isNextClassUrgent = minutesUntil in 0..URGENT_THRESHOLD_MINUTES
+
+            nextClassTimeRemaining = when {
                 minutesUntil == 0L -> "Now"
                 minutesUntil < 60  -> "in ${minutesUntil}m"
                 else               -> "in ${minutesUntil / 60}h ${minutesUntil % 60}m"
             }
+        } else {
+            nextClassTimeRemaining = ""
+            isNextClassUrgent = false
+            tickerJob?.cancel()
         }
+    }
 
     companion object {
         const val URGENT_THRESHOLD_MINUTES = 15L
@@ -132,17 +141,41 @@ class CalendarViewModel(
      * lived in MapsActivity — the ViewModel handles its own side-effects.
      */
     private fun restoreSelectionIfAvailable() {
-        val id   = calendarPreferences.getSelectedCalendarId()   ?: return
+        val id = calendarPreferences.getSelectedCalendarId() ?: return
         val name = calendarPreferences.getSelectedCalendarName() ?: return
-        selectedCalendarId   = id
+        selectedCalendarId = id
         selectedCalendarName = name
-        viewModelScope.launch {
+        launchOnMain {
             calendarState = CalendarState.Loading
             loadWeekEvents(id)
             calendarState = CalendarState.Idle
         }
     }
+    private var tickerJob: kotlinx.coroutines.Job? = null
 
+    // Change your tickerFlow to just emit once immediately
+    private val tickerFlow = flow {
+        emit(System.currentTimeMillis())
+    }
+
+    private fun startTicker() {
+        tickerJob?.cancel()
+        tickerJob = viewModelScope.launch(dispatcher) {
+            refreshPillState(System.currentTimeMillis())
+            while (true) {
+                refreshPillState(System.currentTimeMillis())
+
+                // The Break Condition:
+                // If we aren't loading and have no events (or the day is over),
+                // kill the loop so tests don't hang.
+                if (!weekViewLoading && (weekEvents.isEmpty() || nextUpcomingEvent == null)) {
+                    break
+                }
+
+                delay(60_000L)
+            }
+        }
+    }
     // ─────────────────────────────────────────────────────────────────────────
     // Calendar picker
     // ─────────────────────────────────────────────────────────────────────────
@@ -153,7 +186,7 @@ class CalendarViewModel(
      * which one contains their courses.
      */
     fun loadCalendarsAndAutoSelect() {
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher){
             calendarState = CalendarState.Loading
             val calendars = calendarProvider.getCalendars()
             calendarState = if (calendars.isEmpty()) {
@@ -174,7 +207,7 @@ class CalendarViewModel(
         // Persist before the coroutine so it's saved even if the coroutine
         // is cancelled (e.g. user backgrounds the app mid-load).
         calendarPreferences.saveSelection(CalendarInfo(id = calendarId, summary = calendarName))
-        viewModelScope.launch {
+        viewModelScope.launch(dispatcher){
             calendarState = CalendarState.Loading
             loadWeekEvents(calendarId)
             calendarState = CalendarState.Idle
@@ -211,12 +244,12 @@ class CalendarViewModel(
      * Loads all events for the week starting at [weekStartMs].
      * Called on init restore, calendar selection, or week navigation.
      */
+    private var loadJob: kotlinx.coroutines.Job? = null
     fun loadWeekEvents(calendarId: String, weekStartMs: Long = currentWeekStartMs) {
         currentWeekStartMs = weekStartMs
-        viewModelScope.launch {
+        loadJob?.cancel()
+        loadJob=viewModelScope.launch(dispatcher){
             weekViewLoading = true
-            // Resolve location for every event in the ViewModel layer —
-            // UI receives pre-resolved data and never calls parsing logic.
             weekEvents = calendarProvider.getWeekEvents(calendarId, weekStartMs)
                 .map { event ->
                     ResolvedCalendarEvent(
@@ -225,6 +258,7 @@ class CalendarViewModel(
                     )
                 }
             weekViewLoading = false
+            startTicker()
         }
     }
 
@@ -253,5 +287,18 @@ class CalendarViewModel(
             .toInstant()
             .toEpochMilli()
         loadWeekEvents(calendarId, newStart)
+    }
+    fun setAuthError(message: String) {
+        calendarState = CalendarState.Error(message)
+    }
+
+    // Add this so the UI can dismiss the error popup
+    fun dismissError() {
+        calendarState = CalendarState.Idle
+    }
+    override fun onCleared() {
+        super.onCleared()
+        loadJob?.cancel()
+        tickerJob?.cancel()
     }
 }

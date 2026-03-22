@@ -54,13 +54,13 @@ jobs:
       - name: Run E2E Tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 33
+          api-level: 29
           arch: x86_64
           profile: pixel_6
           avd-name: maestro_ci
+          emulator-boot-timeout: 600
           emulator-options: -no-window -gpu swiftshader_indirect -noaudit -no-boot-anim
           disable-animations: true
-          boot-timeout: 600
           script: |
             adb install -r app/build/outputs/apk/debug/app-debug.apk
             

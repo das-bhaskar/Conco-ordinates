@@ -29,6 +29,7 @@ data class BuildingUiState(
     val routeDuration: String = "-- min",
     val routeDistance: String = "-- m",
     val routeErrorMessage: String? = null,
+    val routeSegments: List<com.example.myapplication.logic.RouteSegment> = emptyList(), // Add this
 
     val navState: NavigationState = NavigationState(), // Modular extension
 

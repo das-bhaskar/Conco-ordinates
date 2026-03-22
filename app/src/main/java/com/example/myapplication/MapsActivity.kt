@@ -40,6 +40,8 @@ class MapsActivity : ComponentActivity() {
     private lateinit var calendarViewModel:   CalendarViewModel
     private lateinit var fusedLocationClient: com.google.android.gms.location.FusedLocationProviderClient
 
+    // ── Google Sign-In (must live here — needs ActivityResultLauncher) ─────────
+    // ── Google Sign-In (Surgical Update) ─────────
     private val signInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->

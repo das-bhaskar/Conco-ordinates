@@ -1,8 +1,16 @@
 
 # US-2.1: As a user, I want to select my start and destination points by either typing a building name or clicking a building on the map, so that I can plan my route with minimal effort.
+# US-2.2: As a campus map user, I want my current building to be used as the starting point, so that I don’t have to manually select it.
+#
+# This test implements US-2.1 and US-2.2 making the implementation of an E2E test for US-2.2 redundant.
 
 appId: com.example.myapplication
 ---
+# Scenario 1: Type building name
+# Set user location out of campus (Starbucks, Brossard)
+- setLocation:
+    latitude: 45.4377
+    longitude: -73.47379
 - launchApp:
     clearState: true
 - assertVisible:
@@ -32,80 +40,76 @@ appId: com.example.myapplication
 - waitForAnimationToEnd:
     timeout: 5000
 
-# TODO: Fix! Does not close the building info
-- tapOn:
-    point: "50%, 40%"
+- tapOn: "Directions"
 - waitForAnimationToEnd:
     timeout: 2000
 
-## Scenario 1: Tap on a building for directions
-#- launchApp:
-#    clearState: true
-#- assertVisible:
-#    id: "search_bar"
-#- assertVisible:
-#    id: "campus_map"
-#- assertVisible:
-#    id: "campus_toggle"
-#- assertVisible:
-#    id: "LOY_button"
-#- assertVisible:
-#    id: "SGW_button"
-#- assertVisible: "RECENTER"
-#- assertVisible:
-#    id: "app_nav"
-#- assertVisible:
-#    id: "map_option"
-#- assertVisible:
-#    id: "schedule_option"
-#
-#- waitForAnimationToEnd:
-#    timeout: 5000
-#
-#- tapOn:
-#    id: "SGW_button"
-#- waitForAnimationToEnd:
-#    timeout: 5000
-#
-## Tap on Hall building
-#- tapOn:
-#    point: "50%, 47%"
-#- waitForAnimationToEnd:
-#    timeout: 5000
-#
-#- assertVisible:
-#    id: "building_info_popup"
-#
-#- tapOn:
-#    id: "directions_option"
-#- waitForAnimationToEnd:
-#    timeout: 5000
-#
-#- assertVisible:
-#    id: "directions_info_popup"
-#
-#- assertVisible:
-#    id: "directions_start_field"
-#- assertVisible:
-#    id: "directions_dest_field"
-#
-#- tapOn:
-#    id: "directions_dest_field"
-#- waitForAnimationToEnd:
-#    timeout: 2000
-#
-#- inputText: "Vanier"
-#- waitForAnimationToEnd:
-#    timeout: 2000
-#- assertVisible:
-#    text: "Vanier Library"
-#
-#- tapOn:
-#    text: "Vanier Library"
-#- waitForAnimationToEnd:
-#    timeout: 2000
-#
-#
+- assertVisible:
+    text: "Directions"
+- assertVisible:
+    text: "Your position"
+- assertVisible:
+    text: "Vanier Library"
+- assertVisible: "Walk"
+- assertVisible: "Drive"
+- assertVisible: "Transit"
+- assertVisible: "Shuttle"
+
+- tapOn: "Drive"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- assertVisible:
+    text: "Start"
+
+
+- setLocation:
+    latitude: 45.459081
+    longitude: -73.638709
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    text: "SGW"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    point: "50%, 47%"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "Directions"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- assertVisible:
+    text: "Directions"
+- assertVisible:
+    text: "Your position"
+- assertVisible:
+    text: "Henry F. Hall Building"
+- assertVisible: "Walk"
+- assertVisible: "Drive"
+- assertVisible: "Transit"
+- assertVisible: "Shuttle"
+
+- tapOn: "Drive"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- assertVisible:
+    text: "Start"
 ## Scenario 2: Search for a building and get directions
 #- launchApp:
 #    clearState: true

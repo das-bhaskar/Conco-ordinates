@@ -60,6 +60,7 @@ jobs:
           avd-name: maestro_ci
           emulator-options: -no-window -gpu swiftshader_indirect -noaudit -no-boot-anim
           disable-animations: true
+          boot-timeout: 600
           script: |
             adb install -r app/build/outputs/apk/debug/app-debug.apk
             

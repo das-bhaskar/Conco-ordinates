@@ -7,6 +7,11 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
 jobs:
   e2e_tests:
     name: E2E Tests
@@ -82,6 +87,7 @@ jobs:
 
       - name: Display results on PR page
         if: always()
+        continue-on-error: true
         uses: EnricoMi/publish-unit-test-result-action/macos@v2
         with:
           files: e2e-report/*.xml

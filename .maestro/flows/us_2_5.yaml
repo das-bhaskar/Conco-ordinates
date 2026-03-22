@@ -1,11 +1,5 @@
 
 # US-2.5: As a campus map user, I want to be able to choose between walking, driving, and public transportation, so that I can travel using my preferred method based on the weather or my schedule.
-# US-2.6: As a campus map user, I want shuttle service routes to be displayed, so that I can efficiently use the Concordia Shuttle.
-# US-2.7: As a campus map user, I want the application to determine shuttle availability based on the current time, so that I only see shuttle routes when the service is operating.
-# US-2.8: As a campus map user, I want the nearest shuttle stop to be identified, so that I know where to board.
-#
-# This test covers both user stories 2.5, 2.6, 2.7 and 2.8. Implementing an e2e test for US-2.6, US-2.7 or US-2.8 would be redundant since it
-# is tested through US-2.5 e2e test.
 
 appId: com.example.myapplication
 ---

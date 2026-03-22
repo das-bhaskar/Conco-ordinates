@@ -62,7 +62,8 @@ appId: com.example.myapplication
 - assertVisible:
     text: "Start"
 
-
+# Scenario 2: Tap on a building
+# Set user location to LOYOLA campus (Vanier Library)
 - setLocation:
     latitude: 45.459081
     longitude: -73.638709
@@ -110,69 +111,3 @@ appId: com.example.myapplication
 
 - assertVisible:
     text: "Start"
-## Scenario 2: Search for a building and get directions
-#- launchApp:
-#    clearState: true
-#- assertVisible:
-#    id: "search_bar"
-#- assertVisible:
-#    id: "campus_map"
-#- assertVisible:
-#    id: "campus_toggle"
-#- assertVisible:
-#    id: "LOY_button"
-#- assertVisible:
-#    id: "SGW_button"
-#- assertVisible: "RECENTER"
-#- assertVisible:
-#    id: "app_nav"
-#- assertVisible:
-#    id: "map_option"
-#- assertVisible:
-#    id: "schedule_option"
-#
-#- waitForAnimationToEnd:
-#    timeout: 5000
-#
-#- tapOn:
-#    id: "search_bar"
-#- inputText: "Vanier"
-#- waitForAnimationToEnd:
-#    timeout: 2000
-#
-#- tapOn:
-#    text: "Vanier Library"
-#- waitForAnimationToEnd:
-#    timeout: 2000
-#
-#- assertVisible:
-#    id: "building_info_popup"
-#
-#- tapOn:
-#    id: "directions_option"
-#- waitForAnimationToEnd:
-#    timeout: 5000
-#
-#- assertVisible:
-#    id: "directions_info_popup"
-#
-#- assertVisible:
-#    id: "directions_start_field"
-#- assertVisible:
-#    id: "directions_dest_field"
-#
-#- tapOn:
-#    id: "directions_dest_field"
-#- waitForAnimationToEnd:
-#    timeout: 2000
-#
-#- inputText: "Hall"
-#- waitForAnimationToEnd:
-#    timeout: 2000
-#- assertVisible:
-#    text: "Henry F. Hall Building"
-#
-#- tapOn:
-#    text: "Henry F. Hall Building"
-#- waitForAnimationToEnd:
-#    timeout: 2000

@@ -7,164 +7,53 @@
 
 appId: com.example.myapplication
 ---
-# Scenario 1: Tap on a building for directions
+- setLocation:
+    latitude: 45.459081
+    longitude: -73.638709
 - launchApp:
     clearState: true
 - assertVisible:
-    id: "search_bar"
+    text: "Search buildings or addresses..."
 - assertVisible:
-    id: "campus_map"
+    text: "SGW"
 - assertVisible:
-    id: "campus_toggle"
+    text: "LOY"
 - assertVisible:
-    id: "LOY_button"
+    text: "Map"
 - assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
-
-- waitForAnimationToEnd:
-    timeout: 5000
+    text: "Schedule"
 
 - tapOn:
-    id: "SGW_button"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-# Tap on Hall building
-- tapOn:
-    point: "50%, 47%"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "building_info_popup"
-
-- tapOn:
-    id: "directions_option"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "directions_info_popup"
-
-- assertVisible:
-    id: "directions_start_field"
-- assertVisible:
-    id: "directions_dest_field"
-- assertVisible:
-    text: "PREVIEW"
-
-- tapOn:
-    id: "directions_close_button"
+    text: "Search buildings or addresses..."
 - waitForAnimationToEnd:
     timeout: 2000
 
-- assertNotVisible:
-    id: "directions_info_popup"
-- assertNotVisible:
-    id: "buildings_info_popup"
-
-- assertVisible:
-    id: "search_bar"
-- assertVisible:
-    id: "campus_map"
-- assertVisible:
-    id: "campus_toggle"
-- assertVisible:
-    id: "LOY_button"
-- assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
-
-# Scenario 2: Search for a building and get directions
-- launchApp:
-    clearState: true
-- assertVisible:
-    id: "search_bar"
-- assertVisible:
-    id: "campus_map"
-- assertVisible:
-    id: "campus_toggle"
-- assertVisible:
-    id: "LOY_button"
-- assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
-
+- inputText: "Hall"
+- tapOn:
+    text: "Henry F. Hall Building"
 - waitForAnimationToEnd:
     timeout: 5000
 
-- tapOn:
-    id: "search_bar"
-- inputText: "Vanier"
-- waitForAnimationToEnd:
-    timeout: 2000
-
-- tapOn:
-    text: "Vanier Library"
+- tapOn: "Directions"
 - waitForAnimationToEnd:
     timeout: 2000
 
 - assertVisible:
-    id: "building_info_popup"
-
-- tapOn:
-    id: "directions_option"
-- waitForAnimationToEnd:
-    timeout: 5000
-
+    text: "Directions"
 - assertVisible:
-    id: "directions_info_popup"
+    text: "Your position"
+- assertVisible:
+    text: "Henry F. Hall Building"
+- assertVisible: "Walk"
+- assertVisible: "Drive"
+- assertVisible: "Transit"
+- assertVisible: "Shuttle"
 
-- assertVisible:
-    id: "directions_start_field"
-- assertVisible:
-    id: "directions_dest_field"
-- assertVisible:
-    text: "PREVIEW"
-
-- tapOn:
-    id: "directions_close_button"
+- tapOn: "Drive"
 - waitForAnimationToEnd:
     timeout: 2000
 
-- assertNotVisible:
-    id: "directions_info_popup"
-- assertNotVisible:
-    id: "buildings_info_popup"
-
 - assertVisible:
-    id: "search_bar"
-- assertVisible:
-    id: "campus_map"
-- assertVisible:
-    id: "campus_toggle"
-- assertVisible:
-    id: "LOY_button"
-- assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
+    text: "Start"
+- tapOn:
+    text: "Start"

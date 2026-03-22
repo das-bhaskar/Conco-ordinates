@@ -9,223 +9,63 @@
 
 appId: com.example.myapplication
 ---
-# Scenario 1: Tap on a building for directions
+# Set user location out of campus (Starbucks, Brossard)
+- setLocation:
+    latitude: 45.4377
+    longitude: -73.47379
 - launchApp:
     clearState: true
 - assertVisible:
-    id: "search_bar"
+    text: "Search buildings or addresses..."
 - assertVisible:
-    id: "campus_map"
+    text: "SGW"
 - assertVisible:
-    id: "campus_toggle"
+    text: "LOY"
 - assertVisible:
-    id: "LOY_button"
+    text: "Map"
 - assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
+    text: "Schedule"
 
+- tapOn:
+    point: "80%, 83%"
 - waitForAnimationToEnd:
     timeout: 5000
 
 - tapOn:
-    id: "SGW_button"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-# Tap on Hall building
-- tapOn:
-    point: "50%, 47%"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "building_info_popup"
-
-- tapOn:
-    id: "directions_option"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "directions_info_popup"
-
-- assertVisible:
-    id: "directions_start_field"
-- assertVisible:
-    id: "directions_dest_field"
-- assertVisible:
-    text: "PREVIEW"
-- assertVisible:
-    id: "transport_mode_walk"
-- assertVisible:
-    id: "transport_mode_drive"
-- assertVisible:
-    id: "transport_mode_public"
-- assertVisible:
-    id: "transport_mode_shuttle"
-
-- tapOn:
-    id: "transport_mode_drive"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "transport_mode_drive"
-- assertVisible:
-    id: "directions_info_popup"
-
-- tapOn:
-    id: "transport_mode_public"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "transport_mode_public"
-- assertVisible:
-    id: "directions_info_popup"
-
-- tapOn:
-    id: "transport_mode_shuttle"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "transport_mode_shuttle"
-- assertVisible:
-    id: "directions_info_popup"
-- assertNotVisible:
-    text: "Fastest route"
-- assertTrue:
-    condition: ${visible("Next shuttle:") || visible("Shuttle out of service")}
-- runFlow:
-    when:
-      visible: "Next shuttle:"
-    commands:
-      - assertVisible:
-          text: "Nearest stop:"
-
-- tapOn:
-    id: "transport_mode_walk"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "transport_mode_walk"
-- assertVisible:
-    id: "directions_info_popup"
-
-# Scenario 2: Search for a building and get directions
-- launchApp:
-    clearState: true
-- assertVisible:
-    id: "search_bar"
-- assertVisible:
-    id: "campus_map"
-- assertVisible:
-    id: "campus_toggle"
-- assertVisible:
-    id: "LOY_button"
-- assertVisible:
-    id: "SGW_button"
-- assertVisible: "RECENTER"
-- assertVisible:
-    id: "app_nav"
-- assertVisible:
-    id: "map_option"
-- assertVisible:
-    id: "schedule_option"
-
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- tapOn:
-    id: "search_bar"
-- inputText: "Vanier"
+    text: "Search buildings or addresses..."
 - waitForAnimationToEnd:
     timeout: 2000
 
+- inputText: "Vanier"
 - tapOn:
     text: "Vanier Library"
 - waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "Directions"
+- waitForAnimationToEnd:
     timeout: 2000
 
 - assertVisible:
-    id: "building_info_popup"
+    text: "Directions"
+- assertVisible:
+    text: "Your position"
+- assertVisible:
+    text: "Vanier Library"
+- assertVisible: "Walk"
+- assertVisible: "Drive"
+- assertVisible: "Transit"
+- assertVisible: "Shuttle"
 
-- tapOn:
-    id: "directions_option"
+- tapOn: "Drive"
 - waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "directions_info_popup"
-
-- assertVisible:
-    id: "directions_start_field"
-- assertVisible:
-    id: "directions_dest_field"
-- assertVisible:
-    text: "PREVIEW"
-- assertVisible:
-    id: "transport_mode_walk"
-- assertVisible:
-    id: "transport_mode_drive"
-- assertVisible:
-    id: "transport_mode_public"
-- assertVisible:
-    id: "transport_mode_shuttle"
-
-- tapOn:
-    id: "transport_mode_drive"
+    timeout: 2000
+- tapOn: "Transit"
 - waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "transport_mode_drive"
-- assertVisible:
-    id: "directions_info_popup"
-
-- tapOn:
-    id: "transport_mode_public"
+    timeout: 2000
+- tapOn: "Shuttle"
 - waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "transport_mode_public"
-- assertVisible:
-    id: "directions_info_popup"
-
-- tapOn:
-    id: "transport_mode_shuttle"
+    timeout: 2000
+- tapOn: "Walk"
 - waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "transport_mode_shuttle"
-- assertVisible:
-    id: "directions_info_popup"
-- assertNotVisible:
-    text: "Fastest route"
-- assertTrue:
-    condition: ${visible("Next shuttle:") || visible("Shuttle out of service")}
-- runFlow:
-    when:
-      visible: "Next shuttle:"
-    commands:
-      - assertVisible:
-          text: "Nearest stop:"
-- tapOn:
-    id: "transport_mode_walk"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- assertVisible:
-    id: "transport_mode_walk"
-- assertVisible:
-    id: "directions_info_popup"
+    timeout: 2000

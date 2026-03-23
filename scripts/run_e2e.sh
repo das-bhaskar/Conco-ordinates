@@ -48,6 +48,7 @@ for FLOW in "${FLOWS[@]}"; do
   echo " Video: $VIDEO_FILE"
   echo "-----------------------------"
 
+# TODO: Change to maestro cloud for recordings, --record does not supported on maestro 2.x
   if maestro test \
       --record "$VIDEO_FILE" \
       --format junit \

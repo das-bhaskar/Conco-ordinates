@@ -1,0 +1,65 @@
+
+# US-2.5: As a campus map user, I want to be able to choose between walking, driving, and public transportation, so that I can travel using my preferred method based on the weather or my schedule.
+
+appId: com.example.myapplication
+---
+# Set user location out of campus (Starbucks, Brossard)
+- setLocation:
+    latitude: 45.4377
+    longitude: -73.47379
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    point: "80%, 83%"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Search buildings or addresses..."
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- inputText: "Vanier"
+- tapOn:
+    text: "Vanier Library"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "Directions"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- assertVisible:
+    text: "Directions"
+- assertVisible:
+    text: "Your position"
+- assertVisible:
+    text: "Vanier Library"
+- assertVisible: "Walk"
+- assertVisible: "Drive"
+- assertVisible: "Transit"
+- assertVisible: "Shuttle"
+
+- tapOn: "Drive"
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn: "Transit"
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn: "Shuttle"
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn: "Walk"
+- waitForAnimationToEnd:
+    timeout: 2000

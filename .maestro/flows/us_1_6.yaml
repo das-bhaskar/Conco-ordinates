@@ -1,0 +1,59 @@
+
+# US-1.6: As a campus map user, I want to see additional information for each building, so that I can learn more about campus facilities.
+
+appId: com.example.myapplication
+---
+# User is at the LOYOLA campus (Vanier Library)
+- setLocation:
+    latitude: 45.459081
+    longitude: -73.638709
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    text: "SGW"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Tap on Hall building
+- tapOn:
+    point: "50%, 47%"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    text: "Henry F. Hall Building"
+- assertVisible:
+    text: "Directions"
+- assertVisible:
+    text: "Save"
+- assertVisible:
+    text: "PIN"
+- assertVisible:
+    text: "Share"
+
+- tapOn:
+    point: "90%, 30%"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"

@@ -1,0 +1,48 @@
+
+# US-3.1: As a student, I want to connect my Google Calendar, so that the app can automatically find my next class location and show me how to get there.
+
+appId: com.example.myapplication
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    text: "schedule"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Connect"
+    index: 1
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# TODO: Add text input for email and password to connect to google calendar
+- tapOn:
+    id: "identifierId"
+- waitForAnimationToEnd:
+    timeout: 2000
+- inputText: ""
+- tapOn:
+    text: "Next"
+
+- tapOn:
+    id: "" # Add proper id
+- waitForAnimationToEnd:
+    timeout: 2000
+- inputText: ""
+- tapOn:
+    text: "Next"
+
+# TODO: END
+

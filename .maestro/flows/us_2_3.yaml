@@ -1,0 +1,59 @@
+
+# US-2.3: As a campus map user, I want directions to be shown on the map, so that I can visually follow the route.
+# US-2.4: As a campus map user, I want to get directions between SGW and Loyola campuses, so that I can travel between campuses.
+#
+# This test covers both user stories 2.3 and 2.4. Implementing an e2e test for US-2.4 would be redundant since it
+# is tested through US-2.3 e2e test.
+
+appId: com.example.myapplication
+---
+- setLocation:
+    latitude: 45.459081
+    longitude: -73.638709
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    text: "Search buildings or addresses..."
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- inputText: "Hall"
+- tapOn:
+    text: "Henry F. Hall Building"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "Directions"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- assertVisible:
+    text: "Directions"
+- assertVisible:
+    text: "Your position"
+- assertVisible:
+    text: "Henry F. Hall Building"
+- assertVisible: "Walk"
+- assertVisible: "Drive"
+- assertVisible: "Transit"
+- assertVisible: "Shuttle"
+
+- tapOn: "Drive"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- assertVisible:
+    text: "Start"
+- tapOn:
+    text: "Start"

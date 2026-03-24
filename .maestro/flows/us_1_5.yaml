@@ -1,0 +1,62 @@
+
+# US-1.5: As a campus map user, I want the map to show the building I am currently located in, so that I know my current position on campus.
+
+appId: com.example.myapplication
+---
+# Set user location out of campus (Starbucks, Brossard)
+- setLocation:
+    latitude: 45.4377
+    longitude: -73.47379
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    point: "80%, 83%"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "SGW"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    point: "80%, 83%"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Set user location to Hall Building
+- setLocation:
+    latitude: 45.4972
+    longitude: -73.5789
+- launchApp:
+    clearState: true
+# Give time to the application to load the new location
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    point: "80%, 83%"
+- waitForAnimationToEnd:
+    timeout: 5000

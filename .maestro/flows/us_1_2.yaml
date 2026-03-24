@@ -1,0 +1,41 @@
+
+# US-1.2: As a Student, I want the ability to access the map of Loyola Campus so I can easily navigate within the Loyola campus.
+appId: com.example.myapplication
+---
+# Set user location out of campus (Starbucks, Brossard)
+- setLocation:
+    latitude: 45.4377
+    longitude: -73.47379
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    point: "80%, 83%"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "LOY"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"

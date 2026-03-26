@@ -49,10 +49,11 @@ import com.example.myapplication.ui.components.NextClassPill
 import com.example.myapplication.ui.components.ObserveCameraEffects
 import com.example.myapplication.ui.components.ObserveLocationUpdates
 import com.example.myapplication.ui.components.rememberMapCamera
-import com.example.myapplication.ui.models.MapUIMode
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.viewmodel.CalendarViewModel
 import com.example.myapplication.ui.viewmodel.MapViewModel
+import com.example.myapplication.ui.models.BuildingUiState
+import com.example.myapplication.ui.models.MapUIMode
 import com.google.android.gms.location.LocationServices
 import com.example.myapplication.ui.screens.MapScreen
 import com.google.android.gms.maps.model.LatLng
@@ -153,6 +154,7 @@ class MapsActivity : ComponentActivity() {
         setContent {
             AppNavigation(
                 calendarViewModel = calendarViewModel,
+                mapViewModel      = viewModel,
                 navigationActions = com.example.myapplication.ui.screens.NavigationActions(
                     onNavigateToMap  = { buildingCode -> viewModel.navigateToBuildingCode(buildingCode) },
                     onConnectClick   = { connectCalendar() },
@@ -174,18 +176,20 @@ class MapsActivity : ComponentActivity() {
                         isNextClassUrgent      = calendarViewModel.isNextClassUrgent,
                         nextClassTimeRemaining = calendarViewModel.nextClassTimeRemaining,
                         fusedLocationClient    = fusedLocationClient,
-                        onSearchQueryChanged   = { q, f -> viewModel.onSearchQueryChanged(q, f) },
-                        onSearchResult         = { r, ctx -> viewModel.handleSearchResult(r, ctx) },
-                        onTransportModeChanged = { viewModel.onTransportModeChanged(it) },
-                        onToggleSearchExpansion= { e, f -> viewModel.toggleSearchExpansion(e, f) },
+                        onSearchQueryChanged   = { query, field -> viewModel.onSearchQueryChanged(query, field) },
+                        onSearchResult         = { result, context -> viewModel.handleSearchResult(result, context) },
+                        onTransportModeChanged = { mode -> viewModel.onTransportModeChanged(mode) },
+                        onToggleSearchExpansion= { expanded, field -> viewModel.toggleSearchExpansion(expanded, field) },
                         onSwapLocations        = { viewModel.swapLocations() },
                         onBackToPreview        = { viewModel.onBackToPreview() },
-                        onCampusSelected       = { viewModel.onCampusSelected(it) },
+                        onCampusSelected       = { campus -> viewModel.onCampusSelected(campus) },
                         onBuildingDismiss      = { viewModel.handleMapTap(null) },
                         onDirectionsRequested  = { viewModel.onDirectionsRequested() },
                         onLocationUpdate       = { loc, force -> viewModel.processLocationUpdate(loc, force) },
-                        onNavigateToBuilding   = { viewModel.navigateToBuildingCode(it) },
-                        onStartNavigationActions      = { viewModel.startNavigation() }
+                        onNavigateToBuilding   = { code -> viewModel.navigateToBuildingCode(code) },
+                        onNavigateToIndoor     = { bCode, rCode -> viewModel.onNavigateToIndoor(bCode, rCode) },
+                        onStartNavigationActions = { viewModel.startNavigation() }
+
                     )
                 }
             )

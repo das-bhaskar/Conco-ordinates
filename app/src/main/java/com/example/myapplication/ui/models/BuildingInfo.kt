@@ -30,7 +30,7 @@ data class BuildingUiState(
     val routeDistance: String = "-- m",
     val routeErrorMessage: String? = null,
     val routeSegments: List<com.example.myapplication.logic.RouteSegment> = emptyList(), // Add this
-
+    val hasIndoorMap: Boolean = false,
     val navState: NavigationState = NavigationState(), // Modular extension
 
     // ── Shuttle (US-2.6 / US-2.7 / US-2.8) ───────────────────────────────────

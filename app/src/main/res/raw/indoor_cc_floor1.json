@@ -1,0 +1,244 @@
+{
+  "building": "CC",
+  "floor": 1,
+  "corridors": [
+    {
+      "id": "corridor-main",
+      "polygon": [
+        [0.13, 0.44], [0.95, 0.44], [0.95, 0.56], [0.13, 0.56]
+      ]
+    },
+    {
+      "id": "corridor-west",
+      "polygon": [
+        [0.03, 0.05], [0.13, 0.05], [0.13, 0.95], [0.03, 0.95]
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "id": "CC-124",
+      "type": "office",
+      "label": "CC-124",
+      "polygon": [[0.03,0.05],[0.13,0.05],[0.13,0.30],[0.03,0.30]],
+      "accessible": true
+    },
+    {
+      "id": "CC-122",
+      "type": "classroom",
+      "label": "CC-122",
+      "polygon": [[0.13,0.05],[0.22,0.05],[0.22,0.44],[0.13,0.44]],
+      "accessible": true
+    },
+    {
+      "id": "CC-120",
+      "type": "classroom",
+      "label": "CC-120",
+      "polygon": [[0.22,0.05],[0.34,0.05],[0.34,0.44],[0.22,0.44]],
+      "accessible": true
+    },
+    {
+      "id": "CC-118",
+      "type": "staircase",
+      "label": "CC-118",
+      "icon": "🪜",
+      "polygon": [[0.34,0.05],[0.38,0.05],[0.38,0.44],[0.34,0.44]],
+      "accessible": false
+    },
+    {
+      "id": "CC-116",
+      "type": "classroom",
+      "label": "CC-116",
+      "polygon": [[0.38,0.05],[0.54,0.05],[0.54,0.44],[0.38,0.44]],
+      "accessible": true
+    },
+    {
+      "id": "CC-112-2",
+      "type": "classroom",
+      "label": "CC-112-2",
+      "polygon": [[0.54,0.05],[0.64,0.05],[0.64,0.25],[0.54,0.25]],
+      "accessible": true
+    },
+    {
+      "id": "CC-112",
+      "type": "classroom",
+      "label": "CC-112",
+      "polygon": [[0.54,0.25],[0.64,0.25],[0.64,0.44],[0.54,0.44]],
+      "accessible": true
+    },
+    {
+      "id": "CC-110",
+      "type": "classroom",
+      "label": "CC-110",
+      "polygon": [[0.64,0.05],[0.70,0.05],[0.70,0.44],[0.64,0.44]],
+      "accessible": true
+    },
+    {
+      "id": "CC-155",
+      "type": "staircase",
+      "label": "Stairs",
+      "icon": "🪜",
+      "polygon": [[0.70,0.05],[0.74,0.05],[0.74,0.44],[0.70,0.44]],
+      "accessible": false
+    },
+    {
+      "id": "CC-106",
+      "type": "classroom",
+      "label": "CC-106",
+      "polygon": [[0.74,0.05],[0.84,0.05],[0.84,0.44],[0.74,0.44]],
+      "accessible": true
+    },
+    {
+      "id": "CC-104",
+      "type": "classroom",
+      "label": "CC-104",
+      "polygon": [[0.84,0.05],[0.92,0.05],[0.92,0.44],[0.84,0.44]],
+      "accessible": true
+    },
+    {
+      "id": "CC-102",
+      "type": "classroom",
+      "label": "CC-102",
+      "polygon": [[0.92,0.05],[0.97,0.05],[0.97,0.44],[0.92,0.44]],
+      "accessible": true
+    },
+    {
+      "id": "CC-119",
+      "type": "classroom",
+      "label": "CC-119",
+      "polygon": [[0.13,0.56],[0.34,0.56],[0.34,0.95],[0.13,0.95]],
+      "accessible": true
+    },
+    {
+      "id": "CC-117",
+      "type": "classroom",
+      "label": "CC-117",
+      "polygon": [[0.34,0.56],[0.40,0.56],[0.40,0.95],[0.34,0.95]],
+      "accessible": true
+    },
+    {
+      "id": "CC-115",
+      "type": "classroom",
+      "label": "CC-115",
+      "polygon": [[0.40,0.56],[0.54,0.56],[0.54,0.95],[0.40,0.95]],
+      "accessible": true
+    },
+    {
+      "id": "CC-111",
+      "type": "classroom",
+      "label": "CC-111",
+      "polygon": [[0.54,0.56],[0.66,0.56],[0.66,0.95],[0.54,0.95]],
+      "accessible": true
+    },
+    {
+      "id": "CC-109",
+      "type": "classroom",
+      "label": "CC-109",
+      "polygon": [[0.66,0.56],[0.72,0.56],[0.72,0.95],[0.66,0.95]],
+      "accessible": true
+    },
+    {
+      "id": "CC-107",
+      "type": "office",
+      "label": "CC-107",
+      "polygon": [[0.66,0.56],[0.72,0.56],[0.72,0.75],[0.66,0.75]],
+      "accessible": true
+    },
+    {
+      "id": "CC-101",
+      "type": "classroom",
+      "label": "CC-101",
+      "polygon": [[0.72,0.56],[0.88,0.56],[0.88,0.95],[0.72,0.95]],
+      "accessible": true
+    },
+    {
+      "id": "CC-150",
+      "type": "staircase",
+      "label": "Stairs",
+      "icon": "🪜",
+      "polygon": [[0.88,0.70],[0.92,0.70],[0.92,0.95],[0.88,0.95]],
+      "accessible": false
+    },
+    {
+      "id": "CC-170",
+      "type": "office",
+      "label": "CC-170",
+      "polygon": [[0.92,0.56],[0.97,0.56],[0.97,0.75],[0.92,0.75]],
+      "accessible": true
+    },
+    {
+      "id": "CC-190",
+      "type": "washroom",
+      "label": "Washroom",
+      "icon": "🚻",
+      "polygon": [[0.92,0.75],[0.97,0.75],[0.97,0.95],[0.92,0.95]],
+      "accessible": true
+    }
+  ],
+  "pois": [
+    { "id": "poi-wc-1",   "type": "washroom",  "label": "Washroom", "x": 0.945, "y": 0.85, "nodeId": "node-CC-1-wc1" },
+    { "id": "poi-elev",   "type": "elevator",  "label": "Elevator", "x": 0.08,  "y": 0.50, "nodeId": "node-CC-1-elev" },
+    { "id": "poi-st1",    "type": "staircase", "label": "Stairs",   "x": 0.36,  "y": 0.25, "nodeId": "node-CC-1-st1" },
+    { "id": "poi-st2",    "type": "staircase", "label": "Stairs",   "x": 0.72,  "y": 0.25, "nodeId": "node-CC-1-st2" },
+    { "id": "poi-st3",    "type": "staircase", "label": "Stairs",   "x": 0.90,  "y": 0.82, "nodeId": "node-CC-1-st3" },
+    { "id": "poi-exit-w", "type": "exit",      "label": "Exit",     "x": 0.03,  "y": 0.50, "nodeId": "node-CC-1-ent-w" },
+    { "id": "poi-exit-e", "type": "exit",      "label": "Exit",     "x": 0.97,  "y": 0.50, "nodeId": "node-CC-1-ent-e" }
+  ],
+  "nodes": [
+    { "id": "node-CC-1-ent-w", "x": 0.03, "y": 0.50, "type": "ENTRANCE" },
+    { "id": "node-CC-1-ent-e", "x": 0.97, "y": 0.50, "type": "ENTRANCE" },
+    { "id": "node-CC-1-elev",  "x": 0.08, "y": 0.50, "type": "ELEVATOR", "accessible": true },
+    { "id": "node-CC-1-c1",    "x": 0.13, "y": 0.50, "type": "CORRIDOR" },
+    { "id": "node-CC-1-c2",    "x": 0.22, "y": 0.50, "type": "CORRIDOR" },
+    { "id": "node-CC-1-c3",    "x": 0.34, "y": 0.50, "type": "CORRIDOR" },
+    { "id": "node-CC-1-c4",    "x": 0.46, "y": 0.50, "type": "CORRIDOR" },
+    { "id": "node-CC-1-c5",    "x": 0.54, "y": 0.50, "type": "CORRIDOR" },
+    { "id": "node-CC-1-c6",    "x": 0.64, "y": 0.50, "type": "CORRIDOR" },
+    { "id": "node-CC-1-c7",    "x": 0.72, "y": 0.50, "type": "CORRIDOR" },
+    { "id": "node-CC-1-c8",    "x": 0.84, "y": 0.50, "type": "CORRIDOR" },
+    { "id": "node-CC-1-c9",    "x": 0.92, "y": 0.50, "type": "CORRIDOR" },
+    { "id": "node-CC-1-122",   "x": 0.175,"y": 0.44, "type": "ROOM", "roomId": "CC-122" },
+    { "id": "node-CC-1-120",   "x": 0.28, "y": 0.44, "type": "ROOM", "roomId": "CC-120" },
+    { "id": "node-CC-1-116",   "x": 0.46, "y": 0.44, "type": "ROOM", "roomId": "CC-116" },
+    { "id": "node-CC-1-112",   "x": 0.59, "y": 0.44, "type": "ROOM", "roomId": "CC-112" },
+    { "id": "node-CC-1-106",   "x": 0.79, "y": 0.44, "type": "ROOM", "roomId": "CC-106" },
+    { "id": "node-CC-1-104",   "x": 0.88, "y": 0.44, "type": "ROOM", "roomId": "CC-104" },
+    { "id": "node-CC-1-119",   "x": 0.235,"y": 0.56, "type": "ROOM", "roomId": "CC-119" },
+    { "id": "node-CC-1-115",   "x": 0.47, "y": 0.56, "type": "ROOM", "roomId": "CC-115" },
+    { "id": "node-CC-1-111",   "x": 0.60, "y": 0.56, "type": "ROOM", "roomId": "CC-111" },
+    { "id": "node-CC-1-101",   "x": 0.80, "y": 0.56, "type": "ROOM", "roomId": "CC-101" },
+    { "id": "node-CC-1-st1",   "x": 0.36, "y": 0.44, "type": "STAIRCASE" },
+    { "id": "node-CC-1-st2",   "x": 0.72, "y": 0.44, "type": "STAIRCASE" },
+    { "id": "node-CC-1-wc1",   "x": 0.945,"y": 0.50, "type": "ROOM" }
+  ],
+  "edges": [
+    { "from": "node-CC-1-ent-w","to": "node-CC-1-elev", "weight": 0.05 },
+    { "from": "node-CC-1-elev", "to": "node-CC-1-c1",   "weight": 0.05 },
+    { "from": "node-CC-1-c1",   "to": "node-CC-1-c2",   "weight": 0.09 },
+    { "from": "node-CC-1-c2",   "to": "node-CC-1-c3",   "weight": 0.12 },
+    { "from": "node-CC-1-c3",   "to": "node-CC-1-c4",   "weight": 0.12 },
+    { "from": "node-CC-1-c4",   "to": "node-CC-1-c5",   "weight": 0.08 },
+    { "from": "node-CC-1-c5",   "to": "node-CC-1-c6",   "weight": 0.10 },
+    { "from": "node-CC-1-c6",   "to": "node-CC-1-c7",   "weight": 0.08 },
+    { "from": "node-CC-1-c7",   "to": "node-CC-1-c8",   "weight": 0.12 },
+    { "from": "node-CC-1-c8",   "to": "node-CC-1-c9",   "weight": 0.08 },
+    { "from": "node-CC-1-c9",   "to": "node-CC-1-ent-e","weight": 0.05 },
+    { "from": "node-CC-1-c2",   "to": "node-CC-1-122",  "weight": 0.06 },
+    { "from": "node-CC-1-c2",   "to": "node-CC-1-120",  "weight": 0.06 },
+    { "from": "node-CC-1-c3",   "to": "node-CC-1-st1",  "weight": 0.06 },
+    { "from": "node-CC-1-c4",   "to": "node-CC-1-116",  "weight": 0.06 },
+    { "from": "node-CC-1-c5",   "to": "node-CC-1-112",  "weight": 0.06 },
+    { "from": "node-CC-1-c7",   "to": "node-CC-1-st2",  "weight": 0.06 },
+    { "from": "node-CC-1-c8",   "to": "node-CC-1-106",  "weight": 0.06 },
+    { "from": "node-CC-1-c8",   "to": "node-CC-1-104",  "weight": 0.04 },
+    { "from": "node-CC-1-c1",   "to": "node-CC-1-119",  "weight": 0.06 },
+    { "from": "node-CC-1-c4",   "to": "node-CC-1-115",  "weight": 0.06 },
+    { "from": "node-CC-1-c5",   "to": "node-CC-1-111",  "weight": 0.06 },
+    { "from": "node-CC-1-c7",   "to": "node-CC-1-101",  "weight": 0.06 },
+    { "from": "node-CC-1-c9",   "to": "node-CC-1-wc1",  "weight": 0.06 }
+  ],
+  "entrances": [
+    { "id": "ent-west", "label": "West Entrance", "x": 0.03, "y": 0.50, "nodeId": "node-CC-1-ent-w", "floor": 1 },
+    { "id": "ent-east", "label": "East Entrance", "x": 0.97, "y": 0.50, "nodeId": "node-CC-1-ent-e", "floor": 1 }
+  ]
+}

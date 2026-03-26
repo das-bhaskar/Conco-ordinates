@@ -9,6 +9,8 @@ appId: com.example.myapplication
     longitude: -73.47379
 - launchApp:
     clearState: true
+- waitForAnimationToEnd:
+    timeout: 10000
 - assertVisible:
     text: "Search buildings or addresses..."
 - assertVisible:

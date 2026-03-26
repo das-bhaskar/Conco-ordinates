@@ -21,7 +21,8 @@ fun NavigationOverlay(
     navState: NavigationState,
     onRecenterClick: () -> Unit,
     onExit: () -> Unit,
-    destinationName: () -> String
+    destinationName: () -> String,
+    onEnterBuilding: () -> Unit,
 
     ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -114,18 +115,27 @@ fun NavigationOverlay(
         }
     }
 
-    // Inside NavigationOverlay.kt -> at the end of the Box { ... }
     if (navState.hasArrived) {
         AlertDialog(
-            onDismissRequest = { /* Force the user to click the button */ },
+            onDismissRequest = { /* Force action */ },
             title = { Text("Destination Reached", fontWeight = FontWeight.Bold) },
-            text = { Text("You have arrived at ${destinationName()}") },
+            text = { Text("You have arrived at ${destinationName()}. Would you like to see indoor directions?") },
             confirmButton = {
+                // Primary Action: Go Inside
                 Button(
-                    onClick = onExit,
+                    onClick = {
+                        onEnterBuilding()
+                        onExit() // Close the outdoor nav after entering
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon)
                 ) {
-                    Text("END TRIP", color = Color.White)
+                    Text("GO INSIDE", color = Color.White)
+                }
+            },
+            dismissButton = {
+                // Secondary Action: Just finish the trip
+                TextButton(onClick = onExit) {
+                    Text("END TRIP", color = ConcordiaMaroon)
                 }
             },
             shape = RoundedCornerShape(16.dp),

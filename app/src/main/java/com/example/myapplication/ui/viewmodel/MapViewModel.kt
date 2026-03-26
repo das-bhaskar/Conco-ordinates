@@ -58,6 +58,8 @@ class MapViewModel(
     var searchQuery by mutableStateOf("")
         private set
 
+    var indoorJourneyState by mutableStateOf<com.example.myapplication.ui.models.IndoorJourneyState?>(null)
+        private set
     var currentNavBearing by mutableStateOf(0f)
         private set
 
@@ -186,6 +188,7 @@ class MapViewModel(
             is SearchResult.GoogleResult    -> result.title
             is SearchResult.CurrentLocation -> "Your position"
             is SearchResult.Home            -> "Home"
+            is SearchResult.IndoorRoomResult -> result.label
         }
         val resultCoords = when (result) {
             is SearchResult.BuildingResult  -> result.building.getCenter()
@@ -193,6 +196,7 @@ class MapViewModel(
             is SearchResult.CurrentLocation -> lastProcessedLocation
             is SearchResult.Home            -> LatLng(45.51723868665001, -73.627297124046)
             is SearchResult.GoogleResult    -> null
+            is SearchResult.IndoorRoomResult -> null
         }
         if (uiBuildingState.mode == MapUIMode.DIRECTIONS) {
             val selectedBuilding = if (result is SearchResult.BuildingResult) result.building else null
@@ -213,6 +217,9 @@ class MapViewModel(
                 onCampusSelected(result.campus.name)
                 resultCoords?.let { setMapEventWithOffset(it) }
                 uiBuildingState = uiBuildingState.copy(isVisible = false, building = null)
+            }
+            is SearchResult.IndoorRoomResult -> {
+                onNavigateToIndoor(result.buildingCode, result.roomId)
             }
             is SearchResult.BuildingResult -> {
                 val b = result.building
@@ -485,6 +492,24 @@ class MapViewModel(
                 }
             }
         }
+    }
+    /**
+     * Triggers the transition to the Indoor Navigation flow.
+     * UI components call this when the "Enter Building" button is pressed.
+     */
+    fun onNavigateToIndoor(buildingCode: String, roomCode: String = "") {
+        analyticsProvider.trackNavigationEnter("indoor_transition")
+
+        indoorJourneyState = com.example.myapplication.ui.models.IndoorJourneyState(
+            phase = com.example.myapplication.ui.models.IndoorJourneyPhase.DetectingLocation
+        )
+    }
+
+    /**
+     * Resets the indoor state when the user exits the building view.
+     */
+    fun exitIndoorView() {
+        indoorJourneyState = null
     }
     private data class ShuttleSnapshot(
         val availability:  com.example.myapplication.data.ShuttleAvailability,

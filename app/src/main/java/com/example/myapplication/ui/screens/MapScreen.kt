@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.logic.SearchResult
 import com.example.myapplication.logic.handleRecenter
 import com.example.myapplication.logic.openAppSettings
@@ -79,6 +80,7 @@ fun MapScreen(
     onBuildingDismiss:      () -> Unit,
     onDirectionsRequested:  () -> Unit,
     onLocationUpdate:       (com.google.android.gms.maps.model.LatLng, Boolean) -> Unit,
+    onNavigateToIndoor: (String, String) -> Unit,
     onNavigateToBuilding:   (String) -> Unit,
     onStartNavigationActions: () -> Unit,
 ) {
@@ -145,7 +147,8 @@ fun MapScreen(
                 onToggleSearchExpansion = onToggleSearchExpansion,
                 onSwapLocations = onSwapLocations,
                 onBackToPreview = onBackToPreview,
-                onStartNavigationActions = onStartNavigationActions
+                onStartNavigationActions = onStartNavigationActions,
+                        onNavigateToIndoor = onNavigateToIndoor
             )
 
             MapPreviewOverlays(
@@ -164,7 +167,8 @@ fun MapScreen(
                 context = context,
                 onLocationUpdate = onLocationUpdate,
                 onCampusSelected = onCampusSelected,
-                onNavigateToBuilding = onNavigateToBuilding
+                onNavigateToBuilding = onNavigateToBuilding,
+                onNavigateToIndoor = onNavigateToIndoor
             )
             MapBuildingOverlay(
                 uiState = uiState,
@@ -174,7 +178,8 @@ fun MapScreen(
                 onToggleSearchExpansion = onToggleSearchExpansion,
                 onSwapLocations = onSwapLocations,
                 onBackToPreview = onBackToPreview,
-                onStartNavigationActions = onStartNavigationActions
+                onStartNavigationActions = onStartNavigationActions,
+                onNavigateToIndoor = onNavigateToIndoor
             )
         }
         else {
@@ -182,7 +187,12 @@ fun MapScreen(
                 navState = uiState.navState,
                 onRecenterClick = { mapViewModel.forceRecenter() },
                 onExit = { onBackToPreview() },
-                destinationName = {mapViewModel.uiBuildingState.destinationName}
+                onEnterBuilding = {
+                    uiState.building?.code?.let { code ->
+                        onNavigateToIndoor(code, "")
+                    }
+                },
+                destinationName = { mapViewModel.uiBuildingState.destinationName }
             )
         }
 
@@ -211,7 +221,8 @@ private fun BoxScope.MapSearchOverlay(
     onToggleSearchExpansion:  (Boolean, String) -> Unit,
     onSwapLocations:          () -> Unit,
     onBackToPreview:          () -> Unit,
-    onStartNavigationActions: () -> Unit
+    onStartNavigationActions: () -> Unit,
+    onNavigateToIndoor:       (String, String) -> Unit
 ) {
     if (uiState.mode == MapUIMode.PREVIEW) {
         CampusSearchBar(
@@ -234,7 +245,8 @@ private fun BoxScope.MapSearchOverlay(
             onBackToPreview         = onBackToPreview,
             onSearchResult          = onSearchResult,
             onSearchQueryChanged    = onSearchQueryChanged,
-            onStartNavigationActions = onStartNavigationActions
+            onStartNavigationActions = onStartNavigationActions,
+            onNavigateToIndoor = onNavigateToIndoor
         )
     }
 }
@@ -252,7 +264,8 @@ private fun BoxScope.DirectionsOverlay(
     onBackToPreview:          () -> Unit,
     onStartNavigationActions: () -> Unit,
     onSearchResult:           (com.example.myapplication.logic.SearchResult, android.content.Context) -> Unit,
-    onSearchQueryChanged:     (String, String) -> Unit
+    onSearchQueryChanged:     (String, String) -> Unit,
+    onNavigateToIndoor:       (String, String) -> Unit
 ) {
     if (uiState.isSearchExpanded) {
         DirectionsHeader(
@@ -281,7 +294,8 @@ private fun BoxScope.DirectionsOverlay(
         searchQuery       = searchQuery,
         searchResults     = searchResults,
         activeSearchField = activeSearchField,
-        onSearchResult    = onSearchResult
+        onSearchResult    = onSearchResult,
+        onNavigateToIndoor = onNavigateToIndoor
     )
 }
 @Composable
@@ -291,7 +305,8 @@ private fun BoxScope.DirectionsSearchResults(
     searchQuery:       String,
     searchResults:     List<com.example.myapplication.logic.SearchResult>,
     activeSearchField: String,
-    onSearchResult:    (com.example.myapplication.logic.SearchResult, android.content.Context) -> Unit
+    onSearchResult:    (com.example.myapplication.logic.SearchResult, android.content.Context) -> Unit,
+    onNavigateToIndoor: (String, String) -> Unit
 ) {
     val currentFieldText = when (activeSearchField) {
         "start" -> uiState.startLocationName
@@ -312,10 +327,16 @@ private fun BoxScope.DirectionsSearchResults(
                     is SearchResult.GoogleResult    -> result.title
                     is SearchResult.CurrentLocation -> "Your position"
                     is SearchResult.Home            -> "Home"
+                    is SearchResult.IndoorRoomResult -> result.label
                 }
                 ListItem(
                     headlineContent = { Text(title) },
-                    modifier        = Modifier.clickable { onSearchResult(result, context) }
+                    modifier = Modifier.clickable {
+                        if (result is SearchResult.IndoorRoomResult) {
+                            onNavigateToIndoor(result.buildingCode, result.roomId)                        } else {
+                            onSearchResult(result, context)
+                        }
+                    }
                 )
             }
         }
@@ -339,7 +360,8 @@ private fun BoxScope.MapPreviewOverlays(
     context:               android.content.Context,
     onLocationUpdate:      (com.google.android.gms.maps.model.LatLng, Boolean) -> Unit,
     onCampusSelected:      (String) -> Unit,
-    onNavigateToBuilding:  (String) -> Unit
+    onNavigateToBuilding:  (String) -> Unit,
+    onNavigateToIndoor: (String, String) -> Unit,
 ) {
     val mode = uiState.mode
     if (mode == MapUIMode.ACTIVE_NAVIGATION) return
@@ -394,7 +416,8 @@ private fun BoxScope.MapBuildingOverlay(
     onToggleSearchExpansion:  (Boolean, String) -> Unit,
     onSwapLocations:          () -> Unit,
     onBackToPreview:          () -> Unit,
-    onStartNavigationActions: () -> Unit
+    onStartNavigationActions: () -> Unit,
+    onNavigateToIndoor:    (String, String) -> Unit,
 ) {
     if (!uiState.isVisible) return
     val building = uiState.building ?: return
@@ -403,7 +426,10 @@ private fun BoxScope.MapBuildingOverlay(
             building          = building,
             uiState           = uiState,
             onDismiss         = onDismiss,
-            onDirectionsClick = onDirectionsRequested
+            onDirectionsClick = onDirectionsRequested,
+            onEnterBuilding = {
+                onNavigateToIndoor(building.code, "")
+            }
         )
     } else {
         DirectionsInfoPopup(

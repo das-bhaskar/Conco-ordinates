@@ -1,0 +1,17 @@
+
+# US-3.2: As a student with multiple Google calendars, I want to select specific calendars as the data source for my classes so that my navigation is only based on my academic schedule and not my personal events.
+
+appId: com.example.myapplication
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"

@@ -27,22 +27,29 @@ appId: com.example.myapplication
 - waitForAnimationToEnd:
     timeout: 10000
 
+#- tapOn:
+#    text: "SKIP"
+#- waitForAnimationToEnd:
+#    timeout: 5000
 # TODO: Add text input for email and password to connect to google calendar
 - tapOn:
     id: "identifierId"
 - waitForAnimationToEnd:
     timeout: 2000
-- inputText: ""
+- inputText: "concoordinates@gmail.com"
 - tapOn:
-    text: "Next"
-
-- tapOn:
-    id: "" # Add proper id
+    text: "NEXT"
+- tapOn: "Enter your password"
 - waitForAnimationToEnd:
     timeout: 2000
-- inputText: ""
+- inputText: "A12345678?"
 - tapOn:
-    text: "Next"
-
+    text: "NEXT"
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    text: "I agree"
+- waitForAnimationToEnd:
+    timeout: 2000
 # TODO: END
 

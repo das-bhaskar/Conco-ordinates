@@ -59,12 +59,13 @@ jobs:
           api-level: 29
           target: default
           arch: x86_64
-          profile: pixel_4
+          profile: pixel_7
           avd-name: maestro_ci
           force-avd-creation: false
           emulator-boot-timeout: 600
-          emulator-options: -no-snapshot-save -no-window -noaudio -no-boot-anim -no-accel
+          emulator-options: -no-snapshot-save -no-window -noaudio -no-boot-anim -gpu swiftshader_indirect
           disable-animations: true
+          enable-hw-keyboard: true
           script: |
             adb install -r app/build/outputs/apk/debug/app-debug.apk
             

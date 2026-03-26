@@ -1,8 +1,17 @@
 
 set -euo pipefail
 
-RECORDING_DIR="${RECORDING_DIR:-e2e-video-recordings}"
-REPORT_DIR="${REPORT_DIR:-e2e-report}"
+PR_NUMBER="${PR_NUMBER:-local}"
+
+PR_DATE=$(date '+%Y-%m-%d')
+
+PR_FOLDER="${PR_DATE}_PR-${PR_NUMBER}"
+
+PAR_RECORDING_DIR="${PAR_RECORDING_DIR:-e2e-video-recordings}"
+PAR_REPORT_DIR="${PAR_REPORT_DIR:-e2e-report}"
+
+RECORDING_DIR="${PAR_RECORDING_DIR}/${PR_FOLDER}"
+REPORT_DIR="${PAR_REPORT_DIR}/${PR_FOLDER}"
 
 FLOWS=(
   "us_1_1"
@@ -16,6 +25,8 @@ echo ""
 echo "==============================="
 echo "           E2E Tests           "
 echo "  $TIMESTAMP "
+echo "  PR: #$PR_NUMBER "
+echo "  Folder: $PR_FOLDER "
 echo "==============================="
 echo " Flows: ${#FLOWS[@]}"
 echo " Recordings: $RECORDING_DIR/"
@@ -81,7 +92,7 @@ echo "Merging reports to ${REPORT_DIR}/report.xml ..."
 
 cat > "${REPORT_DIR}/report.xml" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="E2E Tests" tests="${#FLOWS[@]}" failures="$FAILED" timestamp="$TIMESTAMP">
+<testsuites name="E2E Tests - $PR_FOLDER" tests="${#FLOWS[@]}" failures="$FAILED" timestamp="$TIMESTAMP">
 EOF
 
 for FLOW in "${FLOWS[@]}"; do
@@ -97,7 +108,7 @@ TOTAL=${#FLOWS[@]}
 
 echo ""
 echo "==============================="
-echo " E2E RESULTS"
+echo " E2E RESULTS - PR_FOLDER"
 echo "..............................."
 echo " Passed: $PASSED / $TOTAL"
 echo " Failed: $FAILED / $TOTAL"

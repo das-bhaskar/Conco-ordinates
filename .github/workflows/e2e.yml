@@ -69,8 +69,7 @@ jobs:
             adb install -r app/build/outputs/apk/debug/app-debug.apk
             
             # Enable location permission
-            adb shell pm grant com.example.myapplication \
-              android.permission.ACCESS_FINE_LOCATION
+            adb shell pm grant com.example.myapplication android.permission.ACCESS_FINE_LOCATION
             
             chmod +x scripts/run_e2e.sh
             bash scripts/run_e2e.sh

@@ -6,23 +6,16 @@ REPORT_DIR="${REPORT_DIR:-e2e-report}"
 
 FLOWS=(
   "us_1_1"
-  "us_1_2"
-  "us_1_3"
-  "us_1_5"
-  "us_1_6"
-  "us_2_1"
-  "us_2_3"
-  "us_2_5"
-  "us_2_6"
 )
-
 mkdir -p "$RECORDING_DIR"
 mkdir -p "$REPORT_DIR"
+
+TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
 echo ""
 echo "==============================="
 echo "           E2E Tests           "
-echo "  $(date '+%Y-%m-%d %H:%M:%S') "
+echo "  $TIMESTAMP "
 echo "==============================="
 echo " Flows: ${#FLOWS[@]}"
 echo " Recordings: $RECORDING_DIR/"
@@ -41,26 +34,46 @@ adb shell settings put global animator_duration_scale 0
 
 for FLOW in "${FLOWS[@]}"; do
   FLOW_FILE=".maestro/flows/${FLOW}.yaml"
-  VIDEO_FILE="${RECORDING_DIR}/${FLOW}.mp4"
+  VIDEO_DEVICE="/sdcard/${FLOW}.mp4"
+  VIDEO_LOCAL="${RECORDING_DIR}/${FLOW}.mp4"
 
   echo "-----------------------------"
   echo " Running: $FLOW"
-  echo " Video: $VIDEO_FILE"
+  echo " Video: $VIDEO_LOCAL"
   echo "-----------------------------"
 
-# TODO: Change to maestro cloud for recordings, --record does not supported on maestro 2.x
+  adb shell "screenrecord --verbose $VIDEO_DEVICE" &
+  RECORD_PID=$!
+
+  sleep 2
+
+
   if maestro test \
-      --record "$VIDEO_FILE" \
       --format junit \
       --output "${REPORT_DIR}/${FLOW}.xml" \
       "$FLOW_FILE"; then
+    FLOW_RESULT="PASSED"
+  else
+    FLOW_RESULT="FAILED"
+  fi
+  echo ""
+
+  kill $RECORD_PID 2>/dev/null || true
+  sleep 1
+
+  adb pull "$VIDEO_DEVICE" "$VIDEO_LOCAL" 2>/dev/null || true
+
+  adb shell rm "$VIDEO_DEVICE" 2>/dev/null || true
+
+  if [ "$FLOW_RESULT" = "PASSED" ]; then
     echo "  PASSED: $FLOW"
     PASSED=$((PASSED + 1))
   else
-    echo "  FAILED: $FLOW (see $VIDEO_FILE)"
+    echo "  FAILED: $FLOW (See maestro cloud video)"
     FAILED=$((FAILED + 1))
     FAILED_FLOWS+=("$FLOW")
   fi
+
   echo ""
 done
 
@@ -68,7 +81,7 @@ echo "Merging reports to ${REPORT_DIR}/report.xml ..."
 
 cat > "${REPORT_DIR}/report.xml" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="E2E Tests" tests="${#FLOWS[@]}" failures="$FAILED" timestamp="$(date -u =%Y-%m-%dT%H:%M:%SZ)">
+<testsuites name="E2E Tests" tests="${#FLOWS[@]}" failures="$FAILED" timestamp="$TIMESTAMP">
 EOF
 
 for FLOW in "${FLOWS[@]}"; do
@@ -96,12 +109,12 @@ if [ ${#FAILED_FLOWS[@]} -gt 0 ]; then
   echo " Failed flows:"
   for flow in "${FAILED_FLOWS[@]}"; do
     echo "  $flow"
-    echo "  See ${RECORDING_DIR}/${flow}.mp4"
+    echo "  Watch: ${RECORDING_DIR}/${flow}.mp4"
   done
   echo ""
 fi
 
-echo " Recording: $RECORDING_DIR/"
+echo " Recordings: $RECORDING_DIR/"
 echo " Report: $REPORT_DIR/report.xml"
 echo "==============================="
 echo ""

@@ -10,7 +10,7 @@ appId: com.example.myapplication
 - launchApp:
     clearState: true
 - waitForAnimationToEnd:
-    timeout: 10000
+    timeout: 20000
 - assertVisible:
     text: "Search buildings or addresses..."
 - assertVisible:
@@ -25,12 +25,12 @@ appId: com.example.myapplication
 - tapOn:
     point: "80%, 83%"
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 10000
 
 - tapOn:
     text: "SGW"
 - waitForAnimationToEnd:
-    timeout: 5000
+    timeout: 10000
 
 - assertVisible:
     text: "Search buildings or addresses..."

@@ -32,12 +32,30 @@ PASSED=0
 FAILED=0
 FAILED_FLOWS=()
 
+APP_ID="com.example.myapplication"
+APK_PATH="app/build/outputs/apk/debug/app-debug.apk"
+
 ADB="${ADB:-adb}"
 
 # Disable animations
 "$ADB" shell settings put global window_animation_scale 0
 "$ADB" shell settings put global transition_animation_scale 0
 "$ADB" shell settings put global animator_duration_scale 0
+
+echo "Installing APK..."
+"$ADB" install -r "$APK_PATH"
+
+echo "==== Installed package check ===="
+"$ADB" shell pm list packages | grep myapplication || true
+
+echo "==== Launchable activity check ===="
+"$ADB" shell cmd package resolve-activity --brief "$APP_ID" || true
+
+echo "==== Manual launch test ===="
+"$ADB" shell monkey -p "$APP_ID" -c android.intent.category.LAUNCHER 1 || true
+
+echo "==== Recent crash logs ===="
+"$ADB" logcat -d | tail -n 200 || true
 
 for FLOW in "${FLOWS[@]}"; do
   FLOW_FILE=".maestro/flows/${FLOW}.yaml"

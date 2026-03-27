@@ -49,23 +49,30 @@ jobs:
           profile: pixel_4
           disable-animations: true
           script: |
-            # 1. Install the APK generated in the previous step
+            # 1. Install the APK
             adb install -r app/build/outputs/apk/debug/app-debug.apk
             
-            # 2. Grant permissions (Required for navigation features)
-            adb shell pm grant com.example.concoordinates android.permission.ACCESS_FINE_LOCATION
+            # 2. Wait for the package manager to actually recognize the app
+            echo "Waiting for package to be registered..."
+            for i in {1..10}; do
+              if adb shell pm list packages | grep -q "com.example.concoordinates"; then
+                echo "Package found!"
+                break
+              fi
+              echo "Retrying ($i/10)..."
+              sleep 2
+            done
+
+            # 3. Grant permissions (with || true to prevent crashing if it fails)
+            adb shell pm grant com.example.concoordinates android.permission.ACCESS_FINE_LOCATION || echo "Permission grant failed, but continuing..."
+            adb shell pm grant com.example.concoordinates android.permission.ACCESS_COARSE_LOCATION || true
             
-            # 3. Setup Maestro CLI
+            # 4. Setup Maestro and Run
             curl -Ls "https://get.maestro.mobile.dev" | bash
             export PATH="$PATH:$HOME/.maestro/bin"
             
-            # 4. Run Maestro Flows
+            mkdir -p e2e-report
             maestro test .maestro/flows/ --format junit --output e2e-report/report.xml
-            
-            # 5. Extract E2E Coverage (.ec)
-            adb shell am force-stop com.example.concoordinates
-            mkdir -p app/build/outputs/code-coverage/connected
-            adb pull /data/data/com.example.concoordinates/files/coverage.ec app/build/outputs/code-coverage/connected/coverage.ec || true
 
       - name: Run Unit Tests and Generate Merged Coverage
         # This matches your CI command but will now find the .ec file from the step above

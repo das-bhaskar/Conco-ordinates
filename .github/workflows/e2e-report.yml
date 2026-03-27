@@ -43,8 +43,8 @@ jobs:
         with:
           api-level: 29
           target: default
-          arch: x86_64
-          profile: pixel_4
+          arch: arm64-v8a
+          profile: pixel_6
           disable-animations: true
           # Note: script lines are joined by newlines; the shell handles the 'for' loop correctly on macOS
           script: |

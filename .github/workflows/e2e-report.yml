@@ -6,15 +6,15 @@ on:
   pull_request:
     branches: ["main", "develop"]
 
-
 permissions:
   contents: read
   pull-requests: write
 
 jobs:
   e2e-test-coverage:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Switched to macOS for hardware acceleration (required for stable Emulator)
+    runs-on: macos-latest
+    timeout-minutes: 60
 
     steps:
       - name: Checkout Repository
@@ -31,13 +31,11 @@ jobs:
         run: chmod +x gradlew
 
       - name: Create local.properties
-        # This mirrors your existing CI logic exactly
         env:
           MAPS_VAR: ${{ secrets.MAPS_API_KEY || 'unused' }}
         run: echo "MAPS_API_KEY=\"$MAPS_VAR\"" > local.properties
 
       - name: Build Debug APK
-        # No extra env vars needed; mirrors your existing CI step
         run: ./gradlew assembleDebug
 
       - name: Run E2E Tests on Emulator
@@ -48,11 +46,10 @@ jobs:
           arch: x86_64
           profile: pixel_4
           disable-animations: true
+          # Note: script lines are joined by newlines; the shell handles the 'for' loop correctly on macOS
           script: |
-            # 1. Install the APK
             adb install -r app/build/outputs/apk/debug/app-debug.apk
-            
-            # 2. Wait for the package manager to actually recognize the app
+
             echo "Waiting for package to be registered..."
             for i in {1..10}; do
               if adb shell pm list packages | grep -q "com.example.concoordinates"; then
@@ -60,38 +57,38 @@ jobs:
                 break
               fi
               echo "Retrying ($i/10)..."
-              sleep 2
+              sleep 5
             done
 
-            # 3. Grant permissions (with || true to prevent crashing if it fails)
-            adb shell pm grant com.example.concoordinates android.permission.ACCESS_FINE_LOCATION || echo "Permission grant failed, but continuing..."
+            echo "Granting permissions..."
+            adb shell pm grant com.example.concoordinates android.permission.ACCESS_FINE_LOCATION || true
             adb shell pm grant com.example.concoordinates android.permission.ACCESS_COARSE_LOCATION || true
-            
-            # 4. Setup Maestro and Run
+
+            echo "Installing Maestro..."
             curl -Ls "https://get.maestro.mobile.dev" | bash
             export PATH="$PATH:$HOME/.maestro/bin"
-            
+
             mkdir -p e2e-report
+            echo "Running Maestro flows..."
             maestro test .maestro/flows/ --format junit --output e2e-report/report.xml
 
       - name: Run Unit Tests and Generate Merged Coverage
-        # This matches your CI command but will now find the .ec file from the step above
         run: ./gradlew testDebugUnitTest jacocoTestReport --info --continue
 
       - name: Upload E2E Report Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Sprint-${{ github.event.inputs.sprint_number }}-E2E-Coverage
+          name: Sprint-E2E-Coverage
           path: |
             e2e-report/
             app/build/reports/jacoco/jacocoTestReport/html/
 
       - name: PR Coverage Reporter
-        # This will post the COMBINED (Unit + E2E) coverage as a comment
+        if: github.event_name == 'pull_request'
         uses: madrapps/jacoco-report@v1.7.1
         with:
           paths: ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          title: "Sprint ${{ github.event.inputs.sprint_number }} Combined E2E + Unit Coverage"
+          title: "Combined E2E + Unit Coverage Report"
           update-comment: true

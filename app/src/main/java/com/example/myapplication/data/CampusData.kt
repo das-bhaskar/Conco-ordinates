@@ -149,4 +149,13 @@ object CampusRepo {
         return xIntersection > pX
     }
     fun getAllCampuses(): List<Campus> = allCampuses
+
+    /**
+     * Flat list of all buildings across all campuses.
+     * Cached after first access — avoids repeated flatMap on every
+     * IndoorJourneyHandler call. Data is immutable after initialize().
+     */
+    private var _allBuildings: List<Building>? = null
+    fun getAllBuildings(): List<Building> =
+        _allBuildings ?: allCampuses.flatMap { it.buildings }.also { _allBuildings = it }
 }

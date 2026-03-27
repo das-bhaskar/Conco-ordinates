@@ -73,12 +73,6 @@ object IndoorRoomResolver {
         floor:        Int = 1
     ): String? = null  // filled in at runtime from IndoorRepository
 
-    private fun floorsFor(code: String): List<Int> = when (code.uppercase()) {
-        "CC" -> listOf(1)
-        "H"  -> listOf(1, 2, 8, 9)
-        "MB" -> listOf(1, -2)
-        "VE" -> listOf(1, 2)
-        "VL" -> listOf(1, 2)
-        else -> listOf(1)
-    }
+    private fun floorsFor(code: String): List<Int> =
+        com.example.myapplication.data.indoor.IndoorBuildingConfig.floorsFor(code)
 }

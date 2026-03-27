@@ -3,15 +3,15 @@
     {
       "nodeId": "node-CC-1-ent-w",
       "label": "CC West Entrance",
-      "lat": 45.49719,
-      "lng": -73.57918,
+      "lat": 45.458503,
+      "lng": -73.640741,
       "floor": 1
     },
     {
       "nodeId": "node-CC-1-ent-e",
       "label": "CC East Entrance",
-      "lat": 45.49719,
-      "lng": -73.57784,
+      "lat": 45.458154,
+      "lng": -73.639911,
       "floor": 1
     }
   ],

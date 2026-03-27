@@ -18,12 +18,11 @@ import com.example.myapplication.ui.models.BuildingUiState
 
 @Composable
 fun BuildingInfoPopup(
-    building:         Building,
-    uiState:          BuildingUiState,
-    onDismiss:        () -> Unit,
+    building:          Building,
+    uiState:           BuildingUiState,
+    onDismiss:         () -> Unit,
     onDirectionsClick: () -> Unit,
-    onIndoorMapClick:  () -> Unit = {},
-    onEnterBuilding: () -> Unit
+    onIndoorMapClick:  () -> Unit = {}
 ) {
     Box(
         modifier         = Modifier.fillMaxSize(),
@@ -49,22 +48,16 @@ fun BuildingInfoPopup(
                     Text(text = building.name, style = MaterialTheme.typography.headlineSmall)
 
                     Row(
-                        modifier            = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                        modifier              = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         ActionButton(Icons.Default.Directions, "Directions", onDirectionsClick)
                         if (uiState.hasIndoorMap) {
                             ActionButton(Icons.Default.Map, "Indoor", onIndoorMapClick)
                         }
-                        ActionButton(Icons.Default.Save,    "Save")    {}
-                        ActionButton(Icons.Default.PinDrop, "PIN")     {}
-                        ActionButton(Icons.Default.Share,   "Share")   {}
-                        Button(
-                            onClick = onEnterBuilding,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
-                        ) {
-                            Text("ENTER BUILDING")
-                        }
+                        ActionButton(Icons.Default.Save,    "Save")  {}
+                        ActionButton(Icons.Default.PinDrop, "PIN")   {}
+                        ActionButton(Icons.Default.Share,   "Share") {}
                     }
 
                     HorizontalDivider(
@@ -73,7 +66,7 @@ fun BuildingInfoPopup(
                         color     = Color.LightGray
                     )
                     Row(
-                        modifier        = Modifier.padding(top = 16.dp),
+                        modifier          = Modifier.padding(top = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(Icons.Default.LocationOn, contentDescription = null, tint = Color.Blue)

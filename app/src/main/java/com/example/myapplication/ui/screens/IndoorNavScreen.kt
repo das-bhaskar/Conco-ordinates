@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.data.indoor.BuildingEntrances
+import com.example.myapplication.data.indoor.IndoorRepository
 import com.example.myapplication.data.indoor.IndoorRoom
 import com.example.myapplication.logic.CrossFloorNavigator
 import com.example.myapplication.logic.IndoorOutdoorRouter
@@ -24,6 +25,7 @@ import com.example.myapplication.logic.IndoorRoomResolver
 import com.example.myapplication.logic.TransferPreference
 import com.example.myapplication.ui.components.IndoorMapCanvas
 import com.example.myapplication.ui.components.IndoorNavViewModel
+import com.example.myapplication.ui.components.IndoorNavViewModelFactory
 import kotlinx.coroutines.launch
 
 
@@ -44,7 +46,12 @@ fun IndoorNavScreen(
     // Bug 1: use a unique key per session so each building/startNode combination
     // gets its own ViewModel instance, preventing stale state from a previous
     // session (e.g. CC screen) leaking into a new session (e.g. H screen).
-    vm: IndoorNavViewModel = viewModel(key = "$building-$initialFloor-$startNodeId")
+    vm: IndoorNavViewModel = viewModel(
+        key     = "$building-$initialFloor-$startNodeId",
+        factory = IndoorNavViewModelFactory(
+            IndoorRepository(androidx.compose.ui.platform.LocalContext.current.applicationContext)
+        )
+    )
 ) {
     val state by vm.state.collectAsState()
 

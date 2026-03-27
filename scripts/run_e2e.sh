@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
+export PATH="$PATH:$HOME/.maestro/bin"
 
+if ! command -v maestro >/dev/null 2>&1; then
+  echo "Maestro CLI not found in PATH"
+  exit 1
+fi
 REPORT_DIR="${REPORT_DIR:-e2e-report}"
 TEST_OUTPUT_DIR="${TEST_OUTPUT_DIR:-e2e-test-output}"
 

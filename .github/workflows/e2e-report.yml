@@ -41,8 +41,8 @@ jobs:
         run: |
           curl -fsSL "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
-          "$HOME/.maestro/bin/maestro" --version
-          "$HOME/.maestro/bin/maestro" driver-setup
+          export PATH="$PATH:$HOME/.maestro/bin"
+          maestro --version
 
       - name: Grant execute permission
         run: |

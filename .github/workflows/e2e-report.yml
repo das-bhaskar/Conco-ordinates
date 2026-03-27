@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   e2e-test:
@@ -15,14 +16,19 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      APP_ID: com.example.concoordinates
-      FLOW_DIR: ${{ github.workspace }}/.maestro/flows
-      APK_PATH: ${{ github.workspace }}/app/build/outputs/apk/debug/app-debug.apk
       MAESTRO_DRIVER_STARTUP_TIMEOUT: "180000"
+      REPORT_DIR: e2e-report
+      TEST_OUTPUT_DIR: e2e-test-output
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -31,14 +37,10 @@ jobs:
           distribution: "temurin"
           cache: gradle
 
-      - name: Enable KVM
+      - name: Grant execute permission
         run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: Grant Execute Permission
-        run: chmod +x gradlew
+          chmod +x gradlew
+          chmod +x scripts/run_e2e.sh
 
       - name: Create local.properties
         env:
@@ -48,7 +50,7 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
-      - name: Run E2E Tests on Emulator
+      - name: Run E2E tests on emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
@@ -57,36 +59,9 @@ jobs:
           profile: pixel_4
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
-          script: >-
-            sh -c 'set -eu;
-            mkdir -p e2e-report e2e-test-output .maestro-debug;
-            adb wait-for-device;
-            adb install -r "$APK_PATH";
-            echo "Waiting for package to be registered...";
-            i=1;
-            while [ "$i" -le 10 ]; do
-              if adb shell pm list packages | grep -q "$APP_ID"; then
-                echo "Package found!";
-                break;
-              fi;
-              echo "Retrying ($i/10)...";
-              sleep 2;
-              i=$((i + 1));
-            done;
-            adb shell pm grant "$APP_ID" android.permission.ACCESS_FINE_LOCATION || true;
-            adb shell pm grant "$APP_ID" android.permission.ACCESS_COARSE_LOCATION || true;
-            curl -Ls https://get.maestro.mobile.dev | bash;
-            export PATH="$PATH:$HOME/.maestro/bin";
-            maestro --version;
-            maestro driver-setup;
-            maestro --verbose --device emulator-5554 test
-              --format junit
-              --output e2e-report/report.xml
-              --test-output-dir e2e-test-output
-              --debug-output .maestro-debug
-              "$FLOW_DIR"'
+          script: bash ./scripts/run_e2e.sh
 
-      - name: Upload E2E Artifacts
+      - name: Upload E2E artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -94,5 +69,4 @@ jobs:
           path: |
             e2e-report/
             e2e-test-output/
-            .maestro-debug/
           if-no-files-found: ignore

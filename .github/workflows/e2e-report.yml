@@ -1,21 +1,24 @@
 name: E2E Sprint Report
 
 on:
-  workflow_dispatch:
-    inputs:
-      sprint_number:
-        description: 'Sprint Number'
-        required: true
-        default: '4'
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
-  e2e-test-coverage:
+  e2e-test:
+    name: Maestro E2E
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    env:
+      APP_ID: com.example.concoordinates
+      FLOW_DIR: ${{ github.workspace }}/.maestro/flows
+      APK_PATH: ${{ github.workspace }}/app/build/outputs/apk/debug/app-debug.apk
+      MAESTRO_DRIVER_STARTUP_TIMEOUT: "180000"
 
     steps:
       - name: Checkout Repository
@@ -28,17 +31,21 @@ jobs:
           distribution: "temurin"
           cache: gradle
 
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       - name: Grant Execute Permission
         run: chmod +x gradlew
 
       - name: Create local.properties
-        # This mirrors your existing CI logic exactly
         env:
           MAPS_VAR: ${{ secrets.MAPS_API_KEY || 'unused' }}
         run: echo "MAPS_API_KEY=\"$MAPS_VAR\"" > local.properties
 
       - name: Build Debug APK
-        # No extra env vars needed; mirrors your existing CI step
         run: ./gradlew assembleDebug
 
       - name: Run E2E Tests on Emulator
@@ -49,43 +56,43 @@ jobs:
           arch: x86_64
           profile: pixel_4
           disable-animations: true
-          script: |
-            # 1. Install the APK generated in the previous step
-            adb install -r app/build/outputs/apk/debug/app-debug.apk
-            
-            # 2. Grant permissions (Required for navigation features)
-            adb shell pm grant com.example.concoordinates android.permission.ACCESS_FINE_LOCATION
-            
-            # 3. Setup Maestro CLI
-            curl -Ls "https://get.maestro.mobile.dev" | bash
-            export PATH="$PATH:$HOME/.maestro/bin"
-            
-            # 4. Run Maestro Flows
-            maestro test .maestro/flows/ --format junit --output e2e-report/report.xml
-            
-            # 5. Extract E2E Coverage (.ec)
-            adb shell am force-stop com.example.concoordinates
-            mkdir -p app/build/outputs/code-coverage/connected
-            adb pull /data/data/com.example.concoordinates/files/coverage.ec app/build/outputs/code-coverage/connected/coverage.ec || true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          script: >-
+            sh -c 'set -eu;
+            mkdir -p e2e-report e2e-test-output .maestro-debug;
+            adb wait-for-device;
+            adb install -r "$APK_PATH";
+            echo "Waiting for package to be registered...";
+            i=1;
+            while [ "$i" -le 10 ]; do
+              if adb shell pm list packages | grep -q "$APP_ID"; then
+                echo "Package found!";
+                break;
+              fi;
+              echo "Retrying ($i/10)...";
+              sleep 2;
+              i=$((i + 1));
+            done;
+            adb shell pm grant "$APP_ID" android.permission.ACCESS_FINE_LOCATION || true;
+            adb shell pm grant "$APP_ID" android.permission.ACCESS_COARSE_LOCATION || true;
+            curl -Ls https://get.maestro.mobile.dev | bash;
+            export PATH="$PATH:$HOME/.maestro/bin";
+            maestro --version;
+            maestro driver-setup;
+            maestro --verbose --device emulator-5554 test
+              --format junit
+              --output e2e-report/report.xml
+              --test-output-dir e2e-test-output
+              --debug-output .maestro-debug
+              "$FLOW_DIR"'
 
-      - name: Run Unit Tests and Generate Merged Coverage
-        # This matches your CI command but will now find the .ec file from the step above
-        run: ./gradlew testDebugUnitTest jacocoTestReport --info --continue
-
-      - name: Upload E2E Report Artifacts
+      - name: Upload E2E Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Sprint-${{ github.event.inputs.sprint_number }}-E2E-Coverage
+          name: e2e-artifacts
           path: |
             e2e-report/
-            app/build/reports/jacoco/jacocoTestReport/html/
-
-      - name: PR Coverage Reporter
-        # This will post the COMBINED (Unit + E2E) coverage as a comment
-        uses: madrapps/jacoco-report@v1.7.1
-        with:
-          paths: ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: "Sprint ${{ github.event.inputs.sprint_number }} Combined E2E + Unit Coverage"
-          update-comment: true
+            e2e-test-output/
+            .maestro-debug/
+          if-no-files-found: ignore

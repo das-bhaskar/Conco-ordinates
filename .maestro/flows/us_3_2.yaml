@@ -15,3 +15,22 @@ appId: com.example.myapplication
     text: "Map"
 - assertVisible:
     text: "Schedule"
+
+- tapOn:
+    text: "schedule"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Connect"
+    index: 1
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Conco-ordinates"
+- waitForAnimationToEnd:
+    timeout: 10000

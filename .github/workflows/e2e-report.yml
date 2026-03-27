@@ -1,12 +1,11 @@
 name: E2E Sprint Report
 
 on:
-  workflow_dispatch:
-    inputs:
-      sprint_number:
-        description: 'Sprint Number'
-        required: true
-        default: '4'
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
 
 permissions:
   contents: read

@@ -42,32 +42,38 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
-          target: google_apis
+          target: google_apis_playstore # Play Store images are often more stable on ARM CI
           arch: arm64-v8a
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu libguest -no-snapshot -noaudio -no-boot-anim -accel on
-          # Note: script lines are joined by newlines; the shell handles the 'for' loop correctly on macOS
+          # REMOVED -accel on; ADDED -no-snapshot-load for a clean boot every time
+          emulator-options: >-
+            -no-window 
+            -gpu swiftshader_indirect 
+            -no-snapshot 
+            -noaudio 
+            -no-boot-anim 
+            -memory 3072
           script: |
-
-            # Increase ADB timeout for slow initial connections
-            export ADB_INSTALL_TIMEOUT=5
+            # Ensure ADB is ready
             adb wait-for-device
+            
+            # Use the correct package name from your build.gradle
             adb install -r app/build/outputs/apk/debug/app-debug.apk
 
             echo "Waiting for package to be registered..."
-            for i in {1..15}; do
-              if adb shell pm list packages | grep -q "com.example.concoordinates"; then
+            for i in {1..20}; do
+              if adb shell pm list packages | grep -q "com.example.myapplication"; then
                 echo "Package found!"
                 break
               fi
-              echo "Retrying ($i/15)..."
+              echo "Retrying ($i/20)..."
               sleep 5
             done
 
             echo "Granting permissions..."
-            adb shell pm grant com.example.concoordinates android.permission.ACCESS_FINE_LOCATION || true
-            adb shell pm grant com.example.concoordinates android.permission.ACCESS_COARSE_LOCATION || true
+            adb shell pm grant com.example.myapplication android.permission.ACCESS_FINE_LOCATION || true
+            adb shell pm grant com.example.myapplication android.permission.ACCESS_COARSE_LOCATION || true
 
             echo "Installing Maestro..."
             curl -Ls "https://get.maestro.mobile.dev" | bash

@@ -31,7 +31,7 @@ object IndoorJourneyHandler {
     ): IndoorJourneyPhase {
         if (userGps == null) return IndoorJourneyPhase.DetectingLocation
 
-        val allBuildings = CampusRepo.getAllCampuses().flatMap { it.buildings }
+        val allBuildings = CampusRepo.getAllBuildings()
 
         val currentBuilding = allBuildings.firstOrNull { building ->
             PolyUtil.containsLocation(userGps, building.getGoogleOutline(), false)
@@ -128,7 +128,7 @@ object IndoorJourneyHandler {
     fun onNearDestinationBuilding(
         phase: IndoorJourneyPhase.Outdoor
     ): IndoorJourneyPhase {
-        val allBuildings  = CampusRepo.getAllCampuses().flatMap { it.buildings }
+        val allBuildings  = CampusRepo.getAllBuildings()
         val destBuilding  = allBuildings.firstOrNull { it.code == phase.destRoom.buildingCode }
             ?: return IndoorJourneyPhase.Idle
         val entrances     = BuildingEntrances.forBuilding(phase.destRoom.buildingCode)
@@ -157,7 +157,7 @@ object IndoorJourneyHandler {
      * Used in processLocationUpdate to auto-trigger AskEntryPoint.
      */
     fun isNearBuilding(userGps: LatLng, buildingCode: String): Boolean {
-        val allBuildings = CampusRepo.getAllCampuses().flatMap { it.buildings }
+        val allBuildings = CampusRepo.getAllBuildings()
         val building     = allBuildings.firstOrNull { it.code == buildingCode } ?: return false
         val center       = building.getCenter()
         return com.google.maps.android.SphericalUtil

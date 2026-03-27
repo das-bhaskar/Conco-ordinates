@@ -1,7 +1,5 @@
 package com.example.myapplication.ui.components
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.indoor.IndoorRepository
 import com.example.myapplication.data.indoor.IndoorFloor
@@ -53,7 +51,10 @@ data class IndoorNavUiState(
     // Running step offset from previous segments
     val stepOffset:             Int             = 0,
 
-    // floor-change overlay (user must confirm they changed floors)
+    // ── Step cache — built once when fullRoute is set ─────────────────────────
+    // Maps segment index → pre-built steps for that walk segment.
+    // Avoids O(n²) repeated IndoorStepBuilder.build() calls in applySegment().
+    val stepCache:              Map<Int, List<IndoorStepBuilder.NavStep>> = emptyMap(),
     val pendingFloorChange:     Segment.FloorChange? = null,
 
     // mid-route advance card: shown when a Walk segment ends but route continues
@@ -79,9 +80,25 @@ data class IndoorNavUiState(
 
 // ── ViewModel ─────────────────────────────────────────────────────────────────
 
-class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
+/**
+ * Factory for [IndoorNavViewModel].
+ *
+ * Provides [IndoorRepository] via constructor injection so the ViewModel
+ * does not create its own dependencies (DIP). Tests can pass a fake repo
+ * without needing an Application context.
+ */
+class IndoorNavViewModelFactory(
+    private val repo: IndoorRepository
+) : androidx.lifecycle.ViewModelProvider.Factory {
+    override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
+        return IndoorNavViewModel(repo) as T
+    }
+}
 
-    private val repo   = IndoorRepository(app)
+class IndoorNavViewModel(
+    private val repo: IndoorRepository
+) : androidx.lifecycle.ViewModel() {
     private val _state = MutableStateFlow(IndoorNavUiState())
     val state: StateFlow<IndoorNavUiState> = _state.asStateFlow()
 
@@ -131,7 +148,17 @@ class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
                     error = "No path with ${preference.label}. Try another option.") }
                 return@launch
             }
-            _state.update { it.copy(isLoading = false, fullRoute = route, currentSegmentIdx = 0) }
+            val cache = buildStepCache(route)
+            val totalSteps = cache.values.sumOf { it.size }
+            _state.update {
+                it.copy(
+                    isLoading         = false,
+                    fullRoute         = route,
+                    currentSegmentIdx = 0,
+                    stepCache         = cache,
+                    totalStepCount    = totalSteps
+                )
+            }
             applySegment(0)
         }
     }
@@ -303,7 +330,19 @@ class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
                 return@launch
             }
 
-            _state.update { it.copy(isLoading = false, fullRoute = route, currentSegmentIdx = 0) }
+            // Build step cache once — O(n) total, not O(n²) per applySegment call
+            val cache = buildStepCache(route)
+            val totalSteps = cache.values.sumOf { it.size }
+
+            _state.update {
+                it.copy(
+                    isLoading       = false,
+                    fullRoute       = route,
+                    currentSegmentIdx = 0,
+                    stepCache       = cache,
+                    totalStepCount  = totalSteps
+                )
+            }
             applySegment(0)
         }
     }
@@ -371,25 +410,55 @@ class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
         lastNavParams = null
         _state.update {
             it.copy(
-                fullRoute          = null,
-                currentSegmentIdx  = 0,
-                currentSteps       = emptyList(),
-                currentStepIdx     = 0,
-                totalStepCount     = 0,
-                stepOffset         = 0,
-                pathNodeIds        = emptySet(),
-                pathEdgeIds        = emptyList(),
-                highlightRoomId    = null,
-                pendingFloorChange = null,
+                fullRoute             = null,
+                currentSegmentIdx     = 0,
+                currentSteps          = emptyList(),
+                currentStepIdx        = 0,
+                totalStepCount        = 0,
+                stepOffset            = 0,
+                stepCache             = emptyMap(),
+                pathNodeIds           = emptySet(),
+                pathEdgeIds           = emptyList(),
+                highlightRoomId       = null,
+                pendingFloorChange    = null,
                 pendingSegmentAdvance = null,
-                outdoorSegment     = null,
-                instruction        = "",
-                hasArrived         = false
+                outdoorSegment        = null,
+                instruction           = "",
+                hasArrived            = false
             )
         }
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────
+
+    /**
+     * Builds steps for every IndoorWalk segment in [route] exactly once.
+     * Result is stored in [IndoorNavUiState.stepCache] keyed by segment index.
+     * applySegment() reads from this cache instead of calling
+     * IndoorStepBuilder.build() repeatedly — O(n) total vs O(n²) before.
+     */
+    private fun buildStepCache(
+        route: IndoorOutdoorRouter.FullRoute
+    ): Map<Int, List<IndoorStepBuilder.NavStep>> {
+        val cache = mutableMapOf<Int, List<IndoorStepBuilder.NavStep>>()
+        route.segments.forEachIndexed { idx, seg ->
+            if (seg !is Segment.IndoorWalk) return@forEachIndexed
+            val isLast  = idx == route.segments.size - 1
+            val nextSeg = route.segments.getOrNull(idx + 1)
+            val destLabel = route.segments.filterIsInstance<Segment.IndoorWalk>()
+                .lastOrNull()?.path?.lastOrNull()?.roomId ?: "your destination"
+            cache[idx] = IndoorStepBuilder.build(
+                path             = seg.path,
+                destinationLabel = if (isLast) destLabel else "the ${
+                    when (nextSeg) {
+                        is Segment.FloorChange -> nextSeg.via
+                        else                   -> "exit"
+                    }
+                }"
+            )
+        }
+        return cache
+    }
 
     private fun applySegment(idx: Int) {
         val route = _state.value.fullRoute ?: return
@@ -421,33 +490,15 @@ class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
                     return
                 }
 
-                // Build turn-by-turn steps for this walk segment
-                val destLabel = route.segments.filterIsInstance<Segment.IndoorWalk>()
-                    .lastOrNull()?.path?.lastOrNull()?.roomId ?: "your destination"
-                val steps = IndoorStepBuilder.build(
-                    path             = path,
-                    destinationLabel = if (isLastSegment) destLabel else "the ${nextSeg?.let {
-                        when (it) {
-                            is Segment.FloorChange -> it.via
-                            else -> "exit"
-                        }
-                    } ?: "exit"}"
-                )
+                // Read from cache — already built, no recomputation
+                val steps = _state.value.stepCache[idx] ?: emptyList()
 
-                // Compute running step offset from previous walk segments
-                val stepOffset = route.segments.take(idx)
-                    .filterIsInstance<Segment.IndoorWalk>()
-                    .sumOf { s ->
-                        IndoorStepBuilder.build(s.path).size
-                    }
+                // Compute step offset from cached sizes — O(n) but cache is pre-built
+                val stepOffset = _state.value.stepCache
+                    .filterKeys { it < idx }
+                    .values.sumOf { it.size }
 
-                // Count total steps across all walk segments
-                val totalSteps = route.segments
-                    .filterIsInstance<Segment.IndoorWalk>()
-                    .sumOf { s -> IndoorStepBuilder.build(s.path).size }
-
-                // Apply first step of this segment
-                val firstStep = steps.firstOrNull()
+                val firstStep  = steps.firstOrNull()
                 val firstEdges = firstStep?.nodes?.zipWithNext { a, b -> a.id to b.id }
                     ?: emptyList()
 
@@ -459,7 +510,6 @@ class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
                         highlightRoomId       = path.lastOrNull()?.roomId,
                         currentSteps          = steps,
                         currentStepIdx        = 0,
-                        totalStepCount        = totalSteps,
                         stepOffset            = stepOffset,
                         pendingSegmentAdvance = if (steps.size > 1) null
                                                else advancePromptFor(isLastSegment, nextSeg),

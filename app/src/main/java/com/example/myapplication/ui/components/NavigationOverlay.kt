@@ -18,36 +18,34 @@ import com.example.myapplication.ui.theme.ConcordiaMaroon
 
 @Composable
 fun NavigationOverlay(
-    navState: NavigationState,
+    navState:        NavigationState,
     onRecenterClick: () -> Unit,
-    onExit: () -> Unit,
-    destinationName: () -> String,
-    onEnterBuilding: () -> Unit,
-
-    ) {
+    onExit:          () -> Unit,
+    destinationName: () -> String
+) {
     Box(modifier = Modifier.fillMaxSize()) {
         // Top Instruction Box
         Surface(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .fillMaxWidth()
-                .padding(16.dp), // Added padding here so it doesn't touch screen edges
-            shape = RoundedCornerShape(12.dp),
-            color = Color.White,
+                .padding(16.dp),
+            shape           = RoundedCornerShape(12.dp),
+            color           = Color.White,
             shadowElevation = 8.dp
         ) {
             Row(
-                modifier = Modifier.padding(20.dp),
+                modifier          = Modifier.padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowRightAlt,
+                    imageVector        = Icons.AutoMirrored.Filled.ArrowRightAlt,
                     contentDescription = null,
-                    tint = ConcordiaMaroon
+                    tint               = ConcordiaMaroon
                 )
                 Spacer(Modifier.width(12.dp))
                 Text(
-                    text = navState.currentInstruction,
+                    text  = navState.currentInstruction,
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.Black
                 )
@@ -59,33 +57,30 @@ fun NavigationOverlay(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                // FIXED: Correct way to apply horizontal and bottom padding together
                 .padding(start = 16.dp, end = 16.dp, bottom = 40.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment     = Alignment.CenterVertically
         ) {
             // RECENTER
             Button(
-                onClick = onRecenterClick,
-                modifier = Modifier
-                    .height(54.dp)
-                    .weight(1.6f),
-                shape = RoundedCornerShape(27.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon),
-                elevation = ButtonDefaults.buttonElevation(4.dp),
-                contentPadding = PaddingValues(horizontal = 12.dp)
+                onClick  = onRecenterClick,
+                modifier = Modifier.height(54.dp).weight(1.6f),
+                shape    = RoundedCornerShape(27.dp),
+                colors   = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon),
+                elevation        = ButtonDefaults.buttonElevation(4.dp),
+                contentPadding   = PaddingValues(horizontal = 12.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.MyLocation,
+                    imageVector        = Icons.Default.MyLocation,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    modifier           = Modifier.size(18.dp)
                 )
                 Spacer(Modifier.width(6.dp))
                 Text(
-                    text = "RECENTER",
-                    style = MaterialTheme.typography.labelLarge.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
+                    text     = "RECENTER",
+                    style    = MaterialTheme.typography.labelLarge.copy(
+                        fontWeight   = FontWeight.Bold,
+                        fontSize     = 12.sp,
                         letterSpacing = 0.5.sp
                     ),
                     maxLines = 1,
@@ -95,20 +90,18 @@ fun NavigationOverlay(
 
             // EXIT
             Button(
-                onClick = onExit,
-                modifier = Modifier
-                    .height(54.dp)
-                    .weight(0.7f),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon),
-                elevation = ButtonDefaults.buttonElevation(4.dp),
+                onClick        = onExit,
+                modifier       = Modifier.height(54.dp).weight(0.7f),
+                shape          = RoundedCornerShape(12.dp),
+                colors         = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon),
+                elevation      = ButtonDefaults.buttonElevation(4.dp),
                 contentPadding = PaddingValues(0.dp)
             ) {
                 Text(
-                    text = "EXIT",
+                    text  = "EXIT",
                     style = MaterialTheme.typography.labelLarge.copy(
                         fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp
+                        fontSize   = 12.sp
                     )
                 )
             }
@@ -118,27 +111,15 @@ fun NavigationOverlay(
     if (navState.hasArrived) {
         AlertDialog(
             onDismissRequest = { /* Force action */ },
-            title = { Text("Destination Reached", fontWeight = FontWeight.Bold) },
-            text = { Text("You have arrived at ${destinationName()}. Would you like to see indoor directions?") },
-            confirmButton = {
-                // Primary Action: Go Inside
+            title            = { Text("Destination Reached", fontWeight = FontWeight.Bold) },
+            text             = { Text("You have arrived at ${destinationName()}.") },
+            confirmButton    = {
                 Button(
-                    onClick = {
-                        onEnterBuilding()
-                        onExit() // Close the outdoor nav after entering
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon)
-                ) {
-                    Text("GO INSIDE", color = Color.White)
-                }
+                    onClick = onExit,
+                    colors  = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon)
+                ) { Text("END TRIP", color = Color.White) }
             },
-            dismissButton = {
-                // Secondary Action: Just finish the trip
-                TextButton(onClick = onExit) {
-                    Text("END TRIP", color = ConcordiaMaroon)
-                }
-            },
-            shape = RoundedCornerShape(16.dp),
+            shape          = RoundedCornerShape(16.dp),
             containerColor = Color.White
         )
     }

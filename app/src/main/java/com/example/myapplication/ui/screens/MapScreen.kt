@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.myapplication.logic.SearchResult
 import com.example.myapplication.logic.handleRecenter
 import com.example.myapplication.logic.openAppSettings
@@ -41,48 +40,34 @@ import com.example.myapplication.ui.components.rememberMapCamera
 import com.example.myapplication.ui.models.BuildingUiState
 import com.example.myapplication.ui.models.MapUIMode
 import com.example.myapplication.ui.theme.ConcordiaMaroon
-
 import com.google.android.gms.location.FusedLocationProviderClient
 import kotlinx.coroutines.launch
 
-/**
- * Full map screen — extracted from MapsActivity into ui/screens per
- * architectural review (Thin Activity pattern).
- *
- * Receives [mapViewModel], [calendarViewModel], and [fusedLocationClient]
- * as parameters so the composable remains independently testable without
- * instantiating a full Activity.
- *
- * All private overlay composables live here, keeping MapsActivity as a
- * pure lifecycle/DI entry point.
- */
 @Composable
 fun MapScreen(
-    mapViewModel:        com.example.myapplication.ui.viewmodel.MapViewModel,
-    // ViewModel properties not in BuildingUiState
-    currentCampus:       com.example.myapplication.data.Campus?,
-    highlightedBuildingName: String?,
-    searchQuery:         String,
-    searchResults:       List<com.example.myapplication.logic.SearchResult>,
-    activeSearchField:   String,
-    nextClassEvent:      com.example.myapplication.data.ResolvedCalendarEvent?,
-    isNextClassUrgent:   Boolean,
-    nextClassTimeRemaining: String,
-    fusedLocationClient: FusedLocationProviderClient,
-    // map interactions
-    onSearchQueryChanged:   (String, String) -> Unit,
-    onSearchResult:         (com.example.myapplication.logic.SearchResult, android.content.Context) -> Unit,
-    onTransportModeChanged: (String) -> Unit,
-    onToggleSearchExpansion:(Boolean, String) -> Unit,
-    onSwapLocations:        () -> Unit,
-    onBackToPreview:        () -> Unit,
-    onCampusSelected:       (String) -> Unit,
-    onBuildingDismiss:      () -> Unit,
-    onDirectionsRequested:  () -> Unit,
-    onLocationUpdate:       (com.google.android.gms.maps.model.LatLng, Boolean) -> Unit,
-    onNavigateToIndoor: (String, String) -> Unit,
-    onNavigateToBuilding:   (String) -> Unit,
-    onStartNavigationActions: () -> Unit,
+    mapViewModel:             com.example.myapplication.ui.viewmodel.MapViewModel,
+    currentCampus:            com.example.myapplication.data.Campus?,
+    highlightedBuildingName:  String?,
+    searchQuery:              String,
+    searchResults:            List<SearchResult>,
+    activeSearchField:        String,
+    nextClassEvent:           com.example.myapplication.data.ResolvedCalendarEvent?,
+    isNextClassUrgent:        Boolean,
+    nextClassTimeRemaining:   String,
+    fusedLocationClient:      FusedLocationProviderClient,
+    onSearchQueryChanged:     (String, String) -> Unit,
+    onSearchResult:           (SearchResult, android.content.Context) -> Unit,
+    onTransportModeChanged:   (String) -> Unit,
+    onToggleSearchExpansion:  (Boolean, String) -> Unit,
+    onSwapLocations:          () -> Unit,
+    onBackToPreview:          () -> Unit,
+    onCampusSelected:         (String) -> Unit,
+    onBuildingDismiss:        () -> Unit,
+    onDirectionsRequested:    () -> Unit,
+    onLocationUpdate:         (com.google.android.gms.maps.model.LatLng, Boolean) -> Unit,
+    onNavigateToBuilding:     (String) -> Unit,
+    onStartNavigationActions: () -> Unit = {},
+    onIndoorMapClick:         () -> Unit = {}
 ) {
     val uiState = mapViewModel.uiBuildingState
     val context = LocalContext.current
@@ -95,8 +80,6 @@ fun MapScreen(
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
-    // Compute shouldShowRationale here (has Activity context) — pass as param to
-    // handleRecenter so the utility stays context-agnostic (PR review #5).
     val shouldShowRationale = ActivityCompat.shouldShowRequestPermissionRationale(
         context as androidx.activity.ComponentActivity,
         Manifest.permission.ACCESS_FINE_LOCATION
@@ -120,10 +103,11 @@ fun MapScreen(
     ) { isGranted -> hasLocationPermission = isGranted }
 
     val mapPaddingBottom = when (uiState.mode) {
-        MapUIMode.DIRECTIONS -> 600
-        MapUIMode.ACTIVE_NAVIGATION -> 100 // Padding for the Exit button row
-        else -> 0
+        MapUIMode.DIRECTIONS        -> 600
+        MapUIMode.ACTIVE_NAVIGATION -> 100
+        else                        -> 0
     }
+
     Box(modifier = Modifier.fillMaxSize()) {
         CampusMap(
             currentCampus           = currentCampus,
@@ -134,64 +118,56 @@ fun MapScreen(
             contentPadding          = PaddingValues(bottom = mapPaddingBottom.dp),
             modifier                = Modifier.testTag("campus_map")
         )
+
         if (uiState.mode != MapUIMode.ACTIVE_NAVIGATION) {
             MapSearchOverlay(
-                context = context,
-                uiState = uiState,
-                searchQuery = searchQuery,
-                searchResults = searchResults,
-                activeSearchField = activeSearchField,
-                onSearchQueryChanged = onSearchQueryChanged,
-                onSearchResult = onSearchResult,
-                onTransportModeChanged = onTransportModeChanged,
-                onToggleSearchExpansion = onToggleSearchExpansion,
-                onSwapLocations = onSwapLocations,
-                onBackToPreview = onBackToPreview,
-                onStartNavigationActions = onStartNavigationActions,
-                        onNavigateToIndoor = onNavigateToIndoor
+                context                  = context,
+                uiState                  = uiState,
+                searchQuery              = searchQuery,
+                searchResults            = searchResults,
+                activeSearchField        = activeSearchField,
+                onSearchQueryChanged     = onSearchQueryChanged,
+                onSearchResult           = onSearchResult,
+                onTransportModeChanged   = onTransportModeChanged,
+                onToggleSearchExpansion  = onToggleSearchExpansion,
+                onSwapLocations          = onSwapLocations,
+                onBackToPreview          = onBackToPreview,
+                onStartNavigationActions = onStartNavigationActions
             )
-
             MapPreviewOverlays(
-                uiState = uiState,
-                currentCampus = currentCampus,
-                nextClassEvent = nextClassEvent,
-                isNextClassUrgent = isNextClassUrgent,
+                uiState                = uiState,
+                currentCampus          = currentCampus,
+                nextClassEvent         = nextClassEvent,
+                isNextClassUrgent      = isNextClassUrgent,
                 nextClassTimeRemaining = nextClassTimeRemaining,
-                fusedLocationClient = fusedLocationClient,
-                shouldShowRationale = shouldShowRationale,
-                hasLocationPermission = hasLocationPermission,
-                launcher = launcher,
-                cameraController = cameraController,
-                scope = scope,
-                onShowSettings = { showSettingsDialog = true },
-                context = context,
-                onLocationUpdate = onLocationUpdate,
-                onCampusSelected = onCampusSelected,
-                onNavigateToBuilding = onNavigateToBuilding,
-                onNavigateToIndoor = onNavigateToIndoor
+                fusedLocationClient    = fusedLocationClient,
+                shouldShowRationale    = shouldShowRationale,
+                hasLocationPermission  = hasLocationPermission,
+                launcher               = launcher,
+                cameraController       = cameraController,
+                scope                  = scope,
+                onShowSettings         = { showSettingsDialog = true },
+                context                = context,
+                onLocationUpdate       = onLocationUpdate,
+                onCampusSelected       = onCampusSelected,
+                onNavigateToBuilding   = onNavigateToBuilding
             )
             MapBuildingOverlay(
-                uiState = uiState,
-                onDismiss = onBuildingDismiss,
-                onDirectionsRequested = onDirectionsRequested,
-                onTransportModeChanged = onTransportModeChanged,
-                onToggleSearchExpansion = onToggleSearchExpansion,
-                onSwapLocations = onSwapLocations,
-                onBackToPreview = onBackToPreview,
-                onStartNavigationActions = onStartNavigationActions,
-                onNavigateToIndoor = onNavigateToIndoor
+                uiState                  = uiState,
+                onDismiss                = onBuildingDismiss,
+                onDirectionsRequested    = onDirectionsRequested,
+                onIndoorMapClick         = onIndoorMapClick,
+                onTransportModeChanged   = onTransportModeChanged,
+                onToggleSearchExpansion  = onToggleSearchExpansion,
+                onSwapLocations          = onSwapLocations,
+                onBackToPreview          = onBackToPreview,
+                onStartNavigationActions = onStartNavigationActions
             )
-        }
-        else {
+        } else {
             NavigationOverlay(
-                navState = uiState.navState,
+                navState        = uiState.navState,
                 onRecenterClick = { mapViewModel.forceRecenter() },
-                onExit = { onBackToPreview() },
-                onEnterBuilding = {
-                    uiState.building?.code?.let { code ->
-                        onNavigateToIndoor(code, "")
-                    }
-                },
+                onExit          = { onBackToPreview() },
                 destinationName = { mapViewModel.uiBuildingState.destinationName }
             )
         }
@@ -202,27 +178,25 @@ fun MapScreen(
                 onDismiss      = { showSettingsDialog = false }
             )
         }
-
     }
 }
 
-// ── Private overlays ──────────────────────────────────────────────────────────
+// ── private overlays ──────────────────────────────────────────────────────────
 
 @Composable
 private fun BoxScope.MapSearchOverlay(
-    context:                android.content.Context,
-    uiState:                BuildingUiState,
-    searchQuery:            String,
-    searchResults:          List<com.example.myapplication.logic.SearchResult>,
-    activeSearchField:      String,
-    onSearchQueryChanged:   (String, String) -> Unit,
-    onSearchResult:         (com.example.myapplication.logic.SearchResult, android.content.Context) -> Unit,
+    context:                  android.content.Context,
+    uiState:                  BuildingUiState,
+    searchQuery:              String,
+    searchResults:            List<SearchResult>,
+    activeSearchField:        String,
+    onSearchQueryChanged:     (String, String) -> Unit,
+    onSearchResult:           (SearchResult, android.content.Context) -> Unit,
     onTransportModeChanged:   (String) -> Unit,
     onToggleSearchExpansion:  (Boolean, String) -> Unit,
     onSwapLocations:          () -> Unit,
     onBackToPreview:          () -> Unit,
-    onStartNavigationActions: () -> Unit,
-    onNavigateToIndoor:       (String, String) -> Unit
+    onStartNavigationActions: () -> Unit
 ) {
     if (uiState.mode == MapUIMode.PREVIEW) {
         CampusSearchBar(
@@ -234,38 +208,36 @@ private fun BoxScope.MapSearchOverlay(
         )
     } else {
         DirectionsOverlay(
-            context                 = context,
-            uiState                 = uiState,
-            searchQuery             = searchQuery,
-            searchResults           = searchResults,
-            activeSearchField       = activeSearchField,
-            onTransportModeChanged  = onTransportModeChanged,
-            onToggleSearchExpansion = onToggleSearchExpansion,
-            onSwapLocations         = onSwapLocations,
-            onBackToPreview         = onBackToPreview,
-            onSearchResult          = onSearchResult,
-            onSearchQueryChanged    = onSearchQueryChanged,
-            onStartNavigationActions = onStartNavigationActions,
-            onNavigateToIndoor = onNavigateToIndoor
+            context                  = context,
+            uiState                  = uiState,
+            searchQuery              = searchQuery,
+            searchResults            = searchResults,
+            activeSearchField        = activeSearchField,
+            onTransportModeChanged   = onTransportModeChanged,
+            onToggleSearchExpansion  = onToggleSearchExpansion,
+            onSwapLocations          = onSwapLocations,
+            onBackToPreview          = onBackToPreview,
+            onSearchResult           = onSearchResult,
+            onSearchQueryChanged     = onSearchQueryChanged,
+            onStartNavigationActions = onStartNavigationActions
         )
     }
 }
 
 @Composable
 private fun BoxScope.DirectionsOverlay(
-    context:                android.content.Context,
-    uiState:                BuildingUiState,
-    searchQuery:            String,
-    searchResults:          List<com.example.myapplication.logic.SearchResult>,
-    activeSearchField:      String,
+    context:                  android.content.Context,
+    uiState:                  BuildingUiState,
+    searchQuery:              String,
+    searchResults:            List<SearchResult>,
+    activeSearchField:        String,
     onTransportModeChanged:   (String) -> Unit,
     onToggleSearchExpansion:  (Boolean, String) -> Unit,
     onSwapLocations:          () -> Unit,
     onBackToPreview:          () -> Unit,
     onStartNavigationActions: () -> Unit,
-    onSearchResult:           (com.example.myapplication.logic.SearchResult, android.content.Context) -> Unit,
-    onSearchQueryChanged:     (String, String) -> Unit,
-    onNavigateToIndoor:       (String, String) -> Unit
+    onSearchResult:           (SearchResult, android.content.Context) -> Unit,
+    onSearchQueryChanged:     (String, String) -> Unit
 ) {
     if (uiState.isSearchExpanded) {
         DirectionsHeader(
@@ -294,19 +266,18 @@ private fun BoxScope.DirectionsOverlay(
         searchQuery       = searchQuery,
         searchResults     = searchResults,
         activeSearchField = activeSearchField,
-        onSearchResult    = onSearchResult,
-        onNavigateToIndoor = onNavigateToIndoor
+        onSearchResult    = onSearchResult
     )
 }
+
 @Composable
 private fun BoxScope.DirectionsSearchResults(
     context:           android.content.Context,
     uiState:           BuildingUiState,
     searchQuery:       String,
-    searchResults:     List<com.example.myapplication.logic.SearchResult>,
+    searchResults:     List<SearchResult>,
     activeSearchField: String,
-    onSearchResult:    (com.example.myapplication.logic.SearchResult, android.content.Context) -> Unit,
-    onNavigateToIndoor: (String, String) -> Unit
+    onSearchResult:    (SearchResult, android.content.Context) -> Unit
 ) {
     val currentFieldText = when (activeSearchField) {
         "start" -> uiState.startLocationName
@@ -322,21 +293,16 @@ private fun BoxScope.DirectionsSearchResults(
         LazyColumn(modifier = Modifier.fillMaxWidth().heightIn(max = 300.dp)) {
             items(searchResults) { result ->
                 val title = when (result) {
-                    is SearchResult.BuildingResult  -> result.building.name
-                    is SearchResult.CampusResult    -> result.campus.name
-                    is SearchResult.GoogleResult    -> result.title
-                    is SearchResult.CurrentLocation -> "Your position"
-                    is SearchResult.Home            -> "Home"
+                    is SearchResult.BuildingResult   -> result.building.name
+                    is SearchResult.CampusResult     -> result.campus.name
+                    is SearchResult.GoogleResult     -> result.title
+                    is SearchResult.CurrentLocation  -> "Your position"
+                    is SearchResult.Home             -> "Home"
                     is SearchResult.IndoorRoomResult -> result.label
                 }
                 ListItem(
                     headlineContent = { Text(title) },
-                    modifier = Modifier.clickable {
-                        if (result is SearchResult.IndoorRoomResult) {
-                            onNavigateToIndoor(result.buildingCode, result.roomId)                        } else {
-                            onSearchResult(result, context)
-                        }
-                    }
+                    modifier        = Modifier.clickable { onSearchResult(result, context) }
                 )
             }
         }
@@ -345,33 +311,30 @@ private fun BoxScope.DirectionsSearchResults(
 
 @Composable
 private fun BoxScope.MapPreviewOverlays(
-    uiState:               BuildingUiState,
-    currentCampus:         com.example.myapplication.data.Campus?,
-    nextClassEvent:        com.example.myapplication.data.ResolvedCalendarEvent?,
-    isNextClassUrgent:     Boolean,
+    uiState:                BuildingUiState,
+    currentCampus:          com.example.myapplication.data.Campus?,
+    nextClassEvent:         com.example.myapplication.data.ResolvedCalendarEvent?,
+    isNextClassUrgent:      Boolean,
     nextClassTimeRemaining: String,
-    fusedLocationClient:   FusedLocationProviderClient,
-    shouldShowRationale:   Boolean,
-    hasLocationPermission: Boolean,
-    launcher:              androidx.activity.result.ActivityResultLauncher<String>,
-    cameraController:      TrueCameraController,
-    scope:                 kotlinx.coroutines.CoroutineScope,
-    onShowSettings:        () -> Unit,
-    context:               android.content.Context,
-    onLocationUpdate:      (com.google.android.gms.maps.model.LatLng, Boolean) -> Unit,
-    onCampusSelected:      (String) -> Unit,
-    onNavigateToBuilding:  (String) -> Unit,
-    onNavigateToIndoor: (String, String) -> Unit,
+    fusedLocationClient:    FusedLocationProviderClient,
+    shouldShowRationale:    Boolean,
+    hasLocationPermission:  Boolean,
+    launcher:               androidx.activity.result.ActivityResultLauncher<String>,
+    cameraController:       TrueCameraController,
+    scope:                  kotlinx.coroutines.CoroutineScope,
+    onShowSettings:         () -> Unit,
+    context:                android.content.Context,
+    onLocationUpdate:       (com.google.android.gms.maps.model.LatLng, Boolean) -> Unit,
+    onCampusSelected:       (String) -> Unit,
+    onNavigateToBuilding:   (String) -> Unit
 ) {
     val mode = uiState.mode
     if (mode == MapUIMode.ACTIVE_NAVIGATION) return
     if (mode == MapUIMode.PREVIEW) {
         NextClassPill(
-            nextEvent      = nextClassEvent,
-            isUrgent       = isNextClassUrgent,
-            timeRemaining  = nextClassTimeRemaining,
-            // ResolvedCalendarEvent.destinationBuildingCode encapsulates the
-            // (locationResult as? Known)?.buildingCode fallback — no casting in UI (PR review).
+            nextEvent       = nextClassEvent,
+            isUrgent        = isNextClassUrgent,
+            timeRemaining   = nextClassTimeRemaining,
             onNavigateClick = {
                 nextClassEvent?.destinationBuildingCode?.let { onNavigateToBuilding(it) }
             },
@@ -381,18 +344,18 @@ private fun BoxScope.MapPreviewOverlays(
     if (mode != MapUIMode.DIRECTIONS) {
         CampusToggle(
             selectedCampusName = currentCampus?.name,
-            onCampusClick      = { name -> onCampusSelected(name) },
+            onCampusClick      = { onCampusSelected(it) },
             modifier           = Modifier.align(Alignment.BottomEnd).padding(end = 12.dp, bottom = 160.dp)
         )
         ExtendedFloatingActionButton(
             onClick = {
                 handleRecenter(
-                    client               = fusedLocationClient,
-                    hasPermission        = hasLocationPermission,
-                    shouldShowRationale  = shouldShowRationale,
-                    launcher             = launcher,
-                    context              = context,
-                    onShowSettings       = onShowSettings
+                    client              = fusedLocationClient,
+                    hasPermission       = hasLocationPermission,
+                    shouldShowRationale = shouldShowRationale,
+                    launcher            = launcher,
+                    context             = context,
+                    onShowSettings      = onShowSettings
                 ) { userLocation ->
                     scope.launch { cameraController.animateTo(userLocation, 18.5f) }
                     onLocationUpdate(userLocation, true)
@@ -409,15 +372,15 @@ private fun BoxScope.MapPreviewOverlays(
 
 @Composable
 private fun BoxScope.MapBuildingOverlay(
-    uiState:               BuildingUiState,
-    onDismiss:             () -> Unit,
-    onDirectionsRequested: () -> Unit,
+    uiState:                  BuildingUiState,
+    onDismiss:                () -> Unit,
+    onDirectionsRequested:    () -> Unit,
+    onIndoorMapClick:         () -> Unit,
     onTransportModeChanged:   (String) -> Unit,
     onToggleSearchExpansion:  (Boolean, String) -> Unit,
     onSwapLocations:          () -> Unit,
     onBackToPreview:          () -> Unit,
-    onStartNavigationActions: () -> Unit,
-    onNavigateToIndoor:    (String, String) -> Unit,
+    onStartNavigationActions: () -> Unit
 ) {
     if (!uiState.isVisible) return
     val building = uiState.building ?: return
@@ -427,9 +390,7 @@ private fun BoxScope.MapBuildingOverlay(
             uiState           = uiState,
             onDismiss         = onDismiss,
             onDirectionsClick = onDirectionsRequested,
-            onEnterBuilding = {
-                onNavigateToIndoor(building.code, "")
-            }
+            onIndoorMapClick  = onIndoorMapClick
         )
     } else {
         DirectionsInfoPopup(

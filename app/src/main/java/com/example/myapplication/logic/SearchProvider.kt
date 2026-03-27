@@ -104,10 +104,14 @@ class HybridSearchProvider(
 
         for (floor in floorsForBuilding) {
             val floorData = indoorRepo?.getFloor(buildingCode, floor) ?: continue
-            // Match rooms whose label ends with the room suffix
+            // Extract the numeric part from a label like "H-829" → "829"
+            // Then match rooms whose numeric part starts with roomSuffix (prefix match)
+            // or is an exact match. This prevents "H-8" matching "H-258", "H-298" etc.
             val matchingRooms = floorData.rooms.filter { room ->
-                room.label.endsWith(roomSuffix, ignoreCase = true) ||
-                room.id.endsWith(roomSuffix, ignoreCase = true)
+                val labelNum = room.label.substringAfterLast('-')
+                val idNum    = room.id.substringAfterLast('-')
+                labelNum.startsWith(roomSuffix, ignoreCase = true) ||
+                idNum.startsWith(roomSuffix, ignoreCase = true)
             }
             for (room in matchingRooms) {
                 val node = floorData.nodes.firstOrNull { it.roomId == room.id }
@@ -124,13 +128,7 @@ class HybridSearchProvider(
         return results.take(3)
     }
 
-    /** Mirror of MapsActivity.floorsFor — kept in sync manually. */
-    private fun floorsFor(code: String): List<Int> = when (code) {
-        "CC" -> listOf(1)
-        "H"  -> listOf(1, 2, 8, 9)
-        "MB" -> listOf(1, -2)
-        "VE" -> listOf(1, 2)
-        "VL" -> listOf(1, 2)
-        else -> emptyList()
-    }
+    /** Delegates to [IndoorBuildingConfig] — single source of truth for building floors. */
+    private fun floorsFor(code: String): List<Int> =
+        com.example.myapplication.data.indoor.IndoorBuildingConfig.floorsFor(code)
 }

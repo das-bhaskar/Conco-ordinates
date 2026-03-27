@@ -65,7 +65,6 @@ data class NavigationActions(
 @Composable
 fun AppNavigation(
     calendarViewModel: CalendarViewModel,
-    mapViewModel:      com.example.myapplication.ui.viewmodel.MapViewModel,
     userEmail:         String,
     navigationActions: NavigationActions,
     onScreenVisible:   (screenRoute: String) -> Unit = {},
@@ -124,19 +123,8 @@ fun AppNavigation(
                 startDestination = Screen.Map.route
             ) {
                 composable(Screen.Map.route) {
-                    val indoorState = mapViewModel.indoorJourneyState
-
-                    if (indoorState != null) {
-                        // If the "Go Inside" button was clicked, this state is now active.
-                        // We show the IndoorNavScreen instead of the standard mapContent.
-                        IndoorNavScreen(
-                            building = mapViewModel.uiBuildingState.building?.code ?: "",
-                            onBack   = { mapViewModel.exitIndoorView() }
-                        )
-                    } else {
-                        // Otherwise, show the normal Google Map
-                        mapContent()
-                    }                }
+                    mapContent()
+                }
                 composable(Screen.Calendar.route) {
                     val calId = calendarViewModel.selectedCalendarId
                     CalendarScreen(

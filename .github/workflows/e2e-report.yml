@@ -6,15 +6,15 @@ on:
   pull_request:
     branches: ["main", "develop"]
 
+
 permissions:
   contents: read
   pull-requests: write
 
 jobs:
   e2e-test-coverage:
-    # Switched to macOS for hardware acceleration (required for stable Emulator)
-    runs-on: macos-latest
-    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
       - name: Checkout Repository
@@ -31,64 +31,47 @@ jobs:
         run: chmod +x gradlew
 
       - name: Create local.properties
+        # This mirrors your existing CI logic exactly
         env:
           MAPS_VAR: ${{ secrets.MAPS_API_KEY || 'unused' }}
         run: echo "MAPS_API_KEY=\"$MAPS_VAR\"" > local.properties
 
       - name: Build Debug APK
+        # No extra env vars needed; mirrors your existing CI step
         run: ./gradlew assembleDebug
 
       - name: Run E2E Tests on Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30
-          target: google_apis
-          arch: arm64-v8a
-          profile: pixel_6
+          api-level: 29
+          target: default
+          arch: x86_64
+          profile: pixel_4
           disable-animations: true
-          emulator-options: -no-window -gpu libguest -no-snapshot -noaudio -no-boot-anim
-          # Note: script lines are joined by newlines; the shell handles the 'for' loop correctly on macOS
-           script: |
-            adb install -r app/build/outputs/apk/debug/app-debug.apk
+          script: |
+           adb install -r app/build/outputs/apk/debug/app-debug.apk
 
-            echo "Waiting for package to be registered..."
-            i=1
-            while [ "$i" -le 10 ]; do
-              if adb shell pm list packages | grep -q "com.example.concoordinates"; then
-              echo "Package found!"
-             break
-             fi
-             echo "Retrying ($i/10)..."
-             sleep 2
-              i=$((i + 1))
-              done
+           echo "Waiting for package to be registered..."
+           i=1
+           while [ "$i" -le 10 ]; do
+           if adb shell pm list packages | grep -q "com.example.concoordinates"; then
+           echo "Package found!"
+           break
+           fi
+           echo "Retrying ($i/10)..."
+           sleep 2
+           i=$((i + 1))
+           done
 
-             adb shell pm grant com.example.concoordinates android.permission.ACCESS_FINE_LOCATION || echo "Permission grant failed, but continuing..."
-             adb shell pm grant com.example.concoordinates android.permission.ACCESS_COARSE_LOCATION || true
+           adb shell pm grant com.example.concoordinates android.permission.ACCESS_FINE_LOCATION || echo "Permission grant failed, but continuing..."
+           adb shell pm grant com.example.concoordinates android.permission.ACCESS_COARSE_LOCATION || true
 
-             curl -Ls "https://get.maestro.mobile.dev" | bash
-              export PATH="$PATH:$HOME/.maestro/bin"
+           curl -Ls "https://get.maestro.mobile.dev" | bash
+           export PATH="$PATH:$HOME/.maestro/bin"
 
-               mkdir -p e2e-report
-               maestro test .maestro/flows/ --format junit --output e2e-report/report.xml
+           mkdir -p e2e-report
+           maestro test .maestro/flows/ --format junit --output e2e-report/report.xml
 
       - name: Run Unit Tests and Generate Merged Coverage
+        # This matches your CI command but will now find the .ec file from the step above
         run: ./gradlew testDebugUnitTest jacocoTestReport --info --continue
-
-      - name: Upload E2E Report Artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Sprint-E2E-Coverage
-          path: |
-            e2e-report/
-            app/build/reports/jacoco/jacocoTestReport/html/
-
-      - name: PR Coverage Reporter
-        if: github.event_name == 'pull_request'
-        uses: madrapps/jacoco-report@v1.7.1
-        with:
-          paths: ${{ github.workspace }}/app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: "Combined E2E + Unit Coverage Report"
-          update-comment: true

@@ -135,7 +135,7 @@ dependencies {
 }
 
 val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
-    dependsOn("testDebugUnitTest")
+    dependsOn("testDebugUnitTest","connectedDebugAndroidTest")
 
     reports {
         xml.required.set(true)
@@ -206,7 +206,8 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
     include(
         "outputs/unit_test_code_coverage/debugUnitTest/*.exec",
         "jacoco/testDebugUnitTest.exec",
-        "jacoco/testDebugUnitTestUnitTest.exec"
+        "jacoco/testDebugUnitTestUnitTest.exec",
+        "outputs/code-coverage/connected/*.ec"
         )
     })
 }

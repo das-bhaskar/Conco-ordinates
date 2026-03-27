@@ -48,30 +48,29 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu libguest -no-snapshot -noaudio -no-boot-anim
           # Note: script lines are joined by newlines; the shell handles the 'for' loop correctly on macOS
-          script: |
+           script: |
             adb install -r app/build/outputs/apk/debug/app-debug.apk
 
             echo "Waiting for package to be registered..."
-            for i in {1..10}; do
+            i=1
+            while [ "$i" -le 10 ]; do
               if adb shell pm list packages | grep -q "com.example.concoordinates"; then
-                echo "Package found!"
-                break
-              fi
-              echo "Retrying ($i/10)..."
-              sleep 5
-            done
+              echo "Package found!"
+             break
+             fi
+             echo "Retrying ($i/10)..."
+             sleep 2
+              i=$((i + 1))
+              done
 
-            echo "Granting permissions..."
-            adb shell pm grant com.example.concoordinates android.permission.ACCESS_FINE_LOCATION || true
-            adb shell pm grant com.example.concoordinates android.permission.ACCESS_COARSE_LOCATION || true
+             adb shell pm grant com.example.concoordinates android.permission.ACCESS_FINE_LOCATION || echo "Permission grant failed, but continuing..."
+             adb shell pm grant com.example.concoordinates android.permission.ACCESS_COARSE_LOCATION || true
 
-            echo "Installing Maestro..."
-            curl -Ls "https://get.maestro.mobile.dev" | bash
-            export PATH="$PATH:$HOME/.maestro/bin"
+             curl -Ls "https://get.maestro.mobile.dev" | bash
+              export PATH="$PATH:$HOME/.maestro/bin"
 
-            mkdir -p e2e-report
-            echo "Running Maestro flows..."
-            maestro test .maestro/flows/ --format junit --output e2e-report/report.xml
+               mkdir -p e2e-report
+               maestro test .maestro/flows/ --format junit --output e2e-report/report.xml
 
       - name: Run Unit Tests and Generate Merged Coverage
         run: ./gradlew testDebugUnitTest jacocoTestReport --info --continue

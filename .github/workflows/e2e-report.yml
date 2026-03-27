@@ -41,23 +41,27 @@ jobs:
       - name: Run E2E Tests on Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30
+          api-level: 34
           target: google_apis
           arch: arm64-v8a
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu libguest -no-snapshot -noaudio -no-boot-anim
+          emulator-options: -no-window -gpu libguest -no-snapshot -noaudio -no-boot-anim -accel on
           # Note: script lines are joined by newlines; the shell handles the 'for' loop correctly on macOS
           script: |
+
+            # Increase ADB timeout for slow initial connections
+            export ADB_INSTALL_TIMEOUT=5
+            adb wait-for-device
             adb install -r app/build/outputs/apk/debug/app-debug.apk
 
             echo "Waiting for package to be registered..."
-            for i in {1..10}; do
+            for i in {1..15}; do
               if adb shell pm list packages | grep -q "com.example.concoordinates"; then
                 echo "Package found!"
                 break
               fi
-              echo "Retrying ($i/10)..."
+              echo "Retrying ($i/15)..."
               sleep 5
             done
 

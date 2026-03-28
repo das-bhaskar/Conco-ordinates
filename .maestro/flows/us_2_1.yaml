@@ -86,7 +86,12 @@ appId: com.example.myapplication
       text: "Directions"
     direction: DOWN
     timeout: 10000
-
+    
+- extendedWaitUntil:
+    visible:
+      text: "Directions"
+    timeout: 10000
+    
 - takeScreenshot: before-directions
 
 - tapOn:

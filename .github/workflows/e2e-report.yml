@@ -41,3 +41,4 @@ jobs:
            api-key: ${{ secrets.MAESTRO_API_KEY }}
            project-id: ${{ secrets.MAESTRO_PROJECT_ID }}
            app-file: app/build/outputs/apk/debug/app-debug.apk
+           workspace: .maestro/flows

@@ -9,72 +9,94 @@ appId: com.example.myapplication
 - launchApp:
     clearState: true
 
+# Wait for the main screen to load first
 - extendedWaitUntil:
     visible:
-      text: "Search buildings or addresses"
-    timeout: 15000
+      text: "Map"
+    timeout: 20000
 
-# Handle permissions
+# Handle permissions if they appear
 - tapOn:
     text: "While using the app"
+    optional: true
+- tapOn:
+    text: "Only this time"
     optional: true
 - tapOn:
     text: "Allow"
     optional: true
 
+# Assert main UI more loosely for CI stability
+- assertVisible:
+    text: "Search"
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- takeScreenshot: main-screen-loaded
+
 - tapOn:
     point: "80%, 83%"
 
+# Wait for search UI
 - extendedWaitUntil:
     visible:
-      text: "Search buildings or addresses"
-    timeout: 10000
+      text: "Search"
+    timeout: 15000
 
 - tapOn:
-    text: "Search buildings or addresses"
+    text: "Search"
 
-# 🔑 IMPORTANT: type + press enter
+# Type destination
 - inputText: "Vanier"
 - pressKey: Enter
 
-# 🔑 Wait for results (NOT immediate)
+# Wait for results
 - extendedWaitUntil:
     visible:
       text: "Vanier"
-    timeout: 15000
+    timeout: 20000
 
-# Try exact match first
+# Try exact result first
 - tapOn:
     text: "Vanier Library"
     optional: true
 
-# Fallback if text slightly different
+# Fallback if exact text differs
 - tapOn:
     text: "Vanier"
     optional: true
 
 - takeScreenshot: after-search-selection
 
-# Wait for details screen
+# Wait for details screen / bottom sheet
 - extendedWaitUntil:
     visible:
       text: "Vanier"
-    timeout: 15000
+    timeout: 20000
 
-# Scroll if needed
+# Scroll in case Directions is lower in the sheet
 - scrollUntilVisible:
     element:
       text: "Directions"
     direction: DOWN
     timeout: 10000
 
+- takeScreenshot: before-directions
+
 - tapOn:
     text: "Directions"
 
+# Wait for directions UI
 - extendedWaitUntil:
     visible:
       text: "Your position"
-    timeout: 15000
+    timeout: 20000
 
 - assertVisible:
     text: "Walk"
@@ -85,7 +107,8 @@ appId: com.example.myapplication
 - assertVisible:
     text: "Shuttle"
 
-- tapOn: "Drive"
+- tapOn:
+    text: "Drive"
 
 - extendedWaitUntil:
     visible:

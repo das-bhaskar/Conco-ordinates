@@ -1,115 +1,113 @@
+
+# US-2.1: As a user, I want to select my start and destination points by either typing a building name or clicking a building on the map, so that I can plan my route with minimal effort.
+# US-2.2: As a campus map user, I want my current building to be used as the starting point, so that I don’t have to manually select it.
+#
+# This test implements US-2.1 and US-2.2 making the implementation of an E2E test for US-2.2 redundant.
+
 appId: com.example.myapplication
 ---
-
-# Scenario 1
+# Scenario 1: Type building name
+# Set user location out of campus (Starbucks, Brossard)
 - setLocation:
     latitude: 45.4377
     longitude: -73.47379
-
 - launchApp:
     clearState: true
-
-# Wait for the main screen to be usable
-- extendedWaitUntil:
-    visible:
-      text: "^Map$"
-    timeout: 30000
-
-# Handle permissions if they appear
-- tapOn:
-    text: "While using the app"
-    optional: true
-- tapOn:
-    text: "Only this time"
-    optional: true
-- tapOn:
-    text: "Allow"
-    optional: true
-
-# Main UI checks
 - assertVisible:
-    text: "Search"
+    text: "Search buildings or addresses..."
 - assertVisible:
-    text: "^SGW$"
+    text: "SGW"
 - assertVisible:
-    text: "^LOY$"
+    text: "LOY"
 - assertVisible:
-    text: "^Map$"
+    text: "Map"
 - assertVisible:
-    text: "^Schedule$"
+    text: "Schedule"
 
-- takeScreenshot: main-screen-loaded
-
-# Keep this for now if that button has no reliable text/id
 - tapOn:
     point: "80%, 83%"
-
-# Wait for search UI
-- extendedWaitUntil:
-    visible:
-      text: "Search"
-    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 5000
 
 - tapOn:
-    text: "Search"
+    text: "Search buildings or addresses..."
+- waitForAnimationToEnd:
+    timeout: 2000
 
-# Enter destination
 - inputText: "Vanier"
-- pressKey: Enter
-
-# Wait for the actual search result, not just the typed query
-- extendedWaitUntil:
-    visible:
-      text: "^Vanier Library$"
-    timeout: 30000
-
-- takeScreenshot: search-results-loaded
-
-# Actually select the result
 - tapOn:
-    text: "^Vanier Library$"
-    retryTapIfNoChange: true
+    text: "Vanier Library"
+- waitForAnimationToEnd:
+    timeout: 5000
 
-- takeScreenshot: after-result-tap
-
-# Wait for details sheet/button to appear
-- extendedWaitUntil:
-    visible:
-      text: "^Directions$"
-    timeout: 30000
-
-# In case the sheet is partially collapsed
-- scrollUntilVisible:
-    element:
-      text: "^Directions$"
-    direction: DOWN
-    timeout: 20000
-
-- takeScreenshot: before-directions
-
-- tapOn:
-    text: "^Directions$"
-    retryTapIfNoChange: true
-
-# Wait for directions UI
-- extendedWaitUntil:
-    visible:
-      text: "^Your position$"
-    timeout: 30000
+- tapOn: "Directions"
+- waitForAnimationToEnd:
+    timeout: 2000
 
 - assertVisible:
-    text: "^Walk$"
+    text: "Directions"
 - assertVisible:
-    text: "^Drive$"
+    text: "Your position"
 - assertVisible:
-    text: "^Transit$"
+    text: "Vanier Library"
+- assertVisible: "Walk"
+- assertVisible: "Drive"
+- assertVisible: "Transit"
+- assertVisible: "Shuttle"
+
+- tapOn: "Drive"
+- waitForAnimationToEnd:
+    timeout: 2000
+
 - assertVisible:
-    text: "^Shuttle$"
+    text: "Start"
+
+# Scenario 2: Tap on a building
+# Set user location to LOYOLA campus (Vanier Library)
+- setLocation:
+    latitude: 45.459081
+    longitude: -73.638709
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
 
 - tapOn:
-    text: "^Drive$"
+    text: "SGW"
+- waitForAnimationToEnd:
+    timeout: 5000
 
-- extendedWaitUntil:
-    visible:
-      text: "^Start$"
-    timeout: 15000
+- tapOn:
+    point: "50%, 47%"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "Directions"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- assertVisible:
+    text: "Directions"
+- assertVisible:
+    text: "Your position"
+- assertVisible:
+    text: "Henry F. Hall Building"
+- assertVisible: "Walk"
+- assertVisible: "Drive"
+- assertVisible: "Transit"
+- assertVisible: "Shuttle"
+
+- tapOn: "Drive"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- assertVisible:
+    text: "Start"

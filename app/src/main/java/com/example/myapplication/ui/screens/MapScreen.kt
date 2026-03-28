@@ -32,6 +32,7 @@ import com.example.myapplication.ui.components.CampusToggle
 import com.example.myapplication.ui.components.DirectionsHeader
 import com.example.myapplication.ui.components.DirectionsInfoPopup
 import com.example.myapplication.ui.components.LocationPermissionDialog
+import com.example.myapplication.ui.components.MapPOIOverlay
 import com.example.myapplication.ui.components.NavigationOverlay
 import com.example.myapplication.ui.components.NextClassPill
 import com.example.myapplication.ui.components.ObserveCameraEffects
@@ -40,12 +41,14 @@ import com.example.myapplication.ui.components.rememberMapCamera
 import com.example.myapplication.ui.models.BuildingUiState
 import com.example.myapplication.ui.models.MapUIMode
 import com.example.myapplication.ui.theme.ConcordiaMaroon
+import com.example.myapplication.ui.viewmodel.POIViewModel
 import com.google.android.gms.location.FusedLocationProviderClient
 import kotlinx.coroutines.launch
 
 @Composable
 fun MapScreen(
     mapViewModel:             com.example.myapplication.ui.viewmodel.MapViewModel,
+    poiViewModel:             POIViewModel,                                          // ← NEW
     currentCampus:            com.example.myapplication.data.Campus?,
     highlightedBuildingName:  String?,
     searchQuery:              String,
@@ -85,8 +88,12 @@ fun MapScreen(
         Manifest.permission.ACCESS_FINE_LOCATION
     )
 
+    // Pipe location updates into both MapViewModel (existing) and POIViewModel (new)
     ObserveLocationUpdates(hasLocationPermission, fusedLocationClient,
-        onLocationUpdate = { loc -> onLocationUpdate(loc, false) })
+        onLocationUpdate = { loc ->
+            onLocationUpdate(loc, false)
+            poiViewModel.onLocationUpdated(loc)          // ← NEW: keeps POI list fresh
+        })
     val cameraPositionState = rememberMapCamera()
     val cameraController    = remember(cameraPositionState) { TrueCameraController(cameraPositionState) }
     ObserveCameraEffects(
@@ -162,6 +169,11 @@ fun MapScreen(
                 onSwapLocations          = onSwapLocations,
                 onBackToPreview          = onBackToPreview,
                 onStartNavigationActions = onStartNavigationActions
+            )
+            // ── Epic 5: POI overlay — single insertion point, zero existing code changed ──
+            MapPOIOverlay(
+                poiViewModel = poiViewModel,
+                mapViewModel = mapViewModel
             )
         } else {
             NavigationOverlay(

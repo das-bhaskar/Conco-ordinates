@@ -498,6 +498,34 @@ class MapViewModel(
         }
     }
 
+    /**
+     * Navigate to an outdoor POI selected from the POI panel (Epic 5).
+     *
+     * Reuses the existing [MapUIMode.DIRECTIONS] pipeline and
+     * [calculateRouteWithState()] — no new routing logic required.
+     *
+     * The key difference from [navigateToBuildingCode]: POIs have no [Building]
+     * in [CampusRepo], so [building] is null and [endPoint] is set directly
+     * from the Places API coordinates.
+     *
+     * SOLID — Open/Closed: existing routing pipeline extended, not modified.
+     */
+    fun navigateToPOI(name: String, latLng: LatLng) {
+        uiBuildingState = uiBuildingState.copy(
+            mode              = MapUIMode.DIRECTIONS,
+            destinationName   = name,
+            building          = null,       // POI is not a campus building
+            endPoint          = latLng,
+            // Atomic route reset — same pattern as navigateToBuildingCode()
+            routePoints       = emptyList(),
+            routeDuration     = "-- min",
+            routeDistance     = "-- m",
+            routeBounds       = null,
+            routeErrorMessage = null
+        )
+        calculateRouteWithState()
+    }
+
     fun toggleSearchExpansion(expanded: Boolean, field: String = "main") {
         activeSearchField = field
         uiBuildingState   = uiBuildingState.copy(isSearchExpanded = expanded)

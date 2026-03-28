@@ -9,11 +9,11 @@ appId: com.example.myapplication
 - launchApp:
     clearState: true
 
-# Wait for the main screen to load first
+# Wait for the main screen to be usable
 - extendedWaitUntil:
     visible:
-      text: "Map"
-    timeout: 20000
+      text: "^Map$"
+    timeout: 30000
 
 # Handle permissions if they appear
 - tapOn:
@@ -26,20 +26,21 @@ appId: com.example.myapplication
     text: "Allow"
     optional: true
 
-# Assert main UI more loosely for CI stability
+# Main UI checks
 - assertVisible:
     text: "Search"
 - assertVisible:
-    text: "SGW"
+    text: "^SGW$"
 - assertVisible:
-    text: "LOY"
+    text: "^LOY$"
 - assertVisible:
-    text: "Map"
+    text: "^Map$"
 - assertVisible:
-    text: "Schedule"
+    text: "^Schedule$"
 
 - takeScreenshot: main-screen-loaded
 
+# Keep this for now if that button has no reliable text/id
 - tapOn:
     point: "80%, 83%"
 
@@ -47,75 +48,68 @@ appId: com.example.myapplication
 - extendedWaitUntil:
     visible:
       text: "Search"
-    timeout: 15000
+    timeout: 20000
 
 - tapOn:
     text: "Search"
 
-# Type destination
+# Enter destination
 - inputText: "Vanier"
 - pressKey: Enter
 
-# Wait for results
+# Wait for the actual search result, not just the typed query
 - extendedWaitUntil:
     visible:
-      text: "Vanier"
-    timeout: 20000
+      text: "^Vanier Library$"
+    timeout: 30000
 
-# Try exact result first
+- takeScreenshot: search-results-loaded
+
+# Actually select the result
 - tapOn:
-    text: "Vanier Library"
-    optional: true
+    text: "^Vanier Library$"
+    retryTapIfNoChange: true
 
-# Fallback if exact text differs
-- tapOn:
-    text: "Vanier"
-    optional: true
+- takeScreenshot: after-result-tap
 
-- takeScreenshot: after-search-selection
-
-# Wait for details screen / bottom sheet
+# Wait for details sheet/button to appear
 - extendedWaitUntil:
     visible:
-      text: "Vanier"
-    timeout: 20000
+      text: "^Directions$"
+    timeout: 30000
 
-# Scroll in case Directions is lower in the sheet
+# In case the sheet is partially collapsed
 - scrollUntilVisible:
     element:
-      text: "Directions"
+      text: "^Directions$"
     direction: DOWN
-    timeout: 10000
-    
-- extendedWaitUntil:
-    visible:
-      text: "Directions"
-    timeout: 10000
-    
+    timeout: 20000
+
 - takeScreenshot: before-directions
 
 - tapOn:
-    text: "Directions"
+    text: "^Directions$"
+    retryTapIfNoChange: true
 
 # Wait for directions UI
 - extendedWaitUntil:
     visible:
-      text: "Your position"
-    timeout: 20000
+      text: "^Your position$"
+    timeout: 30000
 
 - assertVisible:
-    text: "Walk"
+    text: "^Walk$"
 - assertVisible:
-    text: "Drive"
+    text: "^Drive$"
 - assertVisible:
-    text: "Transit"
+    text: "^Transit$"
 - assertVisible:
-    text: "Shuttle"
+    text: "^Shuttle$"
 
 - tapOn:
-    text: "Drive"
+    text: "^Drive$"
 
 - extendedWaitUntil:
     visible:
-      text: "Start"
-    timeout: 10000
+      text: "^Start$"
+    timeout: 15000

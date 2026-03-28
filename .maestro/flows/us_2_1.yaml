@@ -1,4 +1,3 @@
-
 # US-2.1: As a user, I want to select my start and destination points by either typing a building name or clicking a building on the map, so that I can plan my route with minimal effort.
 # US-2.2: As a campus map user, I want my current building to be used as the starting point, so that I don’t have to manually select it.
 #
@@ -11,103 +10,175 @@ appId: com.example.myapplication
 - setLocation:
     latitude: 45.4377
     longitude: -73.47379
+
 - launchApp:
     clearState: true
+
+- extendedWaitUntil:
+    visible:
+      text: "^Search buildings or addresses...$"
+    timeout: 15000
+
+- tapOn:
+    text: "While using the app"
+    optional: true
+- tapOn:
+    text: "Only this time"
+    optional: true
+- tapOn:
+    text: "Allow"
+    optional: true
+
 - assertVisible:
-    text: "Search buildings or addresses..."
+    text: "^SGW$"
 - assertVisible:
-    text: "SGW"
+    text: "^LOY$"
 - assertVisible:
-    text: "LOY"
+    text: "^Map$"
 - assertVisible:
-    text: "Map"
-- assertVisible:
-    text: "Schedule"
+    text: "^Schedule$"
 
 - tapOn:
     point: "80%, 83%"
-- waitForAnimationToEnd:
-    timeout: 5000
+
+- extendedWaitUntil:
+    visible:
+      text: "^Search buildings or addresses...$"
+    timeout: 10000
 
 - tapOn:
-    text: "Search buildings or addresses..."
-- waitForAnimationToEnd:
-    timeout: 2000
+    text: "^Search buildings or addresses...$"
 
 - inputText: "Vanier"
+
+- extendedWaitUntil:
+    visible:
+      text: "^Vanier Library$"
+    timeout: 10000
+
 - tapOn:
-    text: "Vanier Library"
-- waitForAnimationToEnd:
-    timeout: 5000
+    text: "^Vanier Library$"
 
-- tapOn: "Directions"
-- waitForAnimationToEnd:
-    timeout: 2000
+- takeScreenshot: scenario1-after-vanier-selection
 
-- assertVisible:
-    text: "Directions"
-- assertVisible:
-    text: "Your position"
-- assertVisible:
-    text: "Vanier Library"
-- assertVisible: "Walk"
-- assertVisible: "Drive"
-- assertVisible: "Transit"
-- assertVisible: "Shuttle"
+- extendedWaitUntil:
+    visible:
+      text: "^Directions$"
+    timeout: 15000
 
-- tapOn: "Drive"
-- waitForAnimationToEnd:
-    timeout: 2000
+- tapOn:
+    text: "^Directions$"
+
+- extendedWaitUntil:
+    visible:
+      text: "^Your position$"
+    timeout: 15000
 
 - assertVisible:
-    text: "Start"
+    text: "^Directions$"
+- assertVisible:
+    text: "^Your position$"
+- assertVisible:
+    text: "^Vanier Library$"
+- assertVisible:
+    text: "^Walk$"
+- assertVisible:
+    text: "^Drive$"
+- assertVisible:
+    text: "^Transit$"
+- assertVisible:
+    text: "^Shuttle$"
+
+- tapOn:
+    text: "^Drive$"
+
+- extendedWaitUntil:
+    visible:
+      text: "^Start$"
+    timeout: 10000
+
+- assertVisible:
+    text: "^Start$"
 
 # Scenario 2: Tap on a building
 # Set user location to LOYOLA campus (Vanier Library)
 - setLocation:
     latitude: 45.459081
     longitude: -73.638709
+
 - launchApp:
     clearState: true
-- assertVisible:
-    text: "Search buildings or addresses..."
-- assertVisible:
-    text: "SGW"
-- assertVisible:
-    text: "LOY"
-- assertVisible:
-    text: "Map"
-- assertVisible:
-    text: "Schedule"
+
+- extendedWaitUntil:
+    visible:
+      text: "^Search buildings or addresses...$"
+    timeout: 15000
 
 - tapOn:
-    text: "SGW"
+    text: "While using the app"
+    optional: true
+- tapOn:
+    text: "Only this time"
+    optional: true
+- tapOn:
+    text: "Allow"
+    optional: true
+
+- assertVisible:
+    text: "^SGW$"
+- assertVisible:
+    text: "^LOY$"
+- assertVisible:
+    text: "^Map$"
+- assertVisible:
+    text: "^Schedule$"
+
+- tapOn:
+    text: "^SGW$"
+
 - waitForAnimationToEnd:
     timeout: 5000
 
 - tapOn:
     point: "50%, 47%"
-- waitForAnimationToEnd:
-    timeout: 5000
 
-- tapOn: "Directions"
-- waitForAnimationToEnd:
-    timeout: 2000
+- takeScreenshot: scenario2-after-map-tap
 
-- assertVisible:
-    text: "Directions"
-- assertVisible:
-    text: "Your position"
-- assertVisible:
-    text: "Henry F. Hall Building"
-- assertVisible: "Walk"
-- assertVisible: "Drive"
-- assertVisible: "Transit"
-- assertVisible: "Shuttle"
+- extendedWaitUntil:
+    visible:
+      text: "^Directions$"
+    timeout: 15000
 
-- tapOn: "Drive"
-- waitForAnimationToEnd:
-    timeout: 2000
+- tapOn:
+    text: "^Directions$"
+
+- extendedWaitUntil:
+    visible:
+      text: "^Your position$"
+    timeout: 15000
 
 - assertVisible:
-    text: "Start"
+    text: "^Directions$"
+- assertVisible:
+    text: "^Your position$"
+- assertVisible:
+    text: "^Henry F\\. Hall Building$"
+- assertVisible:
+    text: "^Walk$"
+- assertVisible:
+    text: "^Drive$"
+- assertVisible:
+    text: "^Transit$"
+- assertVisible:
+    text: "^Shuttle$"
+
+- tapOn:
+    text: "^Drive$"
+
+- extendedWaitUntil:
+    visible:
+      text: "^Start$"
+    timeout: 10000
+
+- assertVisible:
+    text: "^Start$"

@@ -6,7 +6,7 @@
    fill="none"
    version="1.1"
    id="svg69"
-   sodipodi:docname="H2.svg"
+   sodipodi:docname="H-2.svg"
    inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -22,15 +22,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
-     inkscape:zoom="6.6796876"
-     inkscape:cx="332.87485"
-     inkscape:cy="460.42572"
+     inkscape:zoom="0.83496095"
+     inkscape:cx="608.41169"
+     inkscape:cy="484.45379"
      inkscape:window-width="1920"
      inkscape:window-height="1057"
-     inkscape:window-x="1912"
+     inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
-     inkscape:current-layer="layer9" />
+     inkscape:current-layer="layer11" />
   <g
      inkscape:groupmode="layer"
      id="layer7"
@@ -1893,8 +1893,7 @@
   <g
      inkscape:groupmode="layer"
      id="layer11"
-     inkscape:label="Classes"
-     sodipodi:insensitive="true">
+     inkscape:label="Classes">
     <text
        xml:space="preserve"
        style="font-size:29.3333px;writing-mode:lr-tb;direction:ltr;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.35512;stroke-dasharray:none;stroke-opacity:1"
@@ -1907,6 +1906,18 @@
          x="800.03387"
          y="371.11722"
          style="font-size:29.3333px;stroke-width:3.35512;stroke-dasharray:none">220</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:29.3333px;writing-mode:lr-tb;direction:ltr;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.35512;stroke-dasharray:none;stroke-opacity:1"
+       x="1002.2142"
+       y="559.61975"
+       id="text52-1-16-79-1-72-5-94"
+       transform="scale(0.92430694,1.0818917)"><tspan
+         sodipodi:role="line"
+         id="tspan52-1-8-5-3-2-86-88"
+         x="1002.2142"
+         y="559.61975"
+         style="font-size:29.3333px;stroke-width:3.35512;stroke-dasharray:none">260</tspan></text>
     <text
        xml:space="preserve"
        style="font-size:21.3333px;writing-mode:lr-tb;direction:ltr;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.35512;stroke-dasharray:none;stroke-opacity:1"

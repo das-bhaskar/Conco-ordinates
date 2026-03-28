@@ -19,6 +19,7 @@ appId: com.example.myapplication
       text: "^Search buildings or addresses...$"
     timeout: 15000
 
+# Optional permission handling
 - tapOn:
     text: "While using the app"
     optional: true
@@ -61,10 +62,20 @@ appId: com.example.myapplication
 
 - takeScreenshot: scenario1-after-vanier-selection
 
+# Wait for place/details state to appear
 - extendedWaitUntil:
     visible:
-      text: "^Directions$"
+      text: "Vanier Library"
     timeout: 15000
+
+# In case Directions is lower in the sheet
+- scrollUntilVisible:
+    element:
+      text: "^Directions$"
+    direction: DOWN
+    timeout: 10000
+
+- takeScreenshot: scenario1-before-directions
 
 - tapOn:
     text: "^Directions$"
@@ -114,6 +125,7 @@ appId: com.example.myapplication
       text: "^Search buildings or addresses...$"
     timeout: 15000
 
+# Optional permission handling
 - tapOn:
     text: "While using the app"
     optional: true
@@ -139,15 +151,32 @@ appId: com.example.myapplication
 - waitForAnimationToEnd:
     timeout: 5000
 
+- takeScreenshot: scenario2-before-map-tap
+
+# Try a text-based tap first if available
+- tapOn:
+    text: "Hall"
+    optional: true
+
+# Fallback coordinate tap
 - tapOn:
     point: "50%, 47%"
 
 - takeScreenshot: scenario2-after-map-tap
 
+# Wait for building details state
 - extendedWaitUntil:
     visible:
-      text: "^Directions$"
+      text: "Hall"
     timeout: 15000
+
+- scrollUntilVisible:
+    element:
+      text: "^Directions$"
+    direction: DOWN
+    timeout: 10000
+
+- takeScreenshot: scenario2-before-directions
 
 - tapOn:
     text: "^Directions$"

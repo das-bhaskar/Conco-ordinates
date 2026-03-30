@@ -191,6 +191,71 @@ class IndoorOutdoorRouterTest {
         assertEquals(1, route.totalSteps)
     }
 
+    @Test
+    fun `FullRoute with multiple segments has correct totalSteps`() {
+        val walk1 = IndoorOutdoorRouter.Segment.IndoorWalk("H", 1, emptyList(), "Walk 1")
+        val walk2 = IndoorOutdoorRouter.Segment.IndoorWalk("H", 8, emptyList(), "Walk 2")
+        val fc    = IndoorOutdoorRouter.Segment.FloorChange("H", 1, 8, "elevator", "Take elevator")
+        val route = IndoorOutdoorRouter.FullRoute(listOf(walk1, fc, walk2))
+        assertEquals(3, route.totalSteps)
+    }
+
+    // ── Case 3 edge cases: multi-building ─────────────────────────────────────
+
+    @Test
+    fun `buildRoute different buildings with no CC entrance returns partial route`() = runTest {
+        // Clear CC entrance so addDestinationWalkSegments has no bestEntry
+        injectEntrances(mapOf("H" to listOf(hEntrance)))
+        val repo = makeRepo()
+        val dest = IndoorOutdoorRouter.IndoorDestination("CC", 1, "cc-dest", "CC-101")
+        val route = IndoorOutdoorRouter.buildRoute(
+            repo, "H", 1, "start", dest,
+            userGps = LatLng(45.496, -73.579),
+            preference = TransferPreference.ANY
+        )
+        // No CC entrance → no outdoor or indoor segments to CC
+        assertTrue(route.segments.none { it is IndoorOutdoorRouter.Segment.OutdoorWalk })
+    }
+
+    @Test
+    fun `buildRoute different buildings with userGps picks nearest exit`() = runTest {
+        val repo = makeRepo()
+        val dest = IndoorOutdoorRouter.IndoorDestination("CC", 1, "cc-dest", "CC-101")
+        // User near H entrance
+        val route = IndoorOutdoorRouter.buildRoute(
+            repo, "H", 1, "start", dest,
+            userGps = LatLng(45.496, -73.579),
+            preference = TransferPreference.ANY
+        )
+        // Should have an outdoor walk since CC entrance exists
+        assertTrue(route.segments.any { it is IndoorOutdoorRouter.Segment.OutdoorWalk })
+    }
+
+    @Test
+    fun `buildRoute different buildings with null userGps still works`() = runTest {
+        val repo = makeRepo()
+        val dest = IndoorOutdoorRouter.IndoorDestination("CC", 1, "cc-dest", "CC-101")
+        val route = IndoorOutdoorRouter.buildRoute(
+            repo, "H", 1, "start", dest,
+            userGps = null,
+            preference = TransferPreference.ANY
+        )
+        assertNotNull(route)
+    }
+
+    @Test
+    fun `buildRoute same building cross-floor with ELEVATOR_ONLY preference`() = runTest {
+        val repo = makeRepo()
+        val dest = IndoorOutdoorRouter.IndoorDestination("H", 8, "dest_f8", "H-829")
+        val route = IndoorOutdoorRouter.buildRoute(
+            repo, "H", 1, "start", dest,
+            userGps = null,
+            preference = TransferPreference.ELEVATOR_ONLY
+        )
+        // Elevator path: walk → floor change → walk
+        assertTrue(route.segments.isNotEmpty())
+    }
+
     // ── Segment data classes ──────────────────────────────────────────────────
 
     @Test

@@ -144,9 +144,9 @@ class BuildingEntrancesTest {
 
     @Test
     fun `nearest picks entrance closest to user among three options`() {
-        val far    = BuildingEntrance("far",    "Far",    LatLng(45.500, -73.600), 1)
-        val mid    = BuildingEntrance("mid",    "Mid",    LatLng(45.498, -73.579), 1)
-        val close  = BuildingEntrance("close",  "Close",  LatLng(45.4972, -73.5788), 1)
+        val far    = BuildingEntrance("far",   "Far",   LatLng(45.500, -73.600), 1)
+        val mid    = BuildingEntrance("mid",   "Mid",   LatLng(45.498, -73.579), 1)
+        val close  = BuildingEntrance("close", "Close", LatLng(45.4972, -73.5788), 1)
         injectData(mapOf("H" to listOf(far, mid, close)))
 
         val user   = LatLng(45.4973, -73.5787)
@@ -170,5 +170,42 @@ class BuildingEntrancesTest {
         assertEquals(1, BuildingEntrances.forBuilding("CC").size)
         assertEquals("h1",  BuildingEntrances.forBuilding("H").first().nodeId)
         assertEquals("cc1", BuildingEntrances.forBuilding("CC").first().nodeId)
+    }
+
+    // ── BuildingEntrances class instance (DI path) ────────────────────────────
+
+    @Test
+    fun `BuildingEntrances class instance forBuilding works independently`() {
+        val entrance = BuildingEntrance("n-inst", "Instance Entrance", LatLng(45.0, -73.0))
+        val instance = BuildingEntrances(mapOf("H" to listOf(entrance)))
+        assertEquals(1, instance.forBuilding("H").size)
+        assertEquals("n-inst", instance.forBuilding("H").first().nodeId)
+        assertTrue(instance.forBuilding("CC").isEmpty())
+    }
+
+    @Test
+    fun `BuildingEntrances class instance nearest works`() {
+        val e1 = BuildingEntrance("near", "Near", LatLng(45.497, -73.578))
+        val e2 = BuildingEntrance("far",  "Far",  LatLng(45.500, -73.600))
+        val instance = BuildingEntrances(mapOf("H" to listOf(e1, e2)))
+        val result = instance.nearest("H", LatLng(45.497, -73.578))
+        assertEquals("near", result!!.nodeId)
+    }
+
+    @Test
+    fun `BuildingEntrances empty constructor returns empty for any building`() {
+        val instance = BuildingEntrances()
+        assertTrue(instance.forBuilding("H").isEmpty())
+        assertNull(instance.nearest("H", LatLng(45.0, -73.0)))
+    }
+
+    @Test
+    fun `companion default delegates to singleton instance`() {
+        val e = BuildingEntrance("del-n", "Delegated", LatLng(45.0, -73.0))
+        injectData(mapOf("H" to listOf(e)))
+        // companion forBuilding delegates to default
+        assertEquals("del-n", BuildingEntrances.forBuilding("H").first().nodeId)
+        // companion nearest delegates to default
+        assertNotNull(BuildingEntrances.nearest("H", LatLng(45.0, -73.0)))
     }
 }

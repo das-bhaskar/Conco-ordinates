@@ -26,6 +26,7 @@ import com.example.myapplication.logic.IndoorOutdoorRouter
 import com.example.myapplication.logic.IndoorRoomResolver
 import com.example.myapplication.logic.TransferPreference
 import com.example.myapplication.ui.components.IndoorMapCanvas
+import com.example.myapplication.ui.components.IndoorNavUiState
 import com.example.myapplication.ui.components.IndoorNavViewModel
 import com.example.myapplication.ui.components.IndoorNavViewModelFactory
 import kotlinx.coroutines.launch
@@ -33,28 +34,42 @@ import kotlinx.coroutines.launch
 
 private val Maroon = Color(0xFF912338)
 
+/**
+ * Groups all call-site parameters for [IndoorNavScreen] so the composable
+ * stays within SonarCloud's 7-parameter limit.
+ */
+data class IndoorNavParams(
+    val building:         String,
+    val availableFloors:  List<Int>                                        = listOf(1),
+    val initialFloor:     Int                                              = availableFloors.first(),
+    val destination:      IndoorOutdoorRouter.IndoorDestination?           = null,
+    val startNodeId:      String?                                          = null,
+    val startFloor:       Int?                                             = null,
+    val onBack:           () -> Unit                                       = {},
+    val onConfirmExit:    (() -> Unit)?                                    = null,
+    val onOutdoorHandoff: (IndoorOutdoorRouter.Segment.OutdoorWalk) -> Unit = {}
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IndoorNavScreen(
-    building:            String,
-    availableFloors:     List<Int> = listOf(1),
-    initialFloor:        Int       = availableFloors.first(),
-    destination:         IndoorOutdoorRouter.IndoorDestination? = null,
-    startNodeId:         String?   = null,
-    startFloor:          Int?      = null,
-    onBack:              () -> Unit = {},
-    onConfirmExit:       (() -> Unit)? = null,
-    onOutdoorHandoff:    (IndoorOutdoorRouter.Segment.OutdoorWalk) -> Unit = {},
-    // Bug 1: use a unique key per session so each building/startNode combination
-    // gets its own ViewModel instance, preventing stale state from a previous
-    // session (e.g. CC screen) leaking into a new session (e.g. H screen).
+    params: IndoorNavParams,
     vm: IndoorNavViewModel = viewModel(
-        key     = "$building-$initialFloor-$startNodeId",
+        key     = "${params.building}-${params.initialFloor}-${params.startNodeId}",
         factory = IndoorNavViewModelFactory(
-            IndoorRepository(androidx.compose.ui.platform.LocalContext.current.applicationContext)
+            androidx.compose.ui.platform.LocalContext.current.applicationContext as android.app.Application
         )
     )
 ) {
+    val building         = params.building
+    val availableFloors  = params.availableFloors
+    val initialFloor     = params.initialFloor
+    val destination      = params.destination
+    val startNodeId      = params.startNodeId
+    val startFloor       = params.startFloor
+    val onBack           = params.onBack
+    val onConfirmExit    = params.onConfirmExit
+    val onOutdoorHandoff = params.onOutdoorHandoff
     val state by vm.state.collectAsState()
 
     // Initial navigation
@@ -81,278 +96,212 @@ fun IndoorNavScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            "${state.currentBuilding} · ${if (state.currentFloorNumber < 0) "B${-state.currentFloorNumber}" else "Floor ${state.currentFloorNumber}"}",
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        if (state.instruction.isNotEmpty()) {
-                            Text(
-                                state.instruction,
-                                fontSize = 11.sp,
-                                color    = Maroon
-                            )
-                        }
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
-                    }
-                },
-                actions = {
-                    // ── ♿ Accessible mode toggle ──────────────────────────
-                    IconButton(onClick = { vm.toggleAccessibleMode() }) {
-                        Text(
-                            "♿",
-                            fontSize = 18.sp,
-                            color = if (state.accessibleMode) Maroon
-                                    else MaterialTheme.colorScheme.onSurface.copy(.35f)
-                        )
-                    }
-
-                    // ── ⚙ Transfer preference menu ────────────────────────
-                    var showPrefMenu by remember { mutableStateOf(false) }
-                    Box {
-                        IconButton(onClick = { showPrefMenu = true }) {
-                            Text(
-                                state.transferPreference.icon,
-                                fontSize = 18.sp,
-                                color = if (state.transferPreference != TransferPreference.ANY)
-                                    Maroon
-                                else MaterialTheme.colorScheme.onSurface.copy(.55f)
-                            )
-                        }
-                        DropdownMenu(
-                            expanded         = showPrefMenu,
-                            onDismissRequest = { showPrefMenu = false }
-                        ) {
-                            Text(
-                                "  Floor Change Method",
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSurface.copy(.5f),
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                            )
-                            TransferPreference.entries.forEach { pref ->
-                                val selected = state.transferPreference == pref
-                                DropdownMenuItem(
-                                    text = {
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            Text(pref.icon, fontSize = 16.sp)
-                                            Text(
-                                                pref.label,
-                                                color = if (selected) Maroon
-                                                        else MaterialTheme.colorScheme.onSurface
-                                            )
-                                            if (selected) {
-                                                Spacer(Modifier.weight(1f))
-                                                Text("✓", color = Maroon, fontSize = 14.sp)
-                                            }
-                                        }
-                                    },
-                                    onClick = {
-                                        vm.setTransferPreference(pref)
-                                        showPrefMenu = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    if (state.fullRoute != null) {
-                        TextButton(onClick = { vm.clearRoute() }) {
-                            Text("Clear", fontSize = 12.sp, color = Maroon)
-                        }
-                    }
-                    TextButton(onClick = { vm.toggleNavGraph() }) {
-                        Text(
-                            if (state.showNavGraph) "Hide Graph" else "Nav Graph",
-                            fontSize = 12.sp,
-                            color    = if (state.showNavGraph) Maroon
-                                       else MaterialTheme.colorScheme.onSurface.copy(.45f)
-                        )
-                    }
-                }
-            )
-        }
+        topBar = { IndoorNavTopBar(state, vm, onBack) }
     ) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding)) {
+        IndoorNavContent(
+            state        = state,
+            vm           = vm,
+            padding      = padding,
+            onConfirmExit = onConfirmExit,
+            onBack        = onBack
+        )
+    }
+}
 
-            // ── loading / error ────────────────────────────────────────────
-            if (state.isLoading) {
-                CircularProgressIndicator(Modifier.align(Alignment.Center), color = Maroon)
-            }
-            state.error?.let {
-                Column(Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("🗺️", fontSize = 48.sp)
-                    Spacer(Modifier.height(12.dp))
-                    Text(it, color = MaterialTheme.colorScheme.onSurface.copy(.45f))
+// ── top bar ───────────────────────────────────────────────────────────────────
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun IndoorNavTopBar(
+    state: IndoorNavUiState,
+    vm:    IndoorNavViewModel,
+    onBack: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Column {
+                Text(
+                    "${state.currentBuilding} · ${if (state.currentFloorNumber < 0) "B${-state.currentFloorNumber}" else "Floor ${state.currentFloorNumber}"}",
+                    fontWeight = FontWeight.SemiBold
+                )
+                if (state.instruction.isNotEmpty()) {
+                    Text(state.instruction, fontSize = 11.sp, color = Maroon)
                 }
             }
-
-            // ── map canvas ─────────────────────────────────────────────────
-            state.floor?.let { floor ->
-                IndoorMapCanvas(
-                    floor           = floor,
-                    modifier        = Modifier.fillMaxSize(),
-                    highlightRoomId = state.highlightRoomId,
-                    pathNodeIds     = state.pathNodeIds,
-                    pathEdgeIds     = state.pathEdgeIds,
-                    showNavGraph    = state.showNavGraph,
-                    onRoomTap       = { vm.onRoomTap(it) }
-                )
+        },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
             }
-
-            // ── floor selector ─────────────────────────────────────────────
-            if (state.availableFloors.size > 1) {
-                FloorSelector(
-                    floors   = state.availableFloors,
-                    current  = state.currentFloorNumber,
-                    onSelect = { vm.switchFloor(state.currentBuilding, it) },
-                    modifier = Modifier.align(Alignment.CenterEnd).padding(end = 12.dp)
-                )
+        },
+        actions = {
+            IconButton(onClick = { vm.toggleAccessibleMode() }) {
+                Text("♿", fontSize = 18.sp,
+                    color = if (state.accessibleMode) Maroon
+                            else MaterialTheme.colorScheme.onSurface.copy(.35f))
             }
-
-            // ── segment progress bar ───────────────────────────────────────
-            state.fullRoute?.let { route ->
-                SegmentProgressBar(
-                    current = state.stepOffset + state.currentStepIdx + 1,
-                    total   = state.totalStepCount.takeIf { it > 0 } ?: route.totalSteps,
-                    modifier = Modifier.align(Alignment.TopCenter).padding(top = 4.dp)
-                )
-            }
-
-            // ── floor change overlay ───────────────────────────────────────
-            AnimatedVisibility(
-                visible  = state.pendingFloorChange != null,
-                enter    = slideInVertically { it } + fadeIn(),
-                exit     = slideOutVertically { it } + fadeOut(),
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                state.pendingFloorChange?.let { fc ->
-                    FloorChangeCard(
-                        fromFloor = fc.fromFloor,
-                        toFloor   = fc.toFloor,
-                        via       = fc.via,
-                        onConfirm = { vm.confirmFloorChange() }
-                    )
+            var showPrefMenu by remember { mutableStateOf(false) }
+            Box {
+                IconButton(onClick = { showPrefMenu = true }) {
+                    Text(state.transferPreference.icon, fontSize = 18.sp,
+                        color = if (state.transferPreference != TransferPreference.ANY) Maroon
+                                else MaterialTheme.colorScheme.onSurface.copy(.55f))
+                }
+                DropdownMenu(expanded = showPrefMenu, onDismissRequest = { showPrefMenu = false }) {
+                    Text("  Floor Change Method", fontSize = 11.sp, fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface.copy(.5f),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                    TransferPreference.entries.forEach { pref ->
+                        val selected = state.transferPreference == pref
+                        DropdownMenuItem(
+                            text = {
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically) {
+                                    Text(pref.icon, fontSize = 16.sp)
+                                    Text(pref.label,
+                                        color = if (selected) Maroon
+                                                else MaterialTheme.colorScheme.onSurface)
+                                    if (selected) { Spacer(Modifier.weight(1f)); Text("✓", color = Maroon, fontSize = 14.sp) }
+                                }
+                            },
+                            onClick = { vm.setTransferPreference(pref); showPrefMenu = false }
+                        )
+                    }
                 }
             }
-
-            // ── mid-step "Next Step" button ────────────────────────────────
-            // Shown when there are more turn steps within the current walk segment.
-            // Lighter than SegmentAdvanceCard — just a small button at bottom.
-            val hasMoreSteps = state.currentSteps.isNotEmpty()
-                    && state.currentStepIdx < state.currentSteps.size - 1
-                    && state.pendingFloorChange == null
-                    && !state.hasArrived
-            AnimatedVisibility(
-                visible  = hasMoreSteps,
-                enter    = slideInVertically { it } + fadeIn(),
-                exit     = slideOutVertically { it } + fadeOut(),
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                val nextStep = state.currentSteps.getOrNull(state.currentStepIdx + 1)
-                NextStepCard(
-                    nextInstruction = nextStep?.instruction ?: "",
-                    distanceM       = state.currentSteps.getOrNull(state.currentStepIdx)?.distanceM ?: 0f,
-                    onConfirm       = { vm.advanceStep() }
-                )
-            }
-
-            // ── segment advance card ───────────────────────────────────────
-            // Shown at the last step of a walk segment — user confirms arrival
-            // at transfer point (elevator) or final destination.
-            AnimatedVisibility(
-                visible  = state.pendingSegmentAdvance != null
-                        && state.pendingFloorChange == null
-                        && !state.hasArrived,
-                enter    = slideInVertically { it } + fadeIn(),
-                exit     = slideOutVertically { it } + fadeOut(),
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                state.pendingSegmentAdvance?.let { prompt ->
-                    SegmentAdvanceCard(
-                        prompt    = prompt,
-                        onConfirm = { vm.confirmSegmentAdvance() }
-                    )
+            if (state.fullRoute != null) {
+                TextButton(onClick = { vm.clearRoute() }) {
+                    Text("Clear", fontSize = 12.sp, color = Maroon)
                 }
             }
-
-            // ── exit confirmation card (shown when path ends at building exit) ──
-            AnimatedVisibility(
-                visible  = state.hasArrived && onConfirmExit != null,
-                enter    = slideInVertically { it } + fadeIn(),
-                exit     = slideOutVertically { it } + fadeOut(),
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                if (onConfirmExit != null) {
-                    ExitConfirmationCard(onConfirm = onConfirmExit)
-                }
-            }
-
-            // ── room card — user picks destination, then enters start room ──
-            AnimatedVisibility(
-                visible  = state.selectedRoom != null
-                        && state.pendingFloorChange == null
-                        && state.pendingSegmentAdvance == null,
-                enter    = slideInVertically { it } + fadeIn(),
-                exit     = slideOutVertically { it } + fadeOut(),
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                state.selectedRoom?.let { room ->
-                    RoomCard(
-                        room         = room,
-                        buildingCode = state.currentBuilding,
-                        currentFloor = state.currentFloorNumber,
-                        onDismiss    = { vm.dismissRoom() },
-                        onNavigate   = { startNodeId, startFloorNum ->
-                            val destNodeId = state.floor?.nodes
-                                ?.firstOrNull { it.roomId == room.id }?.id
-                                ?: return@RoomCard
-                            vm.navigateTo(
-                                destination = IndoorOutdoorRouter.IndoorDestination(
-                                    building = state.currentBuilding,
-                                    floor    = state.currentFloorNumber,
-                                    nodeId   = destNodeId,
-                                    label    = room.label
-                                ),
-                                startNodeId = startNodeId,
-                                startFloor  = startFloorNum
-                            )
-                            vm.dismissRoom()  // close the popup after starting navigation
-                        }
-                    )
-                }
-            }
-
-            // ── arrived overlay ────────────────────────────────────────────
-            // Only show the "Destination Reached" dialog when this is NOT an exit leg.
-            // Exit legs show ExitConfirmationCard instead (handled below).
-            if (state.hasArrived && onConfirmExit == null) {
-                AlertDialog(
-                    onDismissRequest = {},
-                    title   = { Text("Destination Reached", fontWeight = FontWeight.Bold) },
-                    text    = { Text("You have arrived at your destination.") },
-                    confirmButton = {
-                        Button(
-                            onClick = { vm.clearRoute(); onBack() },
-                            colors  = ButtonDefaults.buttonColors(containerColor = Maroon)
-                        ) { Text("Done", color = Color.White) }
-                    },
-                    shape          = RoundedCornerShape(16.dp),
-                    containerColor = Color.White
-                )
+            TextButton(onClick = { vm.toggleNavGraph() }) {
+                Text(if (state.showNavGraph) "Hide Graph" else "Nav Graph", fontSize = 12.sp,
+                    color = if (state.showNavGraph) Maroon
+                            else MaterialTheme.colorScheme.onSurface.copy(.45f))
             }
         }
+    )
+}
+
+// ── screen content ────────────────────────────────────────────────────────────
+
+@Composable
+private fun IndoorNavContent(
+    state:         IndoorNavUiState,
+    vm:            IndoorNavViewModel,
+    padding:       androidx.compose.foundation.layout.PaddingValues,
+    onConfirmExit: (() -> Unit)?,
+    onBack:        () -> Unit
+) {
+    Box(Modifier.fillMaxSize().padding(padding)) {
+
+        if (state.isLoading) {
+            CircularProgressIndicator(Modifier.align(Alignment.Center), color = Maroon)
+        }
+        state.error?.let {
+            Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("🗺️", fontSize = 48.sp); Spacer(Modifier.height(12.dp))
+                Text(it, color = MaterialTheme.colorScheme.onSurface.copy(.45f))
+            }
+        }
+
+        state.floor?.let { floor ->
+            IndoorMapCanvas(floor = floor, modifier = Modifier.fillMaxSize(),
+                highlightRoomId = state.highlightRoomId, pathNodeIds = state.pathNodeIds,
+                pathEdgeIds = state.pathEdgeIds, showNavGraph = state.showNavGraph,
+                onRoomTap = { vm.onRoomTap(it) })
+        }
+
+        if (state.availableFloors.size > 1) {
+            FloorSelector(floors = state.availableFloors, current = state.currentFloorNumber,
+                onSelect = { vm.switchFloor(state.currentBuilding, it) },
+                modifier = Modifier.align(Alignment.CenterEnd).padding(end = 12.dp))
+        }
+
+        state.fullRoute?.let { route ->
+            SegmentProgressBar(
+                current  = state.stepOffset + state.currentStepIdx + 1,
+                total    = state.totalStepCount.takeIf { it > 0 } ?: route.totalSteps,
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 4.dp))
+        }
+
+        IndoorNavOverlays(state, vm, onConfirmExit, onBack)
+    }
+}
+
+/** All animated bottom-sheet overlays — extracted to keep [IndoorNavContent] readable. */
+@Composable
+private fun BoxScope.IndoorNavOverlays(
+    state:         IndoorNavUiState,
+    vm:            IndoorNavViewModel,
+    onConfirmExit: (() -> Unit)?,
+    onBack:        () -> Unit
+) {
+    val bottomCenter = Modifier.align(Alignment.BottomCenter)
+    AnimatedVisibility(state.pendingFloorChange != null,
+        enter = slideInVertically { it } + fadeIn(), exit = slideOutVertically { it } + fadeOut(),
+        modifier = bottomCenter) {
+        state.pendingFloorChange?.let { fc ->
+            FloorChangeCard(fc.fromFloor, fc.toFloor, fc.via) { vm.confirmFloorChange() }
+        }
+    }
+
+    val hasMoreSteps = state.currentSteps.isNotEmpty()
+        && state.currentStepIdx < state.currentSteps.size - 1
+        && state.pendingFloorChange == null && !state.hasArrived
+    AnimatedVisibility(hasMoreSteps,
+        enter = slideInVertically { it } + fadeIn(), exit = slideOutVertically { it } + fadeOut(),
+        modifier = bottomCenter) {
+        NextStepCard(
+            nextInstruction = state.currentSteps.getOrNull(state.currentStepIdx + 1)?.instruction ?: "",
+            distanceM       = state.currentSteps.getOrNull(state.currentStepIdx)?.distanceM ?: 0f,
+            onConfirm       = { vm.advanceStep() })
+    }
+
+    AnimatedVisibility(state.pendingSegmentAdvance != null && state.pendingFloorChange == null && !state.hasArrived,
+        enter = slideInVertically { it } + fadeIn(), exit = slideOutVertically { it } + fadeOut(),
+        modifier = bottomCenter) {
+        state.pendingSegmentAdvance?.let { prompt ->
+            SegmentAdvanceCard(prompt = prompt, onConfirm = { vm.confirmSegmentAdvance() })
+        }
+    }
+
+    AnimatedVisibility(state.hasArrived && onConfirmExit != null,
+        enter = slideInVertically { it } + fadeIn(), exit = slideOutVertically { it } + fadeOut(),
+        modifier = bottomCenter) {
+        if (onConfirmExit != null) ExitConfirmationCard(onConfirm = onConfirmExit)
+    }
+
+    AnimatedVisibility(state.selectedRoom != null && state.pendingFloorChange == null && state.pendingSegmentAdvance == null,
+        enter = slideInVertically { it } + fadeIn(), exit = slideOutVertically { it } + fadeOut(),
+        modifier = bottomCenter) {
+        state.selectedRoom?.let { room ->
+            RoomCard(room = room, buildingCode = state.currentBuilding,
+                currentFloor = state.currentFloorNumber,
+                onDismiss    = { vm.dismissRoom() },
+                onNavigate   = { startNodeId, startFloorNum ->
+                    val destNodeId = state.floor?.nodes
+                        ?.firstOrNull { it.roomId == room.id }?.id ?: return@RoomCard
+                    vm.navigateTo(
+                        destination = IndoorOutdoorRouter.IndoorDestination(
+                            building = state.currentBuilding, floor = state.currentFloorNumber,
+                            nodeId = destNodeId, label = room.label),
+                        startNodeId = startNodeId, startFloor = startFloorNum)
+                    vm.dismissRoom()
+                })
+        }
+    }
+
+    if (state.hasArrived && onConfirmExit == null) {
+        AlertDialog(onDismissRequest = {},
+            title   = { Text("Destination Reached", fontWeight = FontWeight.Bold) },
+            text    = { Text("You have arrived at your destination.") },
+            confirmButton = {
+                Button(onClick = { vm.clearRoute(); onBack() },
+                    colors = ButtonDefaults.buttonColors(containerColor = Maroon)
+                ) { Text("Done", color = Color.White) }
+            },
+            shape = RoundedCornerShape(16.dp), containerColor = Color.White)
     }
 }
 
@@ -512,30 +461,18 @@ private fun RoomCard(
                 modifier = Modifier.fillMaxWidth(),
                 colors   = ButtonDefaults.buttonColors(containerColor = Maroon),
                 onClick  = {
+                    errorMsg = null
                     scope.launch {
                         isSearching = true
-                        errorMsg    = null
-                        val resolved = com.example.myapplication.logic.IndoorRoomResolver.resolve(
-                            repo         = indoorRepo,
-                            buildingCode = buildingCode,
-                            query        = startQuery
-                        )
+                        val result = resolveRoom(indoorRepo, buildingCode, startQuery)
                         isSearching = false
-                        if (resolved != null) {
-                            onNavigate(resolved.nodeId, resolved.floor)
-                        } else {
-                            errorMsg = "Room \"$startQuery\" not found in $buildingCode"
-                        }
+                        if (result != null) onNavigate(result.nodeId, result.floor)
+                        else errorMsg = "Room \"$startQuery\" not found in $buildingCode"
                     }
                 }
             ) {
-                if (isSearching) {
-                    CircularProgressIndicator(
-                        Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp
-                    )
-                } else {
-                    Text("Navigate Here", color = Color.White)
-                }
+                if (isSearching) CircularProgressIndicator(Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)
+                else Text("Navigate Here", color = Color.White)
             }
         }
     }
@@ -654,3 +591,13 @@ private fun ExitConfirmationCard(onConfirm: () -> Unit) {    Surface(
         }
     }
 }
+
+/** Suspend helper extracted from [RoomCard] to keep its onClick lambda simple. */
+private suspend fun resolveRoom(
+    repo:         com.example.myapplication.data.indoor.IndoorRepository,
+    buildingCode: String,
+    query:        String
+): com.example.myapplication.logic.IndoorRoomResolver.ResolvedRoom? =
+    com.example.myapplication.logic.IndoorRoomResolver.resolve(
+        repo = repo, buildingCode = buildingCode, query = query
+    )

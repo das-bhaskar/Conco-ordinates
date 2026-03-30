@@ -29,6 +29,9 @@ import com.example.myapplication.logic.IndoorJourneyHandler
 import com.example.myapplication.data.indoor.BuildingEntrance
 
 
+private const val ROUTE_DURATION_PLACEHOLDER = "-- min"
+private const val ROUTE_DISTANCE_PLACEHOLDER = "-- m"
+
 /**
  * [shuttleService] has no default value so callers must inject a concrete
  * implementation.  This makes the ViewModel truly modular – swap in a
@@ -153,12 +156,11 @@ class MapViewModel(
 
         // 4. Indoor journey: auto-detect arrival near destination building
         val journeyPhase = indoorJourneyState.phase
-        if (journeyPhase is IndoorJourneyPhase.Outdoor) {
-            if (IndoorJourneyHandler.isNearBuilding(userLocation, journeyPhase.destRoom.buildingCode)) {
-                indoorJourneyState = IndoorJourneyState(
-                    phase = IndoorJourneyHandler.onNearDestinationBuilding(journeyPhase)
-                )
-            }
+        if (journeyPhase is IndoorJourneyPhase.Outdoor &&
+            IndoorJourneyHandler.isNearBuilding(userLocation, journeyPhase.destRoom.buildingCode)) {
+            indoorJourneyState = IndoorJourneyState(
+                phase = IndoorJourneyHandler.onNearDestinationBuilding(journeyPhase)
+            )
         }
     }
 
@@ -350,8 +352,8 @@ class MapViewModel(
             destinationName       = destLabel,
             selectedTransportMode = "walk",
             routePoints           = emptyList(),
-            routeDuration         = "-- min",
-            routeDistance         = "-- m",
+            routeDuration         = ROUTE_DURATION_PLACEHOLDER,
+            routeDistance         = ROUTE_DISTANCE_PLACEHOLDER,
             routeBounds           = null,
             routeErrorMessage     = null
         )
@@ -447,8 +449,8 @@ class MapViewModel(
             else {
                 uiBuildingState.copy(
                     routePoints       = emptyList(),
-                    routeDuration     = "-- min",
-                    routeDistance     = "-- m",
+                    routeDuration     = ROUTE_DURATION_PLACEHOLDER,
+                    routeDistance     = ROUTE_DISTANCE_PLACEHOLDER,
                     routeSegments = emptyList(),
                     routeBounds       = null,
                     routeErrorMessage = "$modeName route unavailable between these points."
@@ -494,8 +496,8 @@ class MapViewModel(
             // Route reset — atomically cleared so the UI shows a clean blank state
             // before the new polyline arrives from calculateRouteWithState()
             routePoints       = emptyList(),
-            routeDuration     = "-- min",
-            routeDistance     = "-- m",
+            routeDuration     = ROUTE_DURATION_PLACEHOLDER,
+            routeDistance     = ROUTE_DISTANCE_PLACEHOLDER,
             routeBounds       = null,
             routeErrorMessage = null
         )

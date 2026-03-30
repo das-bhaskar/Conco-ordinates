@@ -61,82 +61,75 @@ class IndoorStepBuilder(
     ): List<NavStep> {
         if (path.size < 2) return emptyList()
 
-        val steps   = mutableListOf<NavStep>()
-        var segStart = 0                     // index of the first node in the current segment
+        val steps    = mutableListOf<NavStep>()
+        var segStart = 0
         var segNodes = mutableListOf(path[0])
 
         for (i in 1 until path.size) {
-            val prev = path[i - 1]
-            val curr = path[i]
-            val isLast = i == path.size - 1
-
-            // Force a step boundary at special node types
+            val prev    = path[i - 1]
+            val curr    = path[i]
+            val isLast  = i == path.size - 1
             val forceBreak = curr.type in listOf("ELEVATOR", "ESCALATOR", "STAIRCASE")
-
-            // Compute turn angle at curr (needs next node to determine direction)
-            val turnDeg = if (i < path.size - 1) {
-                headingChange(path[i - 1], path[i], path[i + 1])
-            } else 0.0
-
-            val isTurn = abs(turnDeg) >= STRAIGHT_THRESHOLD
+            val turnDeg = if (i < path.size - 1) headingChange(path[i - 1], path[i], path[i + 1]) else 0.0
+            val isTurn  = abs(turnDeg) >= STRAIGHT_THRESHOLD
 
             segNodes.add(curr)
 
             if (forceBreak || isTurn || isLast) {
-                // Close current segment
-                val dist = segmentDistance(segNodes, scaleMetresPerUnit)
-                val instruction = if (steps.isEmpty()) {
-                    // First step — describe overall direction
-                    buildFirstInstruction(path[0], path.last())
-                } else {
-                    // Instruction is the TURN that happened at the END of the previous segment
-                    // (i.e. what the user does to start THIS step)
-                    val prevHeading = headingDeg(path[segStart], prev)
-                    val newHeading  = headingDeg(prev, curr)
-                    val delta       = normaliseDelta(newHeading - prevHeading)
-                    turnInstruction(delta, curr)
-                }
-
-                steps.add(NavStep(
-                    instruction = instruction,
-                    nodes       = segNodes.toList(),
-                    distanceM   = dist,
-                    isLast      = isLast && !forceBreak
-                ))
-
+                flushSegment(steps, segNodes, segStart, prev, curr, path, isLast, forceBreak)
                 segStart = i
                 segNodes = mutableListOf(curr)
-
-                // If forced break for elevator/escalator, emit a "take the X" step
                 if (forceBreak) {
-                    val xferInstruction = when (curr.type) {
-                        "ELEVATOR"  -> "Take the elevator to the next floor"
-                        "ESCALATOR" -> "Take the escalator to the next floor"
-                        "STAIRCASE" -> "Take the stairs to the next floor"
-                        else        -> "Transfer"
-                    }
-                    steps.add(NavStep(
-                        instruction = xferInstruction,
-                        nodes       = listOf(curr),
-                        distanceM   = 0f,
-                        isLast      = isLast
-                    ))
+                    emitTransferStep(steps, curr, isLast)
                     segStart = i
                     segNodes = mutableListOf(curr)
                 }
             }
         }
 
-        // Append arrival step
+        markArrival(steps, destinationLabel)
+        return steps
+    }
+
+    /** Closes the current walk segment and appends a [NavStep]. */
+    private fun flushSegment(
+        steps:      MutableList<NavStep>,
+        segNodes:   List<IndoorNode>,
+        segStart:   Int,
+        prev:       IndoorNode,
+        curr:       IndoorNode,
+        path:       List<IndoorNode>,
+        isLast:     Boolean,
+        forceBreak: Boolean
+    ) {
+        val dist = segmentDistance(segNodes, scaleMetresPerUnit)
+        val instruction = if (steps.isEmpty()) {
+            buildFirstInstruction(path[0], path.last())
+        } else {
+            val prevHeading = headingDeg(path[segStart], prev)
+            val newHeading  = headingDeg(prev, curr)
+            turnInstruction(normaliseDelta(newHeading - prevHeading), curr)
+        }
+        steps.add(NavStep(instruction, segNodes.toList(), dist, isLast && !forceBreak))
+    }
+
+    /** Emits a "Take the elevator/escalator/stairs" transfer step. */
+    private fun emitTransferStep(steps: MutableList<NavStep>, curr: IndoorNode, isLast: Boolean) {
+        val xferInstruction = when (curr.type) {
+            "ELEVATOR"  -> "Take the elevator to the next floor"
+            "ESCALATOR" -> "Take the escalator to the next floor"
+            "STAIRCASE" -> "Take the stairs to the next floor"
+            else        -> "Transfer"
+        }
+        steps.add(NavStep(xferInstruction, listOf(curr), 0f, isLast))
+    }
+
+    /** Rewrites the last step's instruction to the arrival message. */
+    private fun markArrival(steps: MutableList<NavStep>, destinationLabel: String) {
         if (steps.isNotEmpty()) {
             val last = steps.removeLast()
-            steps.add(last.copy(
-                instruction = "You have arrived at $destinationLabel",
-                isLast      = true
-            ))
+            steps.add(last.copy(instruction = "You have arrived at $destinationLabel", isLast = true))
         }
-
-        return steps
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

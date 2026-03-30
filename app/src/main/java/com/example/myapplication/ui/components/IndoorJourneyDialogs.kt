@@ -161,9 +161,9 @@ private fun AskCurrentRoomDialog(
                 enabled = query.isNotBlank() && !isSearching,
                 colors  = ButtonDefaults.buttonColors(containerColor = Maroon),
                 onClick = {
+                    errorMsg = null  // reset before launching coroutine
                     scope.launch {
                         isSearching = true
-                        errorMsg    = null
                         val resolved = IndoorRoomResolver.resolve(
                             repo         = indoorRepo,
                             buildingCode = buildingCode,

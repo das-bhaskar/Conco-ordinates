@@ -91,17 +91,19 @@ class CrossFloorNavigator {
         if (pairs.isEmpty()) return emptyList()
 
         return findBestRoute(
-            pairs         = pairs,
-            startNodes    = startFloorData.nodes,
-            startEdges    = startFloorData.edges,
-            targetNodes   = targetFloorData.nodes,
-            targetEdges   = targetFloorData.edges,
-            startNodeId   = startNodeId,
-            targetNodeId  = targetNodeId,
-            startFloor    = startFloor,
-            targetFloor   = targetFloor,
-            building      = building,
-            accessibleOnly = preference == TransferPreference.ELEVATOR_ONLY
+            pairs  = pairs,
+            params = RouteSearchParams(
+                startNodes    = startFloorData.nodes,
+                startEdges    = startFloorData.edges,
+                targetNodes   = targetFloorData.nodes,
+                targetEdges   = targetFloorData.edges,
+                startNodeId   = startNodeId,
+                targetNodeId  = targetNodeId,
+                startFloor    = startFloor,
+                targetFloor   = targetFloor,
+                building      = building,
+                accessibleOnly = preference == TransferPreference.ELEVATOR_ONLY
+            )
         )
     }
 
@@ -152,34 +154,41 @@ class CrossFloorNavigator {
         return pairs
     }
 
+    /** Parameters for [findBestRoute] — groups related values to stay within param limit. */
+    private data class RouteSearchParams(
+        val startNodes:    List<IndoorNode>,
+        val startEdges:    List<IndoorEdge>,
+        val targetNodes:   List<IndoorNode>,
+        val targetEdges:   List<IndoorEdge>,
+        val startNodeId:   String,
+        val targetNodeId:  String,
+        val startFloor:    Int,
+        val targetFloor:   Int,
+        val building:      String,
+        val accessibleOnly: Boolean
+    )
+
     /**
      * Picks the transfer pair with the lowest total A* path cost.
      * Extracted to reduce cognitive complexity of [navigate].
      */
     private fun findBestRoute(
-        pairs:          List<TransferPair>,
-        startNodes:     List<IndoorNode>,
-        startEdges:     List<IndoorEdge>,
-        targetNodes:    List<IndoorNode>,
-        targetEdges:    List<IndoorEdge>,
-        startNodeId:    String,
-        targetNodeId:   String,
-        startFloor:     Int,
-        targetFloor:    Int,
-        building:       String,
-        accessibleOnly: Boolean
+        pairs:  List<TransferPair>,
+        params: RouteSearchParams
     ): List<NavStep> {
         var bestSteps: List<NavStep> = emptyList()
         var bestCost  = Float.MAX_VALUE
 
         for (pair in pairs) {
             val seg1 = IndoorPathfinder.findPath(
-                startNodes, startEdges, startNodeId, pair.startNode.id, accessibleOnly
+                params.startNodes, params.startEdges,
+                params.startNodeId, pair.startNode.id, params.accessibleOnly
             )
             if (seg1.isEmpty()) continue
 
             val seg2 = IndoorPathfinder.findPath(
-                targetNodes, targetEdges, pair.targetNode.id, targetNodeId, accessibleOnly
+                params.targetNodes, params.targetEdges,
+                pair.targetNode.id, params.targetNodeId, params.accessibleOnly
             )
             if (seg2.isEmpty()) continue
 
@@ -187,15 +196,15 @@ class CrossFloorNavigator {
             if (cost < bestCost) {
                 bestCost  = cost
                 bestSteps = listOf(
-                    NavStep.Walk(FloorSegment(startFloor, seg1, building)),
+                    NavStep.Walk(FloorSegment(params.startFloor, seg1, params.building)),
                     NavStep.ChangeFloor(
-                        fromFloor    = startFloor,
-                        toFloor      = targetFloor,
+                        fromFloor    = params.startFloor,
+                        toFloor      = params.targetFloor,
                         via          = pair.via,
-                        building     = building,
+                        building     = params.building,
                         targetNodeId = pair.targetNode.id
                     ),
-                    NavStep.Walk(FloorSegment(targetFloor, seg2, building))
+                    NavStep.Walk(FloorSegment(params.targetFloor, seg2, params.building))
                 )
             }
         }

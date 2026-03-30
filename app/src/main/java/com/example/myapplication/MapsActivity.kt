@@ -27,6 +27,7 @@ import com.example.myapplication.ui.components.IndoorJourneyDialogs
 import com.example.myapplication.ui.models.IndoorJourneyPhase
 import com.example.myapplication.ui.screens.AppNavigation
 import com.example.myapplication.ui.screens.IndoorActions
+import com.example.myapplication.ui.screens.IndoorNavParams
 import com.example.myapplication.ui.screens.IndoorNavScreen
 import com.example.myapplication.ui.screens.MapScreen
 import com.example.myapplication.ui.viewmodel.CalendarViewModel
@@ -217,12 +218,12 @@ private fun MapContent(
         modifier = Modifier.fillMaxSize()
     ) {
         indoorTarget?.let { (code, floor) ->
-            IndoorNavScreen(
+            IndoorNavScreen(IndoorNavParams(
                 building        = code,
                 availableFloors = com.example.myapplication.data.indoor.IndoorBuildingConfig.floorsFor(code),
                 initialFloor    = floor,
                 onBack          = { indoorTarget = null }
-            )
+            ))
         }
     }
 
@@ -265,17 +266,13 @@ private fun MapContent(
                 else -> null
             }
 
-            IndoorNavScreen(
+            IndoorNavScreen(IndoorNavParams(
                 building        = code,
-                // Pass all floors so the user can see the floor selector during cross-floor nav
                 availableFloors = com.example.myapplication.data.indoor.IndoorBuildingConfig.floorsFor(code),
                 initialFloor    = floor,
                 destination     = destination,
                 startNodeId     = startNode,
-                // Tell CrossFloorNavigator which floor the user's start node is on.
-                // For IndoorToDestination this may differ from the destination floor.
                 startFloor      = floor,
-                // Only show exit confirmation card when walking to an exit (cross-building)
                 onConfirmExit   = if (phase is IndoorJourneyPhase.IndoorToExit) {
                     { mapViewModel.onUserExited() }
                 } else null,
@@ -287,7 +284,7 @@ private fun MapContent(
                         destLabel   = outdoorSeg.destLabel
                     )
                 }
-            )
+            ))
         }
     }
 }

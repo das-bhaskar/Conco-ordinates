@@ -148,70 +148,87 @@ object IndoorOutdoorRouter {
     ): FullRoute {
         val segments = mutableListOf<Segment>()
 
-        // 3a. Walk to best exit in start building
-        val bestExit = if (userGps != null)
+        val bestExit = pickBestExit(startBuilding, userGps)
+        addExitWalkSegment(segments, repo, startBuilding, startFloor, startNodeId, bestExit, preference)
+
+        val bestEntry = BuildingEntrances.forBuilding(destination.building).firstOrNull()
+        if (bestEntry != null && bestExit != null) {
+            segments += Segment.OutdoorWalk(
+                origin      = bestExit.gps,
+                destination = bestEntry.gps,
+                originLabel = bestExit.label,
+                destLabel   = bestEntry.label,
+                instruction = "Walk to ${destination.building} building"
+            )
+        }
+
+        if (bestEntry != null) {
+            addDestinationWalkSegments(segments, repo, destination, bestEntry, preference)
+        }
+
+        return FullRoute(segments)
+    }
+
+    private fun pickBestExit(
+        startBuilding: String,
+        userGps:       LatLng?
+    ): com.example.myapplication.data.indoor.BuildingEntrance? =
+        if (userGps != null)
             BuildingEntrances.nearest(startBuilding, userGps)
                 ?: BuildingEntrances.forBuilding(startBuilding).firstOrNull()
         else BuildingEntrances.forBuilding(startBuilding).firstOrNull()
 
-        if (bestExit != null) {
-            val startFloorData = repo.getFloor(startBuilding, startFloor)
-            if (startFloorData != null) {
-                val exitPath = IndoorPathfinder.findPath(
-                    startFloorData.nodes, startFloorData.edges,
-                    startNodeId, bestExit.nodeId,
-                    preference == TransferPreference.ELEVATOR_ONLY
-                )
-                if (exitPath.isNotEmpty()) {
-                    segments += Segment.IndoorWalk(
-                        startBuilding, startFloor, exitPath, "Walk to ${bestExit.label}"
-                    )
-                }
-            }
-        }
-
-        // 3b. Outdoor walk to destination building entrance
-        val bestEntry = BuildingEntrances.forBuilding(destination.building).firstOrNull()
-
-        if (bestEntry != null) {
-            bestExit?.let { exit ->
-                segments += Segment.OutdoorWalk(
-                    origin      = exit.gps,
-                    destination = bestEntry.gps,
-                    originLabel = exit.label,
-                    destLabel   = bestEntry.label,
-                    instruction = "Walk to ${destination.building} building"
-                )
-            }
-        }
-
-        // 3c. Indoor walk (+ possible floor change) inside destination building
-        if (bestEntry != null) {
-            val steps = CrossFloorNavigator.navigate(
-                repo, destination.building,
-                bestEntry.floor, bestEntry.nodeId,
-                destination.floor, destination.nodeId, preference
+    private suspend fun addExitWalkSegment(
+        segments:      MutableList<Segment>,
+        repo:          IndoorRepository,
+        startBuilding: String,
+        startFloor:    Int,
+        startNodeId:   String,
+        bestExit:      com.example.myapplication.data.indoor.BuildingEntrance?,
+        preference:    TransferPreference
+    ) {
+        val startFloorData = repo.getFloor(startBuilding, startFloor)
+        if (bestExit != null && startFloorData != null) {
+            val exitPath = IndoorPathfinder.findPath(
+                startFloorData.nodes, startFloorData.edges,
+                startNodeId, bestExit.nodeId,
+                preference == TransferPreference.ELEVATOR_ONLY
             )
-            val viaType = steps.filterIsInstance<CrossFloorNavigator.NavStep.ChangeFloor>()
-                .firstOrNull()?.via ?: "elevator"
-
-            steps.forEach { step ->
-                when (step) {
-                    is CrossFloorNavigator.NavStep.Walk ->
-                        segments += Segment.IndoorWalk(
-                            step.segment.building, step.segment.floor, step.segment.path,
-                            if (step.segment.floor == bestEntry.floor) "Walk to the $viaType"
-                            else "Walk to ${destination.label}"
-                        )
-                    is CrossFloorNavigator.NavStep.ChangeFloor ->
-                        segments += Segment.FloorChange(
-                            step.building, step.fromFloor, step.toFloor, step.via,
-                            "Take the ${step.via} to floor ${step.toFloor}"
-                        )
-                }
+            if (exitPath.isNotEmpty()) {
+                segments += Segment.IndoorWalk(startBuilding, startFloor, exitPath, "Walk to ${bestExit.label}")
             }
         }
+    }
 
-        return FullRoute(segments)
+    private suspend fun addDestinationWalkSegments(
+        segments:    MutableList<Segment>,
+        repo:        IndoorRepository,
+        destination: IndoorDestination,
+        bestEntry:   com.example.myapplication.data.indoor.BuildingEntrance,
+        preference:  TransferPreference
+    ) {
+        val steps = CrossFloorNavigator.navigate(
+            repo, destination.building,
+            bestEntry.floor, bestEntry.nodeId,
+            destination.floor, destination.nodeId, preference
+        )
+        val viaType = steps.filterIsInstance<CrossFloorNavigator.NavStep.ChangeFloor>()
+            .firstOrNull()?.via ?: "elevator"
+
+        steps.forEach { step ->
+            when (step) {
+                is CrossFloorNavigator.NavStep.Walk ->
+                    segments += Segment.IndoorWalk(
+                        step.segment.building, step.segment.floor, step.segment.path,
+                        if (step.segment.floor == bestEntry.floor) "Walk to the $viaType"
+                        else "Walk to ${destination.label}"
+                    )
+                is CrossFloorNavigator.NavStep.ChangeFloor ->
+                    segments += Segment.FloorChange(
+                        step.building, step.fromFloor, step.toFloor, step.via,
+                        "Take the ${step.via} to floor ${step.toFloor}"
+                    )
+            }
+        }
     }
 }

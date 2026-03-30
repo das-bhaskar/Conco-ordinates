@@ -124,4 +124,51 @@ class BuildingEntrancesTest {
         assertNotNull(e1.toString())
         assertEquals(e1.hashCode(), e2.hashCode())
     }
+
+    @Test
+    fun `BuildingEntrance with explicit floor`() {
+        val e = BuildingEntrance("n1", "Label", LatLng(45.0, -73.0), floor = 8)
+        assertEquals(8, e.floor)
+    }
+
+    @Test
+    fun `forBuilding returns all entrances for building with multiple`() {
+        val e1 = BuildingEntrance("n1", "North", LatLng(45.497, -73.578), 1)
+        val e2 = BuildingEntrance("n2", "South", LatLng(45.496, -73.578), 1)
+        val e3 = BuildingEntrance("n3", "East",  LatLng(45.497, -73.577), 1)
+        injectData(mapOf("H" to listOf(e1, e2, e3)))
+
+        val result = BuildingEntrances.forBuilding("H")
+        assertEquals(3, result.size)
+    }
+
+    @Test
+    fun `nearest picks entrance closest to user among three options`() {
+        val far    = BuildingEntrance("far",    "Far",    LatLng(45.500, -73.600), 1)
+        val mid    = BuildingEntrance("mid",    "Mid",    LatLng(45.498, -73.579), 1)
+        val close  = BuildingEntrance("close",  "Close",  LatLng(45.4972, -73.5788), 1)
+        injectData(mapOf("H" to listOf(far, mid, close)))
+
+        val user   = LatLng(45.4973, -73.5787)
+        val result = BuildingEntrances.nearest("H", user)
+        assertEquals("close", result!!.nodeId)
+    }
+
+    @Test
+    fun `nearest returns null for building with empty entrance list`() {
+        injectData(mapOf("H" to emptyList()))
+        assertNull(BuildingEntrances.nearest("H", LatLng(45.0, -73.0)))
+    }
+
+    @Test
+    fun `forBuilding handles multiple buildings independently`() {
+        val hEntrance  = BuildingEntrance("h1",  "H South",  LatLng(45.497, -73.578))
+        val ccEntrance = BuildingEntrance("cc1", "CC West",  LatLng(45.458, -73.640))
+        injectData(mapOf("H" to listOf(hEntrance), "CC" to listOf(ccEntrance)))
+
+        assertEquals(1, BuildingEntrances.forBuilding("H").size)
+        assertEquals(1, BuildingEntrances.forBuilding("CC").size)
+        assertEquals("h1",  BuildingEntrances.forBuilding("H").first().nodeId)
+        assertEquals("cc1", BuildingEntrances.forBuilding("CC").first().nodeId)
+    }
 }

@@ -1,5 +1,7 @@
 package com.example.myapplication.ui.components
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.data.indoor.IndoorRepository
 import com.example.myapplication.data.indoor.IndoorFloor
@@ -77,14 +79,9 @@ data class IndoorNavUiState(
 
 // ── ViewModel ─────────────────────────────────────────────────────────────────
 
-/**
- * [repo] is injected via [IndoorNavViewModelFactory] so the ViewModel
- * never creates its own dependencies (DIP). Tests can pass a fake repo
- * without needing an Application context.
- */
-class IndoorNavViewModel(
-    private val repo: IndoorRepository
-) : androidx.lifecycle.ViewModel() {
+class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
+
+    private val repo   = IndoorRepository(app)
     private val _state = MutableStateFlow(IndoorNavUiState())
     val state: StateFlow<IndoorNavUiState> = _state.asStateFlow()
 
@@ -182,7 +179,8 @@ class IndoorNavViewModel(
     private fun loadFloor(building: String, floor: Int) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-            val result = repo.getFloor(building, floor)
+            val result       = repo.getFloor(building, floor)
+            val defaultStart = result?.nodes?.firstOrNull { it.type == "ENTRANCE" }?.id
             _state.update {
                 it.copy(
                     isLoading          = false,
@@ -257,14 +255,15 @@ class IndoorNavViewModel(
             // If nodeId is blank, resolve it from the destination floor JSON
             val resolvedDestNodeId = if (destination.nodeId.isBlank()) {
                 val destFloorData = repo.getFloor(destination.building, destination.floor)
+                val nodes = destFloorData?.nodes ?: emptyList()
                 val room = destFloorData?.rooms?.firstOrNull { room ->
                     room.label.endsWith(destination.label.substringAfterLast('-'), ignoreCase = true) ||
                     room.id.endsWith(destination.label.substringAfterLast('-'), ignoreCase = true)
                 }
                 val node = if (room != null) {
-                    destFloorData?.nodes?.firstOrNull { it.roomId == room.id }
+                    nodes.firstOrNull { it.roomId == room.id }
                 } else {
-                    destFloorData?.nodes?.firstOrNull { n ->
+                    nodes.firstOrNull { n ->
                         n.roomId?.endsWith(destination.label.substringAfterLast('-'), ignoreCase = true) == true
                     }
                 }
@@ -398,95 +397,79 @@ class IndoorNavViewModel(
         val seg   = route.segments.getOrNull(idx) ?: return
 
         when (seg) {
-            is Segment.IndoorWalk -> {
-                val path    = seg.path
-                val nodeIds = path.map { it.id }.toSet()
-
-                if (seg.floor != _state.value.currentFloorNumber) {
-                    loadFloor(seg.building, seg.floor)
-                }
-
-                val isLastSegment = idx == route.segments.size - 1
-                val nextSeg       = route.segments.getOrNull(idx + 1)
-
-                if (path.isEmpty() || (path.size == 1 && isLastSegment)) {
-                    lastNavParams = null
-                    _state.update {
-                        it.copy(
-                            pathNodeIds           = nodeIds,
-                            pathEdgeIds           = emptyList(),
-                            instruction           = seg.instruction,
-                            pendingSegmentAdvance = null,
-                            hasArrived            = true
-                        )
-                    }
-                    return
-                }
-
-                // Build turn-by-turn steps for this walk segment
-                val destLabel = route.segments.filterIsInstance<Segment.IndoorWalk>()
-                    .lastOrNull()?.path?.lastOrNull()?.roomId ?: "your destination"
-                val steps = IndoorStepBuilder.build(
-                    path             = path,
-                    destinationLabel = if (isLastSegment) destLabel else "the ${nextSeg?.let {
-                        when (it) {
-                            is Segment.FloorChange -> it.via
-                            else -> "exit"
-                        }
-                    } ?: "exit"}"
-                )
-
-                // Compute running step offset from previous walk segments
-                val stepOffset = route.segments.take(idx)
-                    .filterIsInstance<Segment.IndoorWalk>()
-                    .sumOf { s ->
-                        IndoorStepBuilder.build(s.path).size
-                    }
-
-                // Count total steps across all walk segments
-                val totalSteps = route.segments
-                    .filterIsInstance<Segment.IndoorWalk>()
-                    .sumOf { s -> IndoorStepBuilder.build(s.path).size }
-
-                // Apply first step of this segment
-                val firstStep = steps.firstOrNull()
-                val firstEdges = firstStep?.nodes?.zipWithNext { a, b -> a.id to b.id }
-                    ?: emptyList()
-
-                _state.update {
-                    it.copy(
-                        pathNodeIds           = firstStep?.nodes?.map { n -> n.id }?.toSet() ?: nodeIds,
-                        pathEdgeIds           = firstEdges,
-                        instruction           = firstStep?.instruction ?: seg.instruction,
-                        highlightRoomId       = path.lastOrNull()?.roomId,
-                        currentSteps          = steps,
-                        currentStepIdx        = 0,
-                        totalStepCount        = totalSteps,
-                        stepOffset            = stepOffset,
-                        pendingSegmentAdvance = if (steps.size > 1) null
-                                               else advancePromptFor(isLastSegment, nextSeg),
-                        hasArrived            = false
-                    )
-                }
+            is Segment.IndoorWalk  -> applyIndoorWalkSegment(seg, idx, route)
+            is Segment.FloorChange -> _state.update {
+                it.copy(pendingFloorChange = seg, pendingSegmentAdvance = null, instruction = seg.instruction)
             }
-            is Segment.FloorChange -> {
-                _state.update {
-                    it.copy(
-                        pendingFloorChange    = seg,
-                        pendingSegmentAdvance = null,
-                        instruction           = seg.instruction
-                    )
-                }
+            is Segment.OutdoorWalk -> _state.update {
+                it.copy(outdoorSegment = seg, pendingSegmentAdvance = null, instruction = seg.instruction)
             }
-            is Segment.OutdoorWalk -> {
-                _state.update {
-                    it.copy(
-                        outdoorSegment        = seg,
-                        pendingSegmentAdvance = null,
-                        instruction           = seg.instruction
-                    )
-                }
+        }
+    }
+
+    /**
+     * Applies an [Segment.IndoorWalk] segment — builds turn-by-turn steps and
+     * updates the UI state. Extracted to keep [applySegment] below the SonarCloud
+     * cognitive complexity limit.
+     */
+    private fun applyIndoorWalkSegment(
+        seg:   Segment.IndoorWalk,
+        idx:   Int,
+        route: com.example.myapplication.logic.IndoorOutdoorRouter.FullRoute
+    ) {
+        val path    = seg.path
+        val nodeIds = path.map { it.id }.toSet()
+
+        if (seg.floor != _state.value.currentFloorNumber) loadFloor(seg.building, seg.floor)
+
+        val isLastSegment = idx == route.segments.size - 1
+        val nextSeg       = route.segments.getOrNull(idx + 1)
+
+        if (path.isEmpty() || (path.size == 1 && isLastSegment)) {
+            lastNavParams = null
+            _state.update {
+                it.copy(pathNodeIds = nodeIds, pathEdgeIds = emptyList(),
+                    instruction = seg.instruction, pendingSegmentAdvance = null, hasArrived = true)
             }
+            return
+        }
+
+        val destLabel = route.segments.filterIsInstance<Segment.IndoorWalk>()
+            .lastOrNull()?.path?.lastOrNull()?.roomId ?: "your destination"
+        val nextVia = when (nextSeg) {
+            is Segment.FloorChange -> nextSeg.via
+            else -> "exit"
+        }
+        val steps = IndoorStepBuilder.build(
+            path             = path,
+            destinationLabel = if (isLastSegment) destLabel else "the $nextVia"
+        )
+
+        val stepOffset = route.segments.take(idx)
+            .filterIsInstance<Segment.IndoorWalk>()
+            .sumOf { s -> IndoorStepBuilder.build(s.path).size }
+
+        val totalSteps = route.segments
+            .filterIsInstance<Segment.IndoorWalk>()
+            .sumOf { s -> IndoorStepBuilder.build(s.path).size }
+
+        val firstStep  = steps.firstOrNull()
+        val firstEdges = firstStep?.nodes?.zipWithNext { a, b -> a.id to b.id } ?: emptyList()
+
+        _state.update {
+            it.copy(
+                pathNodeIds           = firstStep?.nodes?.map { n -> n.id }?.toSet() ?: nodeIds,
+                pathEdgeIds           = firstEdges,
+                instruction           = firstStep?.instruction ?: seg.instruction,
+                highlightRoomId       = path.lastOrNull()?.roomId,
+                currentSteps          = steps,
+                currentStepIdx        = 0,
+                totalStepCount        = totalSteps,
+                stepOffset            = stepOffset,
+                pendingSegmentAdvance = if (steps.size > 1) null
+                                       else advancePromptFor(isLastSegment, nextSeg),
+                hasArrived            = false
+            )
         }
     }
 
@@ -506,6 +489,10 @@ class IndoorNavViewModel(
         // All steps done — advance route segment
         val isLast = st.currentSegmentIdx == route.segments.size - 1
         when {
+            isLast && st.isExitLeg -> {
+                lastNavParams = null
+                _state.update { it.copy(pendingSegmentAdvance = null, hasArrived = true) }
+            }
             isLast -> {
                 lastNavParams = null
                 _state.update { it.copy(pendingSegmentAdvance = null, hasArrived = true) }
@@ -556,18 +543,19 @@ class IndoorNavViewModel(
 
 /**
  * ViewModelProvider.Factory for [IndoorNavViewModel].
- *
- * Injects [IndoorRepository] via constructor so the ViewModel follows DIP
- * and can be tested with a mock repo without needing an Android Context.
+ * Required because [IndoorNavViewModel] extends [AndroidViewModel] and needs
+ * an [Application] context — the default factory handles this automatically
+ * when using viewModel(), but we provide an explicit factory so the screen
+ * composable can pass a unique key per session.
  */
 class IndoorNavViewModelFactory(
-    private val repo: IndoorRepository
-) : androidx.lifecycle.ViewModelProvider.Factory {
+    private val app: android.app.Application
+) : androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory(app) {
     @Suppress("UNCHECKED_CAST")
     override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
         require(modelClass == IndoorNavViewModel::class.java) {
             "IndoorNavViewModelFactory can only create IndoorNavViewModel"
         }
-        return IndoorNavViewModel(repo) as T
+        return IndoorNavViewModel(app) as T
     }
 }

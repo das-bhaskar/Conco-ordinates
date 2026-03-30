@@ -20,15 +20,15 @@ import android.text.SpannableString
 class SearchProviderTest {
 
     private lateinit var mockPlacesClient: PlacesClient
+    private lateinit var mockIndoorRepo: com.example.myapplication.data.indoor.IndoorRepository
     private lateinit var searchProvider: HybridSearchProvider
 
     @Before
     fun setup() {
         com.example.myapplication.telemetry.CrashReporter.isTesting = true
         mockPlacesClient = mock()
-        searchProvider = HybridSearchProvider(mockPlacesClient)
-        // Disable Firebase for unit tests
-
+        mockIndoorRepo   = mock()
+        searchProvider   = HybridSearchProvider(mockPlacesClient, mockIndoorRepo)
     }
 
     @Test

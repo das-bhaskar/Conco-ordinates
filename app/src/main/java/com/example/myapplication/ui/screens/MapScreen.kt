@@ -43,6 +43,17 @@ import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.google.android.gms.location.FusedLocationProviderClient
 import kotlinx.coroutines.launch
 
+/**
+ * Groups all indoor-specific callbacks for [MapScreen] and [MapBuildingOverlay].
+ *
+ * As more indoor features are added (floor changes, room detail, etc.) this
+ * data class can be extended without changing the composable parameter lists.
+ * Callers mock the entire object in tests rather than wiring individual lambdas.
+ */
+data class IndoorActions(
+    val onIndoorMapClick: () -> Unit = {}
+)
+
 @Composable
 fun MapScreen(
     mapViewModel:             com.example.myapplication.ui.viewmodel.MapViewModel,
@@ -67,7 +78,7 @@ fun MapScreen(
     onLocationUpdate:         (com.google.android.gms.maps.model.LatLng, Boolean) -> Unit,
     onNavigateToBuilding:     (String) -> Unit,
     onStartNavigationActions: () -> Unit = {},
-    onIndoorMapClick:         () -> Unit = {}
+    indoorActions:            IndoorActions = IndoorActions()
 ) {
     val uiState = mapViewModel.uiBuildingState
     val context = LocalContext.current
@@ -156,7 +167,7 @@ fun MapScreen(
                 uiState                  = uiState,
                 onDismiss                = onBuildingDismiss,
                 onDirectionsRequested    = onDirectionsRequested,
-                onIndoorMapClick         = onIndoorMapClick,
+                onIndoorMapClick         = indoorActions.onIndoorMapClick,
                 onTransportModeChanged   = onTransportModeChanged,
                 onToggleSearchExpansion  = onToggleSearchExpansion,
                 onSwapLocations          = onSwapLocations,

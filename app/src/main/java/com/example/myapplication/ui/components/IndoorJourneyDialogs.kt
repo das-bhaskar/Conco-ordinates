@@ -25,7 +25,6 @@ fun IndoorJourneyDialogs(
     phase:              IndoorJourneyPhase,
     indoorRepo:         IndoorRepository,
     onRoomResolved:     (nodeId: String, label: String, buildingCode: String, floor: Int) -> Unit,
-    onConfirmExit:      () -> Unit,
     onEntranceSelected: (BuildingEntrance) -> Unit,
     onDismiss:          () -> Unit
 ) {

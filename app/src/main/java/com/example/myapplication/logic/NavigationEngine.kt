@@ -2,31 +2,46 @@ package com.example.myapplication.logic
 
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.SphericalUtil
-import com.example.myapplication.data.Building
 
 /**
  * Abstracts navigation calculations so [MapViewModel] never depends
  * on a concrete implementation.
  *
- * [checkArrivalWithBuilding] is part of the interface because the campus
- * navigation use-case requires building-aware arrival detection — callers
- * should not need to downcast to [CampusNavigationEngine] to access it.
- * Previously the unsafe cast `navigationEngine as CampusNavigationEngine`
- * in MapViewModel violated LSP and made the interface pointless.
+ * [checkArrivalWithBuilding] now accepts a [LatLng] center and radius
+ * instead of a [Building] model — the logic layer no longer imports
+ * from the data layer, satisfying the Dependency Rule.
+ *
+ * MapViewModel is responsible for extracting the building center and
+ * passing it here, which is appropriate since it already owns [uiBuildingState].
  */
 interface NavigationEngine {
     fun calculateNextInstruction(userPos: LatLng, route: List<LatLng>): String
     fun checkArrival(userPos: LatLng, destination: LatLng): Boolean
-    fun checkArrivalWithBuilding(userPos: LatLng, targetBuilding: Building?): Boolean
+
+    /**
+     * Returns true when [userPos] is within [radiusMetres] of [buildingCenter].
+     *
+     * Accepts a pre-computed center rather than a Building object so the
+     * logic layer has no dependency on the data layer (Dependency Rule).
+     */
+    fun checkArrivalWithBuilding(
+        userPos:        LatLng,
+        buildingCenter: LatLng?,
+        radiusMetres:   Double = 50.0
+    ): Boolean
+
     fun calculateBearing(userPos: LatLng, route: List<LatLng>, currentBearing: Float): Float
 }
 
 class CampusNavigationEngine : NavigationEngine {
 
-    override fun checkArrivalWithBuilding(userPos: LatLng, targetBuilding: Building?): Boolean {
-        if (targetBuilding == null) return false
-        val distance = SphericalUtil.computeDistanceBetween(userPos, targetBuilding.getCenter())
-        return distance < 50.0
+    override fun checkArrivalWithBuilding(
+        userPos:        LatLng,
+        buildingCenter: LatLng?,
+        radiusMetres:   Double
+    ): Boolean {
+        if (buildingCenter == null) return false
+        return SphericalUtil.computeDistanceBetween(userPos, buildingCenter) < radiusMetres
     }
 
     override fun checkArrival(userPos: LatLng, destination: LatLng): Boolean =

@@ -1,7 +1,5 @@
 package com.example.myapplication.logic
 
-import com.example.myapplication.data.Building
-import com.example.myapplication.data.JsonLatLng
 import com.google.android.gms.maps.model.LatLng
 import org.junit.Assert.*
 import org.junit.Before
@@ -9,7 +7,9 @@ import org.junit.Test
 
 /**
  * Unit tests for [CampusNavigationEngine].
- * Pure JVM — uses SphericalUtil internally but no Android UI.
+ *
+ * [checkArrivalWithBuilding] now accepts a [LatLng] center rather than a
+ * Building object — the logic layer is decoupled from the data layer.
  */
 class NavigationEngineTest {
 
@@ -17,19 +17,6 @@ class NavigationEngineTest {
 
     // Hall Building center ~45.497, -73.578
     private val hallCenter = LatLng(45.4972, -73.5789)
-
-    private val hallBuilding = Building(
-        name    = "Henry F. Hall Building",
-        code    = "H",
-        wayID   = 1L,
-        address = "1455 De Maisonneuve Blvd W",
-        outline = listOf(
-            JsonLatLng(45.496, -73.580),
-            JsonLatLng(45.498, -73.580),
-            JsonLatLng(45.498, -73.578),
-            JsonLatLng(45.496, -73.578)
-        )
-    )
 
     @Before
     fun setup() {
@@ -41,34 +28,42 @@ class NavigationEngineTest {
     @Test
     fun `checkArrival returns true when within 15 metres`() {
         val dest = LatLng(45.497, -73.579)
-        val user = LatLng(45.4970, -73.5790)  // same point
+        val user = LatLng(45.4970, -73.5790)
         assertTrue(engine.checkArrival(user, dest))
     }
 
     @Test
     fun `checkArrival returns false when far away`() {
         val dest = LatLng(45.497, -73.579)
-        val user = LatLng(45.458, -73.640)    // Loyola campus ~5km away
+        val user = LatLng(45.458, -73.640)
         assertFalse(engine.checkArrival(user, dest))
     }
 
     // ── checkArrivalWithBuilding ──────────────────────────────────────────────
 
     @Test
-    fun `checkArrivalWithBuilding returns false when building is null`() {
+    fun `checkArrivalWithBuilding returns false when buildingCenter is null`() {
         assertFalse(engine.checkArrivalWithBuilding(hallCenter, null))
     }
 
     @Test
     fun `checkArrivalWithBuilding returns true when within 50m of building center`() {
-        // User is right at the center — 0m away
-        assertTrue(engine.checkArrivalWithBuilding(hallCenter, hallBuilding))
+        // User is at the center — 0m away, well within 50m default radius
+        assertTrue(engine.checkArrivalWithBuilding(hallCenter, hallCenter))
     }
 
     @Test
-    fun `checkArrivalWithBuilding returns false when far from building`() {
+    fun `checkArrivalWithBuilding returns false when far from building center`() {
         val farAway = LatLng(45.458, -73.640)
-        assertFalse(engine.checkArrivalWithBuilding(farAway, hallBuilding))
+        assertFalse(engine.checkArrivalWithBuilding(farAway, hallCenter))
+    }
+
+    @Test
+    fun `checkArrivalWithBuilding respects custom radius`() {
+        // 5m away from center
+        val nearby = LatLng(45.49725, -73.5789)
+        assertTrue(engine.checkArrivalWithBuilding(nearby, hallCenter, radiusMetres = 10.0))
+        assertFalse(engine.checkArrivalWithBuilding(nearby, hallCenter, radiusMetres = 1.0))
     }
 
     // ── calculateBearing ─────────────────────────────────────────────────────
@@ -76,18 +71,14 @@ class NavigationEngineTest {
     @Test
     fun `calculateBearing returns currentBearing when no route points are far enough`() {
         val user = LatLng(45.497, -73.579)
-        val currentBearing = 90f
-        // Route has only one point very close to user
         val route = listOf(LatLng(45.497001, -73.579001))
-        val result = engine.calculateBearing(user, route, currentBearing)
-        assertEquals(currentBearing, result, 0.01f)
+        val result = engine.calculateBearing(user, route, 90f)
+        assertEquals(90f, result, 0.01f)
     }
 
     @Test
     fun `calculateBearing returns currentBearing for empty route`() {
-        val bearing = engine.calculateBearing(
-            LatLng(45.497, -73.579), emptyList(), 45f
-        )
+        val bearing = engine.calculateBearing(LatLng(45.497, -73.579), emptyList(), 45f)
         assertEquals(45f, bearing, 0.01f)
     }
 
@@ -96,7 +87,6 @@ class NavigationEngineTest {
         val user  = LatLng(45.497, -73.579)
         val route = listOf(LatLng(45.507, -73.579)) // ~1km north
         val result = engine.calculateBearing(user, route, 0f)
-        // Heading north should be around -180..0 or close to 0 (north is ~0/-360 in SphericalUtil)
         assertTrue(result in -180f..180f)
     }
 

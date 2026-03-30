@@ -30,13 +30,7 @@ object IndoorPathfinder {
         val goal    = nodeMap[endId] ?: return emptyList()
         if (nodeMap[startId] == null) return emptyList()
 
-        // Build adjacency list (bidirectional)
-        val adj = HashMap<String, MutableList<Pair<String, Float>>>()
-        edges.forEach { edge ->
-            if (accessibleOnly && !edge.accessible) return@forEach
-            adj.getOrPut(edge.from) { mutableListOf() }.add(edge.to   to edge.weight)
-            adj.getOrPut(edge.to)   { mutableListOf() }.add(edge.from to edge.weight)
-        }
+        val adj = buildAdjacencyList(edges, accessibleOnly)
 
         val gScore   = HashMap<String, Float>().apply { put(startId, 0f) }
         val fScore   = HashMap<String, Float>().apply { put(startId, h(nodeMap[startId]!!, goal)) }
@@ -61,7 +55,24 @@ object IndoorPathfinder {
                 }
             }
         }
-        return emptyList() // no path
+        return emptyList()
+    }
+
+    /**
+     * Builds a bidirectional adjacency list from [edges].
+     * Extracted to reduce cognitive complexity of [findPath].
+     */
+    private fun buildAdjacencyList(
+        edges:          List<IndoorEdge>,
+        accessibleOnly: Boolean
+    ): HashMap<String, MutableList<Pair<String, Float>>> {
+        val adj = HashMap<String, MutableList<Pair<String, Float>>>()
+        edges.forEach { edge ->
+            if (accessibleOnly && !edge.accessible) return@forEach
+            adj.getOrPut(edge.from) { mutableListOf() }.add(edge.to   to edge.weight)
+            adj.getOrPut(edge.to)   { mutableListOf() }.add(edge.from to edge.weight)
+        }
+        return adj
     }
 
     /** Euclidean distance heuristic (coords are normalized 0–1) */

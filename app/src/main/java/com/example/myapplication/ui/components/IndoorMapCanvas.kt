@@ -71,6 +71,88 @@ private const val SCALE_MIN = 0.4f
 private const val SCALE_MAX = 10f
 private const val ZOOM_STEP = 1.35f
 
+// ── map state ─────────────────────────────────────────────────────────────────
+
+/**
+ * Encapsulates pan/zoom/fit state for [IndoorMapCanvas].
+ *
+ * Extracted from the composable body so view logic (pan/zoom math) is
+ * separated from rendering logic (Canvas draw calls). Also allows the
+ * state to be hoisted and tested independently.
+ */
+class IndoorMapState {
+    var scale      by mutableStateOf(1f)
+    var panOffset  by mutableStateOf(Offset.Zero)
+    var canvasSize by mutableStateOf(Size.Zero)
+    var fitted     by mutableStateOf(false)
+
+    fun toScreen(nx: Float, ny: Float) = Offset(
+        nx * canvasSize.width  * scale + panOffset.x,
+        ny * canvasSize.height * scale + panOffset.y
+    )
+
+    fun toNorm(sx: Float, sy: Float) = Offset(
+        (sx - panOffset.x) / (canvasSize.width  * scale),
+        (sy - panOffset.y) / (canvasSize.height * scale)
+    )
+
+    fun fitToBounds(minX: Float, minY: Float, maxX: Float, maxY: Float, pad: Float = 0.05f) {
+        if (canvasSize == Size.Zero) return
+        val contentW = (maxX - minX + pad * 2).coerceAtLeast(0.01f)
+        val contentH = (maxY - minY + pad * 2).coerceAtLeast(0.01f)
+        val newScale = minOf(1f / contentW, 1f / contentH).coerceIn(SCALE_MIN, SCALE_MAX)
+        val cx = (minX + maxX) / 2f
+        val cy = (minY + maxY) / 2f
+        scale     = newScale
+        panOffset = Offset(
+            canvasSize.width  / 2f - cx * canvasSize.width  * newScale,
+            canvasSize.height / 2f - cy * canvasSize.height * newScale
+        )
+    }
+
+    fun autoFit(floor: IndoorFloor, pathEdgeIds: List<Pair<String, String>>) {
+        if (canvasSize == Size.Zero || fitted) return
+        fitted = true
+
+        if (pathEdgeIds.isNotEmpty()) {
+            val nodeMap = floor.nodes.associateBy { it.id }
+            val pathNodes = pathEdgeIds
+                .flatMap { (a, b) -> listOf(nodeMap[a], nodeMap[b]) }
+                .filterNotNull()
+            if (pathNodes.isNotEmpty()) {
+                fitToBounds(
+                    minX = pathNodes.minOf { it.x }, minY = pathNodes.minOf { it.y },
+                    maxX = pathNodes.maxOf { it.x }, maxY = pathNodes.maxOf { it.y },
+                    pad  = 0.08f
+                )
+                return
+            }
+        }
+
+        val allPts = floor.rooms.flatMap { it.polygon } + floor.corridors.flatMap { it.polygon }
+        if (allPts.isEmpty()) return
+        fitToBounds(
+            minX = allPts.minOf { it.x }, minY = allPts.minOf { it.y },
+            maxX = allPts.maxOf { it.x }, maxY = allPts.maxOf { it.y },
+            pad  = 0.03f
+        )
+    }
+
+    fun zoomBy(factor: Float) {
+        if (canvasSize == Size.Zero) return
+        val cx    = canvasSize.width  / 2f
+        val cy    = canvasSize.height / 2f
+        val next  = (scale * factor).coerceIn(SCALE_MIN, SCALE_MAX)
+        val ratio = next / scale
+        panOffset = Offset(cx - ratio * (cx - panOffset.x), cy - ratio * (cy - panOffset.y))
+        scale     = next
+    }
+}
+
+/** Creates and remembers an [IndoorMapState] scoped to the current composition. */
+@Composable
+fun rememberIndoorMapState(): IndoorMapState = remember { IndoorMapState() }
+
 // ── composable ────────────────────────────────────────────────────────────────
 
 @Composable
@@ -83,89 +165,14 @@ fun IndoorMapCanvas(
     showNavGraph:    Boolean  = false,
     onRoomTap:       (IndoorRoom) -> Unit = {}
 ) {
-    var scale      by remember { mutableStateOf(1f) }
-    var panOffset  by remember { mutableStateOf(Offset.Zero) }
-    var canvasSize by remember { mutableStateOf(Size.Zero) }
-    var fitted     by remember { mutableStateOf(false) }
-    val measurer   = rememberTextMeasurer()
+    val mapState = rememberIndoorMapState()
+    val measurer = rememberTextMeasurer()
 
-    // Reset fit when floor changes
-    LaunchedEffect(floor) { fitted = false }
+    // Cache the node map so drawing doesn't rebuild it on every frame
+    val nodeMap = remember(floor) { floor.nodes.associateBy { it.id } }
 
-    // Auto-fit to path when route is set; fit to floor otherwise
-    LaunchedEffect(floor, pathEdgeIds) { fitted = false }
-
-    fun toScreen(nx: Float, ny: Float) = Offset(
-        nx * canvasSize.width  * scale + panOffset.x,
-        ny * canvasSize.height * scale + panOffset.y
-    )
-    fun toNorm(sx: Float, sy: Float) = Offset(
-        (sx - panOffset.x) / (canvasSize.width  * scale),
-        (sy - panOffset.y) / (canvasSize.height * scale)
-    )
-
-    /** Fit view to a bounding box defined by normalized coords, with padding. */
-    fun fitToBounds(minX: Float, minY: Float, maxX: Float, maxY: Float, pad: Float = 0.05f) {
-        if (canvasSize == Size.Zero) return
-        val contentW = (maxX - minX + pad * 2).coerceAtLeast(0.01f)
-        val contentH = (maxY - minY + pad * 2).coerceAtLeast(0.01f)
-        val newScale = minOf(
-            1f / contentW,
-            1f / contentH
-        ).coerceIn(SCALE_MIN, SCALE_MAX)
-        val cx = (minX + maxX) / 2f
-        val cy = (minY + maxY) / 2f
-        scale     = newScale
-        panOffset = Offset(
-            canvasSize.width  / 2f - cx * canvasSize.width  * newScale,
-            canvasSize.height / 2f - cy * canvasSize.height * newScale
-        )
-    }
-
-    fun autoFit() {
-        if (canvasSize == Size.Zero || fitted) return
-        fitted = true
-
-        // If there's an active path, fit to the path's bounding box
-        if (pathEdgeIds.isNotEmpty()) {
-            val nodeMap = floor.nodes.associateBy { it.id }
-            val pathNodes = pathEdgeIds
-                .flatMap { (a, b) -> listOf(nodeMap[a], nodeMap[b]) }
-                .filterNotNull()
-            if (pathNodes.isNotEmpty()) {
-                fitToBounds(
-                    minX = pathNodes.minOf { it.x },
-                    minY = pathNodes.minOf { it.y },
-                    maxX = pathNodes.maxOf { it.x },
-                    maxY = pathNodes.maxOf { it.y },
-                    pad  = 0.08f
-                )
-                return
-            }
-        }
-
-        // Otherwise fit to whole floor
-        val allPts = floor.rooms.flatMap { it.polygon } + floor.corridors.flatMap { it.polygon }
-        if (allPts.isEmpty()) return
-        fitToBounds(
-            minX = allPts.minOf { it.x },
-            minY = allPts.minOf { it.y },
-            maxX = allPts.maxOf { it.x },
-            maxY = allPts.maxOf { it.y },
-            pad  = 0.03f
-        )
-    }
-
-    /** Zoom in/out centred on screen centre. */
-    fun zoomBy(factor: Float) {
-        if (canvasSize == Size.Zero) return
-        val cx     = canvasSize.width  / 2f
-        val cy     = canvasSize.height / 2f
-        val next   = (scale * factor).coerceIn(SCALE_MIN, SCALE_MAX)
-        val ratio  = next / scale
-        panOffset  = Offset(cx - ratio * (cx - panOffset.x), cy - ratio * (cy - panOffset.y))
-        scale      = next
-    }
+    LaunchedEffect(floor)          { mapState.fitted = false }
+    LaunchedEffect(floor, pathEdgeIds) { mapState.fitted = false }
 
     Box(modifier = modifier) {
         Canvas(
@@ -174,177 +181,53 @@ fun IndoorMapCanvas(
                 .background(BG)
                 .pointerInput(Unit) {
                     detectTransformGestures { centroid, pan, zoom, _ ->
-                        val next  = (scale * zoom).coerceIn(SCALE_MIN, SCALE_MAX)
-                        val ratio = next / scale
-                        panOffset = Offset(
-                            centroid.x - ratio * (centroid.x - panOffset.x) + pan.x,
-                            centroid.y - ratio * (centroid.y - panOffset.y) + pan.y
+                        val next  = (mapState.scale * zoom).coerceIn(SCALE_MIN, SCALE_MAX)
+                        val ratio = next / mapState.scale
+                        mapState.panOffset = Offset(
+                            centroid.x - ratio * (centroid.x - mapState.panOffset.x) + pan.x,
+                            centroid.y - ratio * (centroid.y - mapState.panOffset.y) + pan.y
                         )
-                        scale = next
+                        mapState.scale = next
                     }
                 }
                 .pointerInput(floor) {
                     detectTapGestures { tap ->
-                        if (canvasSize == Size.Zero) return@detectTapGestures
-                        val n = toNorm(tap.x, tap.y)
+                        if (mapState.canvasSize == Size.Zero) return@detectTapGestures
+                        val n = mapState.toNorm(tap.x, tap.y)
                         floor.rooms.firstOrNull { pointInPolygon(n.x, n.y, it.polygon) }
                             ?.let { onRoomTap(it) }
                     }
                 }
         ) {
-            canvasSize = size
-            autoFit()
+            mapState.canvasSize = size
+            mapState.autoFit(floor, pathEdgeIds)
 
-            drawGrid(::toScreen)
+            val toScreen: (Float, Float) -> Offset = { nx, ny -> mapState.toScreen(nx, ny) }
 
-            val allPts = floor.rooms.flatMap { it.polygon } + floor.corridors.flatMap { it.polygon }
-            if (allPts.isNotEmpty()) {
-                val pad = 0.03f
-                val tl  = toScreen(allPts.minOf { it.x } - pad, allPts.minOf { it.y } - pad)
-                val br  = toScreen(allPts.maxOf { it.x } + pad, allPts.maxOf { it.y } + pad)
-                drawRect(FLOOR_BG,   topLeft = tl, size = Size(br.x - tl.x, br.y - tl.y))
-                drawRect(CORRIDOR_S, topLeft = tl, size = Size(br.x - tl.x, br.y - tl.y), style = Stroke(2f))
-            }
-
-            floor.corridors.forEach { c ->
-                drawPolygon(c.polygon, CORRIDOR_F, CORRIDOR_S, ::toScreen, 1.5f)
-            }
-
-            floor.rooms.forEach { room ->
-                val hi     = room.id == highlightRoomId
-                val onPath = pathNodeIds.isNotEmpty() &&
-                    floor.nodes.any { it.roomId == room.id && it.id in pathNodeIds }
-                val fill   = when {
-                    hi     -> Color(0xFFFFD740).copy(.30f)
-                    onPath -> PATH_COLOR.copy(.12f)
-                    else   -> ROOM_FILL[room.type] ?: Color.Gray.copy(.12f)
-                }
-                val stroke = when {
-                    hi     -> Color(0xFFFFAA00)
-                    onPath -> PATH_COLOR
-                    else   -> ROOM_STROKE[room.type] ?: Color.Gray
-                }
-                drawPolygon(room.polygon, fill, stroke, ::toScreen, if (hi || onPath) 3f else 2f)
-
-                if (room.polygon.size >= 3) {
-                    val cx  = room.polygon.map { it.x }.average().toFloat()
-                    val cy  = room.polygon.map { it.y }.average().toFloat()
-                    val pos = toScreen(cx, cy)
-                    val fs  = (9f * scale).coerceIn(9f, 16f)
-                    val lbl = room.icon?.let { "$it ${room.label}" } ?: room.label
-                    val m   = measurer.measure(lbl, TextStyle(
-                        color = stroke, fontSize = fs.sp, fontWeight = FontWeight.SemiBold
-                    ))
-                    drawContext.canvas.nativeCanvas.drawText(
-                        lbl, pos.x, pos.y + m.size.height / 2f - 4f * density,
-                        android.graphics.Paint().apply {
-                            color       = android.graphics.Color.argb(180, 255, 255, 255)
-                            textSize    = fs * density
-                            textAlign   = android.graphics.Paint.Align.CENTER
-                            isAntiAlias = true
-                            strokeWidth = fs * density * 0.35f
-                            style       = android.graphics.Paint.Style.STROKE
-                        }
-                    )
-                    drawText(m, topLeft = Offset(pos.x - m.size.width / 2f, pos.y - m.size.height / 2f))
-                }
-            }
-
-            if (pathEdgeIds.isNotEmpty()) {
-                val nodeMap = floor.nodes.associateBy { it.id }
-                pathEdgeIds.forEach { (fromId, toId) ->
-                    val a = nodeMap[fromId] ?: return@forEach
-                    val b = nodeMap[toId]   ?: return@forEach
-                    drawLine(PATH_COLOR, toScreen(a.x, a.y), toScreen(b.x, b.y),
-                        (6f * scale).coerceIn(4f, 14f))
-                }
-                pathEdgeIds.forEach { (fromId, toId) ->
-                    val a = nodeMap[fromId] ?: return@forEach
-                    val b = nodeMap[toId]   ?: return@forEach
-                    drawLine(PATH_DOT.copy(alpha = 0.55f), toScreen(a.x, a.y), toScreen(b.x, b.y),
-                        (2f * scale).coerceIn(1f, 5f),
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 10f), 0f))
-                }
-                pathEdgeIds.firstOrNull()?.first?.let { startId ->
-                    nodeMap[startId]?.let { n ->
-                        val pos = toScreen(n.x, n.y)
-                        val r   = (8f * scale).coerceIn(6f, 16f)
-                        drawCircle(Color(0xFF4CAF50), r, pos)
-                        drawCircle(Color.White, r, pos, style = Stroke(2f))
-                    }
-                }
-                pathEdgeIds.lastOrNull()?.second?.let { endId ->
-                    nodeMap[endId]?.let { n ->
-                        val pos = toScreen(n.x, n.y)
-                        val r   = (8f * scale).coerceIn(6f, 16f)
-                        drawCircle(PATH_COLOR, r, pos)
-                        drawCircle(Color.White, r, pos, style = Stroke(2f))
-                    }
-                }
-            }
-
-            floor.pois.forEach { poi ->
-                val icon = poiEmoji(poi.type)
-                val pos  = toScreen(poi.x, poi.y)
-                val sz   = (22f * scale).coerceIn(16f, 44f)
-                drawCircle(Color.White, sz * 0.72f, pos)
-                drawCircle(poiRingColor(poi.type), sz * 0.72f, pos, style = Stroke(sz * 0.12f))
-                drawContext.canvas.nativeCanvas.drawText(
-                    icon, pos.x, pos.y + sz * 0.38f,
-                    android.graphics.Paint().apply {
-                        textSize    = sz * 0.85f
-                        textAlign   = android.graphics.Paint.Align.CENTER
-                        isAntiAlias = true
-                    }
-                )
-            }
-
-            floor.entrances.forEach { e ->
-                val pos = toScreen(e.x, e.y)
-                val r   = (10f * scale).coerceIn(7f, 20f)
-                drawCircle(Color(0xFFF0A060), r, pos)
-                drawCircle(Color(0xFFCC7020), r, pos, style = Stroke(2f))
-            }
-
-            if (showNavGraph) {
-                floor.edges.forEach { edge ->
-                    val a = floor.nodes.find { it.id == edge.from } ?: return@forEach
-                    val b = floor.nodes.find { it.id == edge.to   } ?: return@forEach
-                    drawLine(Color(0xFF9B7FE8).copy(.4f), toScreen(a.x, a.y), toScreen(b.x, b.y), 1.5f)
-                }
-                val nr = (5f * scale).coerceIn(3f, 10f)
-                floor.nodes.forEach { node ->
-                    val col = NODE_COLOR[node.type] ?: Color(0xFF5B9CF6)
-                    val pos = toScreen(node.x, node.y)
-                    drawCircle(col.copy(.6f), nr, pos)
-                    drawCircle(col, nr, pos, style = Stroke(1.5f))
-                }
-            }
+            drawGrid(toScreen)
+            drawFloorBackground(floor, toScreen)
+            drawFloorCorridors(floor, toScreen)
+            drawFloorRooms(floor, highlightRoomId, pathNodeIds, toScreen, measurer, mapState.scale)
+            drawNavigationPath(pathEdgeIds, nodeMap, toScreen, mapState.scale)
+            drawPointsOfInterest(floor, toScreen, mapState.scale)
+            if (showNavGraph) drawNavGraph(floor, nodeMap, toScreen, mapState.scale)
         }
 
-        // ── Zoom buttons (bottom-right) ────────────────────────────────────────
         Column(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(12.dp),
+            modifier = Modifier.align(Alignment.BottomEnd).padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            ZoomButton("+") { zoomBy(ZOOM_STEP) }
-            ZoomButton("−") { zoomBy(1f / ZOOM_STEP) }
+            ZoomButton("+") { mapState.zoomBy(ZOOM_STEP) }
+            ZoomButton("−") { mapState.zoomBy(1f / ZOOM_STEP) }
             ZoomButton("⊡") {
-                // Reset to fit entire floor
-                fitted = false
-                // Force re-fit to floor (not path) by temporarily clearing path context
-                val allPts = floor.rooms.flatMap { it.polygon } +
-                    floor.corridors.flatMap { it.polygon }
-                if (allPts.isNotEmpty() && canvasSize != Size.Zero) {
-                    fitToBounds(
-                        minX = allPts.minOf { it.x },
-                        minY = allPts.minOf { it.y },
-                        maxX = allPts.maxOf { it.x },
-                        maxY = allPts.maxOf { it.y }
+                mapState.fitted = false
+                val allPts = floor.rooms.flatMap { it.polygon } + floor.corridors.flatMap { it.polygon }
+                if (allPts.isNotEmpty() && mapState.canvasSize != Size.Zero) {
+                    mapState.fitToBounds(
+                        minX = allPts.minOf { it.x }, minY = allPts.minOf { it.y },
+                        maxX = allPts.maxOf { it.x }, maxY = allPts.maxOf { it.y }
                     )
-                    fitted = true
+                    mapState.fitted = true
                 }
             }
         }
@@ -367,7 +250,171 @@ private fun ZoomButton(label: String, onClick: () -> Unit) {
     }
 }
 
-// ── helpers ───────────────────────────────────────────────────────────────────
+// ── DrawScope extension functions ─────────────────────────────────────────────
+
+private fun DrawScope.drawFloorBackground(
+    floor:    IndoorFloor,
+    toScreen: (Float, Float) -> Offset
+) {
+    val allPts = floor.rooms.flatMap { it.polygon } + floor.corridors.flatMap { it.polygon }
+    if (allPts.isEmpty()) return
+    val pad = 0.03f
+    val tl  = toScreen(allPts.minOf { it.x } - pad, allPts.minOf { it.y } - pad)
+    val br  = toScreen(allPts.maxOf { it.x } + pad, allPts.maxOf { it.y } + pad)
+    drawRect(FLOOR_BG,   topLeft = tl, size = Size(br.x - tl.x, br.y - tl.y))
+    drawRect(CORRIDOR_S, topLeft = tl, size = Size(br.x - tl.x, br.y - tl.y), style = Stroke(2f))
+}
+
+private fun DrawScope.drawFloorCorridors(
+    floor:    IndoorFloor,
+    toScreen: (Float, Float) -> Offset
+) {
+    floor.corridors.forEach { c ->
+        drawPolygon(c.polygon, CORRIDOR_F, CORRIDOR_S, toScreen, 1.5f)
+    }
+}
+
+private fun DrawScope.drawFloorRooms(
+    floor:           IndoorFloor,
+    highlightRoomId: String?,
+    pathNodeIds:     Set<String>,
+    toScreen:        (Float, Float) -> Offset,
+    measurer:        androidx.compose.ui.text.TextMeasurer,
+    scale:           Float
+) {
+    floor.rooms.forEach { room ->
+        val hi     = room.id == highlightRoomId
+        val onPath = pathNodeIds.isNotEmpty() &&
+            floor.nodes.any { it.roomId == room.id && it.id in pathNodeIds }
+        val fill = when {
+            hi     -> Color(0xFFFFD740).copy(.30f)
+            onPath -> PATH_COLOR.copy(.12f)
+            else   -> ROOM_FILL[room.type] ?: Color.Gray.copy(.12f)
+        }
+        val stroke = when {
+            hi     -> Color(0xFFFFAA00)
+            onPath -> PATH_COLOR
+            else   -> ROOM_STROKE[room.type] ?: Color.Gray
+        }
+        drawPolygon(room.polygon, fill, stroke, toScreen, if (hi || onPath) 3f else 2f)
+
+        if (room.polygon.size >= 3) {
+            val cx  = room.polygon.map { it.x }.average().toFloat()
+            val cy  = room.polygon.map { it.y }.average().toFloat()
+            val pos = toScreen(cx, cy)
+            val fs  = (9f * scale).coerceIn(9f, 16f)
+            val lbl = room.icon?.let { "$it ${room.label}" } ?: room.label
+            val m   = measurer.measure(lbl, TextStyle(
+                color = stroke, fontSize = fs.sp, fontWeight = FontWeight.SemiBold
+            ))
+            drawContext.canvas.nativeCanvas.drawText(
+                lbl, pos.x, pos.y + m.size.height / 2f - 4f * density,
+                android.graphics.Paint().apply {
+                    color       = android.graphics.Color.argb(180, 255, 255, 255)
+                    textSize    = fs * density
+                    textAlign   = android.graphics.Paint.Align.CENTER
+                    isAntiAlias = true
+                    strokeWidth = fs * density * 0.35f
+                    style       = android.graphics.Paint.Style.STROKE
+                }
+            )
+            drawText(m, topLeft = Offset(pos.x - m.size.width / 2f, pos.y - m.size.height / 2f))
+        }
+    }
+}
+
+private fun DrawScope.drawNavigationPath(
+    pathEdgeIds: List<Pair<String, String>>,
+    nodeMap:     Map<String, com.example.myapplication.data.indoor.IndoorNode>,
+    toScreen:    (Float, Float) -> Offset,
+    scale:       Float
+) {
+    if (pathEdgeIds.isEmpty()) return
+
+    // Solid path line
+    pathEdgeIds.forEach { (fromId, toId) ->
+        val a = nodeMap[fromId] ?: return@forEach
+        val b = nodeMap[toId]   ?: return@forEach
+        drawLine(PATH_COLOR, toScreen(a.x, a.y), toScreen(b.x, b.y),
+            (6f * scale).coerceIn(4f, 14f))
+    }
+    // Dashed overlay
+    pathEdgeIds.forEach { (fromId, toId) ->
+        val a = nodeMap[fromId] ?: return@forEach
+        val b = nodeMap[toId]   ?: return@forEach
+        drawLine(PATH_DOT.copy(alpha = 0.55f), toScreen(a.x, a.y), toScreen(b.x, b.y),
+            (2f * scale).coerceIn(1f, 5f),
+            pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 10f), 0f))
+    }
+    // Start marker
+    pathEdgeIds.firstOrNull()?.first?.let { startId ->
+        nodeMap[startId]?.let { n ->
+            val pos = toScreen(n.x, n.y)
+            val r   = (8f * scale).coerceIn(6f, 16f)
+            drawCircle(Color(0xFF4CAF50), r, pos)
+            drawCircle(Color.White, r, pos, style = Stroke(2f))
+        }
+    }
+    // End marker
+    pathEdgeIds.lastOrNull()?.second?.let { endId ->
+        nodeMap[endId]?.let { n ->
+            val pos = toScreen(n.x, n.y)
+            val r   = (8f * scale).coerceIn(6f, 16f)
+            drawCircle(PATH_COLOR, r, pos)
+            drawCircle(Color.White, r, pos, style = Stroke(2f))
+        }
+    }
+}
+
+private fun DrawScope.drawPointsOfInterest(
+    floor:    IndoorFloor,
+    toScreen: (Float, Float) -> Offset,
+    scale:    Float
+) {
+    floor.pois.forEach { poi ->
+        val icon = poiEmoji(poi.type)
+        val pos  = toScreen(poi.x, poi.y)
+        val sz   = (22f * scale).coerceIn(16f, 44f)
+        drawCircle(Color.White, sz * 0.72f, pos)
+        drawCircle(poiRingColor(poi.type), sz * 0.72f, pos, style = Stroke(sz * 0.12f))
+        drawContext.canvas.nativeCanvas.drawText(
+            icon, pos.x, pos.y + sz * 0.38f,
+            android.graphics.Paint().apply {
+                textSize    = sz * 0.85f
+                textAlign   = android.graphics.Paint.Align.CENTER
+                isAntiAlias = true
+            }
+        )
+    }
+    // Entrances
+    floor.entrances.forEach { e ->
+        val pos = toScreen(e.x, e.y)
+        val r   = (10f * scale).coerceIn(7f, 20f)
+        drawCircle(Color(0xFFF0A060), r, pos)
+        drawCircle(Color(0xFFCC7020), r, pos, style = Stroke(2f))
+    }
+}
+
+private fun DrawScope.drawNavGraph(
+    floor:    IndoorFloor,
+    nodeMap:  Map<String, com.example.myapplication.data.indoor.IndoorNode>,
+    toScreen: (Float, Float) -> Offset,
+    scale:    Float
+) {
+    floor.edges.forEach { edge ->
+        val a = nodeMap[edge.from] ?: return@forEach
+        val b = nodeMap[edge.to]   ?: return@forEach
+        drawLine(Color(0xFF9B7FE8).copy(.4f), toScreen(a.x, a.y), toScreen(b.x, b.y), 1.5f)
+    }
+    val nr = (5f * scale).coerceIn(3f, 10f)
+    floor.nodes.forEach { node ->
+        val col = NODE_COLOR[node.type] ?: Color(0xFF5B9CF6)
+        val pos = toScreen(node.x, node.y)
+        drawCircle(col.copy(.6f), nr, pos)
+        drawCircle(col, nr, pos, style = Stroke(1.5f))
+    }
+}
+
 
 private fun DrawScope.drawGrid(toScreen: (Float, Float) -> Offset) {
     var x = 0f; while (x <= 1f) {

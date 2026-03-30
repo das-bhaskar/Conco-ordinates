@@ -13,6 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -491,6 +493,7 @@ private fun RoomCard(
                 singleLine    = true,
                 isError       = errorMsg != null,
                 supportingText = errorMsg?.let { { Text(it, color = MaterialTheme.colorScheme.error) } },
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Characters),
                 modifier      = Modifier.fillMaxWidth()
             )
             // Quick shortcut: building entrance

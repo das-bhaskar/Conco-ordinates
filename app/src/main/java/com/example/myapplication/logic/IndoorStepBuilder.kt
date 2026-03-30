@@ -8,6 +8,13 @@ import kotlin.math.abs
 /**
  * Converts a raw A* node list into human-readable turn-by-turn steps.
  *
+ * [scaleMetresPerUnit] converts normalised 0-1 coordinates to metres.
+ * Different buildings have different physical dimensions — inject the correct
+ * scale at construction time rather than hardcoding "1 unit ≈ 100m".
+ *
+ * A default companion factory [default] is provided for call-sites that
+ * don't need building-specific scaling.
+ *
  * Algorithm:
  * 1. Compute heading (angle) of each edge in the path.
  * 2. At each node, compute the heading change (delta).
@@ -15,28 +22,42 @@ import kotlin.math.abs
  * 4. If |delta| >= STRAIGHT_THRESHOLD → start a new step with a turn instruction.
  * 5. Special nodes (ELEVATOR, ESCALATOR, STAIRCASE, ENTRANCE) always force a new step.
  */
-object IndoorStepBuilder {
+class IndoorStepBuilder(
+    private val scaleMetresPerUnit: Float = DEFAULT_SCALE
+) {
 
-    // Heading change below this threshold is considered "straight"
-    private const val STRAIGHT_THRESHOLD = 25.0   // degrees
+    companion object {
+        /** Approximate scale for buildings without specific dimensions. */
+        const val DEFAULT_SCALE = 100f
+
+        /** Heading change below this threshold is considered "straight" (degrees). */
+        const val STRAIGHT_THRESHOLD = 25.0
+
+        /** Singleton with default scale — avoids instantiation boilerplate in callers
+         *  that don't need building-specific dimensions. */
+        val default: IndoorStepBuilder = IndoorStepBuilder()
+
+        /** Convenience: call [default.build] without creating an instance. */
+        fun build(
+            path:             List<IndoorNode>,
+            destinationLabel: String = "your destination"
+        ): List<NavStep> = default.build(path, destinationLabel)
+    }
 
     data class NavStep(
-        val instruction: String,          // e.g. "Go straight", "Turn left", "Take the elevator"
-        val nodes:       List<IndoorNode>, // all nodes in this step (for path highlighting)
-        val distanceM:   Float,            // estimated distance in metres (1 unit ≈ 50m for H building)
+        val instruction: String,
+        val nodes:       List<IndoorNode>,
+        val distanceM:   Float,
         val isLast:      Boolean = false
     )
 
     /**
      * Build turn-by-turn steps from a flat node list (A* output).
-     *
-     * [scaleMetresPerUnit] converts normalised 0-1 coordinates to metres.
-     * H building is ~100m wide, so 1 unit ≈ 100m. Default is a reasonable estimate.
+     * Uses [scaleMetresPerUnit] injected at construction time.
      */
     fun build(
-        path:               List<IndoorNode>,
-        scaleMetresPerUnit: Float = 100f,
-        destinationLabel:   String = "your destination"
+        path:             List<IndoorNode>,
+        destinationLabel: String = "your destination"
     ): List<NavStep> {
         if (path.size < 2) return emptyList()
 

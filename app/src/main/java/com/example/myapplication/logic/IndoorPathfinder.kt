@@ -1,5 +1,6 @@
 package com.example.myapplication.logic
 
+import com.example.myapplication.data.indoor.IndoorBuildingConfig
 import com.example.myapplication.data.indoor.IndoorEdge
 import com.example.myapplication.data.indoor.IndoorNode
 import java.util.PriorityQueue
@@ -10,11 +11,13 @@ object IndoorPathfinder {
     /**
      * A* pathfinding on a normalized indoor nav graph.
      *
-     * @param nodes        all nodes for the floor
-     * @param edges        all edges for the floor (treated as bidirectional)
-     * @param startId      node id of the starting point
-     * @param endId        node id of the destination
-     * @param accessibleOnly  if true, skip edges where accessible=false
+     * @param nodes          all nodes for the floor
+     * @param edges          all edges for the floor (treated as bidirectional)
+     * @param startId        node id of the starting point
+     * @param endId          node id of the destination
+     * @param accessibleOnly if true, skip edges where accessible=false
+     * @param building       building code used to scale normalized coords to real metres.
+     *                       Defaults to "" which falls back to [IndoorBuildingConfig.defaultDims].
      * @return ordered list of nodes from start to end, empty if no path found
      */
     fun findPath(
@@ -22,7 +25,8 @@ object IndoorPathfinder {
         edges:          List<IndoorEdge>,
         startId:        String,
         endId:          String,
-        accessibleOnly: Boolean = false
+        accessibleOnly: Boolean = false,
+        building:       String  = ""
     ): List<IndoorNode> {
         if (startId == endId) return listOf(nodes.first { it.id == startId })
 
@@ -30,10 +34,11 @@ object IndoorPathfinder {
         val goal    = nodeMap[endId] ?: return emptyList()
         if (nodeMap[startId] == null) return emptyList()
 
-        val adj = buildAdjacencyList(edges, accessibleOnly)
+        val dims = IndoorBuildingConfig.dimsFor(building)
+        val adj  = buildAdjacencyList(edges, accessibleOnly)
 
         val gScore   = HashMap<String, Float>().apply { put(startId, 0f) }
-        val fScore   = HashMap<String, Float>().apply { put(startId, h(nodeMap[startId]!!, goal)) }
+        val fScore   = HashMap<String, Float>().apply { put(startId, h(nodeMap[startId]!!, goal, dims)) }
         val cameFrom = HashMap<String, String>()
         val closed   = HashSet<String>()
         val openSet  = PriorityQueue<String>(compareBy { fScore[it] ?: Float.MAX_VALUE })
@@ -50,7 +55,7 @@ object IndoorPathfinder {
                 if (tentativeG < (gScore[neighbor] ?: Float.MAX_VALUE)) {
                     cameFrom[neighbor] = current
                     gScore[neighbor]   = tentativeG
-                    fScore[neighbor]   = tentativeG + h(nodeMap[neighbor] ?: return@forEach, goal)
+                    fScore[neighbor]   = tentativeG + h(nodeMap[neighbor] ?: return@forEach, goal, dims)
                     if (!openSet.contains(neighbor)) openSet.add(neighbor)
                 }
             }
@@ -75,10 +80,19 @@ object IndoorPathfinder {
         return adj
     }
 
-    /** Euclidean distance heuristic (coords are normalized 0–1) */
-    private fun h(a: IndoorNode, b: IndoorNode): Float {
-        val dx = a.x - b.x
-        val dy = a.y - b.y
+    /**
+     * Euclidean distance heuristic scaled by real building dimensions.
+     * Multiplying normalized 0–1 coords by the building's width/height (metres)
+     * gives a physically meaningful distance estimate, preventing skewed paths
+     * in buildings with non-square floor plans (e.g. Hall Building is ~70m × 120m).
+     */
+    private fun h(
+        a:    IndoorNode,
+        b:    IndoorNode,
+        dims: IndoorBuildingConfig.BuildingDims
+    ): Float {
+        val dx = (a.x - b.x) * dims.widthM
+        val dy = (a.y - b.y) * dims.heightM
         return sqrt(dx * dx + dy * dy)
     }
 

@@ -192,7 +192,7 @@ class CrossFloorNavigator {
             )
             if (seg2.isEmpty()) continue
 
-            val cost = pathCost(seg1) + pathCost(seg2)
+            val cost = pathCost(seg1, params.building) + pathCost(seg2, params.building)
             if (cost < bestCost) {
                 bestCost  = cost
                 bestSteps = listOf(
@@ -211,11 +211,18 @@ class CrossFloorNavigator {
         return bestSteps
     }
 
-    private fun pathCost(path: List<IndoorNode>): Float {
+    /**
+     * Approximates the real-world path length in metres by scaling normalized
+     * 0–1 coordinates by the building's footprint dimensions.
+     * This avoids skewed costs when buildings have non-square aspect ratios.
+     */
+    private fun pathCost(path: List<IndoorNode>, building: String): Float {
+        val dims = com.example.myapplication.data.indoor.IndoorBuildingConfig.dimsFor(building)
         var cost = 0f
         for (i in 0 until path.size - 1) {
             val a = path[i]; val b = path[i + 1]
-            val dx = a.x - b.x; val dy = a.y - b.y
+            val dx = (a.x - b.x) * dims.widthM
+            val dy = (a.y - b.y) * dims.heightM
             cost += kotlin.math.sqrt(dx * dx + dy * dy)
         }
         return cost

@@ -108,7 +108,9 @@ class MapsActivity : ComponentActivity() {
         )
 
         val placesClient = com.google.android.libraries.places.api.Places.createClient(this)
-        viewModel.initSearch(placesClient, indoorRepo)   // ← pass indoorRepo
+        viewModel.initSearch(
+            com.example.myapplication.logic.HybridSearchProvider(placesClient, indoorRepo)
+        )
 
         setContent {
             AppNavigation(

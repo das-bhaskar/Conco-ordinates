@@ -134,53 +134,65 @@ private fun IndoorNavTopBar(
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
             }
         },
-        actions = {
-            IconButton(onClick = { vm.toggleAccessibleMode() }) {
-                Text("♿", fontSize = 18.sp,
-                    color = if (state.accessibleMode) Maroon
-                            else MaterialTheme.colorScheme.onSurface.copy(.35f))
-            }
-            var showPrefMenu by remember { mutableStateOf(false) }
-            Box {
-                IconButton(onClick = { showPrefMenu = true }) {
-                    Text(state.transferPreference.icon, fontSize = 18.sp,
-                        color = if (state.transferPreference != TransferPreference.ANY) Maroon
-                                else MaterialTheme.colorScheme.onSurface.copy(.55f))
-                }
-                DropdownMenu(expanded = showPrefMenu, onDismissRequest = { showPrefMenu = false }) {
-                    Text("  Floor Change Method", fontSize = 11.sp, fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface.copy(.5f),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
-                    TransferPreference.entries.forEach { pref ->
-                        val selected = state.transferPreference == pref
-                        DropdownMenuItem(
-                            text = {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalAlignment = Alignment.CenterVertically) {
-                                    Text(pref.icon, fontSize = 16.sp)
-                                    Text(pref.label,
-                                        color = if (selected) Maroon
-                                                else MaterialTheme.colorScheme.onSurface)
-                                    if (selected) { Spacer(Modifier.weight(1f)); Text("✓", color = Maroon, fontSize = 14.sp) }
-                                }
-                            },
-                            onClick = { vm.setTransferPreference(pref); showPrefMenu = false }
-                        )
-                    }
-                }
-            }
-            if (state.fullRoute != null) {
-                TextButton(onClick = { vm.clearRoute() }) {
-                    Text("Clear", fontSize = 12.sp, color = Maroon)
-                }
-            }
-            TextButton(onClick = { vm.toggleNavGraph() }) {
-                Text(if (state.showNavGraph) "Hide Graph" else "Nav Graph", fontSize = 12.sp,
-                    color = if (state.showNavGraph) Maroon
-                            else MaterialTheme.colorScheme.onSurface.copy(.45f))
+        actions = { IndoorNavTopBarActions(state, vm) }
+    )
+}
+
+/** Actions row for [IndoorNavTopBar] — extracted to keep the top bar below complexity limit. */
+@Composable
+private fun IndoorNavTopBarActions(state: IndoorNavUiState, vm: IndoorNavViewModel) {
+    IconButton(onClick = { vm.toggleAccessibleMode() }) {
+        Text("♿", fontSize = 18.sp,
+            color = if (state.accessibleMode) Maroon
+                    else MaterialTheme.colorScheme.onSurface.copy(.35f))
+    }
+    TransferPreferenceMenu(state, vm)
+    if (state.fullRoute != null) {
+        TextButton(onClick = { vm.clearRoute() }) {
+            Text("Clear", fontSize = 12.sp, color = Maroon)
+        }
+    }
+    TextButton(onClick = { vm.toggleNavGraph() }) {
+        Text(if (state.showNavGraph) "Hide Graph" else "Nav Graph", fontSize = 12.sp,
+            color = if (state.showNavGraph) Maroon
+                    else MaterialTheme.colorScheme.onSurface.copy(.45f))
+    }
+}
+
+/** Transfer preference dropdown — extracted to keep [IndoorNavTopBarActions] readable. */
+@Composable
+private fun TransferPreferenceMenu(state: IndoorNavUiState, vm: IndoorNavViewModel) {
+    var showPrefMenu by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { showPrefMenu = true }) {
+            Text(state.transferPreference.icon, fontSize = 18.sp,
+                color = if (state.transferPreference != TransferPreference.ANY) Maroon
+                        else MaterialTheme.colorScheme.onSurface.copy(.55f))
+        }
+        DropdownMenu(expanded = showPrefMenu, onDismissRequest = { showPrefMenu = false }) {
+            Text("  Floor Change Method", fontSize = 11.sp, fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface.copy(.5f),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+            TransferPreference.entries.forEach { pref ->
+                val selected = state.transferPreference == pref
+                DropdownMenuItem(
+                    text = {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically) {
+                            Text(pref.icon, fontSize = 16.sp)
+                            Text(pref.label,
+                                color = if (selected) Maroon else MaterialTheme.colorScheme.onSurface)
+                            if (selected) {
+                                Spacer(Modifier.weight(1f))
+                                Text("✓", color = Maroon, fontSize = 14.sp)
+                            }
+                        }
+                    },
+                    onClick = { vm.setTransferPreference(pref); showPrefMenu = false }
+                )
             }
         }
-    )
+    }
 }
 
 // ── screen content ────────────────────────────────────────────────────────────
@@ -371,19 +383,29 @@ private fun FloorSelector(
             verticalArrangement = Arrangement.spacedBy(2.dp),
             horizontalAlignment = Alignment.CenterHorizontally) {
             floors.sortedDescending().forEach { floor ->
-                Surface(onClick = { onSelect(floor) }, shape = RoundedCornerShape(8.dp),
-                    color = if (floor == current) Maroon else Color.Transparent,
-                    modifier = Modifier.size(40.dp)) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            if (floor < 0) "B${-floor}" else floor.toString(),
-                            fontSize = 13.sp,
-                            fontWeight = if (floor == current) FontWeight.Bold else FontWeight.Normal,
-                            color = if (floor == current) Color.White
-                                    else MaterialTheme.colorScheme.onSurface)
-                    }
-                }
+                FloorButton(floor = floor, selected = floor == current, onSelect = onSelect)
             }
+        }
+    }
+}
+
+/** Single floor chip inside [FloorSelector]. Extracted to reduce [FloorSelector] complexity. */
+@Composable
+private fun FloorButton(floor: Int, selected: Boolean, onSelect: (Int) -> Unit) {
+    val label = if (floor < 0) "B${-floor}" else floor.toString()
+    Surface(
+        onClick   = { onSelect(floor) },
+        shape     = RoundedCornerShape(8.dp),
+        color     = if (selected) Maroon else Color.Transparent,
+        modifier  = Modifier.size(40.dp)
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                label,
+                fontSize   = 13.sp,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                color      = if (selected) Color.White else MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }

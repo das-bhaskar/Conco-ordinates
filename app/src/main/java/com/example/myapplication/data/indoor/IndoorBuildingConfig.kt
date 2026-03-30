@@ -22,6 +22,33 @@ object IndoorBuildingConfig {
         "VL" to listOf(1, 2)
     )
 
+    /**
+     * Approximate building footprint dimensions in metres (width × height).
+     * Used by [IndoorPathfinder] and [CrossFloorNavigator] to convert
+     * normalized 0–1 coordinates into real-world distances so that path
+     * costs are comparable across buildings with different aspect ratios.
+     *
+     * Values are rough estimates from satellite imagery; sufficient for
+     * relative path ranking (which route is shorter), not turn-by-turn
+     * distance display.
+     */
+    data class BuildingDims(val widthM: Float, val heightM: Float)
+
+    private val dimsMap: Map<String, BuildingDims> = mapOf(
+        "H"  to BuildingDims(70f, 120f),
+        "CC" to BuildingDims(80f,  90f),
+        "MB" to BuildingDims(60f,  80f),
+        "VE" to BuildingDims(40f,  60f),
+        "VL" to BuildingDims(40f,  60f)
+    )
+
+    /** Default dims used when the building code is unknown. */
+    private val defaultDims = BuildingDims(60f, 80f)
+
+    /** Returns the approximate footprint for [buildingCode]. */
+    fun dimsFor(buildingCode: String): BuildingDims =
+        dimsMap[buildingCode.uppercase()] ?: defaultDims
+
     /** Returns the available floor numbers for [buildingCode], or empty list if unknown. */
     fun floorsFor(buildingCode: String): List<Int> =
         floorMap[buildingCode.uppercase()] ?: emptyList()

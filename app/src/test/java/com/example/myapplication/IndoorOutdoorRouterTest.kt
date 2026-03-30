@@ -86,7 +86,7 @@ class IndoorOutdoorRouterTest {
     private fun injectEntrances(data: Map<String, List<BuildingEntrance>>) {
         val field = BuildingEntrances::class.java.getDeclaredField("data")
         field.isAccessible = true
-        field.set(BuildingEntrances, data)
+        field.set(BuildingEntrances.default, data)
     }
 
     // ── Case 1: same building, same floor ─────────────────────────────────────

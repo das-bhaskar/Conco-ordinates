@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
@@ -179,6 +180,9 @@ fun IndoorMapCanvas(
             modifier = Modifier
                 .fillMaxSize()
                 .background(BG)
+                // Wrap in graphicsLayer so pan/zoom transforms are applied by the
+                // GPU compositor rather than triggering full recomposition.
+                .graphicsLayer { }
                 .pointerInput(Unit) {
                     detectTransformGestures { centroid, pan, zoom, _ ->
                         val next  = (mapState.scale * zoom).coerceIn(SCALE_MIN, SCALE_MAX)

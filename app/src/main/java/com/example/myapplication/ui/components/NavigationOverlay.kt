@@ -61,10 +61,10 @@ fun NavigationOverlay(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment     = Alignment.CenterVertically
         ) {
-            // RECENTER
+            // RECENTER — equal weight so EXIT button stays accessible on all screen sizes
             Button(
                 onClick  = onRecenterClick,
-                modifier = Modifier.height(54.dp).weight(1.6f),
+                modifier = Modifier.height(54.dp).weight(1f),
                 shape    = RoundedCornerShape(27.dp),
                 colors   = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon),
                 elevation        = ButtonDefaults.buttonElevation(4.dp),
@@ -88,10 +88,10 @@ fun NavigationOverlay(
                 )
             }
 
-            // EXIT
+            // EXIT — equal weight ensures minimum 48dp touch target on all devices
             Button(
                 onClick        = onExit,
-                modifier       = Modifier.height(54.dp).weight(0.7f),
+                modifier       = Modifier.height(54.dp).weight(1f),
                 shape          = RoundedCornerShape(12.dp),
                 colors         = ButtonDefaults.buttonColors(containerColor = ConcordiaMaroon),
                 elevation      = ButtonDefaults.buttonElevation(4.dp),
@@ -110,7 +110,9 @@ fun NavigationOverlay(
 
     if (navState.hasArrived) {
         AlertDialog(
-            onDismissRequest = { /* Force action */ },
+            // Allow system back gesture to dismiss — triggers the same logic as END TRIP
+            // to prevent the app from getting stuck if the user swipes back.
+            onDismissRequest = onExit,
             title            = { Text("Destination Reached", fontWeight = FontWeight.Bold) },
             text             = { Text("You have arrived at ${destinationName()}.") },
             confirmButton    = {

@@ -152,10 +152,11 @@ object CampusRepo {
 
     /**
      * Flat list of all buildings across all campuses.
-     * Cached after first access — avoids repeated flatMap on every
-     * IndoorJourneyHandler call. Data is immutable after initialize().
+     * lazy(SYNCHRONIZED) ensures the flatMap runs exactly once even when
+     * called concurrently from multiple coroutines (Dispatchers.IO).
      */
-    private var _allBuildings: List<Building>? = null
-    fun getAllBuildings(): List<Building> =
-        _allBuildings ?: allCampuses.flatMap { it.buildings }.also { _allBuildings = it }
+    private val allBuildingsCache: List<Building> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        allCampuses.flatMap { it.buildings }
+    }
+    fun getAllBuildings(): List<Building> = allBuildingsCache
 }

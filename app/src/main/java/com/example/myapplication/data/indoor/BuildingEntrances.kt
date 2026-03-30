@@ -1,6 +1,7 @@
 package com.example.myapplication.data.indoor
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import com.google.android.gms.maps.model.LatLng
 import org.json.JSONObject
 
@@ -28,12 +29,10 @@ object BuildingEntrances {
     fun forBuilding(code: String): List<BuildingEntrance> =
         data[code.uppercase()] ?: emptyList()
 
-    /** Entrance closest to a GPS point — used to auto-pick exit/entry. */
+    /** Entrance closest to a GPS point — uses Haversine via SphericalUtil for accuracy. */
     fun nearest(code: String, gps: LatLng): BuildingEntrance? =
         forBuilding(code).minByOrNull { e ->
-            val dlat = e.gps.latitude  - gps.latitude
-            val dlng = e.gps.longitude - gps.longitude
-            dlat * dlat + dlng * dlng
+            com.google.maps.android.SphericalUtil.computeDistanceBetween(e.gps, gps)
         }
 
     // ── JSON parsing ──────────────────────────────────────────────────────────
@@ -56,14 +55,18 @@ object BuildingEntrances {
         }
     }
 
-    private fun parseJson(json: String): Map<String, List<BuildingEntrance>> {
+    @VisibleForTesting
+    internal fun parseJson(json: String): Map<String, List<BuildingEntrance>> {
         val root   = JSONObject(json)
         val result = mutableMapOf<String, List<BuildingEntrance>>()
 
-        for (buildingCode in root.keys()) {
+        // Use names() instead of keys() — safer under org.json in JVM unit test environments
+        val names = root.names() ?: return result
+        for (i in 0 until names.length()) {
+            val buildingCode = names.getString(i)
             val arr      = root.getJSONArray(buildingCode)
-            val entrances = (0 until arr.length()).map { i ->
-                val obj = arr.getJSONObject(i)
+            val entrances = (0 until arr.length()).map { j ->
+                val obj = arr.getJSONObject(j)
                 BuildingEntrance(
                     nodeId = obj.getString("nodeId"),
                     label  = obj.getString("label"),

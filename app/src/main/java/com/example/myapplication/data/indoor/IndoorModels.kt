@@ -2,6 +2,44 @@ package com.example.myapplication.data.indoor
 
 import androidx.compose.ui.geometry.Offset
 
+/**
+ * Type-safe enum for room types.
+ * Replaces raw String values — prevents typos and makes when exhaustive.
+ * [raw] is the JSON string value so parsing stays backward-compatible.
+ */
+enum class RoomType(val raw: String) {
+    CLASSROOM("classroom"),
+    OFFICE("office"),
+    WASHROOM("washroom"),
+    ELEVATOR("elevator"),
+    STAIRCASE("staircase"),
+    ESCALATOR("escalator"),
+    OTHER("other");
+
+    companion object {
+        fun fromRaw(raw: String): RoomType =
+            entries.firstOrNull { it.raw == raw.lowercase() } ?: OTHER
+    }
+}
+
+/**
+ * Type-safe enum for nav node types.
+ * [raw] is the JSON string value so parsing stays backward-compatible.
+ */
+enum class NodeType(val raw: String) {
+    CORRIDOR("CORRIDOR"),
+    ROOM("ROOM"),
+    ELEVATOR("ELEVATOR"),
+    ESCALATOR("ESCALATOR"),
+    STAIRCASE("STAIRCASE"),
+    ENTRANCE("ENTRANCE");
+
+    companion object {
+        fun fromRaw(raw: String): NodeType =
+            entries.firstOrNull { it.raw == raw.uppercase() } ?: CORRIDOR
+    }
+}
+
 data class IndoorRoom(
     val id: String,
     val type: String,           // classroom | office | washroom | elevator | staircase | other

@@ -48,31 +48,49 @@ class IndoorStepBuilderTest {
 
     @Test
     fun `build straight path heading east says Head east`() {
-        // Moving right → east
-        val path = listOf(node("A", 0f, 0.5f), node("B", 1f, 0.5f))
+        // Go east then turn south — forces 2 steps; first step keeps "Head east"
+        val path = listOf(
+            node("A", 0f, 0.5f), node("B", 0.5f, 0.5f),
+            node("C", 0.5f, 1.0f)  // 90° south turn forces flush of first step
+        )
         val steps = IndoorStepBuilder.build(path)
+        assertTrue(steps.size >= 2)
         assertTrue(steps.first().instruction.contains("east", ignoreCase = true))
     }
 
     @Test
     fun `build straight path heading south says Head south`() {
-        // Moving down → south
-        val path = listOf(node("A", 0.5f, 0f), node("B", 0.5f, 1f))
+        // Go south then turn east
+        val path = listOf(
+            node("A", 0.5f, 0f), node("B", 0.5f, 0.5f),
+            node("C", 1.0f, 0.5f)
+        )
         val steps = IndoorStepBuilder.build(path)
+        assertTrue(steps.size >= 2)
         assertTrue(steps.first().instruction.contains("south", ignoreCase = true))
     }
 
     @Test
     fun `build straight path heading west says Head west`() {
-        val path = listOf(node("A", 1f, 0.5f), node("B", 0f, 0.5f))
+        // Go west then turn south
+        val path = listOf(
+            node("A", 1f, 0.5f), node("B", 0.5f, 0.5f),
+            node("C", 0.5f, 1.0f)
+        )
         val steps = IndoorStepBuilder.build(path)
+        assertTrue(steps.size >= 2)
         assertTrue(steps.first().instruction.contains("west", ignoreCase = true))
     }
 
     @Test
     fun `build straight path heading north says Head north`() {
-        val path = listOf(node("A", 0.5f, 1f), node("B", 0.5f, 0f))
+        // Go north then turn east
+        val path = listOf(
+            node("A", 0.5f, 1f), node("B", 0.5f, 0.5f),
+            node("C", 1.0f, 0.5f)
+        )
         val steps = IndoorStepBuilder.build(path)
+        assertTrue(steps.size >= 2)
         assertTrue(steps.first().instruction.contains("north", ignoreCase = true))
     }
 
@@ -148,16 +166,24 @@ class IndoorStepBuilderTest {
     @Test
     fun `build step distanceM is positive for non-trivial path`() {
         val path = listOf(node("A", 0f, 0f), node("B", 0.1f, 0f))
-        val steps = IndoorStepBuilder.build(path, scaleMetresPerUnit = 100f)
+        val steps = IndoorStepBuilder(scaleMetresPerUnit = 100f).build(path)
         assertTrue(steps.first().distanceM > 0f)
     }
 
     @Test
-    fun `build uses scaleMetresPerUnit to compute distance`() {
+    fun `build uses injected scaleMetresPerUnit to compute distance`() {
         val path = listOf(node("A", 0f, 0f), node("B", 1f, 0f))
-        val steps50  = IndoorStepBuilder.build(path, scaleMetresPerUnit = 50f)
-        val steps100 = IndoorStepBuilder.build(path, scaleMetresPerUnit = 100f)
+        val steps50  = IndoorStepBuilder(scaleMetresPerUnit = 50f).build(path)
+        val steps100 = IndoorStepBuilder(scaleMetresPerUnit = 100f).build(path)
         assertTrue(steps100.first().distanceM > steps50.first().distanceM)
+    }
+
+    @Test
+    fun `companion default uses DEFAULT_SCALE`() {
+        val path = listOf(node("A", 0f, 0f), node("B", 1f, 0f))
+        val stepsDefault = IndoorStepBuilder.build(path)
+        val stepsExplicit = IndoorStepBuilder(IndoorStepBuilder.DEFAULT_SCALE).build(path)
+        assertEquals(stepsDefault.first().distanceM, stepsExplicit.first().distanceM, 0.001f)
     }
 
     // ── isLast flag ───────────────────────────────────────────────────────────

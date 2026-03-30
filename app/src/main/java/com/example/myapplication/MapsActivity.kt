@@ -26,8 +26,8 @@ import com.example.myapplication.telemetry.CrashReporter
 import com.example.myapplication.ui.components.IndoorJourneyDialogs
 import com.example.myapplication.ui.models.IndoorJourneyPhase
 import com.example.myapplication.ui.screens.AppNavigation
+import com.example.myapplication.ui.screens.IndoorActions
 import com.example.myapplication.ui.screens.IndoorNavScreen
-
 import com.example.myapplication.ui.screens.MapScreen
 import com.example.myapplication.ui.viewmodel.CalendarViewModel
 import com.example.myapplication.ui.viewmodel.MapViewModel
@@ -152,11 +152,9 @@ private fun MapContent(
     // Simple indoor map overlay (building popup → Indoor button)
     var indoorTarget by remember { mutableStateOf<Pair<String, Int>?>(null) }
 
-    // Full journey indoor overlay (search → H-829 → full route)
-    var journeyIndoorTarget by remember {
-        mutableStateOf<Triple<String, Int, String?>?>(null)
-        // Triple(buildingCode, floor, startNodeId)
-    }
+    // indoorNavTarget is now derived inside MapViewModel from the journey phase.
+    // The UI simply observes it — no local state or when-block needed here.
+    val journeyIndoorTarget = mapViewModel.indoorNavTarget
 
     // ── Main map screen ───────────────────────────────────────────────────────
     MapScreen(
@@ -182,10 +180,12 @@ private fun MapContent(
         onLocationUpdate         = { loc, force -> mapViewModel.processLocationUpdate(loc, force) },
         onNavigateToBuilding     = { mapViewModel.navigateToBuildingCode(it) },
         onStartNavigationActions = { mapViewModel.startNavigation() },
-        onIndoorMapClick         = {
-            val code = mapViewModel.uiBuildingState.building?.code ?: return@MapScreen
-            indoorTarget = Pair(code, 1)
-        }
+        indoorActions            = IndoorActions(
+            onIndoorMapClick = {
+                val code = mapViewModel.uiBuildingState.building?.code ?: return@IndoorActions
+                indoorTarget = Pair(code, 1)
+            }
+        )
     )
 
     // ── Indoor journey state ──────────────────────────────────────────────────
@@ -205,51 +205,9 @@ private fun MapContent(
         onRoomResolved     = { nodeId, label, buildingCode, floor ->
             mapViewModel.onCurrentRoomSelected(nodeId, label, buildingCode, floor)
         },
-        onConfirmExit      = { mapViewModel.onUserExited() },
         onEntranceSelected = { entrance -> mapViewModel.onEntranceSelected(entrance) },
         onDismiss          = { mapViewModel.clearJourney() }
     )
-
-    // Set journeyIndoorTarget and handle outdoor phase transitions.
-    // Direct derivation (not LaunchedEffect) ensures synchronous response to phase changes.
-    when (journeyPhase) {
-        is IndoorJourneyPhase.IndoorToExit -> {
-            if (journeyIndoorTarget?.first != journeyPhase.buildingCode ||
-                journeyIndoorTarget?.second != journeyPhase.floor) {
-                journeyIndoorTarget = Triple(
-                    journeyPhase.buildingCode,
-                    journeyPhase.floor,
-                    journeyPhase.startNodeId
-                )
-            }
-        }
-        is IndoorJourneyPhase.IndoorToDestination -> {
-            if (journeyIndoorTarget?.first != journeyPhase.buildingCode ||
-                journeyIndoorTarget?.second != journeyPhase.startFloor) {
-                journeyIndoorTarget = Triple(
-                    journeyPhase.buildingCode,
-                    journeyPhase.startFloor,
-                    journeyPhase.startNodeId
-                )
-            }
-        }
-        is IndoorJourneyPhase.Outdoor -> {
-            // User has exited the building — close indoor screen and start outdoor nav.
-            // startOutdoorLeg triggers Google Maps directions to the destination building.
-            if (journeyIndoorTarget != null) {
-                journeyIndoorTarget = null
-                mapViewModel.startOutdoorLeg(
-                    origin      = journeyPhase.origin,
-                    destination = journeyPhase.destination,
-                    destLabel   = journeyPhase.destRoom.label
-                )
-            }
-        }
-        is IndoorJourneyPhase.Idle -> {
-            if (journeyIndoorTarget != null) journeyIndoorTarget = null
-        }
-        else -> { /* AskCurrentRoom, AskEntryPoint, DetectingLocation — no-op */ }
-    }
 
     // ── Simple indoor map (building popup → Indoor button) ────────────────────
     AnimatedVisibility(
@@ -261,7 +219,7 @@ private fun MapContent(
         indoorTarget?.let { (code, floor) ->
             IndoorNavScreen(
                 building        = code,
-                availableFloors = floorsFor(code),
+                availableFloors = com.example.myapplication.data.indoor.IndoorBuildingConfig.floorsFor(code),
                 initialFloor    = floor,
                 onBack          = { indoorTarget = null }
             )
@@ -310,7 +268,7 @@ private fun MapContent(
             IndoorNavScreen(
                 building        = code,
                 // Pass all floors so the user can see the floor selector during cross-floor nav
-                availableFloors = floorsFor(code),
+                availableFloors = com.example.myapplication.data.indoor.IndoorBuildingConfig.floorsFor(code),
                 initialFloor    = floor,
                 destination     = destination,
                 startNodeId     = startNode,
@@ -319,21 +277,10 @@ private fun MapContent(
                 startFloor      = floor,
                 // Only show exit confirmation card when walking to an exit (cross-building)
                 onConfirmExit   = if (phase is IndoorJourneyPhase.IndoorToExit) {
-                    {
-                        // Call onUserExited() first — this transitions phase to Outdoor.
-                        // The when(journeyPhase) block above detects Outdoor phase and
-                        // calls startOutdoorLeg + sets journeyIndoorTarget=null.
-                        // Do NOT set journeyIndoorTarget=null here — the Outdoor handler does it.
-                        mapViewModel.onUserExited()
-                    }
+                    { mapViewModel.onUserExited() }
                 } else null,
-                onBack = {
-                    journeyIndoorTarget = null
-                    mapViewModel.clearJourney()
-                },
+                onBack = { mapViewModel.clearJourney() },
                 onOutdoorHandoff = { outdoorSeg ->
-                    // Hand off to Google Maps for the outdoor leg
-                    journeyIndoorTarget = null
                     mapViewModel.startOutdoorLeg(
                         origin      = outdoorSeg.origin,
                         destination = outdoorSeg.destination,
@@ -345,5 +292,5 @@ private fun MapContent(
     }
 }
 
-private fun floorsFor(code: String): List<Int> =
-    com.example.myapplication.data.indoor.IndoorBuildingConfig.floorsFor(code)
+// floorsFor(code) is provided by IndoorBuildingConfig.floorsFor(code)
+// which is the single source of truth for building floor data.

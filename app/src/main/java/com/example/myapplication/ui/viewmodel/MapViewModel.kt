@@ -94,15 +94,32 @@ class MapViewModel(
     var indoorJourneyState by mutableStateOf(IndoorJourneyState())
         private set
 
+    /**
+     * The indoor building/floor/startNode the UI should currently display.
+     * Derived from [indoorJourneyState] phase — the UI observes this instead
+     * of computing it inside the composable (avoids dual source of truth).
+     *
+     * Null means no indoor map should be shown for the journey flow.
+     */
+    val indoorNavTarget: Triple<String, Int, String>?
+        get() = when (val phase = indoorJourneyState.phase) {
+            is IndoorJourneyPhase.IndoorToExit        ->
+                Triple(phase.buildingCode, phase.floor, phase.startNodeId)
+            is IndoorJourneyPhase.IndoorToDestination ->
+                Triple(phase.buildingCode, phase.startFloor, phase.startNodeId)
+            else -> null
+        }
+
+    private val indoorBuildingCodes = setOf("CC", "H", "MB", "EV")
+
     fun handleMapTap(building: Building?, imageUrl: String? = null) {
         if (uiBuildingState.mode == MapUIMode.DIRECTIONS) return
         uiBuildingState = BuildingUiState(
-            isVisible = building != null,
-            building  = building,
-            address   = building?.address,
-            imageUrl  = imageUrl,
-                    hasIndoorMap = com.example.myapplication.data.indoor.IndoorBuildingConfig
-                        .hasIndoorMap(building?.code ?: "")
+            isVisible    = building != null,
+            building     = building,
+            address      = building?.address,
+            imageUrl     = imageUrl,
+            hasIndoorMap = building?.code?.uppercase() in indoorBuildingCodes
         )
     }
 
@@ -163,8 +180,11 @@ class MapViewModel(
     }
 
     private fun handleActiveNavigationUpdate(userLocation: LatLng, isForce: Boolean) {
-        // Arrival Check — uses interface method, no downcast needed
-        val arrived = navigationEngine.checkArrivalWithBuilding(userLocation, uiBuildingState.building)
+        // Pass building center — logic layer stays decoupled from data layer (Dependency Rule)
+        val arrived = navigationEngine.checkArrivalWithBuilding(
+            userPos        = userLocation,
+            buildingCenter = uiBuildingState.building?.getCenter()
+        )
         if (arrived && !uiBuildingState.navState.hasArrived) {
             uiBuildingState = uiBuildingState.copy(
                 navState = uiBuildingState.navState.copy(hasArrived = true)
@@ -198,22 +218,8 @@ class MapViewModel(
     }
 
     fun handleSearchResult(result: SearchResult, context: android.content.Context) {
-        val resultName = when (result) {
-            is SearchResult.BuildingResult   -> result.building.name
-            is SearchResult.CampusResult     -> result.campus.name
-            is SearchResult.GoogleResult     -> result.title
-            is SearchResult.CurrentLocation  -> "Your position"
-            is SearchResult.Home             -> "Home"
-            is SearchResult.IndoorRoomResult -> result.label
-        }
-        val resultCoords = when (result) {
-            is SearchResult.BuildingResult   -> result.building.getCenter()
-            is SearchResult.CampusResult     -> result.campus.buildings.firstOrNull()?.getCenter()
-            is SearchResult.CurrentLocation  -> lastProcessedLocation
-            is SearchResult.Home             -> LatLng(45.51723868665001, -73.627297124046)
-            is SearchResult.GoogleResult     -> null
-            is SearchResult.IndoorRoomResult -> null  // no map coords, handled by journey state machine
-        }
+        val resultName   = result.displayName
+        val resultCoords = result.coordinates(lastProcessedLocation)
         if (uiBuildingState.mode == MapUIMode.DIRECTIONS) {
             val selectedBuilding = if (result is SearchResult.BuildingResult) result.building else null
             // Prepare all new values first, then commit in one atomic copy()
@@ -283,7 +289,7 @@ class MapViewModel(
 
     fun initSearch(
         client:     com.google.android.libraries.places.api.net.PlacesClient,
-        indoorRepo: com.example.myapplication.data.indoor.IndoorRepository? = null
+        indoorRepo: com.example.myapplication.data.indoor.IndoorRepository
     ) {
         searchProvider = HybridSearchProvider(client, indoorRepo)
         searchResults  = listOf(SearchResult.CurrentLocation)
@@ -293,6 +299,16 @@ class MapViewModel(
 
     fun setJourneyPhase(phase: IndoorJourneyPhase) {
         indoorJourneyState = IndoorJourneyState(phase = phase)
+        // When transitioning to Outdoor, trigger the outdoor nav leg automatically.
+        // This keeps the phase-transition logic in the ViewModel rather than
+        // inside the MapContent composable (avoids business logic in the UI layer).
+        if (phase is IndoorJourneyPhase.Outdoor) {
+            startOutdoorLeg(
+                origin      = phase.origin,
+                destination = phase.destination,
+                destLabel   = phase.destRoom.label
+            )
+        }
     }
 
     fun clearJourney() {
@@ -505,14 +521,18 @@ class MapViewModel(
     private var lastRouteUpdateLocation: LatLng? = null
 
     fun startNavigation() {
-        val target = uiBuildingState.building ?: return
+        val destinationLabel = uiBuildingState.building?.name
+            ?: uiBuildingState.destinationName
+            ?: "destination"
+
+        if (uiBuildingState.endPoint == null && uiBuildingState.building == null) return
 
         uiBuildingState = uiBuildingState.copy(
             mode = MapUIMode.ACTIVE_NAVIGATION,
             navState = NavigationState(
-                hasArrived = false, // CRITICAL: Reset the gate
+                hasArrived          = false,
                 isAutoCenterEnabled = true,
-                currentInstruction = "Follow the path to ${target.name}"
+                currentInstruction  = "Follow the path to $destinationLabel"
             )
         )
         calculateRouteWithState()

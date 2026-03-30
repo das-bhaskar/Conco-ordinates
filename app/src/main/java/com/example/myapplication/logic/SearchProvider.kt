@@ -14,26 +14,49 @@ sealed class SearchResult {
     data class CampusResult(val campus: Campus) : SearchResult()
     data class GoogleResult(val title: String, val address: String, val placeId: String) : SearchResult()
 
-    /**
-     * An indoor room result — e.g. searching "H-829" or "CC-119".
-     * [buildingCode] and [floor] are used to open the correct IndoorMapScreen.
-     * [nodeId] is the A* destination node (may be null if not yet resolved).
-     */
     data class IndoorRoomResult(
         val buildingCode: String,
         val floor:        Int,
-        val roomId:       String,   // e.g. "H-8-829"
-        val nodeId:       String?,  // nav node linked to this room
-        val label:        String    // display label e.g. "H-829 (Floor 8)"
+        val roomId:       String,
+        val nodeId:       String?,
+        val label:        String
     ) : SearchResult()
 
     object CurrentLocation : SearchResult()
     object Home : SearchResult()
+
+    /**
+     * Human-readable display name for this result.
+     * Centralises the when-expression that was previously duplicated in
+     * MapViewModel.handleSearchResult and CampusSearchBar.
+     */
+    val displayName: String get() = when (this) {
+        is BuildingResult  -> building.name
+        is CampusResult    -> campus.name
+        is GoogleResult    -> title
+        is IndoorRoomResult -> label
+        is CurrentLocation -> "Your position"
+        is Home            -> "Home"
+    }
+
+    /**
+     * Map coordinates for this result, or null if not applicable.
+     * Centralises coordinate lookup that was previously in MapViewModel.
+     */
+    fun coordinates(currentLocation: com.google.android.gms.maps.model.LatLng?): com.google.android.gms.maps.model.LatLng? =
+        when (this) {
+            is BuildingResult  -> building.getCenter()
+            is CampusResult    -> campus.buildings.firstOrNull()?.getCenter()
+            is CurrentLocation -> currentLocation
+            is Home            -> com.google.android.gms.maps.model.LatLng(45.51723868665001, -73.627297124046)
+            is GoogleResult    -> null
+            is IndoorRoomResult -> null
+        }
 }
 
 class HybridSearchProvider(
-    private val placesClient:  PlacesClient,
-    private val indoorRepo:    IndoorRepository? = null   // optional — injected in MapsActivity
+    private val placesClient: PlacesClient,
+    private val indoorRepo:   IndoorRepository
 ) {
     suspend fun search(query: String): List<SearchResult> {
         if (query.isBlank()) return listOf(SearchResult.CurrentLocation, SearchResult.Home)
@@ -103,15 +126,11 @@ class HybridSearchProvider(
         val results = mutableListOf<SearchResult.IndoorRoomResult>()
 
         for (floor in floorsForBuilding) {
-            val floorData = indoorRepo?.getFloor(buildingCode, floor) ?: continue
-            // Extract the numeric part from a label like "H-829" → "829"
-            // Then match rooms whose numeric part starts with roomSuffix (prefix match)
-            // or is an exact match. This prevents "H-8" matching "H-258", "H-298" etc.
+            val floorData = indoorRepo.getFloor(buildingCode, floor) ?: continue
+            // Match rooms whose label ends with the room suffix
             val matchingRooms = floorData.rooms.filter { room ->
-                val labelNum = room.label.substringAfterLast('-')
-                val idNum    = room.id.substringAfterLast('-')
-                labelNum.startsWith(roomSuffix, ignoreCase = true) ||
-                idNum.startsWith(roomSuffix, ignoreCase = true)
+                room.label.endsWith(roomSuffix, ignoreCase = true) ||
+                room.id.endsWith(roomSuffix, ignoreCase = true)
             }
             for (room in matchingRooms) {
                 val node = floorData.nodes.firstOrNull { it.roomId == room.id }
@@ -128,7 +147,13 @@ class HybridSearchProvider(
         return results.take(3)
     }
 
-    /** Delegates to [IndoorBuildingConfig] — single source of truth for building floors. */
-    private fun floorsFor(code: String): List<Int> =
-        com.example.myapplication.data.indoor.IndoorBuildingConfig.floorsFor(code)
+    /** Mirror of MapsActivity.floorsFor — kept in sync manually. */
+    private fun floorsFor(code: String): List<Int> = when (code) {
+        "CC" -> listOf(1)
+        "H"  -> listOf(1, 2, 8, 9)
+        "MB" -> listOf(1, -2)
+        "VE" -> listOf(1, 2)
+        "VL" -> listOf(1, 2)
+        else -> emptyList()
+    }
 }

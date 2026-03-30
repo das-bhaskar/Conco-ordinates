@@ -172,4 +172,54 @@ class IndoorJourneyStateTest {
         val s2 = IndoorJourneyState(phase = IndoorJourneyPhase.Idle)
         assertEquals(s1, s2)
     }
+
+    // ── canGoBack property ────────────────────────────────────────────────────
+
+    @Test
+    fun `Idle canGoBack is false`() {
+        assertFalse(IndoorJourneyPhase.Idle.canGoBack)
+    }
+
+    @Test
+    fun `DetectingLocation canGoBack is true`() {
+        assertTrue(IndoorJourneyPhase.DetectingLocation.canGoBack)
+    }
+
+    @Test
+    fun `AskCurrentRoom canGoBack is true`() {
+        assertTrue(IndoorJourneyPhase.AskCurrentRoom(building, destination).canGoBack)
+    }
+
+    @Test
+    fun `IndoorToExit canGoBack is true`() {
+        val phase = IndoorJourneyPhase.IndoorToExit("H", 1, "s", "e", destination)
+        assertTrue(phase.canGoBack)
+    }
+
+    @Test
+    fun `Outdoor canGoBack is false`() {
+        val phase = IndoorJourneyPhase.Outdoor(
+            com.google.android.gms.maps.model.LatLng(45.497, -73.579),
+            com.google.android.gms.maps.model.LatLng(45.458, -73.640),
+            destination
+        )
+        assertFalse(phase.canGoBack)
+    }
+
+    @Test
+    fun `AskEntryPoint canGoBack is true`() {
+        val phase = IndoorJourneyPhase.AskEntryPoint(building, listOf(entrance), destination)
+        assertTrue(phase.canGoBack)
+    }
+
+    @Test
+    fun `IndoorToDestination canGoBack is false`() {
+        val phase = IndoorJourneyPhase.IndoorToDestination("H", 1, "node-s", destination)
+        assertFalse(phase.canGoBack)
+    }
+
+    @Test
+    fun `Arrived canGoBack is false`() {
+        assertFalse(IndoorJourneyPhase.Arrived.canGoBack)
+    }
 }

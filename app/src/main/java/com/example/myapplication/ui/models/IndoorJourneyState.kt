@@ -28,11 +28,24 @@ import com.example.myapplication.logic.SearchResult
  */
 sealed class IndoorJourneyPhase {
 
+    /**
+     * Whether the UI should show a "Back" button for this phase.
+     *
+     * Allows the UI to call [MapViewModel.clearJourney] or step back
+     * without knowing which phase is active — the phase itself declares
+     * whether going back makes sense.
+     */
+    abstract val canGoBack: Boolean
+
     /** No active journey. */
-    object Idle : IndoorJourneyPhase()
+    object Idle : IndoorJourneyPhase() {
+        override val canGoBack = false
+    }
 
     /** Destination chosen, checking GPS to determine user's current building. */
-    object DetectingLocation : IndoorJourneyPhase()
+    object DetectingLocation : IndoorJourneyPhase() {
+        override val canGoBack = true   // user can cancel while we search for GPS
+    }
 
     /**
      * GPS confirmed user is inside [currentBuilding].
@@ -41,7 +54,9 @@ sealed class IndoorJourneyPhase {
     data class AskCurrentRoom(
         val currentBuilding: Building,
         val destination:     SearchResult.IndoorRoomResult
-    ) : IndoorJourneyPhase()
+    ) : IndoorJourneyPhase() {
+        override val canGoBack = true   // user can change destination
+    }
 
     /**
      * User selected their current room.
@@ -53,7 +68,9 @@ sealed class IndoorJourneyPhase {
         val startNodeId:  String,
         val exitNodeId:   String,
         val destination:  SearchResult.IndoorRoomResult
-    ) : IndoorJourneyPhase()
+    ) : IndoorJourneyPhase() {
+        override val canGoBack = true   // user can go back to pick a different room
+    }
 
     /**
      * User confirmed they have exited the building.
@@ -63,7 +80,9 @@ sealed class IndoorJourneyPhase {
         val origin:      com.google.android.gms.maps.model.LatLng,
         val destination: com.google.android.gms.maps.model.LatLng,
         val destRoom:    SearchResult.IndoorRoomResult
-    ) : IndoorJourneyPhase()
+    ) : IndoorJourneyPhase() {
+        override val canGoBack = false  // outdoor nav is in progress, cancelling ends the trip
+    }
 
     /**
      * GPS confirms user is near destination building.
@@ -73,7 +92,9 @@ sealed class IndoorJourneyPhase {
         val building:    Building,
         val entrances:   List<BuildingEntrance>,
         val destination: SearchResult.IndoorRoomResult
-    ) : IndoorJourneyPhase()
+    ) : IndoorJourneyPhase() {
+        override val canGoBack = true   // user can pick a different entrance
+    }
 
     /**
      * User selected entrance. Indoor navigation active in destination building.
@@ -81,13 +102,17 @@ sealed class IndoorJourneyPhase {
      */
     data class IndoorToDestination(
         val buildingCode: String,
-        val startFloor:   Int,    // floor the user is currently on (map starts here)
+        val startFloor:   Int,
         val startNodeId:  String,
         val destination:  SearchResult.IndoorRoomResult
-    ) : IndoorJourneyPhase()
+    ) : IndoorJourneyPhase() {
+        override val canGoBack = false  // actively navigating to destination
+    }
 
     /** Journey complete. */
-    object Arrived : IndoorJourneyPhase()
+    object Arrived : IndoorJourneyPhase() {
+        override val canGoBack = false  // journey is over
+    }
 }
 
 data class IndoorJourneyState(

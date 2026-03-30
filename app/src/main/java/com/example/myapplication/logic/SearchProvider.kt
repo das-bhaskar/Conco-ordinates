@@ -108,7 +108,8 @@ class HybridSearchProvider(
      * Returns up to 3 matching IndoorRoomResult items (one per floor where
      * a matching room exists, e.g. H-112 appears on floor 1 and floor 8).
      */
-    private suspend fun searchIndoorRooms(query: String): List<SearchResult.IndoorRoomResult> {
+    @androidx.annotation.VisibleForTesting
+    internal suspend fun searchIndoorRooms(query: String): List<SearchResult.IndoorRoomResult> {
         // Regex: (building code)(separator)(room number)
         val pattern = Regex(
             """^([A-Za-z]{1,3})\s*[-\s]?\s*(\d[\w.-]*)$""",
@@ -147,8 +148,9 @@ class HybridSearchProvider(
         return results.take(3)
     }
 
-    /** Mirror of MapsActivity.floorsFor — kept in sync manually. */
-    private fun floorsFor(code: String): List<Int> = when (code) {
+    /** Mirror of IndoorBuildingConfig.floorsFor — used by [searchIndoorRooms]. */
+    @androidx.annotation.VisibleForTesting
+    internal fun floorsFor(code: String): List<Int> = when (code) {
         "CC" -> listOf(1)
         "H"  -> listOf(1, 2, 8, 9)
         "MB" -> listOf(1, -2)

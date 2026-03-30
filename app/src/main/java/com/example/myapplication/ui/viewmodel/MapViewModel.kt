@@ -46,7 +46,15 @@ class MapViewModel(
     private val routeProvider: com.example.myapplication.logic.RouteProvider? = null,
     private val shuttleService: ShuttleService,
     private val analyticsProvider: AnalyticsProvider = NoOpAnalyticsProvider,
-    private val navigationEngine: com.example.myapplication.logic.NavigationEngine = CampusNavigationEngine()
+    private val navigationEngine: com.example.myapplication.logic.NavigationEngine = CampusNavigationEngine(),
+    /**
+     * Fully-constructed search provider injected at construction time.
+     * Providing it here (rather than via a secondary [initSearch] call)
+     * follows DIP and makes the ViewModel testable with a mock provider.
+     * Defaults to null so that the ViewModel can still be used before
+     * Places SDK is ready; set via [initSearch] in MapsActivity if needed.
+     */
+    private var searchProvider: HybridSearchProvider? = null
 ) : ViewModel() {
 
     private val shuttleRouteProvider = ShuttleRouteProvider(
@@ -72,7 +80,6 @@ class MapViewModel(
     var searchResults by mutableStateOf<List<SearchResult>>(emptyList())
         private set
 
-    private var searchProvider: HybridSearchProvider? = null
     private var isManualCampusSelection = false
 
     // ── Map UI state ───────────────────────────────────────────────────────────
@@ -155,6 +162,15 @@ class MapViewModel(
         }
 
         // 4. Indoor journey: auto-detect arrival near destination building
+        updateIndoorJourney(userLocation)
+    }
+
+    /**
+     * Checks whether the user has arrived near the destination building
+     * during an outdoor indoor-journey leg and transitions the phase accordingly.
+     * Extracted from [processLocationUpdate] to keep that method focused.
+     */
+    private fun updateIndoorJourney(userLocation: LatLng) {
         val journeyPhase = indoorJourneyState.phase
         if (journeyPhase is IndoorJourneyPhase.Outdoor &&
             IndoorJourneyHandler.isNearBuilding(userLocation, journeyPhase.destRoom.buildingCode)) {
@@ -289,11 +305,14 @@ class MapViewModel(
         searchResults = emptyList()
     }
 
-    fun initSearch(
-        client:     com.google.android.libraries.places.api.net.PlacesClient,
-        indoorRepo: com.example.myapplication.data.indoor.IndoorRepository
-    ) {
-        searchProvider = HybridSearchProvider(client, indoorRepo)
+    /**
+     * Sets the search provider after the Places SDK client is available.
+     * Prefer passing a fully-constructed [HybridSearchProvider] via the
+     * constructor when possible (DIP). This method exists for the case
+     * where the Places client is only available after MapsActivity.onCreate.
+     */
+    fun initSearch(provider: HybridSearchProvider) {
+        searchProvider = provider
         searchResults  = listOf(SearchResult.CurrentLocation)
     }
 

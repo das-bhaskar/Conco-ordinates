@@ -21,7 +21,7 @@ class BuildingEntrancesTest {
     private fun injectData(data: Map<String, List<BuildingEntrance>>) {
         val field = BuildingEntrances::class.java.getDeclaredField("data")
         field.isAccessible = true
-        field.set(BuildingEntrances, data)
+        field.set(BuildingEntrances.default, data)
     }
 
     private fun clearData() = injectData(emptyMap())

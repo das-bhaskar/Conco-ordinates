@@ -1,0 +1,104 @@
+
+# US-3.3: As a student, I want the app to automatically identify my classroom from my next calendar event, so that I don't have to manually look up where my next class is located.
+
+appId: com.example.myapplication
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    text: "schedule"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Connect"
+    index: 1
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "SKIP"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    id: "identifierId"
+- waitForAnimationToEnd:
+    timeout: 2000
+- inputText: "concoordinates@gmail.com"
+- tapOn:
+    text: "NEXT"
+- tapOn: "Enter your password"
+- waitForAnimationToEnd:
+    timeout: 2000
+- inputText: "A12345678?"
+- tapOn:
+    text: "NEXT"
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    text: "I agree"
+- waitForAnimationToEnd:
+    timeout: 20000
+
+- assertVisible:
+    text: "Choose a Calendar"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    text: "concoordinates@gmail.com"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- tapOn:
+    text: "SOEN 345 Lecture"
+    index: 1
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- assertVisible:
+    text: "Building"
+- assertVisible:
+    text: "Room"
+- assertVisible:
+    text: "Campus"
+- assertVisible:
+    text: "Cancel"
+- assertVisible:
+    text: "Navigate"
+
+- tapOn:
+    text: "Navigate"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    text: "Directions"
+- assertVisible: "Drive"
+- assertVisible: "Walk"
+- assertVisible: "Transit"
+- assertVisible: "Shuttle"
+- assertVisible:
+    text: "Your position"
+
+  # TODO: Add specific text for room destination
+
+- assertVisible:
+    text: "Start"

@@ -179,8 +179,7 @@ class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
     private fun loadFloor(building: String, floor: Int) {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-            val result       = repo.getFloor(building, floor)
-            val defaultStart = result?.nodes?.firstOrNull { it.type == "ENTRANCE" }?.id
+            val result = repo.getFloor(building, floor)
             _state.update {
                 it.copy(
                     isLoading          = false,

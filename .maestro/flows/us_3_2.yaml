@@ -31,6 +31,47 @@ appId: com.example.myapplication
     timeout: 5000
 
 - tapOn:
-    text: "Conco-ordinates"
+    text: "SKIP"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    id: "identifierId"
+- waitForAnimationToEnd:
+    timeout: 2000
+- inputText: "concoordinates@gmail.com"
+- tapOn:
+    text: "NEXT"
+- tapOn: "Enter your password"
+- waitForAnimationToEnd:
+    timeout: 2000
+- inputText: "A12345678?"
+- tapOn:
+    text: "NEXT"
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    text: "I agree"
+- waitForAnimationToEnd:
+    timeout: 20000
+- assertVisible:
+    text: "Choose a Calendar"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    text: "concoordinates@gmail.com"
 - waitForAnimationToEnd:
     timeout: 10000
+
+- assertVisible:
+    text: "Schedule"
+    index: 0
+- assertVisible: "Prev"
+- assertVisible: "Next"
+- assertVisible: "Sign out"
+- assertVisible:
+    text: "SOEN 345 Lecture"
+    index: 0

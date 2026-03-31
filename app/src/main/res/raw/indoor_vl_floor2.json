@@ -1,0 +1,1895 @@
+{
+  "building": "VL",
+  "floor": 2,
+  "corridors": [
+    {
+      "id": "corridor-2-1",
+      "polygon": [
+        [
+          0.0051,
+          0.1365
+        ],
+        [
+          0.9706,
+          0.1365
+        ],
+        [
+          0.9706,
+          0.7973
+        ],
+        [
+          0.0051,
+          0.7973
+        ]
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "id": "VL-2-291-2",
+      "type": "classroom",
+      "label": "VL-291-2",
+      "polygon": [
+        [
+          0.6141,
+          0.1365
+        ],
+        [
+          0.6941,
+          0.1365
+        ],
+        [
+          0.6941,
+          0.2165
+        ],
+        [
+          0.6141,
+          0.2165
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-291",
+      "type": "classroom",
+      "label": "VL-291",
+      "polygon": [
+        [
+          0.5702,
+          0.2051
+        ],
+        [
+          0.6502,
+          0.2051
+        ],
+        [
+          0.6502,
+          0.2851
+        ],
+        [
+          0.5702,
+          0.2851
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-205",
+      "type": "classroom",
+      "label": "VL-205",
+      "polygon": [
+        [
+          0.7496,
+          0.211
+        ],
+        [
+          0.8296,
+          0.211
+        ],
+        [
+          0.8296,
+          0.291
+        ],
+        [
+          0.7496,
+          0.291
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-205-4",
+      "type": "classroom",
+      "label": "VL-205-4",
+      "polygon": [
+        [
+          0.7582,
+          0.2934
+        ],
+        [
+          0.8382,
+          0.2934
+        ],
+        [
+          0.8382,
+          0.3734
+        ],
+        [
+          0.7582,
+          0.3734
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-204",
+      "type": "classroom",
+      "label": "VL-204",
+      "polygon": [
+        [
+          0.7035,
+          0.3589
+        ],
+        [
+          0.7835,
+          0.3589
+        ],
+        [
+          0.7835,
+          0.4389
+        ],
+        [
+          0.7035,
+          0.4389
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-203-3",
+      "type": "classroom",
+      "label": "VL-203-3",
+      "polygon": [
+        [
+          0.6511,
+          0.3581
+        ],
+        [
+          0.7311,
+          0.3581
+        ],
+        [
+          0.7311,
+          0.4381
+        ],
+        [
+          0.6511,
+          0.4381
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-203-2",
+      "type": "classroom",
+      "label": "VL-203-2",
+      "polygon": [
+        [
+          0.6495,
+          0.3098
+        ],
+        [
+          0.7295,
+          0.3098
+        ],
+        [
+          0.7295,
+          0.3898
+        ],
+        [
+          0.6495,
+          0.3898
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-203-1",
+      "type": "classroom",
+      "label": "VL-203-1",
+      "polygon": [
+        [
+          0.6521,
+          0.3531
+        ],
+        [
+          0.7321,
+          0.3531
+        ],
+        [
+          0.7321,
+          0.4331
+        ],
+        [
+          0.6521,
+          0.4331
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-201-1",
+      "type": "classroom",
+      "label": "VL-201-1",
+      "polygon": [
+        [
+          0.6583,
+          0.3982
+        ],
+        [
+          0.7383,
+          0.3982
+        ],
+        [
+          0.7383,
+          0.4782
+        ],
+        [
+          0.6583,
+          0.4782
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-201",
+      "type": "classroom",
+      "label": "VL-201",
+      "polygon": [
+        [
+          0.6854,
+          0.4863
+        ],
+        [
+          0.7654,
+          0.4863
+        ],
+        [
+          0.7654,
+          0.5663
+        ],
+        [
+          0.6854,
+          0.5663
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-298",
+      "type": "classroom",
+      "label": "VL-298",
+      "polygon": [
+        [
+          0.8251,
+          0.4684
+        ],
+        [
+          0.9051,
+          0.4684
+        ],
+        [
+          0.9051,
+          0.5484
+        ],
+        [
+          0.8251,
+          0.5484
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-298-10",
+      "type": "classroom",
+      "label": "VL-298-10",
+      "polygon": [
+        [
+          0.8906,
+          0.4618
+        ],
+        [
+          0.9706,
+          0.4618
+        ],
+        [
+          0.9706,
+          0.5418
+        ],
+        [
+          0.8906,
+          0.5418
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-297-1",
+      "type": "classroom",
+      "label": "VL-297-1",
+      "polygon": [
+        [
+          0.822,
+          0.5468
+        ],
+        [
+          0.902,
+          0.5468
+        ],
+        [
+          0.902,
+          0.6268
+        ],
+        [
+          0.822,
+          0.6268
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-297",
+      "type": "classroom",
+      "label": "VL-297",
+      "polygon": [
+        [
+          0.8098,
+          0.6089
+        ],
+        [
+          0.8898,
+          0.6089
+        ],
+        [
+          0.8898,
+          0.6889
+        ],
+        [
+          0.8098,
+          0.6889
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-240",
+      "type": "classroom",
+      "label": "VL-240",
+      "polygon": [
+        [
+          0.8253,
+          0.6646
+        ],
+        [
+          0.9053,
+          0.6646
+        ],
+        [
+          0.9053,
+          0.7446
+        ],
+        [
+          0.8253,
+          0.7446
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-201-2",
+      "type": "classroom",
+      "label": "VL-201-2",
+      "polygon": [
+        [
+          0.61,
+          0.6439
+        ],
+        [
+          0.69,
+          0.6439
+        ],
+        [
+          0.69,
+          0.7239
+        ],
+        [
+          0.61,
+          0.7239
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-202",
+      "type": "classroom",
+      "label": "VL-202",
+      "polygon": [
+        [
+          0.3275,
+          0.5268
+        ],
+        [
+          0.4075,
+          0.5268
+        ],
+        [
+          0.4075,
+          0.6068
+        ],
+        [
+          0.3275,
+          0.6068
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-202-1",
+      "type": "classroom",
+      "label": "VL-202-1",
+      "polygon": [
+        [
+          0.0084,
+          0.7173
+        ],
+        [
+          0.0884,
+          0.7173
+        ],
+        [
+          0.0884,
+          0.7973
+        ],
+        [
+          0.0084,
+          0.7973
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-202-2",
+      "type": "classroom",
+      "label": "VL-202-2",
+      "polygon": [
+        [
+          0.0051,
+          0.5451
+        ],
+        [
+          0.0851,
+          0.5451
+        ],
+        [
+          0.0851,
+          0.6251
+        ],
+        [
+          0.0051,
+          0.6251
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-294",
+      "type": "classroom",
+      "label": "VL-294",
+      "polygon": [
+        [
+          0.1828,
+          0.3248
+        ],
+        [
+          0.1828,
+          0.3722
+        ],
+        [
+          0.1953,
+          0.3722
+        ],
+        [
+          0.1953,
+          0.3778
+        ],
+        [
+          0.2009,
+          0.3778
+        ],
+        [
+          0.2009,
+          0.3722
+        ],
+        [
+          0.2009,
+          0.3248
+        ]
+      ]
+    },
+    {
+      "id": "VL-2-202-30",
+      "type": "classroom",
+      "label": "VL-202-30",
+      "polygon": [
+        [
+          0.2217,
+          0.3452
+        ],
+        [
+          0.3017,
+          0.3452
+        ],
+        [
+          0.3017,
+          0.4252
+        ],
+        [
+          0.2217,
+          0.4252
+        ]
+      ]
+    }
+  ],
+  "pois": [],
+  "nodes": [
+    {
+      "id": "node-VL-2-291-2",
+      "x": 0.6541,
+      "y": 0.1765,
+      "type": "ROOM",
+      "roomId": "VL-2-291-2",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-291",
+      "x": 0.6102,
+      "y": 0.2451,
+      "type": "ROOM",
+      "roomId": "VL-2-291",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-205",
+      "x": 0.7896,
+      "y": 0.251,
+      "type": "ROOM",
+      "roomId": "VL-2-205",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-205-4",
+      "x": 0.7982,
+      "y": 0.3334,
+      "type": "ROOM",
+      "roomId": "VL-2-205-4",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-204",
+      "x": 0.7435,
+      "y": 0.3989,
+      "type": "ROOM",
+      "roomId": "VL-2-204",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-203-3",
+      "x": 0.6911,
+      "y": 0.3981,
+      "type": "ROOM",
+      "roomId": "VL-2-203-3",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-203-2",
+      "x": 0.6895,
+      "y": 0.3498,
+      "type": "ROOM",
+      "roomId": "VL-2-203-2",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-203-1",
+      "x": 0.6921,
+      "y": 0.3931,
+      "type": "ROOM",
+      "roomId": "VL-2-203-1",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-201-1",
+      "x": 0.6983,
+      "y": 0.4382,
+      "type": "ROOM",
+      "roomId": "VL-2-201-1",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-201",
+      "x": 0.7254,
+      "y": 0.5263,
+      "type": "ROOM",
+      "roomId": "VL-2-201",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-298",
+      "x": 0.8651,
+      "y": 0.5084,
+      "type": "ROOM",
+      "roomId": "VL-2-298",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-298-10",
+      "x": 0.9306,
+      "y": 0.5018,
+      "type": "ROOM",
+      "roomId": "VL-2-298-10",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-297-1",
+      "x": 0.862,
+      "y": 0.5868,
+      "type": "ROOM",
+      "roomId": "VL-2-297-1",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-297",
+      "x": 0.8498,
+      "y": 0.6489,
+      "type": "ROOM",
+      "roomId": "VL-2-297",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-240",
+      "x": 0.8653,
+      "y": 0.7046,
+      "type": "ROOM",
+      "roomId": "VL-2-240",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-201-2",
+      "x": 0.65,
+      "y": 0.6839,
+      "type": "ROOM",
+      "roomId": "VL-2-201-2",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-202",
+      "x": 0.3675,
+      "y": 0.5668,
+      "type": "ROOM",
+      "roomId": "VL-2-202",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-202-1",
+      "x": 0.0484,
+      "y": 0.7573,
+      "type": "ROOM",
+      "roomId": "VL-2-202-1",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-202-2",
+      "x": 0.0451,
+      "y": 0.5851,
+      "type": "ROOM",
+      "roomId": "VL-2-202-2",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-294",
+      "x": 0.1941,
+      "y": 0.3603,
+      "type": "ROOM",
+      "roomId": "VL-2-294",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-202-30",
+      "x": 0.2617,
+      "y": 0.3852,
+      "type": "ROOM",
+      "roomId": "VL-2-202-30",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c1",
+      "x": 0.0451,
+      "y": 0.2265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c2",
+      "x": 0.0451,
+      "y": 0.3265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c3",
+      "x": 0.0451,
+      "y": 0.4265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c4",
+      "x": 0.0451,
+      "y": 0.5265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c5",
+      "x": 0.0451,
+      "y": 0.6265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c6",
+      "x": 0.0451,
+      "y": 0.7265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c7",
+      "x": 0.0451,
+      "y": 0.8265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c8",
+      "x": 0.1451,
+      "y": 0.2765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c9",
+      "x": 0.1451,
+      "y": 0.3765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c10",
+      "x": 0.1451,
+      "y": 0.4765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c11",
+      "x": 0.1451,
+      "y": 0.5765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c12",
+      "x": 0.1451,
+      "y": 0.6765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c13",
+      "x": 0.1451,
+      "y": 0.7765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c14",
+      "x": 0.2451,
+      "y": 0.2265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c15",
+      "x": 0.2451,
+      "y": 0.3265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c16",
+      "x": 0.2451,
+      "y": 0.4265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c17",
+      "x": 0.2451,
+      "y": 0.5265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c18",
+      "x": 0.2451,
+      "y": 0.6265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c19",
+      "x": 0.2451,
+      "y": 0.7265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c20",
+      "x": 0.2451,
+      "y": 0.8265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c21",
+      "x": 0.3451,
+      "y": 0.2765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c22",
+      "x": 0.3451,
+      "y": 0.3765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c23",
+      "x": 0.3451,
+      "y": 0.4765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c24",
+      "x": 0.3451,
+      "y": 0.5765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c25",
+      "x": 0.3451,
+      "y": 0.6765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c26",
+      "x": 0.3451,
+      "y": 0.7765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c27",
+      "x": 0.4451,
+      "y": 0.2265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c28",
+      "x": 0.4451,
+      "y": 0.3265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c29",
+      "x": 0.4451,
+      "y": 0.4265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c30",
+      "x": 0.4451,
+      "y": 0.5265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c31",
+      "x": 0.4451,
+      "y": 0.6265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c32",
+      "x": 0.4451,
+      "y": 0.7265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c33",
+      "x": 0.4451,
+      "y": 0.8265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c34",
+      "x": 0.5451,
+      "y": 0.2765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c35",
+      "x": 0.5451,
+      "y": 0.3765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c36",
+      "x": 0.5451,
+      "y": 0.4765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c37",
+      "x": 0.5451,
+      "y": 0.5765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c38",
+      "x": 0.5451,
+      "y": 0.6765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c39",
+      "x": 0.5451,
+      "y": 0.7765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c40",
+      "x": 0.6451,
+      "y": 0.2265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c41",
+      "x": 0.6451,
+      "y": 0.3265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c42",
+      "x": 0.6451,
+      "y": 0.4265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c43",
+      "x": 0.6451,
+      "y": 0.5265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c44",
+      "x": 0.6451,
+      "y": 0.6265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c45",
+      "x": 0.6451,
+      "y": 0.7265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c46",
+      "x": 0.6451,
+      "y": 0.8265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c47",
+      "x": 0.7451,
+      "y": 0.2765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c48",
+      "x": 0.7451,
+      "y": 0.3765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c49",
+      "x": 0.7451,
+      "y": 0.4765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c50",
+      "x": 0.7451,
+      "y": 0.5765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c51",
+      "x": 0.7451,
+      "y": 0.6765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c52",
+      "x": 0.7451,
+      "y": 0.7765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c53",
+      "x": 0.8451,
+      "y": 0.2265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c54",
+      "x": 0.8451,
+      "y": 0.3265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c55",
+      "x": 0.8451,
+      "y": 0.4265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c56",
+      "x": 0.8451,
+      "y": 0.5265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c57",
+      "x": 0.8451,
+      "y": 0.6265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c58",
+      "x": 0.8451,
+      "y": 0.7265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c59",
+      "x": 0.8451,
+      "y": 0.8265,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c60",
+      "x": 0.9451,
+      "y": 0.2765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c61",
+      "x": 0.9451,
+      "y": 0.3765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c62",
+      "x": 0.9451,
+      "y": 0.4765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c63",
+      "x": 0.9451,
+      "y": 0.5765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c64",
+      "x": 0.9451,
+      "y": 0.6765,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VL-2-c65",
+      "x": 0.9451,
+      "y": 0.7765,
+      "type": "CORRIDOR",
+      "accessible": true
+    }
+  ],
+  "edges": [
+    {
+      "from": "node-VL-2-c1",
+      "to": "node-VL-2-c2",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c2",
+      "to": "node-VL-2-c3",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c3",
+      "to": "node-VL-2-c4",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c4",
+      "to": "node-VL-2-c5",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c5",
+      "to": "node-VL-2-c6",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c6",
+      "to": "node-VL-2-c7",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c7",
+      "to": "node-VL-2-c8",
+      "weight": 0.559,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c8",
+      "to": "node-VL-2-c9",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c9",
+      "to": "node-VL-2-c10",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c10",
+      "to": "node-VL-2-c11",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c11",
+      "to": "node-VL-2-c12",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c12",
+      "to": "node-VL-2-c13",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c13",
+      "to": "node-VL-2-c14",
+      "weight": 0.559,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c14",
+      "to": "node-VL-2-c15",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c15",
+      "to": "node-VL-2-c16",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c16",
+      "to": "node-VL-2-c17",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c17",
+      "to": "node-VL-2-c18",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c18",
+      "to": "node-VL-2-c19",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c19",
+      "to": "node-VL-2-c20",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c20",
+      "to": "node-VL-2-c21",
+      "weight": 0.559,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c21",
+      "to": "node-VL-2-c22",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c22",
+      "to": "node-VL-2-c23",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c23",
+      "to": "node-VL-2-c24",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c24",
+      "to": "node-VL-2-c25",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c25",
+      "to": "node-VL-2-c26",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c26",
+      "to": "node-VL-2-c27",
+      "weight": 0.559,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c27",
+      "to": "node-VL-2-c28",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c28",
+      "to": "node-VL-2-c29",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c29",
+      "to": "node-VL-2-c30",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c30",
+      "to": "node-VL-2-c31",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c31",
+      "to": "node-VL-2-c32",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c32",
+      "to": "node-VL-2-c33",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c33",
+      "to": "node-VL-2-c34",
+      "weight": 0.559,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c34",
+      "to": "node-VL-2-c35",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c35",
+      "to": "node-VL-2-c36",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c36",
+      "to": "node-VL-2-c37",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c37",
+      "to": "node-VL-2-c38",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c38",
+      "to": "node-VL-2-c39",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c39",
+      "to": "node-VL-2-c40",
+      "weight": 0.559,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c40",
+      "to": "node-VL-2-c41",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c41",
+      "to": "node-VL-2-c42",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c42",
+      "to": "node-VL-2-c43",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c43",
+      "to": "node-VL-2-c44",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c44",
+      "to": "node-VL-2-c45",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c45",
+      "to": "node-VL-2-c46",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c46",
+      "to": "node-VL-2-c47",
+      "weight": 0.559,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c47",
+      "to": "node-VL-2-c48",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c48",
+      "to": "node-VL-2-c49",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c49",
+      "to": "node-VL-2-c50",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c50",
+      "to": "node-VL-2-c51",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c51",
+      "to": "node-VL-2-c52",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c52",
+      "to": "node-VL-2-c53",
+      "weight": 0.559,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c53",
+      "to": "node-VL-2-c54",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c54",
+      "to": "node-VL-2-c55",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c55",
+      "to": "node-VL-2-c56",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c56",
+      "to": "node-VL-2-c57",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c57",
+      "to": "node-VL-2-c58",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c58",
+      "to": "node-VL-2-c59",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c59",
+      "to": "node-VL-2-c60",
+      "weight": 0.559,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c60",
+      "to": "node-VL-2-c61",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c61",
+      "to": "node-VL-2-c62",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c62",
+      "to": "node-VL-2-c63",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c63",
+      "to": "node-VL-2-c64",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-c64",
+      "to": "node-VL-2-c65",
+      "weight": 0.1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-291-2",
+      "to": "node-VL-2-c40",
+      "weight": 0.0508,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-291-2",
+      "to": "node-VL-2-c47",
+      "weight": 0.1352,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-291",
+      "to": "node-VL-2-c40",
+      "weight": 0.0395,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-291",
+      "to": "node-VL-2-c34",
+      "weight": 0.0723,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-205",
+      "to": "node-VL-2-c47",
+      "weight": 0.0513,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-205",
+      "to": "node-VL-2-c53",
+      "weight": 0.0607,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-205-4",
+      "to": "node-VL-2-c54",
+      "weight": 0.0474,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-205-4",
+      "to": "node-VL-2-c48",
+      "weight": 0.0684,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-204",
+      "to": "node-VL-2-c48",
+      "weight": 0.0225,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-204",
+      "to": "node-VL-2-c49",
+      "weight": 0.0776,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-203-3",
+      "to": "node-VL-2-c42",
+      "weight": 0.0541,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-203-3",
+      "to": "node-VL-2-c48",
+      "weight": 0.0582,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-203-2",
+      "to": "node-VL-2-c41",
+      "weight": 0.0501,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-203-2",
+      "to": "node-VL-2-c48",
+      "weight": 0.0617,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-203-1",
+      "to": "node-VL-2-c48",
+      "weight": 0.0555,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-203-1",
+      "to": "node-VL-2-c42",
+      "weight": 0.0577,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-201-1",
+      "to": "node-VL-2-c42",
+      "weight": 0.0545,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-201-1",
+      "to": "node-VL-2-c49",
+      "weight": 0.0605,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-201",
+      "to": "node-VL-2-c49",
+      "weight": 0.0536,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-201",
+      "to": "node-VL-2-c50",
+      "weight": 0.0539,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-298",
+      "to": "node-VL-2-c56",
+      "weight": 0.027,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-298",
+      "to": "node-VL-2-c55",
+      "weight": 0.0843,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-298-10",
+      "to": "node-VL-2-c62",
+      "weight": 0.0292,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-298-10",
+      "to": "node-VL-2-c63",
+      "weight": 0.0761,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-297-1",
+      "to": "node-VL-2-c57",
+      "weight": 0.0431,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-297-1",
+      "to": "node-VL-2-c56",
+      "weight": 0.0626,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-297",
+      "to": "node-VL-2-c57",
+      "weight": 0.0229,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-297",
+      "to": "node-VL-2-c58",
+      "weight": 0.0777,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-240",
+      "to": "node-VL-2-c58",
+      "weight": 0.0298,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-240",
+      "to": "node-VL-2-c57",
+      "weight": 0.0807,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-201-2",
+      "to": "node-VL-2-c45",
+      "weight": 0.0429,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-201-2",
+      "to": "node-VL-2-c44",
+      "weight": 0.0576,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-202",
+      "to": "node-VL-2-c24",
+      "weight": 0.0244,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-202",
+      "to": "node-VL-2-c30",
+      "weight": 0.0874,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-202-1",
+      "to": "node-VL-2-c6",
+      "weight": 0.031,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-202-1",
+      "to": "node-VL-2-c7",
+      "weight": 0.0693,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-202-2",
+      "to": "node-VL-2-c5",
+      "weight": 0.0414,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-202-2",
+      "to": "node-VL-2-c4",
+      "weight": 0.0586,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-294",
+      "to": "node-VL-2-c9",
+      "weight": 0.0516,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-294",
+      "to": "node-VL-2-c15",
+      "weight": 0.0612,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-202-30",
+      "to": "node-VL-2-c16",
+      "weight": 0.0445,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VL-2-202-30",
+      "to": "node-VL-2-c15",
+      "weight": 0.061,
+      "surface": "SMOOTH",
+      "accessible": true
+    }
+  ],
+  "entrances": []
+}

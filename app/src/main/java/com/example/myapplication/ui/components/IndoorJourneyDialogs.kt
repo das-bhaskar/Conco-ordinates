@@ -161,7 +161,6 @@ private fun AskCurrentRoomDialog(
                 enabled = query.isNotBlank() && !isSearching,
                 colors  = ButtonDefaults.buttonColors(containerColor = Maroon),
                 onClick = {
-                    errorMsg = null  // reset before launching coroutine
                     scope.launch {
                         isSearching = true
                         val resolved = IndoorRoomResolver.resolve(
@@ -170,11 +169,12 @@ private fun AskCurrentRoomDialog(
                             query        = query
                         )
                         isSearching = false
-                        if (resolved != null) {
+                        errorMsg = if (resolved != null) {
                             onResolved(resolved.nodeId, resolved.label,
                                 resolved.buildingCode, resolved.floor)
+                            null
                         } else {
-                            errorMsg = "Room \"$query\" not found in $buildingCode"
+                            "Room \"$query\" not found in $buildingCode"
                         }
                     }
                 }

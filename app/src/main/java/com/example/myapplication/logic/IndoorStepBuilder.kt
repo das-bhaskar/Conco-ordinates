@@ -76,7 +76,7 @@ class IndoorStepBuilder(
             segNodes.add(curr)
 
             if (forceBreak || isTurn || isLast) {
-                flushSegment(steps, segNodes, segStart, prev, curr, path, isLast, forceBreak)
+                flushSegment(steps, segNodes, path[segStart], prev, curr, path.last(), isLast && !forceBreak)
                 segStart = i
                 segNodes = mutableListOf(curr)
                 if (forceBreak) {
@@ -93,24 +93,23 @@ class IndoorStepBuilder(
 
     /** Closes the current walk segment and appends a [NavStep]. */
     private fun flushSegment(
-        steps:      MutableList<NavStep>,
-        segNodes:   List<IndoorNode>,
-        segStart:   Int,
-        prev:       IndoorNode,
-        curr:       IndoorNode,
-        path:       List<IndoorNode>,
-        isLast:     Boolean,
-        forceBreak: Boolean
+        steps:        MutableList<NavStep>,
+        segNodes:     List<IndoorNode>,
+        segStartNode: IndoorNode,
+        prev:         IndoorNode,
+        curr:         IndoorNode,
+        lastNode:     IndoorNode,
+        isLastStep:   Boolean
     ) {
         val dist = segmentDistance(segNodes, scaleMetresPerUnit)
         val instruction = if (steps.isEmpty()) {
-            buildFirstInstruction(path[0], path.last())
+            buildFirstInstruction(segNodes.first(), lastNode)
         } else {
-            val prevHeading = headingDeg(path[segStart], prev)
+            val prevHeading = headingDeg(segStartNode, prev)
             val newHeading  = headingDeg(prev, curr)
             turnInstruction(normaliseDelta(newHeading - prevHeading), curr)
         }
-        steps.add(NavStep(instruction, segNodes.toList(), dist, isLast && !forceBreak))
+        steps.add(NavStep(instruction, segNodes.toList(), dist, isLastStep))
     }
 
     /** Emits a "Take the elevator/escalator/stairs" transfer step. */

@@ -1,0 +1,113 @@
+{
+  "building": "VE",
+  "floor": 1,
+  "corridors": [
+    {
+      "id": "corridor-1-1",
+      "polygon": [
+        [
+          0.7717,
+          0.0412
+        ],
+        [
+          0.8109,
+          0.0412
+        ],
+        [
+          0.8109,
+          0.1659
+        ],
+        [
+          0.7717,
+          0.1659
+        ]
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "id": "VE-1-190",
+      "type": "classroom",
+      "label": "VE-190",
+      "polygon": [
+        [
+          0.7717,
+          0.0412
+        ],
+        [
+          0.7717,
+          0.1659
+        ],
+        [
+          0.8045,
+          0.1659
+        ],
+        [
+          0.8045,
+          0.1197
+        ],
+        [
+          0.8109,
+          0.1197
+        ],
+        [
+          0.8109,
+          0.0412
+        ],
+        [
+          0.8045,
+          0.0412
+        ]
+      ]
+    }
+  ],
+  "pois": [],
+  "nodes": [
+    {
+      "id": "node-VE-1-190",
+      "x": 0.797,
+      "y": 0.0993,
+      "type": "ROOM",
+      "roomId": "VE-1-190",
+      "accessible": true
+    },
+    {
+      "id": "node-VE-1-c1",
+      "x": 0.797,
+      "y": 0.1493,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-VE-1-c2",
+      "x": 0.897,
+      "y": 0.1993,
+      "type": "CORRIDOR",
+      "accessible": true
+    }
+  ],
+  "edges": [
+    {
+      "from": "node-VE-1-c1",
+      "to": "node-VE-1-c2",
+      "weight": 0.1118,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VE-1-190",
+      "to": "node-VE-1-c1",
+      "weight": 0.05,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-VE-1-190",
+      "to": "node-VE-1-c2",
+      "weight": 0.1414,
+      "surface": "SMOOTH",
+      "accessible": true
+    }
+  ],
+  "entrances": []
+}

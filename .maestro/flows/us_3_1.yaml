@@ -34,7 +34,7 @@ appId: com.example.myapplication
     text: "SKIP"
 - waitForAnimationToEnd:
     timeout: 5000
-# TODO: Connection Error (FIX)
+
 - tapOn:
     id: "identifierId"
 - waitForAnimationToEnd:
@@ -54,5 +54,11 @@ appId: com.example.myapplication
     text: "I agree"
 - waitForAnimationToEnd:
     timeout: 20000
-# TODO: END
+- assertVisible:
+    text: "Choose a Calendar"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+   text: "Schedule"
+
 

@@ -1,0 +1,92 @@
+
+# US-3.4: As a student, I want the app to automatically generate a route to my next class based on my current location and the time, so that I can reach my classroom efficiently without manual searching.
+
+appId: com.example.myapplication
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    text: "schedule"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Connect"
+    index: 1
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "SKIP"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    id: "identifierId"
+- waitForAnimationToEnd:
+    timeout: 2000
+- inputText: "concoordinates@gmail.com"
+- tapOn:
+    text: "NEXT"
+- tapOn: "Enter your password"
+- waitForAnimationToEnd:
+    timeout: 2000
+- inputText: "A12345678?"
+- tapOn:
+    text: "NEXT"
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn:
+    text: "I agree"
+- waitForAnimationToEnd:
+    timeout: 20000
+
+- assertVisible:
+    text: "Choose a Calendar"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    text: "concoordinates@gmail.com"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- tapOn:
+    text: "Map"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "SOEN 342 Lab"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    text: "Directions"
+- assertVisible: "Drive"
+- assertVisible: "Walk"
+- assertVisible: "Transit"
+- assertVisible: "Shuttle"
+- assertVisible:
+    text: "Your position"
+
+  # TODO: Add text for room destination
+
+- assertVisible:
+    text: "Start"

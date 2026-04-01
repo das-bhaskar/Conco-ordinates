@@ -3,7 +3,7 @@ package com.example.myapplication.logic
 import com.example.myapplication.data.Building
 import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
-import com.example.myapplication.data.indoor.IndoorRepository
+import com.example.myapplication.data.indoor.IIndoorRepository
 import com.example.myapplication.telemetry.CrashReporter
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -56,7 +56,7 @@ sealed class SearchResult {
 
 class HybridSearchProvider(
     private val placesClient: PlacesClient,
-    private val indoorRepo:   IndoorRepository
+    private val indoorRepo:   IIndoorRepository
 ) {
     suspend fun search(query: String): List<SearchResult> {
         if (query.isBlank()) return listOf(SearchResult.CurrentLocation, SearchResult.Home)
@@ -121,7 +121,7 @@ class HybridSearchProvider(
         val roomSuffix   = match.groupValues[2]   // e.g. "829", "119", "112-2"
 
         // Building must exist in our indoor data
-        val floorsForBuilding = floorsFor(buildingCode)
+        val floorsForBuilding = com.example.myapplication.data.indoor.IndoorBuildingConfig.floorsFor(buildingCode)
         if (floorsForBuilding.isEmpty()) return emptyList()
 
         val results = mutableListOf<SearchResult.IndoorRoomResult>()
@@ -148,14 +148,4 @@ class HybridSearchProvider(
         return results.take(3)
     }
 
-    /** Mirror of IndoorBuildingConfig.floorsFor — used by [searchIndoorRooms]. */
-    @androidx.annotation.VisibleForTesting
-    internal fun floorsFor(code: String): List<Int> = when (code) {
-        "CC" -> listOf(1)
-        "H"  -> listOf(1, 2, 8, 9)
-        "MB" -> listOf(1, -2)
-        "VE" -> listOf(1, 2)
-        "VL" -> listOf(1, 2)
-        else -> emptyList()
-    }
 }

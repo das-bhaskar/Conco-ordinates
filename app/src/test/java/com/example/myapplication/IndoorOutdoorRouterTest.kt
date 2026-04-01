@@ -5,7 +5,7 @@ import com.example.myapplication.data.indoor.BuildingEntrances
 import com.example.myapplication.data.indoor.IndoorEdge
 import com.example.myapplication.data.indoor.IndoorFloor
 import com.example.myapplication.data.indoor.IndoorNode
-import com.example.myapplication.data.indoor.IndoorRepository
+import com.example.myapplication.data.indoor.IIndoorRepository
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
@@ -62,8 +62,8 @@ class IndoorOutdoorRouterTest {
         edges    = listOf(edge("cc-ent", "cc-dest"))
     )
 
-    private fun makeRepo(): IndoorRepository {
-        val repo = mock<IndoorRepository>()
+    private fun makeRepo(): IIndoorRepository {
+        val repo = mock<IIndoorRepository>()
         runBlocking { whenever(repo.getFloor(any(), any())).thenReturn(null) }
         runBlocking { whenever(repo.getFloor("H",  1)).thenReturn(floor1) }
         runBlocking { whenever(repo.getFloor("H",  8)).thenReturn(floor8) }
@@ -111,7 +111,7 @@ class IndoorOutdoorRouterTest {
 
     @Test
     fun `buildRoute same building same floor returns empty when floor data missing`() = runTest {
-        val repo = mock<IndoorRepository>()
+        val repo = mock<IIndoorRepository>()
         runBlocking { whenever(repo.getFloor(any(), any())).thenReturn(null) }
 
         val dest = IndoorOutdoorRouter.IndoorDestination("H", 1, "dest", "H-Dest")

@@ -4,9 +4,10 @@ import androidx.compose.ui.geometry.Offset
 import com.example.myapplication.data.Building
 import com.example.myapplication.data.Campus
 import com.example.myapplication.data.JsonLatLng
+import com.example.myapplication.data.indoor.IIndoorRepository
+import com.example.myapplication.data.indoor.IndoorBuildingConfig
 import com.example.myapplication.data.indoor.IndoorFloor
 import com.example.myapplication.data.indoor.IndoorNode
-import com.example.myapplication.data.indoor.IndoorRepository
 import com.example.myapplication.data.indoor.IndoorRoom
 import com.google.android.libraries.places.api.net.PlacesClient
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,7 +31,7 @@ import org.mockito.kotlin.*
 class SearchProviderTest {
 
     private lateinit var mockPlacesClient: PlacesClient
-    private lateinit var mockIndoorRepo: IndoorRepository
+    private lateinit var mockIndoorRepo: IIndoorRepository
     private lateinit var searchProvider: HybridSearchProvider
 
     @Before
@@ -172,28 +173,28 @@ class SearchProviderTest {
         assertTrue(results.isEmpty() || results.first().nodeId == null)
     }
 
-    // ── floorsFor (internal) ──────────────────────────────────────────────────
+    // ── floorsFor (now via IndoorBuildingConfig — single source of truth) ─────
 
     @Test
-    fun `floorsFor returns correct floors for H`() {
-        assertEquals(listOf(1, 2, 8, 9), searchProvider.floorsFor("H"))
+    fun `IndoorBuildingConfig floorsFor returns correct floors for H`() {
+        assertEquals(listOf(1, 2, 8, 9), IndoorBuildingConfig.floorsFor("H"))
     }
 
     @Test
-    fun `floorsFor returns correct floors for CC`() {
-        assertEquals(listOf(1), searchProvider.floorsFor("CC"))
+    fun `IndoorBuildingConfig floorsFor returns correct floors for CC`() {
+        assertEquals(listOf(1), IndoorBuildingConfig.floorsFor("CC"))
     }
 
     @Test
-    fun `floorsFor returns correct floors for MB including basement`() {
-        val floors = searchProvider.floorsFor("MB")
+    fun `IndoorBuildingConfig floorsFor returns correct floors for MB including basement`() {
+        val floors = IndoorBuildingConfig.floorsFor("MB")
         assertTrue(floors.contains(-2))
         assertTrue(floors.contains(1))
     }
 
     @Test
-    fun `floorsFor returns empty for unknown building`() {
-        assertTrue(searchProvider.floorsFor("ZZ").isEmpty())
+    fun `IndoorBuildingConfig floorsFor returns empty for unknown building`() {
+        assertTrue(IndoorBuildingConfig.floorsFor("ZZ").isEmpty())
     }
 
     // ── SearchResult sealed class ─────────────────────────────────────────────

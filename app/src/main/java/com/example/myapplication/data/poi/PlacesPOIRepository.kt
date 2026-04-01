@@ -9,7 +9,7 @@ import kotlin.math.*
 
 /**
  * Production implementation of [POIRepository] using the Google Places
- * Nearby Search REST API (v1).
+ * Nearby Search REST API.
  *
  * WHY REST instead of Places SDK:
  *   [SearchNearbyRequest] is only available in Places SDK 3.5+.
@@ -30,16 +30,27 @@ class PlacesPOIRepository(
         radiusMeters: Int,
         category:     POICategory
     ): List<POI> = withContext(Dispatchers.IO) {
-        val types = if (category == POICategory.ALL) {
-            POICategory.entries
-                .filter { it != POICategory.ALL }
-                .joinToString("|") { it.placesType }
-        } else {
-            category.placesType
+        // Nearby Search API only accepts ONE type per request.
+        // For ALL: fire one request per supported category, merge, deduplicate by placeId.
+        if (category == POICategory.ALL) {
+            val supported = POICategory.entries.filter { it != POICategory.ALL }
+            return@withContext supported
+                .flatMap { cat ->
+                    try {
+                        val url      = buildUrl(origin, radiusMeters, cat.placesType)
+                        val response = URL(url).readText()
+                        parseResponse(response, origin, cat)
+                    } catch (e: Exception) {
+                        emptyList() // one failing category shouldn't kill the whole fetch
+                    }
+                }
+                .distinctBy { it.placeId }
+                .sortedBy { it.distanceMeters }
+                .take(20)
         }
 
-        val url = buildUrl(origin, radiusMeters, types)
-
+        // Single category — one request
+        val url = buildUrl(origin, radiusMeters, category.placesType)
         try {
             val response = URL(url).readText()
             parseResponse(response, origin, category)
@@ -50,24 +61,24 @@ class PlacesPOIRepository(
 
     // ── URL builder ────────────────────────────────────────────────────────
 
-    private fun buildUrl(origin: LatLng, radius: Int, types: String): String {
+    private fun buildUrl(origin: LatLng, radius: Int, type: String): String {
         val base = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
         return "$base" +
             "?location=${origin.latitude},${origin.longitude}" +
             "&radius=$radius" +
-            "&type=$types" +
+            "&type=$type" +
             "&key=$apiKey"
     }
 
     // ── JSON → POI adapter ─────────────────────────────────────────────────
 
     private fun parseResponse(
-        json:             String,
-        origin:           LatLng,
+        json:              String,
+        origin:            LatLng,
         requestedCategory: POICategory
     ): List<POI> {
-        val root    = JSONObject(json)
-        val status  = root.optString("status")
+        val root   = JSONObject(json)
+        val status = root.optString("status")
 
         if (status == "ZERO_RESULTS") return emptyList()
         if (status != "OK") throw POIException("Places API error: $status")
@@ -86,30 +97,18 @@ class PlacesPOIRepository(
         val address = optString("vicinity", "")
 
         val locationObj = optJSONObject("geometry")?.optJSONObject("location") ?: return null
-        val lat    = locationObj.optDouble("lat", Double.NaN)
-        val lng    = locationObj.optDouble("lng", Double.NaN)
+        val lat = locationObj.optDouble("lat", Double.NaN)
+        val lng = locationObj.optDouble("lng", Double.NaN)
         if (lat.isNaN() || lng.isNaN()) return null
 
         val latLng   = LatLng(lat, lng)
         val distance = haversineMeters(origin, latLng).toInt()
 
-        // Infer category from the place's "types" array if ALL was requested
-        val category = if (requestedCategory != POICategory.ALL) {
-            requestedCategory
-        } else {
-            val typesArray = optJSONArray("types")
-            val typesList  = (0 until (typesArray?.length() ?: 0))
-                .map { typesArray!!.getString(it) }
-            POICategory.entries.firstOrNull { cat ->
-                cat != POICategory.ALL && typesList.contains(cat.placesType)
-            } ?: POICategory.RESTAURANT
-        }
-
         return POI(
             placeId        = placeId,
             name           = name,
             address        = address,
-            category       = category,
+            category       = requestedCategory,   // category is always known — we never pass ALL here
             latLng         = latLng,
             distanceMeters = distance
         )

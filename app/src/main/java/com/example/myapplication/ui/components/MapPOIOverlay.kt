@@ -9,11 +9,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.myapplication.data.poi.POI
 import com.example.myapplication.ui.models.POIUiState
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.viewmodel.MapViewModel
@@ -22,16 +24,12 @@ import com.example.myapplication.ui.viewmodel.POIViewModel
 /**
  * Top-level overlay composable for Epic 5 — POI discovery + directions.
  *
- * Designed to be dropped into [MapScreen]'s root [Box] as a single line,
- * alongside [MapBuildingOverlay] — zero modifications to any existing file.
+ * Owns [isMapView] toggle state locally — no ViewModel change needed.
+ * In map-view mode the panel collapses to just the header + chips so the
+ * user can see the markers on the map; tapping a marker raises [POIActionCard].
  *
- * SOLID — Single Responsibility:
- *   Only wires [POIViewModel] state to the correct child composable.
- *   It never fetches data or mutates state itself.
- *
- * Design Pattern — Facade:
- *   Hides the complexity of 4 different UI states behind one call-site.
- *   MapScreen only calls MapPOIOverlay(...) and doesn't know the internals.
+ * Design Pattern — Facade: MapScreen still calls a single composable.
+ * SOLID — Single Responsibility: only wires state → child composables.
  */
 @Composable
 fun BoxScope.MapPOIOverlay(
@@ -41,17 +39,26 @@ fun BoxScope.MapPOIOverlay(
 ) {
     val uiState by poiViewModel.uiState.collectAsState()
 
-    // ── Explore FAB — only visible when panel is hidden ───────────────────
+    // Toggle lives here — purely UI concern, no business logic
+    var isMapView by remember { mutableStateOf(false) }
+
+    // Reset to list view whenever panel is re-opened
+    // (so user always lands on the list first)
+
+    // ── Explore FAB — visible only when panel is fully hidden ─────────────
     AnimatedVisibility(
-        visible = uiState is POIUiState.Hidden,
-        enter   = fadeIn() + scaleIn(),
-        exit    = fadeOut() + scaleOut(),
+        visible  = uiState is POIUiState.Hidden && !mapViewModel.uiBuildingState.isVisible,
+        enter    = fadeIn() + scaleIn(),
+        exit     = fadeOut() + scaleOut(),
         modifier = Modifier
             .align(Alignment.BottomEnd)
-            .padding(end = 12.dp, bottom = 100.dp)     // sits above RECENTER FAB
+            .padding(end = 12.dp, bottom = 100.dp)
     ) {
         ExtendedFloatingActionButton(
-            onClick        = { poiViewModel.openPOIPanel() },
+            onClick        = {
+                isMapView = false          // always start in list mode
+                poiViewModel.openPOIPanel()
+            },
             containerColor = ConcordiaMaroon,
             contentColor   = Color.White,
             icon           = { Icon(Icons.Default.Explore, contentDescription = null) },
@@ -59,7 +66,7 @@ fun BoxScope.MapPOIOverlay(
         )
     }
 
-    // ── Bottom panel area — animated slide-up ─────────────────────────────
+    // ── Bottom panel — animated slide-up ──────────────────────────────────
     AnimatedVisibility(
         visible  = uiState !is POIUiState.Hidden,
         enter    = slideInVertically(initialOffsetY = { it }) + fadeIn(),
@@ -84,7 +91,7 @@ fun BoxScope.MapPOIOverlay(
 
             is POIUiState.Success -> {
                 if (state.selectedPOI != null) {
-                    // User tapped a POI → show action card
+                    // POI tapped (from list OR map marker) → action card
                     POIActionCard(
                         poi             = state.selectedPOI,
                         onGetDirections = {
@@ -97,33 +104,33 @@ fun BoxScope.MapPOIOverlay(
                         onDismiss = { poiViewModel.onPOIDismissed() }
                     )
                 } else {
-                    // Normal list view
+                    // List panel — collapses in map-view mode
                     POIListPanel(
                         pois               = state.pois,
                         selectedCategory   = state.selectedCategory,
                         onCategorySelected = { poiViewModel.onCategorySelected(it) },
                         onPOISelected      = { poiViewModel.onPOISelected(it) },
-                        onClose            = { poiViewModel.closePOIPanel() }
+                        onClose            = { poiViewModel.closePOIPanel() },
+                        isMapView          = isMapView,
+                        onToggleView       = { isMapView = !isMapView }
                     )
                 }
             }
 
-            is POIUiState.Hidden -> { /* never shown — AnimatedVisibility guards this */ }
+            is POIUiState.Hidden -> { /* guarded by AnimatedVisibility */ }
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Auxiliary state panels (Loading / Error / Empty)
+// Auxiliary panels
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun POILoadingPanel(onClose: () -> Unit) {
     POIShellCard(onClose = onClose) {
         Box(
-            modifier         = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
+            modifier         = Modifier.fillMaxWidth().height(120.dp),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(color = ConcordiaMaroon)
@@ -135,13 +142,11 @@ private fun POILoadingPanel(onClose: () -> Unit) {
 private fun POIErrorPanel(message: String, onRetry: () -> Unit, onClose: () -> Unit) {
     POIShellCard(onClose = onClose) {
         Column(
-            modifier              = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 12.dp),
-            horizontalAlignment   = Alignment.CenterHorizontally,
-            verticalArrangement   = Arrangement.spacedBy(12.dp)
+            modifier            = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(text = "⚠️ $message", style = MaterialTheme.typography.bodyMedium)
+            Text("⚠️ $message", style = MaterialTheme.typography.bodyMedium)
             TextButton(onClick = onRetry) { Text("Retry", color = ConcordiaMaroon) }
         }
     }
@@ -151,9 +156,7 @@ private fun POIErrorPanel(message: String, onRetry: () -> Unit, onClose: () -> U
 private fun POIEmptyPanel(onClose: () -> Unit) {
     POIShellCard(onClose = onClose) {
         Box(
-            modifier         = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
+            modifier         = Modifier.fillMaxWidth().padding(20.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -165,33 +168,25 @@ private fun POIEmptyPanel(onClose: () -> Unit) {
     }
 }
 
-/** Shared card shell for Loading / Error / Empty states. */
 @Composable
 private fun POIShellCard(
-    onClose:  () -> Unit,
-    content:  @Composable ColumnScope.() -> Unit
+    onClose: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit
 ) {
     Card(
-        modifier  = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+        modifier  = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
         elevation = CardDefaults.cardElevation(8.dp),
         colors    = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column {
             Row(
-                modifier              = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 8.dp, top = 8.dp),
+                modifier              = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment     = Alignment.CenterVertically
             ) {
                 Text("Nearby Places", style = MaterialTheme.typography.titleMedium)
                 IconButton(onClick = onClose) {
-                    Icon(
-                        imageVector        = androidx.compose.material.icons.Icons.Default.Close,
-                        contentDescription = "Close"
-                    )
+                    Icon(Icons.Default.Close, contentDescription = "Close")
                 }
             }
             content()

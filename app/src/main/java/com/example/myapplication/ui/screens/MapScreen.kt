@@ -122,6 +122,7 @@ fun MapScreen(
             cameraPositionState     = cameraPositionState,
             hasLocationPermission   = hasLocationPermission,
             viewModel               = mapViewModel,
+            poiViewModel            = poiViewModel,
             contentPadding          = PaddingValues(bottom = mapPaddingBottom.dp),
             modifier                = Modifier.testTag("campus_map")
         )

@@ -87,7 +87,3 @@ private fun com.example.myapplication.data.poi.POICategory.categoryHue(): Float 
         com.example.myapplication.data.poi.POICategory.ATM        -> BitmapDescriptorFactory.HUE_AZURE
     }
 
-private fun formatDistance(meters: Int): String = when {
-    meters < 1000 -> "$meters m"
-    else          -> "${"%.1f".format(meters / 1000.0)} km"
-}

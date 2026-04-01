@@ -241,7 +241,7 @@ private fun IndoorNavContent(
     }
 }
 
-/** All animated bottom-sheet overlays — extracted to keep [IndoorNavContent] readable. */
+/** All animated bottom-sheet overlays — single source of truth via [ActiveOverlay] enum. */
 @Composable
 private fun BoxScope.IndoorNavOverlays(
     state:         IndoorNavUiState,
@@ -250,71 +250,97 @@ private fun BoxScope.IndoorNavOverlays(
     onBack:        () -> Unit
 ) {
     val bottomCenter = Modifier.align(Alignment.BottomCenter)
-    AnimatedVisibility(state.pendingFloorChange != null,
-        enter = slideInVertically { it } + fadeIn(), exit = slideOutVertically { it } + fadeOut(),
-        modifier = bottomCenter) {
-        state.pendingFloorChange?.let { fc ->
-            FloorChangeCard(fc.fromFloor, fc.toFloor, fc.via) { vm.confirmFloorChange() }
-        }
-    }
 
     val hasMoreSteps = state.currentSteps.isNotEmpty()
         && state.currentStepIdx < state.currentSteps.size - 1
         && state.pendingFloorChange == null && !state.hasArrived
-    AnimatedVisibility(hasMoreSteps,
-        enter = slideInVertically { it } + fadeIn(), exit = slideOutVertically { it } + fadeOut(),
-        modifier = bottomCenter) {
-        NextStepCard(
-            nextInstruction = state.currentSteps.getOrNull(state.currentStepIdx + 1)?.instruction ?: "",
-            distanceM       = state.currentSteps.getOrNull(state.currentStepIdx)?.distanceM ?: 0f,
-            onConfirm       = { vm.advanceStep() })
+
+    // Single source of truth — prevents multiple cards overlapping simultaneously.
+    // Priority order matches expected user journey: floor change > next step >
+    // segment advance > exit confirm > room info.
+    val activeOverlay = when {
+        state.pendingFloorChange != null                                              -> ActiveOverlay.FloorChange
+        hasMoreSteps                                                                  -> ActiveOverlay.NextStep
+        state.pendingSegmentAdvance != null                                           -> ActiveOverlay.SegmentAdvance
+        state.hasArrived && onConfirmExit != null                                     -> ActiveOverlay.ExitConfirm
+        state.hasArrived && onConfirmExit == null                                     -> ActiveOverlay.Arrival
+        state.selectedRoom != null                                                    -> ActiveOverlay.RoomInfo
+        else                                                                          -> ActiveOverlay.None
     }
 
-    AnimatedVisibility(state.pendingSegmentAdvance != null && state.pendingFloorChange == null && !state.hasArrived,
-        enter = slideInVertically { it } + fadeIn(), exit = slideOutVertically { it } + fadeOut(),
-        modifier = bottomCenter) {
-        state.pendingSegmentAdvance?.let { prompt ->
-            SegmentAdvanceCard(prompt = prompt, onConfirm = { vm.confirmSegmentAdvance() })
+    AnimatedContent(
+        targetState = activeOverlay,
+        modifier    = bottomCenter,
+        transitionSpec = {
+            (slideInVertically { it } + fadeIn()).togetherWith(slideOutVertically { it } + fadeOut())
+        },
+        label = "indoor_overlay"
+    ) { overlay ->
+        when (overlay) {
+            ActiveOverlay.FloorChange -> {
+                state.pendingFloorChange?.let { fc ->
+                    FloorChangeCard(fc.fromFloor, fc.toFloor, fc.via) { vm.confirmFloorChange() }
+                }
+            }
+            ActiveOverlay.NextStep -> {
+                NextStepCard(
+                    nextInstruction = state.currentSteps.getOrNull(state.currentStepIdx + 1)?.instruction ?: "",
+                    distanceLabel   = state.distanceLabel,
+                    onConfirm       = { vm.advanceStep() }
+                )
+            }
+            ActiveOverlay.SegmentAdvance -> {
+                state.pendingSegmentAdvance?.let { prompt ->
+                    SegmentAdvanceCard(prompt = prompt, onConfirm = { vm.confirmSegmentAdvance() })
+                }
+            }
+            ActiveOverlay.ExitConfirm -> {
+                if (onConfirmExit != null) ExitConfirmationCard(onConfirm = onConfirmExit)
+            }
+            ActiveOverlay.Arrival -> {
+                AlertDialog(
+                    onDismissRequest = {},
+                    title   = { Text("Destination Reached", fontWeight = FontWeight.Bold) },
+                    text    = { Text("You have arrived at your destination.") },
+                    confirmButton = {
+                        Button(onClick = { vm.clearRoute(); onBack() },
+                            colors = ButtonDefaults.buttonColors(containerColor = Maroon)
+                        ) { Text("Done", color = Color.White) }
+                    },
+                    shape = RoundedCornerShape(16.dp), containerColor = Color.White
+                )
+            }
+            ActiveOverlay.RoomInfo -> {
+                state.selectedRoom?.let { room ->
+                    RoomCard(
+                        room         = room,
+                        buildingCode = state.currentBuilding,
+                        currentFloor = state.currentFloorNumber,
+                        onDismiss    = { vm.dismissRoom() },
+                        onNavigate   = { startNodeId, startFloorNum ->
+                            val destNodeId = state.floor?.nodes
+                                ?.firstOrNull { it.roomId == room.id }?.id ?: return@RoomCard
+                            vm.navigateTo(
+                                destination = IndoorOutdoorRouter.IndoorDestination(
+                                    building = state.currentBuilding,
+                                    floor    = state.currentFloorNumber,
+                                    nodeId   = destNodeId,
+                                    label    = room.label),
+                                startNodeId = startNodeId,
+                                startFloor  = startFloorNum)
+                            vm.dismissRoom()
+                        }
+                    )
+                }
+            }
+            ActiveOverlay.None -> { /* nothing shown */ }
         }
     }
+}
 
-    AnimatedVisibility(state.hasArrived && onConfirmExit != null,
-        enter = slideInVertically { it } + fadeIn(), exit = slideOutVertically { it } + fadeOut(),
-        modifier = bottomCenter) {
-        if (onConfirmExit != null) ExitConfirmationCard(onConfirm = onConfirmExit)
-    }
-
-    AnimatedVisibility(state.selectedRoom != null && state.pendingFloorChange == null && state.pendingSegmentAdvance == null,
-        enter = slideInVertically { it } + fadeIn(), exit = slideOutVertically { it } + fadeOut(),
-        modifier = bottomCenter) {
-        state.selectedRoom?.let { room ->
-            RoomCard(room = room, buildingCode = state.currentBuilding,
-                currentFloor = state.currentFloorNumber,
-                onDismiss    = { vm.dismissRoom() },
-                onNavigate   = { startNodeId, startFloorNum ->
-                    val destNodeId = state.floor?.nodes
-                        ?.firstOrNull { it.roomId == room.id }?.id ?: return@RoomCard
-                    vm.navigateTo(
-                        destination = IndoorOutdoorRouter.IndoorDestination(
-                            building = state.currentBuilding, floor = state.currentFloorNumber,
-                            nodeId = destNodeId, label = room.label),
-                        startNodeId = startNodeId, startFloor = startFloorNum)
-                    vm.dismissRoom()
-                })
-        }
-    }
-
-    if (state.hasArrived && onConfirmExit == null) {
-        AlertDialog(onDismissRequest = {},
-            title   = { Text("Destination Reached", fontWeight = FontWeight.Bold) },
-            text    = { Text("You have arrived at your destination.") },
-            confirmButton = {
-                Button(onClick = { vm.clearRoute(); onBack() },
-                    colors = ButtonDefaults.buttonColors(containerColor = Maroon)
-                ) { Text("Done", color = Color.White) }
-            },
-            shape = RoundedCornerShape(16.dp), containerColor = Color.White)
-    }
+/** Represents which bottom overlay is currently active — enforces single source of truth. */
+private enum class ActiveOverlay {
+    FloorChange, NextStep, SegmentAdvance, ExitConfirm, Arrival, RoomInfo, None
 }
 
 // ── sub-composables ───────────────────────────────────────────────────────────
@@ -510,14 +536,9 @@ private fun RoomCard(
 @Composable
 private fun NextStepCard(
     nextInstruction: String,
-    distanceM:       Float,
+    distanceLabel:   String,   // pre-formatted in IndoorNavUiState — unit-testable without UI runner
     onConfirm:       () -> Unit
 ) {
-    val distText = when {
-        distanceM < 5f   -> ""
-        distanceM < 100f -> "In ~${distanceM.toInt()}m"
-        else             -> "In ~${(distanceM / 10).toInt() * 10}m"
-    }
     Surface(
         Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
         shape = RoundedCornerShape(16.dp),
@@ -529,8 +550,8 @@ private fun NextStepCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Column(Modifier.weight(1f)) {
-                if (distText.isNotEmpty()) {
-                    Text(distText, fontSize = 11.sp,
+                if (distanceLabel.isNotEmpty()) {
+                    Text(distanceLabel, fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.onSurface.copy(.5f))
                 }
                 Text(

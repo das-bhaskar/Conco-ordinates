@@ -75,7 +75,21 @@ data class IndoorNavUiState(
     val error:                  String?         = null,
     val hasArrived:             Boolean         = false,
     val isExitLeg:              Boolean         = false
-)
+) {
+    /**
+     * Human-readable distance label for the current step.
+     * Formatted here (not in the Composable) so it can be unit-tested
+     * without a UI test runner.
+     */
+    val distanceLabel: String get() {
+        val distanceM = currentSteps.getOrNull(currentStepIdx)?.distanceM ?: 0f
+        return when {
+            distanceM < 5f   -> ""
+            distanceM < 100f -> "In ~${distanceM.toInt()}m"
+            else             -> "In ~${(distanceM / 10).toInt() * 10}m"
+        }
+    }
+}
 
 // ── ViewModel ─────────────────────────────────────────────────────────────────
 

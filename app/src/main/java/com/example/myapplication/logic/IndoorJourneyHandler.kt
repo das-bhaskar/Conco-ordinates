@@ -1,7 +1,6 @@
 package com.example.myapplication.logic
 
 import com.example.myapplication.data.Building
-import com.example.myapplication.data.CampusRepo
 import com.example.myapplication.data.indoor.BuildingEntrance
 import com.example.myapplication.data.indoor.BuildingEntrances
 import com.example.myapplication.ui.models.IndoorJourneyPhase
@@ -11,20 +10,19 @@ import com.google.maps.android.PolyUtil
 /**
  * Pure logic for advancing the indoor journey state machine.
  *
- * All functions accept [allBuildings] as a parameter instead of calling
- * [CampusRepo] directly — this keeps the functions pure and testable
- * without needing a real CampusRepo initialised with a Context.
+ * All functions that need building data accept [allBuildings] as a required
+ * parameter — no default value calling CampusRepo. This keeps functions pure
+ * and testable without needing CampusRepo initialised with an Android Context.
  *
- * MapViewModel calls these functions and updates its own state accordingly.
- * The [allBuildings] list is obtained from [CampusRepo.getAllBuildings()] at
- * the call site (MapViewModel), which already holds the cached flat list.
+ * The caller (MapViewModel) is responsible for supplying the list from
+ * CampusRepo.getAllBuildings(), which it already holds cached.
  */
 object IndoorJourneyHandler {
 
     fun onDestinationSelected(
         destination:  SearchResult.IndoorRoomResult,
         userGps:      LatLng?,
-        allBuildings: List<Building> = CampusRepo.getAllBuildings()
+        allBuildings: List<Building>               // no default — caller must provide
     ): IndoorJourneyPhase {
         if (userGps == null) return IndoorJourneyPhase.DetectingLocation
 
@@ -95,7 +93,7 @@ object IndoorJourneyHandler {
 
     fun onNearDestinationBuilding(
         phase:        IndoorJourneyPhase.Outdoor,
-        allBuildings: List<Building> = CampusRepo.getAllBuildings()
+        allBuildings: List<Building>               // no default — caller must provide
     ): IndoorJourneyPhase {
         val destBuilding = allBuildings.firstOrNull { it.code == phase.destRoom.buildingCode }
             ?: return IndoorJourneyPhase.Idle
@@ -118,7 +116,7 @@ object IndoorJourneyHandler {
     fun isNearBuilding(
         userGps:      LatLng,
         buildingCode: String,
-        allBuildings: List<Building> = CampusRepo.getAllBuildings()
+        allBuildings: List<Building>               // no default — caller must provide
     ): Boolean {
         val building = allBuildings.firstOrNull { it.code == buildingCode } ?: return false
         val center   = building.getCenter()

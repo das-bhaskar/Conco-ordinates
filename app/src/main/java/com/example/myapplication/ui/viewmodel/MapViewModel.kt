@@ -172,10 +172,11 @@ class MapViewModel(
      */
     private fun updateIndoorJourney(userLocation: LatLng) {
         val journeyPhase = indoorJourneyState.phase
+        val allBuildings = CampusRepo.getAllBuildings()
         if (journeyPhase is IndoorJourneyPhase.Outdoor &&
-            IndoorJourneyHandler.isNearBuilding(userLocation, journeyPhase.destRoom.buildingCode)) {
+            IndoorJourneyHandler.isNearBuilding(userLocation, journeyPhase.destRoom.buildingCode, allBuildings)) {
             indoorJourneyState = IndoorJourneyState(
-                phase = IndoorJourneyHandler.onNearDestinationBuilding(journeyPhase)
+                phase = IndoorJourneyHandler.onNearDestinationBuilding(journeyPhase, allBuildings)
             )
         }
     }
@@ -286,8 +287,9 @@ class MapViewModel(
             is SearchResult.GoogleResult -> { /* Future implementation */ }
             is SearchResult.IndoorRoomResult -> {
                 val nextPhase = IndoorJourneyHandler.onDestinationSelected(
-                    destination = result,
-                    userGps     = lastProcessedLocation
+                    destination  = result,
+                    userGps      = lastProcessedLocation,
+                    allBuildings = CampusRepo.getAllBuildings()
                 )
                 indoorJourneyState = IndoorJourneyState(phase = nextPhase)
 

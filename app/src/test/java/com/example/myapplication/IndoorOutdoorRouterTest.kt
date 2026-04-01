@@ -2,10 +2,10 @@ package com.example.myapplication.logic
 
 import com.example.myapplication.data.indoor.BuildingEntrance
 import com.example.myapplication.data.indoor.BuildingEntrances
+import com.example.myapplication.data.indoor.IIndoorRepository
 import com.example.myapplication.data.indoor.IndoorEdge
 import com.example.myapplication.data.indoor.IndoorFloor
 import com.example.myapplication.data.indoor.IndoorNode
-import com.example.myapplication.data.indoor.IIndoorRepository
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
@@ -13,13 +13,6 @@ import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.*
 
-/**
- * Unit tests for [IndoorOutdoorRouter].
- *
- * Floor layout used in tests:
- *   Floor 1: start ──── dest     (same floor, same building)
- *   Floor 8: el_f8 ──── dest_f8  (cross-floor)
- */
 class IndoorOutdoorRouterTest {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -62,6 +55,16 @@ class IndoorOutdoorRouterTest {
         edges    = listOf(edge("cc-ent", "cc-dest"))
     )
 
+    // Injected BuildingEntrances instances — no reflection needed
+    private val testEntrances = BuildingEntrances(mapOf(
+        "H"  to listOf(hEntrance),
+        "CC" to listOf(ccEntrance)
+    ))
+    private val hOnlyEntrances = BuildingEntrances(mapOf(
+        "H" to listOf(hEntrance)
+    ))
+    private val emptyEntrances = BuildingEntrances()
+
     private fun makeRepo(): IIndoorRepository {
         val repo = mock<IIndoorRepository>()
         runBlocking { whenever(repo.getFloor(any(), any())).thenReturn(null) }
@@ -75,36 +78,21 @@ class IndoorOutdoorRouterTest {
     private fun runBlocking(block: suspend () -> Unit) =
         kotlinx.coroutines.runBlocking { block() }
 
-    @Before
-    fun setup() {
-        injectEntrances(mapOf(
-            "H"  to listOf(hEntrance),
-            "CC" to listOf(ccEntrance)
-        ))
-    }
-
-    private fun injectEntrances(data: Map<String, List<BuildingEntrance>>) {
-        val field = BuildingEntrances::class.java.getDeclaredField("data")
-        field.isAccessible = true
-        field.set(BuildingEntrances.default, data)
-    }
-
     // ── Case 1: same building, same floor ─────────────────────────────────────
 
     @Test
     fun `buildRoute same building same floor returns single IndoorWalk segment`() = runTest {
         val repo = makeRepo()
         val dest = IndoorOutdoorRouter.IndoorDestination("H", 1, "dest", "H-Dest")
-
         val route = IndoorOutdoorRouter.buildRoute(
             repo          = repo,
             startBuilding = "H",
             startFloor    = 1,
             startNodeId   = "start",
             destination   = dest,
-            userGps       = null
+            userGps       = null,
+            entrances     = testEntrances
         )
-
         assertEquals(1, route.segments.size)
         assertTrue(route.segments[0] is IndoorOutdoorRouter.Segment.IndoorWalk)
     }
@@ -113,10 +101,11 @@ class IndoorOutdoorRouterTest {
     fun `buildRoute same building same floor returns empty when floor data missing`() = runTest {
         val repo = mock<IIndoorRepository>()
         runBlocking { whenever(repo.getFloor(any(), any())).thenReturn(null) }
-
         val dest = IndoorOutdoorRouter.IndoorDestination("H", 1, "dest", "H-Dest")
-        val route = IndoorOutdoorRouter.buildRoute(repo, "H", 1, "start", dest, null)
-
+        val route = IndoorOutdoorRouter.buildRoute(
+            repo, "H", 1, "start", dest, null,
+            entrances = testEntrances
+        )
         assertTrue(route.segments.isEmpty())
     }
 
@@ -126,18 +115,16 @@ class IndoorOutdoorRouterTest {
     fun `buildRoute same building different floor returns multi-segment route`() = runTest {
         val repo = makeRepo()
         val dest = IndoorOutdoorRouter.IndoorDestination("H", 8, "dest_f8", "H-829")
-
         val route = IndoorOutdoorRouter.buildRoute(
             repo          = repo,
             startBuilding = "H",
             startFloor    = 1,
             startNodeId   = "start",
             destination   = dest,
-            userGps       = null
+            userGps       = null,
+            entrances     = testEntrances
         )
-
         assertTrue(route.segments.isNotEmpty())
-        // Should contain Walk + FloorChange + Walk
         assertTrue(route.segments.any { it is IndoorOutdoorRouter.Segment.IndoorWalk })
         assertTrue(route.segments.any { it is IndoorOutdoorRouter.Segment.FloorChange })
     }
@@ -148,16 +135,11 @@ class IndoorOutdoorRouterTest {
     fun `buildRoute different buildings includes OutdoorWalk segment`() = runTest {
         val repo = makeRepo()
         val dest = IndoorOutdoorRouter.IndoorDestination("CC", 1, "cc-dest", "CC-111")
-
         val route = IndoorOutdoorRouter.buildRoute(
-            repo          = repo,
-            startBuilding = "H",
-            startFloor    = 1,
-            startNodeId   = "start",
-            destination   = dest,
-            userGps       = LatLng(45.497, -73.579)
+            repo, "H", 1, "start", dest,
+            userGps   = LatLng(45.497, -73.579),
+            entrances = testEntrances
         )
-
         assertTrue(route.segments.any { it is IndoorOutdoorRouter.Segment.OutdoorWalk })
     }
 
@@ -165,55 +147,26 @@ class IndoorOutdoorRouterTest {
     fun `buildRoute different buildings outdoor segment connects H exit to CC entrance`() = runTest {
         val repo = makeRepo()
         val dest = IndoorOutdoorRouter.IndoorDestination("CC", 1, "cc-dest", "CC-111")
-
         val route = IndoorOutdoorRouter.buildRoute(
-            repo          = repo,
-            startBuilding = "H",
-            startFloor    = 1,
-            startNodeId   = "start",
-            destination   = dest,
-            userGps       = null
+            repo, "H", 1, "start", dest,
+            userGps   = null,
+            entrances = testEntrances
         )
-
-        val outdoor = route.segments.filterIsInstance<IndoorOutdoorRouter.Segment.OutdoorWalk>()
-            .firstOrNull()
+        val outdoor = route.segments.filterIsInstance<IndoorOutdoorRouter.Segment.OutdoorWalk>().firstOrNull()
         assertNotNull(outdoor)
         assertEquals(hEntrance.gps, outdoor?.origin)
         assertEquals(ccEntrance.gps, outdoor?.destination)
     }
 
-    // ── FullRoute ─────────────────────────────────────────────────────────────
-
-    @Test
-    fun `FullRoute totalSteps defaults to segments size`() {
-        val walk = IndoorOutdoorRouter.Segment.IndoorWalk("H", 1, emptyList(), "Walk")
-        val route = IndoorOutdoorRouter.FullRoute(listOf(walk))
-        assertEquals(1, route.totalSteps)
-    }
-
-    @Test
-    fun `FullRoute with multiple segments has correct totalSteps`() {
-        val walk1 = IndoorOutdoorRouter.Segment.IndoorWalk("H", 1, emptyList(), "Walk 1")
-        val walk2 = IndoorOutdoorRouter.Segment.IndoorWalk("H", 8, emptyList(), "Walk 2")
-        val fc    = IndoorOutdoorRouter.Segment.FloorChange("H", 1, 8, "elevator", "Take elevator")
-        val route = IndoorOutdoorRouter.FullRoute(listOf(walk1, fc, walk2))
-        assertEquals(3, route.totalSteps)
-    }
-
-    // ── Case 3 edge cases: multi-building ─────────────────────────────────────
-
     @Test
     fun `buildRoute different buildings with no CC entrance returns partial route`() = runTest {
-        // Clear CC entrance so addDestinationWalkSegments has no bestEntry
-        injectEntrances(mapOf("H" to listOf(hEntrance)))
         val repo = makeRepo()
         val dest = IndoorOutdoorRouter.IndoorDestination("CC", 1, "cc-dest", "CC-101")
         val route = IndoorOutdoorRouter.buildRoute(
             repo, "H", 1, "start", dest,
-            userGps = LatLng(45.496, -73.579),
-            preference = TransferPreference.ANY
+            userGps   = LatLng(45.496, -73.579),
+            entrances = hOnlyEntrances  // no CC entrance
         )
-        // No CC entrance → no outdoor or indoor segments to CC
         assertTrue(route.segments.none { it is IndoorOutdoorRouter.Segment.OutdoorWalk })
     }
 
@@ -221,13 +174,11 @@ class IndoorOutdoorRouterTest {
     fun `buildRoute different buildings with userGps picks nearest exit`() = runTest {
         val repo = makeRepo()
         val dest = IndoorOutdoorRouter.IndoorDestination("CC", 1, "cc-dest", "CC-101")
-        // User near H entrance
         val route = IndoorOutdoorRouter.buildRoute(
             repo, "H", 1, "start", dest,
-            userGps = LatLng(45.496, -73.579),
-            preference = TransferPreference.ANY
+            userGps   = LatLng(45.496, -73.579),
+            entrances = testEntrances
         )
-        // Should have an outdoor walk since CC entrance exists
         assertTrue(route.segments.any { it is IndoorOutdoorRouter.Segment.OutdoorWalk })
     }
 
@@ -237,8 +188,8 @@ class IndoorOutdoorRouterTest {
         val dest = IndoorOutdoorRouter.IndoorDestination("CC", 1, "cc-dest", "CC-101")
         val route = IndoorOutdoorRouter.buildRoute(
             repo, "H", 1, "start", dest,
-            userGps = null,
-            preference = TransferPreference.ANY
+            userGps   = null,
+            entrances = testEntrances
         )
         assertNotNull(route)
     }
@@ -249,11 +200,27 @@ class IndoorOutdoorRouterTest {
         val dest = IndoorOutdoorRouter.IndoorDestination("H", 8, "dest_f8", "H-829")
         val route = IndoorOutdoorRouter.buildRoute(
             repo, "H", 1, "start", dest,
-            userGps = null,
-            preference = TransferPreference.ELEVATOR_ONLY
+            userGps    = null,
+            preference = TransferPreference.ELEVATOR_ONLY,
+            entrances  = testEntrances
         )
-        // Elevator path: walk → floor change → walk
         assertTrue(route.segments.isNotEmpty())
+    }
+
+    // ── FullRoute ─────────────────────────────────────────────────────────────
+
+    @Test
+    fun `FullRoute totalSteps defaults to segments size`() {
+        val walk = IndoorOutdoorRouter.Segment.IndoorWalk("H", 1, emptyList(), "Walk")
+        assertEquals(1, IndoorOutdoorRouter.FullRoute(listOf(walk)).totalSteps)
+    }
+
+    @Test
+    fun `FullRoute with multiple segments has correct totalSteps`() {
+        val walk1 = IndoorOutdoorRouter.Segment.IndoorWalk("H", 1, emptyList(), "Walk 1")
+        val walk2 = IndoorOutdoorRouter.Segment.IndoorWalk("H", 8, emptyList(), "Walk 2")
+        val fc    = IndoorOutdoorRouter.Segment.FloorChange("H", 1, 8, "elevator", "Take elevator")
+        assertEquals(3, IndoorOutdoorRouter.FullRoute(listOf(walk1, fc, walk2)).totalSteps)
     }
 
     // ── Segment data classes ──────────────────────────────────────────────────
@@ -261,36 +228,29 @@ class IndoorOutdoorRouterTest {
     @Test
     fun `IndoorWalk segment data class equality`() {
         val s1 = IndoorOutdoorRouter.Segment.IndoorWalk("H", 1, emptyList(), "Walk")
-        val s2 = s1.copy()
-        assertEquals(s1, s2)
+        assertEquals(s1, s1.copy())
         assertNotEquals(s1, s1.copy(floor = 8))
     }
 
     @Test
     fun `FloorChange segment data class equality`() {
         val s1 = IndoorOutdoorRouter.Segment.FloorChange("H", 1, 8, "elevator", "instruction")
-        val s2 = s1.copy()
-        assertEquals(s1, s2)
+        assertEquals(s1, s1.copy())
         assertNotEquals(s1, s1.copy(toFloor = 9))
     }
 
     @Test
     fun `OutdoorWalk segment data class equality`() {
-        val gps1 = LatLng(45.497, -73.579)
-        val gps2 = LatLng(45.458, -73.640)
-        val s1 = IndoorOutdoorRouter.Segment.OutdoorWalk(gps1, gps2, "H Exit", "CC Entry", "Walk")
-        val s2 = s1.copy()
-        assertEquals(s1, s2)
+        val s1 = IndoorOutdoorRouter.Segment.OutdoorWalk(
+            LatLng(45.497,-73.579), LatLng(45.458,-73.640), "H Exit", "CC Entry", "Walk")
+        assertEquals(s1, s1.copy())
         assertNotNull(s1.toString())
     }
-
-    // ── IndoorDestination ─────────────────────────────────────────────────────
 
     @Test
     fun `IndoorDestination data class equality`() {
         val d1 = IndoorOutdoorRouter.IndoorDestination("H", 8, "node-829", "H-829")
-        val d2 = d1.copy()
-        assertEquals(d1, d2)
+        assertEquals(d1, d1.copy())
         assertNotEquals(d1, d1.copy(floor = 1))
         assertNotNull(d1.toString())
     }

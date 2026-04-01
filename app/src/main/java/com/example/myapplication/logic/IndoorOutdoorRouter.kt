@@ -64,7 +64,8 @@ object IndoorOutdoorRouter {
         startNodeId:   String,
         destination:   IndoorDestination,
         userGps:       LatLng?,
-        preference:    TransferPreference = TransferPreference.ANY
+        preference:    TransferPreference = TransferPreference.ANY,
+        entrances:     BuildingEntrances  = BuildingEntrances.default
     ): FullRoute {
         val sameFloor    = startBuilding == destination.building && startFloor == destination.floor
         val sameBuilding = startBuilding == destination.building
@@ -75,7 +76,7 @@ object IndoorOutdoorRouter {
             sameBuilding -> buildCrossFloorRoute(repo, startBuilding, startFloor,
                                 startNodeId, destination, preference)
             else         -> buildMultiBuildingRoute(repo, startBuilding, startFloor,
-                                startNodeId, destination, userGps, preference)
+                                startNodeId, destination, userGps, preference, entrances)
         }
     }
 
@@ -144,14 +145,15 @@ object IndoorOutdoorRouter {
         startNodeId:   String,
         destination:   IndoorDestination,
         userGps:       LatLng?,
-        preference:    TransferPreference
+        preference:    TransferPreference,
+        entrances:     BuildingEntrances
     ): FullRoute {
         val segments = mutableListOf<Segment>()
 
-        val bestExit = pickBestExit(startBuilding, userGps)
+        val bestExit = pickBestExit(startBuilding, userGps, entrances)
         addExitWalkSegment(segments, repo, startBuilding, startFloor, startNodeId, bestExit, preference)
 
-        val bestEntry = BuildingEntrances.forBuilding(destination.building).firstOrNull()
+        val bestEntry = entrances.forBuilding(destination.building).firstOrNull()
         if (bestEntry != null && bestExit != null) {
             segments += Segment.OutdoorWalk(
                 origin      = bestExit.gps,
@@ -171,12 +173,13 @@ object IndoorOutdoorRouter {
 
     private fun pickBestExit(
         startBuilding: String,
-        userGps:       LatLng?
+        userGps:       LatLng?,
+        entrances:     BuildingEntrances
     ): com.example.myapplication.data.indoor.BuildingEntrance? =
         if (userGps != null)
-            BuildingEntrances.nearest(startBuilding, userGps)
-                ?: BuildingEntrances.forBuilding(startBuilding).firstOrNull()
-        else BuildingEntrances.forBuilding(startBuilding).firstOrNull()
+            entrances.nearest(startBuilding, userGps)
+                ?: entrances.forBuilding(startBuilding).firstOrNull()
+        else entrances.forBuilding(startBuilding).firstOrNull()
 
     private suspend fun addExitWalkSegment(
         segments:      MutableList<Segment>,

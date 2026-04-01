@@ -36,6 +36,7 @@ import com.example.myapplication.ui.components.NavigationOverlay
 import com.example.myapplication.ui.components.NextClassPill
 import com.example.myapplication.ui.components.ObserveCameraEffects
 import com.example.myapplication.ui.components.ObserveLocationUpdates
+import com.example.myapplication.ui.components.MapPOIOverlay
 import com.example.myapplication.ui.components.rememberMapCamera
 import com.example.myapplication.ui.models.BuildingUiState
 import com.example.myapplication.ui.models.MapUIMode
@@ -57,6 +58,7 @@ data class IndoorActions(
 @Composable
 fun MapScreen(
     mapViewModel:             com.example.myapplication.ui.viewmodel.MapViewModel,
+    poiViewModel:             com.example.myapplication.ui.viewmodel.POIViewModel,
     currentCampus:            com.example.myapplication.data.Campus?,
     highlightedBuildingName:  String?,
     searchQuery:              String,
@@ -97,7 +99,10 @@ fun MapScreen(
     )
 
     ObserveLocationUpdates(hasLocationPermission, fusedLocationClient,
-        onLocationUpdate = { loc -> onLocationUpdate(loc, false) })
+        onLocationUpdate = { loc ->
+            onLocationUpdate(loc, false)
+            poiViewModel.onLocationUpdated(loc)
+        })
     val cameraPositionState = rememberMapCamera()
     val cameraController    = remember(cameraPositionState) { TrueCameraController(cameraPositionState) }
     ObserveCameraEffects(
@@ -126,6 +131,7 @@ fun MapScreen(
             cameraPositionState     = cameraPositionState,
             hasLocationPermission   = hasLocationPermission,
             viewModel               = mapViewModel,
+            poiViewModel            = poiViewModel,
             contentPadding          = PaddingValues(bottom = mapPaddingBottom.dp),
             modifier                = Modifier.testTag("campus_map")
         )
@@ -173,6 +179,11 @@ fun MapScreen(
                 onSwapLocations          = onSwapLocations,
                 onBackToPreview          = onBackToPreview,
                 onStartNavigationActions = onStartNavigationActions
+            )
+            // ── Epic 5: POI overlay ───────────────────────────────────────
+            MapPOIOverlay(
+                poiViewModel = poiViewModel,
+                mapViewModel = mapViewModel
             )
         } else {
             NavigationOverlay(

@@ -9,6 +9,7 @@ import com.example.myapplication.data.Campus
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.theme.concordiaGold
 import com.example.myapplication.ui.viewmodel.MapViewModel
+import com.example.myapplication.ui.viewmodel.POIViewModel
 import com.google.maps.android.compose.*
 import com.example.myapplication.logic.MapInteractionHandler
 import com.example.myapplication.ui.theme.ConcordiaGreen
@@ -25,6 +26,7 @@ fun CampusMap(
     hasLocationPermission: Boolean,
     modifier: Modifier = Modifier,
     viewModel: MapViewModel,
+    poiViewModel: POIViewModel,                                    // ← NEW
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
     val context = LocalContext.current
@@ -47,6 +49,7 @@ fun CampusMap(
             isNavigating = viewModel.uiBuildingState.mode == MapUIMode.ACTIVE_NAVIGATION,
             onManualMove = { viewModel.toggleAutoCenter(false) }
         )
+
         // 1. THE ROUTE LINE
         val segments = viewModel.uiBuildingState.routeSegments
 
@@ -63,7 +66,6 @@ fun CampusMap(
                 )
             }
         } else if (viewModel.uiBuildingState.routePoints.isNotEmpty()) {
-            // SAFE FALLBACK: If no segments exist (standard walking), use original logic
             val transportMode = viewModel.uiBuildingState.selectedTransportMode
             Polyline(
                 points = viewModel.uiBuildingState.routePoints,
@@ -107,25 +109,28 @@ fun CampusMap(
             }
         }
 
-        // 3. NAVIGATION MARKERS
+        // 3. POI MARKERS
+        POIMarkers(
+            poiViewModel  = poiViewModel,
+            onMarkerClick = { poi -> poiViewModel.onPOISelected(poi) }
+        )
+
+        // 4. NAVIGATION MARKERS
         if (viewModel.uiBuildingState.mode == MapUIMode.DIRECTIONS) {
-
-//
-                viewModel.uiBuildingState.startPoint?.let { startPos ->
-                    Marker(
-                        state = MarkerState(position = startPos),
-                        title = "Start: ${viewModel.uiBuildingState.startLocationName}",
-                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
-                    )
-                }
-                viewModel.uiBuildingState.endPoint?.let { endPos ->
-                    Marker(
-                        state = MarkerState(position = endPos),
-                        title = "Destination: ${viewModel.uiBuildingState.destinationName}",
-                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
-                    )
-                }
-
+            viewModel.uiBuildingState.startPoint?.let { startPos ->
+                Marker(
+                    state = MarkerState(position = startPos),
+                    title = "Start: ${viewModel.uiBuildingState.startLocationName}",
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                )
+            }
+            viewModel.uiBuildingState.endPoint?.let { endPos ->
+                Marker(
+                    state = MarkerState(position = endPos),
+                    title = "Destination: ${viewModel.uiBuildingState.destinationName}",
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+                )
+            }
         }
     }
 }

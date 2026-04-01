@@ -82,7 +82,7 @@ class MapsActivity : ComponentActivity() {
         CrashReporter.log("maps_activity_created")
         CampusRepo.initialize(this)
         ShuttleRepo.initialize(this)
-        BuildingEntrances.initialize(this)
+        BuildingEntrances.initialize(this)   // ← load building_entrances.json
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         authRepository      = AuthRepository(context = applicationContext)
@@ -91,7 +91,7 @@ class MapsActivity : ComponentActivity() {
         val locationProvider = TrueLocationProvider(fusedLocationClient)
         val routeProvider    = com.example.myapplication.logic.GoogleRouteProvider(BuildConfig.MAPS_API_KEY)
         val calendarProvider = GoogleCalendarProvider(context = this, tokenProvider = tokenProvider)
-        val indoorRepo       = IndoorRepository(applicationContext)
+        val indoorRepo       = IndoorRepository(applicationContext)  // ← for indoor room search
 
         viewModel = MapViewModel(
             locationProvider  = locationProvider,
@@ -242,6 +242,7 @@ private fun MapContent(
 
             val destination = when (phase) {
                 is IndoorJourneyPhase.IndoorToExit ->
+                    // Destination is the exit node of the current building
                     com.example.myapplication.logic.IndoorOutdoorRouter.IndoorDestination(
                         building = phase.buildingCode,
                         floor    = phase.floor,
@@ -249,10 +250,13 @@ private fun MapContent(
                         label    = "Exit"
                     )
                 is IndoorJourneyPhase.IndoorToDestination ->
+                    // Same building, possibly different floor.
+                    // nodeId may be null if the search couldn't find the node at query time;
+                    // IndoorNavViewModel.navigateTo will resolve it from the floor JSON.
                     com.example.myapplication.logic.IndoorOutdoorRouter.IndoorDestination(
                         building = phase.destination.buildingCode,
                         floor    = phase.destination.floor,
-                        nodeId   = phase.destination.nodeId ?: "",
+                        nodeId   = phase.destination.nodeId ?: "",  // "" triggers re-resolution in VM
                         label    = phase.destination.label
                     ).also {
                         android.util.Log.d("JOURNEY",
@@ -275,7 +279,7 @@ private fun MapContent(
                 onConfirmExit   = if (phase is IndoorJourneyPhase.IndoorToExit) {
                     { mapViewModel.onUserExited() }
                 } else null,
-                onBack          = { mapViewModel.clearJourney() },
+                onBack = { mapViewModel.clearJourney() },
                 onOutdoorHandoff = { outdoorSeg ->
                     mapViewModel.startOutdoorLeg(
                         origin      = outdoorSeg.origin,
@@ -287,3 +291,6 @@ private fun MapContent(
         }
     }
 }
+
+// floorsFor(code) is provided by IndoorBuildingConfig.floorsFor(code)
+// which is the single source of truth for building floor data.

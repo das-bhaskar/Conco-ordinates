@@ -56,7 +56,7 @@ sealed class SearchResult {
 
 class HybridSearchProvider(
     private val placesClient: PlacesClient,
-    private val indoorRepo:   IIndoorRepository
+    internal val indoorRepo:  IIndoorRepository
 ) {
     suspend fun search(query: String): List<SearchResult> {
         if (query.isBlank()) return listOf(SearchResult.CurrentLocation, SearchResult.Home)

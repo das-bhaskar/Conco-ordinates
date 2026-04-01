@@ -1,6 +1,6 @@
 package com.example.myapplication.logic
 
-import com.example.myapplication.data.indoor.IndoorRepository
+import com.example.myapplication.data.indoor.IIndoorRepository
 import com.example.myapplication.data.indoor.IndoorNode
 
 /**
@@ -24,7 +24,7 @@ object IndoorRoomResolver {
      * [buildingCode] by scanning all known floors.
      */
     suspend fun resolve(
-        repo:         IndoorRepository,
+        repo:         IIndoorRepository,
         buildingCode: String,
         query:        String,
         floors:       List<Int> = floorsFor(buildingCode)
@@ -68,7 +68,7 @@ object IndoorRoomResolver {
 
     /** Resolve the entrance node for a building (used when user picks "Building Entrance"). */
     fun resolveEntrance(
-        repo:         IndoorRepository,
+        repo:         IIndoorRepository,
         buildingCode: String,
         floor:        Int = 1
     ): String? = null  // filled in at runtime from IndoorRepository

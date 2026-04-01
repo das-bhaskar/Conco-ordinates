@@ -179,7 +179,7 @@ fun MapScreen(
                 navState        = uiState.navState,
                 onRecenterClick = { mapViewModel.forceRecenter() },
                 onExit          = { onBackToPreview() },
-                destinationName = { mapViewModel.uiBuildingState.destinationName }
+                destinationName = mapViewModel.uiBuildingState.destinationName
             )
         }
 

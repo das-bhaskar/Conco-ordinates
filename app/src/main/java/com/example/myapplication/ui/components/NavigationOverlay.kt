@@ -21,7 +21,7 @@ fun NavigationOverlay(
     navState:        NavigationState,
     onRecenterClick: () -> Unit,
     onExit:          () -> Unit,
-    destinationName: () -> String
+    destinationName: String
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
         // Top Instruction Box
@@ -114,7 +114,7 @@ fun NavigationOverlay(
             // to prevent the app from getting stuck if the user swipes back.
             onDismissRequest = onExit,
             title            = { Text("Destination Reached", fontWeight = FontWeight.Bold) },
-            text             = { Text("You have arrived at ${destinationName()}.") },
+            text             = { Text("You have arrived at $destinationName.") },
             confirmButton    = {
                 Button(
                     onClick = onExit,

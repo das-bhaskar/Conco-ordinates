@@ -13,17 +13,30 @@ import androidx.compose.ui.unit.sp
 import com.example.myapplication.data.Building
 import com.example.myapplication.data.indoor.BuildingEntrance
 import com.example.myapplication.data.indoor.BuildingEntrances
-import com.example.myapplication.data.indoor.IndoorRepository
-import com.example.myapplication.logic.IndoorRoomResolver
 import com.example.myapplication.ui.models.IndoorJourneyPhase
-import kotlinx.coroutines.launch
 
 private val Maroon = Color(0xFF912338)
 
+/**
+ * Hosts all dialogs for the indoor journey state machine.
+ *
+ * The composable is intentionally free of business logic and coroutines:
+ * - Room search is delegated to [onSearchRoom] which the ViewModel handles.
+ * - Entrance selection is delegated to [onEntranceSelected].
+ * This satisfies SRP and makes every dialog preview/test without a real repository.
+ */
 @Composable
 fun IndoorJourneyDialogs(
     phase:              IndoorJourneyPhase,
-    indoorRepo:         IndoorRepository,
+    /**
+     * Called when the user submits a room query.
+     * The ViewModel runs [IndoorRoomResolver.resolve] and updates
+     * [IndoorJourneyPhase] accordingly, then calls back via [onRoomResolved]
+     * or surfaces an error through the UiState.
+     */
+    onSearchRoom:       (query: String, buildingCode: String) -> Unit,
+    isSearching:        Boolean,
+    searchError:        String?,
     onRoomResolved:     (nodeId: String, label: String, buildingCode: String, floor: Int) -> Unit,
     onEntranceSelected: (BuildingEntrance) -> Unit,
     onDismiss:          () -> Unit
@@ -54,10 +67,12 @@ fun IndoorJourneyDialogs(
         // ── Ask current room ──────────────────────────────────────────────
         is IndoorJourneyPhase.AskCurrentRoom -> {
             AskCurrentRoomDialog(
-                phase       = phase,
-                indoorRepo  = indoorRepo,
-                onResolved  = onRoomResolved,
-                onDismiss   = onDismiss
+                phase        = phase,
+                onSearchRoom = onSearchRoom,
+                isSearching  = isSearching,
+                searchError  = searchError,
+                onResolved   = onRoomResolved,
+                onDismiss    = onDismiss
             )
         }
 
@@ -93,17 +108,21 @@ fun IndoorJourneyDialogs(
 
 // ── Ask current room dialog ───────────────────────────────────────────────────
 
+/**
+ * Room search dialog — the UI owns query state only.
+ * Business logic (coroutine, resolve, error) lives in the ViewModel;
+ * results flow back via [onSearchRoom] → ViewModel → [isSearching]/[searchError]/[onResolved].
+ */
 @Composable
 private fun AskCurrentRoomDialog(
-    phase:      IndoorJourneyPhase.AskCurrentRoom,
-    indoorRepo: IndoorRepository,
-    onResolved: (nodeId: String, label: String, buildingCode: String, floor: Int) -> Unit,
-    onDismiss:  () -> Unit
+    phase:       IndoorJourneyPhase.AskCurrentRoom,
+    onSearchRoom:(query: String, buildingCode: String) -> Unit,
+    isSearching: Boolean,
+    searchError: String?,
+    onResolved:  (nodeId: String, label: String, buildingCode: String, floor: Int) -> Unit,
+    onDismiss:   () -> Unit
 ) {
-    var query       by remember { mutableStateOf("") }
-    var isSearching by remember { mutableStateOf(false) }
-    var errorMsg    by remember { mutableStateOf<String?>(null) }
-    val scope       = rememberCoroutineScope()
+    var query        by remember { mutableStateOf("") }
     val buildingCode = phase.currentBuilding.code
 
     AlertDialog(
@@ -125,17 +144,21 @@ private fun AskCurrentRoomDialog(
                     color = MaterialTheme.colorScheme.onSurface.copy(.7f))
                 OutlinedTextField(
                     value         = query,
-                    onValueChange = { query = it; errorMsg = null },
+                    onValueChange = { query = it },
                     placeholder   = { Text("e.g. ${buildingCode}-119") },
                     singleLine    = true,
-                    isError       = errorMsg != null,
-                    supportingText = errorMsg?.let { { Text(it, color = MaterialTheme.colorScheme.error) } },
-                    modifier      = Modifier.fillMaxWidth()
+                    isError       = searchError != null,
+                    supportingText = searchError?.let {
+                        { Text(it, color = MaterialTheme.colorScheme.error) }
+                    },
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                        capitalization = androidx.compose.ui.text.input.KeyboardCapitalization.Characters
+                    ),
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(Modifier.height(4.dp))
                 Text("Or start from:", fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(.5f))
-                // Building entrance shortcut
                 val entrances = BuildingEntrances.forBuilding(buildingCode)
                 entrances.forEach { entrance ->
                     Surface(
@@ -160,24 +183,8 @@ private fun AskCurrentRoomDialog(
             Button(
                 enabled = query.isNotBlank() && !isSearching,
                 colors  = ButtonDefaults.buttonColors(containerColor = Maroon),
-                onClick = {
-                    scope.launch {
-                        isSearching = true
-                        val resolved = IndoorRoomResolver.resolve(
-                            repo         = indoorRepo,
-                            buildingCode = buildingCode,
-                            query        = query
-                        )
-                        isSearching = false
-                        errorMsg = if (resolved != null) {
-                            onResolved(resolved.nodeId, resolved.label,
-                                resolved.buildingCode, resolved.floor)
-                            null
-                        } else {
-                            "Room \"$query\" not found in $buildingCode"
-                        }
-                    }
-                }
+                // UI simply notifies the ViewModel — no coroutine here
+                onClick = { onSearchRoom(query, buildingCode) }
             ) {
                 if (isSearching) {
                     CircularProgressIndicator(Modifier.size(16.dp), color = Color.White, strokeWidth = 2.dp)

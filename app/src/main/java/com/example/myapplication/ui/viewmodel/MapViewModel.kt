@@ -104,6 +104,12 @@ class MapViewModel(
     var indoorJourneyState by mutableStateOf(IndoorJourneyState())
         private set
 
+    /** UI-facing state for the AskCurrentRoom dialog search. */
+    var indoorRoomSearching by mutableStateOf(false)
+        private set
+    var indoorRoomSearchError by mutableStateOf<String?>(null)
+        private set
+
     /**
      * The indoor building/floor/startNode the UI should currently display.
      * Derived from [indoorJourneyState] phase — the UI observes this instead
@@ -342,6 +348,33 @@ class MapViewModel(
         val phase = indoorJourneyState.phase as? IndoorJourneyPhase.AskCurrentRoom ?: return
         val next  = IndoorJourneyHandler.onCurrentRoomSelected(phase, nodeId, label, floor ?: 1)
         setJourneyPhase(next)   // use setJourneyPhase for consistent phase transitions
+    }
+
+    /**
+     * Called by the UI when the user submits a room query in [AskCurrentRoom] dialog.
+     * The ViewModel owns the coroutine, error state, and resolution — the UI is
+     * purely a notification sender (SRP).
+     */
+    fun searchCurrentRoom(query: String, buildingCode: String) {
+        val repo = (searchProvider as? com.example.myapplication.logic.HybridSearchProvider)
+            ?.indoorRepo ?: return
+        viewModelScope.launch {
+            indoorRoomSearching  = true
+            indoorRoomSearchError = null
+            val resolved = com.example.myapplication.logic.IndoorRoomResolver.resolve(
+                repo         = repo,
+                buildingCode = buildingCode,
+                query        = query
+            )
+            indoorRoomSearching = false
+            if (resolved != null) {
+                onCurrentRoomSelected(resolved.nodeId, resolved.label,
+                    resolved.buildingCode, resolved.floor)
+                indoorRoomSearchError = null
+            } else {
+                indoorRoomSearchError = "Room \"$query\" not found in $buildingCode"
+            }
+        }
     }
 
     fun onUserExited() {

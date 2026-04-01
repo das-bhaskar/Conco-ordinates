@@ -196,15 +196,15 @@ private fun MapContent(
     // the IndoorNavScreen below. Direct read (not LaunchedEffect) is synchronous
     // and avoids timing gaps between phase change and screen transition.
     val journeyPhase = mapViewModel.indoorJourneyState.phase
-    val context      = androidx.compose.ui.platform.LocalContext.current
-    val indoorRepo   = remember(context) {
-        com.example.myapplication.data.indoor.IndoorRepository(context.applicationContext)
-    }
 
     // ── Indoor journey dialogs ────────────────────────────────────────────────
     IndoorJourneyDialogs(
         phase              = journeyPhase,
-        indoorRepo         = indoorRepo,
+        onSearchRoom       = { query, buildingCode ->
+            mapViewModel.searchCurrentRoom(query, buildingCode)
+        },
+        isSearching        = mapViewModel.indoorRoomSearching,
+        searchError        = mapViewModel.indoorRoomSearchError,
         onRoomResolved     = { nodeId, label, buildingCode, floor ->
             mapViewModel.onCurrentRoomSelected(nodeId, label, buildingCode, floor)
         },

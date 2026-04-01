@@ -3,7 +3,7 @@ package com.example.myapplication.logic
 import androidx.compose.ui.geometry.Offset
 import com.example.myapplication.data.indoor.IndoorFloor
 import com.example.myapplication.data.indoor.IndoorNode
-import com.example.myapplication.data.indoor.IndoorRepository
+import com.example.myapplication.data.indoor.IIndoorRepository
 import com.example.myapplication.data.indoor.IndoorRoom
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
@@ -32,8 +32,8 @@ class IndoorRoomResolverTest {
                       rooms: List<IndoorRoom>, nodes: List<IndoorNode>) =
         IndoorFloor(building = building, floor = floorNum, rooms = rooms, nodes = nodes)
 
-    private suspend fun makeRepo(vararg floors: IndoorFloor): IndoorRepository {
-        val repo = mock<IndoorRepository>()
+    private suspend fun makeRepo(vararg floors: IndoorFloor): IIndoorRepository {
+        val repo = mock<IIndoorRepository>()
         // default: return null for all floors
         whenever(repo.getFloor(any(), any())).thenReturn(null)
         for (f in floors) {

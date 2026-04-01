@@ -2,7 +2,7 @@ package com.example.myapplication.logic
 
 import com.example.myapplication.data.indoor.IndoorEdge
 import com.example.myapplication.data.indoor.IndoorNode
-import com.example.myapplication.data.indoor.IndoorRepository
+import com.example.myapplication.data.indoor.IIndoorRepository
 
 /**
  * Finds a path that may cross multiple floors within one building.
@@ -28,7 +28,7 @@ class CrossFloorNavigator {
 
         /** Convenience entry-point — preserves the old object API for all callers. */
         suspend fun navigate(
-            repo:         IndoorRepository,
+            repo:         IIndoorRepository,
             building:     String,
             startFloor:   Int,
             startNodeId:  String,
@@ -61,7 +61,7 @@ class CrossFloorNavigator {
      * Build a cross-floor route inside one building.
      */
     suspend fun navigate(
-        repo:         IndoorRepository,
+        repo:         IIndoorRepository,
         building:     String,
         startFloor:   Int,
         startNodeId:  String,

@@ -1,7 +1,7 @@
 package com.example.myapplication.logic
 
 import com.example.myapplication.data.indoor.BuildingEntrances
-import com.example.myapplication.data.indoor.IndoorRepository
+import com.example.myapplication.data.indoor.IIndoorRepository
 import com.google.android.gms.maps.model.LatLng
 
 /**
@@ -58,7 +58,7 @@ object IndoorOutdoorRouter {
     // ── public entry point ────────────────────────────────────────────────────
 
     suspend fun buildRoute(
-        repo:          IndoorRepository,
+        repo:          IIndoorRepository,
         startBuilding: String,
         startFloor:    Int,
         startNodeId:   String,
@@ -82,7 +82,7 @@ object IndoorOutdoorRouter {
     // ── Case 1: same building, same floor ─────────────────────────────────────
 
     private suspend fun buildSingleFloorRoute(
-        repo:          IndoorRepository,
+        repo:          IIndoorRepository,
         startBuilding: String,
         startFloor:    Int,
         startNodeId:   String,
@@ -102,7 +102,7 @@ object IndoorOutdoorRouter {
     // ── Case 2: same building, different floor ────────────────────────────────
 
     private suspend fun buildCrossFloorRoute(
-        repo:          IndoorRepository,
+        repo:          IIndoorRepository,
         startBuilding: String,
         startFloor:    Int,
         startNodeId:   String,
@@ -138,7 +138,7 @@ object IndoorOutdoorRouter {
     // ── Case 3: different buildings ───────────────────────────────────────────
 
     private suspend fun buildMultiBuildingRoute(
-        repo:          IndoorRepository,
+        repo:          IIndoorRepository,
         startBuilding: String,
         startFloor:    Int,
         startNodeId:   String,
@@ -180,7 +180,7 @@ object IndoorOutdoorRouter {
 
     private suspend fun addExitWalkSegment(
         segments:      MutableList<Segment>,
-        repo:          IndoorRepository,
+        repo:          IIndoorRepository,
         startBuilding: String,
         startFloor:    Int,
         startNodeId:   String,
@@ -202,7 +202,7 @@ object IndoorOutdoorRouter {
 
     private suspend fun addDestinationWalkSegments(
         segments:    MutableList<Segment>,
-        repo:        IndoorRepository,
+        repo:        IIndoorRepository,
         destination: IndoorDestination,
         bestEntry:   com.example.myapplication.data.indoor.BuildingEntrance,
         preference:  TransferPreference

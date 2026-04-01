@@ -339,20 +339,20 @@ class MapViewModel(
     fun onCurrentRoomSelected(nodeId: String, label: String, buildingCode: String? = null, floor: Int? = null) {
         val phase = indoorJourneyState.phase as? IndoorJourneyPhase.AskCurrentRoom ?: return
         val next  = IndoorJourneyHandler.onCurrentRoomSelected(phase, nodeId, label, floor ?: 1)
-        indoorJourneyState = IndoorJourneyState(phase = next)
+        setJourneyPhase(next)   // use setJourneyPhase for consistent phase transitions
     }
 
     fun onUserExited() {
         val phase = indoorJourneyState.phase as? IndoorJourneyPhase.IndoorToExit ?: return
         val gps   = lastProcessedLocation ?: return
         val next  = IndoorJourneyHandler.onUserExited(phase, gps)
-        indoorJourneyState = IndoorJourneyState(phase = next)
+        setJourneyPhase(next)   // use setJourneyPhase — triggers startOutdoorLeg if next is Outdoor
     }
 
     fun onEntranceSelected(entrance: BuildingEntrance) {
         val phase = indoorJourneyState.phase as? IndoorJourneyPhase.AskEntryPoint ?: return
         val next  = IndoorJourneyHandler.onEntranceSelected(phase, entrance)
-        indoorJourneyState = IndoorJourneyState(phase = next)
+        setJourneyPhase(next)   // use setJourneyPhase for consistent phase transitions
     }
 
     /**

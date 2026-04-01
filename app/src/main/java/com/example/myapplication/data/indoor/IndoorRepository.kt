@@ -13,21 +13,25 @@ import org.json.JSONObject
  *
  * The cache uses [ConcurrentHashMap] to prevent data races when
  * [getFloor] is called concurrently from multiple Dispatchers.IO coroutines.
+ *
+ * Implements [IIndoorRepository] so that logic-layer classes and ViewModels
+ * can depend on the interface rather than this Android-specific class,
+ * enabling pure-JVM unit tests with a mock/fake implementation.
  */
 class IndoorRepository(
     private val context: Context,
     private val parser:  IndoorJsonParser = IndoorJsonParser()
-) {
+) : IIndoorRepository {
 
     private val cache = java.util.concurrent.ConcurrentHashMap<String, IndoorFloor>()
 
-    suspend fun getFloor(building: String, floor: Int): IndoorFloor? =
+    override suspend fun getFloor(building: String, floor: Int): IndoorFloor? =
         withContext(Dispatchers.IO) {
             val key = "${building.lowercase()}_$floor"
             cache[key] ?: loadFromRaw(building, floor)?.also { cache[key] = it }
         }
 
-    fun clearCache() = cache.clear()
+    override fun clearCache() = cache.clear()
 
     // ── private ───────────────────────────────────────────────────────────────
 

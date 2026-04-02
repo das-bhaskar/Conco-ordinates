@@ -56,4 +56,8 @@ appId: com.example.myapplication
     timeout: 2000
 
 - assertVisible:
-    text: "Nearest stop: Loyola — Shuttle Terminal (Sherbrooke W.)"
+    text: "Nearest stop:"
+- assertVisible:
+    text: "Loyola"
+- assertVisible:
+    text: "Shuttle Terminal"

@@ -54,10 +54,17 @@ appId: com.example.myapplication
 - tapOn: "Shuttle"
 - waitForAnimationToEnd:
     timeout: 2000
+- runFlow:
+    when:
+      visible: "No more shuttles today"
+    commands:
+      - assertVisible:
+          text: "No more shuttles today"
 
-- assertVisible:
-    text: "Nearest stop:"
-- assertVisible:
-    text: "Loyola"
-- assertVisible:
-    text: "Shuttle Terminal"
+
+- runFlow:
+    when:
+      visible: "Nearest stop: Loyola — Shuttle Terminal (Sherbrooke W.)"
+    commands:
+      - assertVisible:
+          text: "Nearest stop: Loyola — Shuttle Terminal (Sherbrooke W.)"

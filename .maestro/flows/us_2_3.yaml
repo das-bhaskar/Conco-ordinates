@@ -57,3 +57,5 @@ appId: com.example.myapplication
     text: "Start"
 - tapOn:
     text: "Start"
+- waitForAnimationToEnd:
+    timeout: 2000

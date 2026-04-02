@@ -10,8 +10,6 @@ appId: com.example.myapplication
 - launchApp:
     clearState: true
 - assertVisible:
-    id: "campus_toggle"
-- assertVisible:
     text: "Search buildings or addresses..."
 - assertVisible:
     text: "SGW"

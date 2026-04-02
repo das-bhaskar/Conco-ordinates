@@ -1,0 +1,2453 @@
+{
+  "building": "MB",
+  "floor": -2,
+  "corridors": [
+    {
+      "id": "corridor--2-1",
+      "polygon": [
+        [
+          0.034,
+          0.4413
+        ],
+        [
+          0.0378,
+          0.5326
+        ],
+        [
+          0.3954,
+          0.5023
+        ],
+        [
+          0.4499,
+          0.5029
+        ],
+        [
+          0.4958,
+          0.5029
+        ],
+        [
+          0.4942,
+          0.2787
+        ],
+        [
+          0.4967,
+          0.2787
+        ],
+        [
+          0.4968,
+          0.6224
+        ],
+        [
+          0.5573,
+          0.6226
+        ],
+        [
+          0.5577,
+          0.8972
+        ],
+        [
+          0.6046,
+          0.897
+        ],
+        [
+          0.605,
+          0.8349
+        ],
+        [
+          0.846,
+          0.835
+        ],
+        [
+          0.8462,
+          0.8967
+        ],
+        [
+          0.866,
+          0.8967
+        ],
+        [
+          0.8662,
+          0.8715
+        ],
+        [
+          0.8842,
+          0.8717
+        ],
+        [
+          0.884,
+          0.753
+        ],
+        [
+          0.843,
+          0.7528
+        ],
+        [
+          0.8428,
+          0.8056
+        ],
+        [
+          0.7503,
+          0.8059
+        ],
+        [
+          0.7505,
+          0.7704
+        ],
+        [
+          0.7233,
+          0.7706
+        ],
+        [
+          0.7231,
+          0.8044
+        ],
+        [
+          0.6853,
+          0.805
+        ],
+        [
+          0.6851,
+          0.7831
+        ],
+        [
+          0.6343,
+          0.7831
+        ],
+        [
+          0.6341,
+          0.8044
+        ],
+        [
+          0.598,
+          0.8044
+        ],
+        [
+          0.598,
+          0.6059
+        ],
+        [
+          0.7227,
+          0.6056
+        ],
+        [
+          0.7231,
+          0.6445
+        ],
+        [
+          0.7449,
+          0.6445
+        ],
+        [
+          0.7451,
+          0.604
+        ],
+        [
+          0.8407,
+          0.6042
+        ],
+        [
+          0.8407,
+          0.5044
+        ],
+        [
+          0.8038,
+          0.5044
+        ],
+        [
+          0.8038,
+          0.5677
+        ],
+        [
+          0.7685,
+          0.5679
+        ],
+        [
+          0.7683,
+          0.5549
+        ],
+        [
+          0.7235,
+          0.5547
+        ],
+        [
+          0.7233,
+          0.5681
+        ],
+        [
+          0.598,
+          0.5681
+        ],
+        [
+          0.5976,
+          0.5048
+        ],
+        [
+          0.5301,
+          0.5042
+        ],
+        [
+          0.5297,
+          0.2294
+        ],
+        [
+          0.6632,
+          0.2297
+        ],
+        [
+          0.6632,
+          0.2422
+        ],
+        [
+          0.7101,
+          0.2426
+        ],
+        [
+          0.7105,
+          0.2301
+        ],
+        [
+          0.7201,
+          0.2301
+        ],
+        [
+          0.7201,
+          0.1583
+        ],
+        [
+          0.6082,
+          0.1585
+        ],
+        [
+          0.608,
+          0.2025
+        ],
+        [
+          0.3554,
+          0.2031
+        ],
+        [
+          0.3721,
+          0.3167
+        ],
+        [
+          0.4054,
+          0.3127
+        ],
+        [
+          0.4203,
+          0.4116
+        ],
+        [
+          0.3849,
+          0.4112
+        ]
+      ]
+    }
+  ],
+  "rooms": [
+    {
+      "id": "MB-S2-501",
+      "type": "classroom",
+      "label": "MB-S2.501",
+      "polygon": [
+        [
+          0.536,
+          0.093
+        ],
+        [
+          0.608,
+          0.093
+        ],
+        [
+          0.608,
+          0.202
+        ],
+        [
+          0.536,
+          0.202
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-502",
+      "type": "classroom",
+      "label": "MB-S2.502",
+      "polygon": [
+        [
+          0.607,
+          0.093
+        ],
+        [
+          0.646,
+          0.093
+        ],
+        [
+          0.646,
+          0.157
+        ],
+        [
+          0.607,
+          0.157
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-503",
+      "type": "classroom",
+      "label": "MB-S2.503",
+      "polygon": [
+        [
+          0.646,
+          0.093
+        ],
+        [
+          0.682,
+          0.093
+        ],
+        [
+          0.682,
+          0.157
+        ],
+        [
+          0.646,
+          0.157
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-504",
+      "type": "classroom",
+      "label": "MB-S2.504",
+      "polygon": [
+        [
+          0.682,
+          0.093
+        ],
+        [
+          0.72,
+          0.093
+        ],
+        [
+          0.72,
+          0.157
+        ],
+        [
+          0.682,
+          0.157
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-505",
+      "type": "classroom",
+      "label": "MB-S2.505",
+      "polygon": [
+        [
+          0.721,
+          0.093
+        ],
+        [
+          0.842,
+          0.093
+        ],
+        [
+          0.842,
+          0.23
+        ],
+        [
+          0.721,
+          0.23
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-510",
+      "type": "classroom",
+      "label": "MB-S2.510",
+      "polygon": [
+        [
+          0.599,
+          0.526
+        ],
+        [
+          0.64,
+          0.526
+        ],
+        [
+          0.64,
+          0.566
+        ],
+        [
+          0.599,
+          0.566
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-511",
+      "type": "classroom",
+      "label": "MB-S2.511",
+      "polygon": [
+        [
+          0.64,
+          0.526
+        ],
+        [
+          0.679,
+          0.526
+        ],
+        [
+          0.679,
+          0.566
+        ],
+        [
+          0.64,
+          0.566
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-512",
+      "type": "classroom",
+      "label": "MB-S2.512",
+      "polygon": [
+        [
+          0.68,
+          0.526
+        ],
+        [
+          0.722,
+          0.526
+        ],
+        [
+          0.722,
+          0.566
+        ],
+        [
+          0.68,
+          0.566
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-513",
+      "type": "classroom",
+      "label": "MB-S2.513",
+      "polygon": [
+        [
+          0.722,
+          0.503
+        ],
+        [
+          0.769,
+          0.503
+        ],
+        [
+          0.769,
+          0.553
+        ],
+        [
+          0.722,
+          0.553
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-514",
+      "type": "classroom",
+      "label": "MB-S2.514",
+      "polygon": [
+        [
+          0.769,
+          0.503
+        ],
+        [
+          0.802,
+          0.503
+        ],
+        [
+          0.802,
+          0.567
+        ],
+        [
+          0.769,
+          0.567
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-515",
+      "type": "classroom",
+      "label": "MB-S2.515",
+      "polygon": [
+        [
+          0.746,
+          0.605
+        ],
+        [
+          0.842,
+          0.605
+        ],
+        [
+          0.842,
+          0.645
+        ],
+        [
+          0.746,
+          0.645
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-516",
+      "type": "office",
+      "label": "MB-S2.516",
+      "polygon": [
+        [
+          0.722,
+          0.646
+        ],
+        [
+          0.779,
+          0.646
+        ],
+        [
+          0.779,
+          0.678
+        ],
+        [
+          0.722,
+          0.678
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-517",
+      "type": "classroom",
+      "label": "MB-S2.517",
+      "polygon": [
+        [
+          0.68,
+          0.607
+        ],
+        [
+          0.722,
+          0.607
+        ],
+        [
+          0.722,
+          0.642
+        ],
+        [
+          0.68,
+          0.642
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-518",
+      "type": "classroom",
+      "label": "MB-S2.518",
+      "polygon": [
+        [
+          0.64,
+          0.607
+        ],
+        [
+          0.68,
+          0.607
+        ],
+        [
+          0.68,
+          0.642
+        ],
+        [
+          0.64,
+          0.642
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-519",
+      "type": "classroom",
+      "label": "MB-S2.519",
+      "polygon": [
+        [
+          0.599,
+          0.607
+        ],
+        [
+          0.641,
+          0.607
+        ],
+        [
+          0.641,
+          0.642
+        ],
+        [
+          0.599,
+          0.642
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-520",
+      "type": "classroom",
+      "label": "MB-S2.520",
+      "polygon": [
+        [
+          0.599,
+          0.642
+        ],
+        [
+          0.722,
+          0.642
+        ],
+        [
+          0.722,
+          0.709
+        ],
+        [
+          0.599,
+          0.709
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-521",
+      "type": "office",
+      "label": "MB-S2.521",
+      "polygon": [
+        [
+          0.722,
+          0.678
+        ],
+        [
+          0.779,
+          0.678
+        ],
+        [
+          0.779,
+          0.769
+        ],
+        [
+          0.722,
+          0.769
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-522",
+      "type": "office",
+      "label": "MB-S2.522",
+      "polygon": [
+        [
+          0.752,
+          0.769
+        ],
+        [
+          0.842,
+          0.769
+        ],
+        [
+          0.842,
+          0.805
+        ],
+        [
+          0.752,
+          0.805
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-523",
+      "type": "office",
+      "label": "MB-S2.523",
+      "polygon": [
+        [
+          0.885,
+          0.752
+        ],
+        [
+          0.96,
+          0.752
+        ],
+        [
+          0.96,
+          0.873
+        ],
+        [
+          0.885,
+          0.873
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-524",
+      "type": "office",
+      "label": "MB-S2.524",
+      "polygon": [
+        [
+          0.867,
+          0.872
+        ],
+        [
+          0.961,
+          0.872
+        ],
+        [
+          0.961,
+          0.979
+        ],
+        [
+          0.867,
+          0.979
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-525",
+      "type": "office",
+      "label": "MB-S2.525",
+      "polygon": [
+        [
+          0.717,
+          0.898
+        ],
+        [
+          0.867,
+          0.898
+        ],
+        [
+          0.867,
+          0.979
+        ],
+        [
+          0.717,
+          0.979
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.401",
+      "type": "office",
+      "label": "MB-S2.401",
+      "polygon": [
+        [
+          0.606,
+          0.836
+        ],
+        [
+          0.716,
+          0.836
+        ],
+        [
+          0.716,
+          0.98
+        ],
+        [
+          0.606,
+          0.98
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2ES",
+      "type": "escalator",
+      "label": "MB-S2ES",
+      "polygon": [
+        [
+          0.4515,
+          0.5034
+        ],
+        [
+          0.4505,
+          0.6039
+        ],
+        [
+          0.4931,
+          0.6039
+        ],
+        [
+          0.4947,
+          0.504
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.195",
+      "type": "staircase",
+      "label": "MB-S2.195",
+      "polygon": [
+        [
+          0.3954,
+          0.5029
+        ],
+        [
+          0.4499,
+          0.5034
+        ],
+        [
+          0.4494,
+          0.605
+        ],
+        [
+          0.4089,
+          0.605
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.296",
+      "type": "staircase",
+      "label": "MB-S2.296",
+      "polygon": [
+        [
+          0.3727,
+          0.3187
+        ],
+        [
+          0.3846,
+          0.4105
+        ],
+        [
+          0.4175,
+          0.4111
+        ],
+        [
+          0.4029,
+          0.3155
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.410",
+      "type": "washroom",
+      "label": "MB-S2.410",
+      "polygon": [
+        [
+          0.5992,
+          0.7094
+        ],
+        [
+          0.5994,
+          0.8029
+        ],
+        [
+          0.633,
+          0.8033
+        ],
+        [
+          0.6329,
+          0.7806
+        ],
+        [
+          0.66,
+          0.7808
+        ],
+        [
+          0.6605,
+          0.7099
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.420",
+      "type": "washroom",
+      "label": "MB-S2.420",
+      "polygon": [
+        [
+          0.6619,
+          0.7101
+        ],
+        [
+          0.7212,
+          0.7098
+        ],
+        [
+          0.7212,
+          0.8027
+        ],
+        [
+          0.6872,
+          0.8029
+        ],
+        [
+          0.6872,
+          0.7437
+        ],
+        [
+          0.6618,
+          0.7436
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.418",
+      "type": "washroom",
+      "label": "MB-S2.418",
+      "polygon": [
+        [
+          0.6616,
+          0.7457
+        ],
+        [
+          0.6618,
+          0.7808
+        ],
+        [
+          0.6848,
+          0.781
+        ],
+        [
+          0.6853,
+          0.7454
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.435",
+      "type": "classroom",
+      "label": "MB-S2.435",
+      "polygon": [
+        [
+          0.78,
+          0.6464
+        ],
+        [
+          0.78,
+          0.7686
+        ],
+        [
+          0.842,
+          0.7686
+        ],
+        [
+          0.842,
+          0.7516
+        ],
+        [
+          0.9605,
+          0.7513
+        ],
+        [
+          0.9608,
+          0.6366
+        ],
+        [
+          0.8428,
+          0.6364
+        ],
+        [
+          0.8425,
+          0.6462
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.345",
+      "type": "classroom",
+      "label": "MB-S2.345",
+      "polygon": [
+        [
+          0.6003,
+          0.5045
+        ],
+        [
+          0.5997,
+          0.5247
+        ],
+        [
+          0.7209,
+          0.525
+        ],
+        [
+          0.7209,
+          0.5034
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.330",
+      "type": "classroom",
+      "label": "MB-S2.330",
+      "polygon": [
+        [
+          0.6875,
+          0.2454
+        ],
+        [
+          0.6878,
+          0.5022
+        ],
+        [
+          0.8399,
+          0.5022
+        ],
+        [
+          0.8413,
+          0.2311
+        ],
+        [
+          0.712,
+          0.2308
+        ],
+        [
+          0.712,
+          0.2429
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.210",
+      "type": "classroom",
+      "label": "MB-S2.210",
+      "polygon": [
+        [
+          0.5315,
+          0.2311
+        ],
+        [
+          0.5322,
+          0.5022
+        ],
+        [
+          0.685,
+          0.5018
+        ],
+        [
+          0.6853,
+          0.2446
+        ],
+        [
+          0.6612,
+          0.2439
+        ],
+        [
+          0.6608,
+          0.2308
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.245",
+      "type": "office",
+      "label": "MB-S2.245",
+      "polygon": [
+        [
+          0.3404,
+          0.0937
+        ],
+        [
+          0.3554,
+          0.201
+        ],
+        [
+          0.5337,
+          0.2006
+        ],
+        [
+          0.5351,
+          0.0944
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.295",
+      "type": "classroom",
+      "label": "MB-S2.295",
+      "polygon": [
+        [
+          0.3966,
+          0.0091
+        ],
+        [
+          0.3976,
+          0.0905
+        ],
+        [
+          0.4207,
+          0.0916
+        ],
+        [
+          0.4204,
+          0.0099
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2-105",
+      "type": "classroom",
+      "label": "MB-S2-105",
+      "polygon": [
+        [
+          0.4479,
+          0.8996
+        ],
+        [
+          0.4578,
+          0.9781
+        ],
+        [
+          0.6048,
+          0.9781
+        ],
+        [
+          0.6053,
+          0.8994
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.115",
+      "type": "classroom",
+      "label": "MB-S2.115",
+      "polygon": [
+        [
+          0.4281,
+          0.7506
+        ],
+        [
+          0.4469,
+          0.8964
+        ],
+        [
+          0.5556,
+          0.8964
+        ],
+        [
+          0.5556,
+          0.7506
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.135",
+      "type": "classroom",
+      "label": "MB-S2.135",
+      "polygon": [
+        [
+          0.5554,
+          0.6721
+        ],
+        [
+          0.5039,
+          0.6716
+        ],
+        [
+          0.5037,
+          0.7483
+        ],
+        [
+          0.5554,
+          0.7483
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.145",
+      "type": "office",
+      "label": "MB-S2.145",
+      "polygon": [
+        [
+          0.5554,
+          0.624
+        ],
+        [
+          0.5558,
+          0.6691
+        ],
+        [
+          0.4177,
+          0.67
+        ],
+        [
+          0.4093,
+          0.6072
+        ],
+        [
+          0.4939,
+          0.6072
+        ],
+        [
+          0.4948,
+          0.6235
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.147",
+      "type": "office",
+      "label": "MB-S2.147",
+      "polygon": [
+        [
+          0.4175,
+          0.6721
+        ],
+        [
+          0.4272,
+          0.7483
+        ],
+        [
+          0.5025,
+          0.7485
+        ],
+        [
+          0.5032,
+          0.6716
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.494",
+      "type": "staircase",
+      "label": "MB-S2.494",
+      "polygon": [
+        [
+          0.7182,
+          0.8367
+        ],
+        [
+          0.718,
+          0.8639
+        ],
+        [
+          0.8444,
+          0.8643
+        ],
+        [
+          0.8444,
+          0.8367
+        ]
+      ]
+    },
+    {
+      "id": "MB-S2.470",
+      "type": "office",
+      "label": "MB-S2.470",
+      "polygon": [
+        [
+          0.7182,
+          0.8645
+        ],
+        [
+          0.7178,
+          0.897
+        ],
+        [
+          0.8446,
+          0.8966
+        ],
+        [
+          0.8442,
+          0.8649
+        ]
+      ]
+    }
+  ],
+  "pois": [
+    {
+      "id": "washroom--2-1",
+      "type": "washroom",
+      "label": "Washroom",
+      "x": 0.6536,
+      "y": 0.7821,
+      "nodeId": "node-MB--2-washroom--2-1"
+    },
+    {
+      "id": "water_fountain--2-1",
+      "type": "water_fountain",
+      "label": "Water Fountain",
+      "x": 0.6603,
+      "y": 0.7813,
+      "nodeId": "node-MB--2-water_fountain--2-1"
+    },
+    {
+      "id": "escalator--2-1",
+      "type": "escalator",
+      "label": "Escalator",
+      "x": 0.4729,
+      "y": 0.5035,
+      "nodeId": "node-MB--2-escalator--2-1"
+    },
+    {
+      "id": "staircase--2-1",
+      "type": "staircase",
+      "label": "Staircase",
+      "x": 0.4223,
+      "y": 0.5032,
+      "nodeId": "node-MB--2-staircase--2-1"
+    },
+    {
+      "id": "staircase--2-2",
+      "type": "staircase",
+      "label": "Staircase",
+      "x": 0.3991,
+      "y": 0.4097,
+      "nodeId": "node-MB--2-staircase--2-2"
+    },
+    {
+      "id": "elevator--2-1",
+      "type": "elevator",
+      "label": "Elevator",
+      "x": 0.6585,
+      "y": 0.588,
+      "nodeId": "node-MB--2-elevator--2-1"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "node-MB-n2-exit1",
+      "x": 0.3794,
+      "y": 0.4558,
+      "type": "ENTRANCE",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r501",
+      "x": 0.572,
+      "y": 0.1475,
+      "type": "ROOM",
+      "roomId": "MB-S2-501",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r502",
+      "x": 0.6265,
+      "y": 0.125,
+      "type": "ROOM",
+      "roomId": "MB-S2-502",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r503",
+      "x": 0.664,
+      "y": 0.125,
+      "type": "ROOM",
+      "roomId": "MB-S2-503",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r504",
+      "x": 0.701,
+      "y": 0.125,
+      "type": "ROOM",
+      "roomId": "MB-S2-504",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r505",
+      "x": 0.7254,
+      "y": 0.2207,
+      "type": "ROOM",
+      "roomId": "MB-S2-505",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r510",
+      "x": 0.6195,
+      "y": 0.546,
+      "type": "ROOM",
+      "roomId": "MB-S2-510",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r511",
+      "x": 0.6595,
+      "y": 0.546,
+      "type": "ROOM",
+      "roomId": "MB-S2-511",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r512",
+      "x": 0.701,
+      "y": 0.546,
+      "type": "ROOM",
+      "roomId": "MB-S2-512",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r513",
+      "x": 0.7455,
+      "y": 0.528,
+      "type": "ROOM",
+      "roomId": "MB-S2-513",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r514",
+      "x": 0.7855,
+      "y": 0.535,
+      "type": "ROOM",
+      "roomId": "MB-S2-514",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r515",
+      "x": 0.794,
+      "y": 0.625,
+      "type": "ROOM",
+      "roomId": "MB-S2-515",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r516",
+      "x": 0.7505,
+      "y": 0.662,
+      "type": "ROOM",
+      "roomId": "MB-S2-516",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r517",
+      "x": 0.701,
+      "y": 0.6245,
+      "type": "ROOM",
+      "roomId": "MB-S2-517",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r518",
+      "x": 0.66,
+      "y": 0.6245,
+      "type": "ROOM",
+      "roomId": "MB-S2-518",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r519",
+      "x": 0.62,
+      "y": 0.6245,
+      "type": "ROOM",
+      "roomId": "MB-S2-519",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r520",
+      "x": 0.6605,
+      "y": 0.6755,
+      "type": "ROOM",
+      "roomId": "MB-S2-520",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r521",
+      "x": 0.733,
+      "y": 0.7629,
+      "type": "ROOM",
+      "roomId": "MB-S2-521",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r522",
+      "x": 0.7937,
+      "y": 0.7897,
+      "type": "ROOM",
+      "roomId": "MB-S2-522",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r523",
+      "x": 0.8886,
+      "y": 0.8618,
+      "type": "ROOM",
+      "roomId": "MB-S2-523",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r524",
+      "x": 0.8724,
+      "y": 0.8795,
+      "type": "ROOM",
+      "roomId": "MB-S2-524",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-r525",
+      "x": 0.8577,
+      "y": 0.9002,
+      "type": "ROOM",
+      "roomId": "MB-S2-525",
+      "accessible": true
+    },
+    {
+      "id": "node-MB-n2-401",
+      "x": 0.661,
+      "y": 0.8916,
+      "type": "ROOM",
+      "roomId": "MB-S2.401",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-washroom--2-1",
+      "x": 0.6536,
+      "y": 0.7821,
+      "type": "CORRIDOR",
+      "roomId": "washroom--2-1",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-water_fountain--2-1",
+      "x": 0.6603,
+      "y": 0.7813,
+      "type": "CORRIDOR",
+      "roomId": "water_fountain--2-1",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-MB-S2.435-door",
+      "x": 0.8625,
+      "y": 0.749,
+      "type": "ROOM",
+      "roomId": "MB-S2.435",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-MB-S2.345-door",
+      "x": 0.6604,
+      "y": 0.5144,
+      "type": "ROOM",
+      "roomId": "MB-S2.345",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-MB-S2.330-door",
+      "x": 0.7467,
+      "y": 0.3258,
+      "type": "ROOM",
+      "roomId": "MB-S2.330",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-MB-S2.210-door",
+      "x": 0.626,
+      "y": 0.3258,
+      "type": "ROOM",
+      "roomId": "MB-S2.210",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-MB-S2.245-door",
+      "x": 0.4411,
+      "y": 0.1474,
+      "type": "ROOM",
+      "roomId": "MB-S2.245",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-MB-S2.295-door",
+      "x": 0.4088,
+      "y": 0.0503,
+      "type": "ROOM",
+      "roomId": "MB-S2.295",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-MB-S2-105-door",
+      "x": 0.6007,
+      "y": 0.901,
+      "type": "ROOM",
+      "roomId": "MB-S2-105",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-MB-S2.115-door",
+      "x": 0.5513,
+      "y": 0.8903,
+      "type": "ROOM",
+      "roomId": "MB-S2.115",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-MB-S2.135-door",
+      "x": 0.5558,
+      "y": 0.6811,
+      "type": "ROOM",
+      "roomId": "MB-S2.135",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-MB-S2.145-door",
+      "x": 0.554,
+      "y": 0.6625,
+      "type": "ROOM",
+      "roomId": "MB-S2.145",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-MB-S2.147-door",
+      "x": 0.4911,
+      "y": 0.6718,
+      "type": "ROOM",
+      "roomId": "MB-S2.147",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-38",
+      "x": 0.2093,
+      "y": 0.473,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-39",
+      "x": 0.414,
+      "y": 0.4522,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-40",
+      "x": 0.4687,
+      "y": 0.4512,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-41",
+      "x": 0.4676,
+      "y": 0.3931,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-42",
+      "x": 0.4643,
+      "y": 0.3357,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-43",
+      "x": 0.4616,
+      "y": 0.282,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-44",
+      "x": 0.3861,
+      "y": 0.2859,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-45",
+      "x": 0.3839,
+      "y": 0.2349,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-46",
+      "x": 0.4485,
+      "y": 0.2311,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-47",
+      "x": 0.512,
+      "y": 0.2333,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-48",
+      "x": 0.5125,
+      "y": 0.2908,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-49",
+      "x": 0.5114,
+      "y": 0.3515,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-50",
+      "x": 0.5142,
+      "y": 0.4293,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-51",
+      "x": 0.5147,
+      "y": 0.484,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-53",
+      "x": 0.512,
+      "y": 0.5688,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-54",
+      "x": 0.5755,
+      "y": 0.5869,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-55",
+      "x": 0.6242,
+      "y": 0.5863,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-56",
+      "x": 0.6937,
+      "y": 0.5869,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-57",
+      "x": 0.7457,
+      "y": 0.582,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-58",
+      "x": 0.8196,
+      "y": 0.582,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-59",
+      "x": 0.824,
+      "y": 0.5382,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-60",
+      "x": 0.576,
+      "y": 0.6482,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-61",
+      "x": 0.5738,
+      "y": 0.7013,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-62",
+      "x": 0.5749,
+      "y": 0.7571,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-63",
+      "x": 0.5738,
+      "y": 0.7976,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-64",
+      "x": 0.5727,
+      "y": 0.8321,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-65",
+      "x": 0.616,
+      "y": 0.8206,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-66",
+      "x": 0.5771,
+      "y": 0.8764,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-67",
+      "x": 0.657,
+      "y": 0.8212,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-68",
+      "x": 0.7008,
+      "y": 0.819,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-69",
+      "x": 0.7517,
+      "y": 0.8179,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-70",
+      "x": 0.7971,
+      "y": 0.819,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-71",
+      "x": 0.8579,
+      "y": 0.8195,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-72",
+      "x": 0.8584,
+      "y": 0.785,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-73",
+      "x": 0.8595,
+      "y": 0.8573,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-MB-S2.494-door",
+      "x": 0.721,
+      "y": 0.8375,
+      "type": "ROOM",
+      "roomId": "MB-S2.494",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-MB-S2.470-door",
+      "x": 0.8423,
+      "y": 0.8818,
+      "type": "ROOM",
+      "roomId": "MB-S2.470",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-escalator--2-1",
+      "x": 0.4729,
+      "y": 0.5035,
+      "type": "ESCALATOR",
+      "roomId": "escalator--2-1",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-staircase--2-1",
+      "x": 0.4223,
+      "y": 0.5032,
+      "type": "STAIRCASE",
+      "roomId": "staircase--2-1",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-staircase--2-2",
+      "x": 0.3991,
+      "y": 0.4097,
+      "type": "STAIRCASE",
+      "roomId": "staircase--2-2",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-78",
+      "x": 0.5455,
+      "y": 0.215,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-79",
+      "x": 0.5807,
+      "y": 0.2158,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-80",
+      "x": 0.6366,
+      "y": 0.2166,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-81",
+      "x": 0.6305,
+      "y": 0.1806,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-82",
+      "x": 0.684,
+      "y": 0.1791,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-83",
+      "x": 0.6848,
+      "y": 0.2181,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-MB--2-elevator--2-1",
+      "x": 0.6585,
+      "y": 0.588,
+      "type": "ELEVATOR",
+      "roomId": "elevator--2-1",
+      "accessible": true
+    }
+  ],
+  "edges": [
+    {
+      "from": "node-MB--2-staircase--2-1",
+      "to": "node-MB--2-escalator--2-1",
+      "weight": 0.5,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-staircase--2-2",
+      "to": "node-MB--2-39",
+      "weight": 0.5,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-38",
+      "to": "node-MB-n2-exit1",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-exit1",
+      "to": "node-MB--2-39",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-39",
+      "to": "node-MB--2-staircase--2-2",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-39",
+      "to": "node-MB--2-staircase--2-1",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-39",
+      "to": "node-MB--2-40",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-40",
+      "to": "node-MB--2-escalator--2-1",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-elevator--2-1",
+      "to": "node-MB--2-55",
+      "weight": 0.5,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-40",
+      "to": "node-MB--2-41",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-41",
+      "to": "node-MB--2-42",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-42",
+      "to": "node-MB--2-43",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-43",
+      "to": "node-MB--2-46",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-46",
+      "to": "node-MB--2-45",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-45",
+      "to": "node-MB--2-44",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-44",
+      "to": "node-MB--2-43",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-46",
+      "to": "node-MB--2-47",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-47",
+      "to": "node-MB--2-48",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-48",
+      "to": "node-MB--2-49",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-49",
+      "to": "node-MB--2-50",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-50",
+      "to": "node-MB--2-51",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-47",
+      "to": "node-MB--2-78",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-78",
+      "to": "node-MB--2-79",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-79",
+      "to": "node-MB--2-80",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-80",
+      "to": "node-MB--2-83",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-83",
+      "to": "node-MB--2-82",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-82",
+      "to": "node-MB--2-81",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-81",
+      "to": "node-MB-n2-r502",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-81",
+      "to": "node-MB--2-80",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r503",
+      "to": "node-MB--2-81",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r504",
+      "to": "node-MB--2-82",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-83",
+      "to": "node-MB-n2-r505",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-51",
+      "to": "node-MB--2-53",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-53",
+      "to": "node-MB--2-54",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-54",
+      "to": "node-MB--2-55",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-56",
+      "to": "node-MB--2-elevator--2-1",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-56",
+      "to": "node-MB--2-57",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-57",
+      "to": "node-MB--2-58",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-58",
+      "to": "node-MB--2-59",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-59",
+      "to": "node-MB--2-MB-S2.330-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-83",
+      "to": "node-MB--2-MB-S2.330-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-83",
+      "to": "node-MB--2-MB-S2.210-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-54",
+      "to": "node-MB--2-MB-S2.210-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-54",
+      "to": "node-MB--2-60",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-60",
+      "to": "node-MB--2-MB-S2.145-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-MB-S2.145-door",
+      "to": "node-MB--2-MB-S2.147-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-60",
+      "to": "node-MB--2-61",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-60",
+      "to": "node-MB--2-MB-S2.135-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-61",
+      "to": "node-MB--2-62",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-62",
+      "to": "node-MB--2-63",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-63",
+      "to": "node-MB--2-64",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-64",
+      "to": "node-MB--2-66",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-66",
+      "to": "node-MB--2-MB-S2.115-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-66",
+      "to": "node-MB--2-MB-S2-105-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-66",
+      "to": "node-MB--2-MB-S2-105-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-64",
+      "to": "node-MB--2-65",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-65",
+      "to": "node-MB--2-67",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-67",
+      "to": "node-MB--2-washroom--2-1",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-67",
+      "to": "node-MB--2-water_fountain--2-1",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-67",
+      "to": "node-MB--2-68",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-68",
+      "to": "node-MB--2-69",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-69",
+      "to": "node-MB--2-70",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-70",
+      "to": "node-MB--2-71",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-71",
+      "to": "node-MB--2-72",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-72",
+      "to": "node-MB--2-MB-S2.435-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-71",
+      "to": "node-MB--2-73",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-73",
+      "to": "node-MB-n2-r523",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-73",
+      "to": "node-MB--2-MB-S2.470-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-73",
+      "to": "node-MB-n2-r524",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-73",
+      "to": "node-MB-n2-r525",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-65",
+      "to": "node-MB-n2-401",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-68",
+      "to": "node-MB-n2-401",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-46",
+      "to": "node-MB--2-MB-S2.245-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-MB-S2.245-door",
+      "to": "node-MB--2-MB-S2.295-door",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    }
+  ],
+  "entrances": [
+    {
+      "id": "ent-1",
+      "label": "Entrance 1",
+      "floor": -2,
+      "x": 0.3794,
+      "y": 0.4558,
+      "nodeId": "node-MB-n2-exit1",
+      "heading": 180
+    }
+  ]
+}

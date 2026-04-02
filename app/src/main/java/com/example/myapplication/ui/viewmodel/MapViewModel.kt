@@ -23,6 +23,14 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.example.myapplication.ui.models.BuildingUiState
 import com.example.myapplication.ui.models.MapUIMode
 import com.example.myapplication.ui.models.NavigationState
+import com.example.myapplication.ui.models.IndoorJourneyState
+import com.example.myapplication.ui.models.IndoorJourneyPhase
+import com.example.myapplication.logic.IndoorJourneyHandler
+import com.example.myapplication.data.indoor.BuildingEntrance
+
+
+private const val ROUTE_DURATION_PLACEHOLDER = "-- min"
+private const val ROUTE_DISTANCE_PLACEHOLDER = "-- m"
 
 /**
  * [shuttleService] has no default value so callers must inject a concrete
@@ -38,7 +46,15 @@ class MapViewModel(
     private val routeProvider: com.example.myapplication.logic.RouteProvider? = null,
     private val shuttleService: ShuttleService,
     private val analyticsProvider: AnalyticsProvider = NoOpAnalyticsProvider,
-    private val navigationEngine: com.example.myapplication.logic.NavigationEngine = CampusNavigationEngine()
+    private val navigationEngine: com.example.myapplication.logic.NavigationEngine = CampusNavigationEngine(),
+    /**
+     * Fully-constructed search provider injected at construction time.
+     * Providing it here (rather than via a secondary [initSearch] call)
+     * follows DIP and makes the ViewModel testable with a mock provider.
+     * Defaults to null so that the ViewModel can still be used before
+     * Places SDK is ready; set via [initSearch] in MapsActivity if needed.
+     */
+    private var searchProvider: HybridSearchProvider? = null
 ) : ViewModel() {
 
     private val shuttleRouteProvider = ShuttleRouteProvider(
@@ -64,7 +80,6 @@ class MapViewModel(
     var searchResults by mutableStateOf<List<SearchResult>>(emptyList())
         private set
 
-    private var searchProvider: HybridSearchProvider? = null
     private var isManualCampusSelection = false
 
     // ── Map UI state ───────────────────────────────────────────────────────────
@@ -86,13 +101,41 @@ class MapViewModel(
     var activeSearchField by mutableStateOf("main")
         private set
 
+    var indoorJourneyState by mutableStateOf(IndoorJourneyState())
+        private set
+
+    /** UI-facing state for the AskCurrentRoom dialog search. */
+    var indoorRoomSearching by mutableStateOf(false)
+        private set
+    var indoorRoomSearchError by mutableStateOf<String?>(null)
+        private set
+
+    /**
+     * The indoor building/floor/startNode the UI should currently display.
+     * Derived from [indoorJourneyState] phase — the UI observes this instead
+     * of computing it inside the composable (avoids dual source of truth).
+     *
+     * Null means no indoor map should be shown for the journey flow.
+     */
+    val indoorNavTarget: Triple<String, Int, String>?
+        get() = when (val phase = indoorJourneyState.phase) {
+            is IndoorJourneyPhase.IndoorToExit        ->
+                Triple(phase.buildingCode, phase.floor, phase.startNodeId)
+            is IndoorJourneyPhase.IndoorToDestination ->
+                Triple(phase.buildingCode, phase.startFloor, phase.startNodeId)
+            else -> null
+        }
+
+    private val indoorBuildingCodes = setOf("CC", "H", "MB", "EV")
+
     fun handleMapTap(building: Building?, imageUrl: String? = null) {
         if (uiBuildingState.mode == MapUIMode.DIRECTIONS) return
         uiBuildingState = BuildingUiState(
-            isVisible = building != null,
-            building  = building,
-            address   = building?.address,
-            imageUrl  = imageUrl
+            isVisible    = building != null,
+            building     = building,
+            address      = building?.address,
+            imageUrl     = imageUrl,
+            hasIndoorMap = building?.code?.uppercase() in indoorBuildingCodes
         )
     }
 
@@ -123,6 +166,25 @@ class MapViewModel(
         if (uiBuildingState.mode == MapUIMode.ACTIVE_NAVIGATION) {
             handleActiveNavigationUpdate(userLocation, isForce)
         }
+
+        // 4. Indoor journey: auto-detect arrival near destination building
+        updateIndoorJourney(userLocation)
+    }
+
+    /**
+     * Checks whether the user has arrived near the destination building
+     * during an outdoor indoor-journey leg and transitions the phase accordingly.
+     * Extracted from [processLocationUpdate] to keep that method focused.
+     */
+    private fun updateIndoorJourney(userLocation: LatLng) {
+        val journeyPhase = indoorJourneyState.phase
+        val allBuildings = CampusRepo.getAllBuildings()
+        if (journeyPhase is IndoorJourneyPhase.Outdoor &&
+            IndoorJourneyHandler.isNearBuilding(userLocation, journeyPhase.destRoom.buildingCode, allBuildings)) {
+            indoorJourneyState = IndoorJourneyState(
+                phase = IndoorJourneyHandler.onNearDestinationBuilding(journeyPhase, allBuildings)
+            )
+        }
     }
 
     private fun updateCampusState(userLocation: LatLng) {
@@ -143,10 +205,11 @@ class MapViewModel(
     }
 
     private fun handleActiveNavigationUpdate(userLocation: LatLng, isForce: Boolean) {
-        val engine = navigationEngine as CampusNavigationEngine
-
-        // Arrival Check
-        val arrived = engine.checkArrivalWithBuilding(userLocation, uiBuildingState.building)
+        // Pass building center — logic layer stays decoupled from data layer (Dependency Rule)
+        val arrived = navigationEngine.checkArrivalWithBuilding(
+            userPos        = userLocation,
+            buildingCenter = uiBuildingState.building?.getCenter()
+        )
         if (arrived && !uiBuildingState.navState.hasArrived) {
             uiBuildingState = uiBuildingState.copy(
                 navState = uiBuildingState.navState.copy(hasArrived = true)
@@ -164,7 +227,7 @@ class MapViewModel(
         }
 
         // Camera/Bearing Logic
-        val newBearing = engine.calculateBearing(
+        val newBearing = navigationEngine.calculateBearing(
             userLocation,
             uiBuildingState.routePoints,
             uiBuildingState.navState.currentBearing
@@ -180,20 +243,8 @@ class MapViewModel(
     }
 
     fun handleSearchResult(result: SearchResult, context: android.content.Context) {
-        val resultName = when (result) {
-            is SearchResult.BuildingResult  -> result.building.name
-            is SearchResult.CampusResult    -> result.campus.name
-            is SearchResult.GoogleResult    -> result.title
-            is SearchResult.CurrentLocation -> "Your position"
-            is SearchResult.Home            -> "Home"
-        }
-        val resultCoords = when (result) {
-            is SearchResult.BuildingResult  -> result.building.getCenter()
-            is SearchResult.CampusResult    -> result.campus.buildings.firstOrNull()?.getCenter()
-            is SearchResult.CurrentLocation -> lastProcessedLocation
-            is SearchResult.Home            -> LatLng(45.51723868665001, -73.627297124046)
-            is SearchResult.GoogleResult    -> null
-        }
+        val resultName   = result.displayName
+        val resultCoords = result.coordinates(lastProcessedLocation)
         if (uiBuildingState.mode == MapUIMode.DIRECTIONS) {
             val selectedBuilding = if (result is SearchResult.BuildingResult) result.building else null
             // Prepare all new values first, then commit in one atomic copy()
@@ -240,13 +291,127 @@ class MapViewModel(
                 uiBuildingState = uiBuildingState.copy(startPoint = homePos)
             }
             is SearchResult.GoogleResult -> { /* Future implementation */ }
+            is SearchResult.IndoorRoomResult -> {
+                val nextPhase = IndoorJourneyHandler.onDestinationSelected(
+                    destination  = result,
+                    userGps      = lastProcessedLocation,
+                    allBuildings = CampusRepo.getAllBuildings()
+                )
+                indoorJourneyState = IndoorJourneyState(phase = nextPhase)
+
+                // Case 2: user is already outdoors — skip the indoor-to-exit leg
+                // and jump straight to outdoor navigation toward the destination building.
+                if (nextPhase is IndoorJourneyPhase.Outdoor) {
+                    startOutdoorLeg(
+                        origin      = nextPhase.origin,
+                        destination = nextPhase.destination,
+                        destLabel   = nextPhase.destRoom.label
+                    )
+                }
+            }
         }
         searchResults = emptyList()
     }
 
-    fun initSearch(client: com.google.android.libraries.places.api.net.PlacesClient) {
-        searchProvider = HybridSearchProvider(client)
+    /**
+     * Sets the search provider after the Places SDK client is available.
+     * Prefer passing a fully-constructed [HybridSearchProvider] via the
+     * constructor when possible (DIP). This method exists for the case
+     * where the Places client is only available after MapsActivity.onCreate.
+     */
+    fun initSearch(provider: HybridSearchProvider) {
+        searchProvider = provider
         searchResults  = listOf(SearchResult.CurrentLocation)
+    }
+
+    // ── Indoor journey helpers ─────────────────────────────────────────────────
+
+    fun setJourneyPhase(phase: IndoorJourneyPhase) {
+        indoorJourneyState = IndoorJourneyState(phase = phase)
+        // When transitioning to Outdoor, trigger the outdoor nav leg automatically.
+        // This keeps the phase-transition logic in the ViewModel rather than
+        // inside the MapContent composable (avoids business logic in the UI layer).
+        if (phase is IndoorJourneyPhase.Outdoor) {
+            startOutdoorLeg(
+                origin      = phase.origin,
+                destination = phase.destination,
+                destLabel   = phase.destRoom.label
+            )
+        }
+    }
+
+    fun clearJourney() {
+        indoorJourneyState = IndoorJourneyState(phase = IndoorJourneyPhase.Idle)
+    }
+
+    fun onCurrentRoomSelected(nodeId: String, label: String, buildingCode: String? = null, floor: Int? = null) {
+        val phase = indoorJourneyState.phase as? IndoorJourneyPhase.AskCurrentRoom ?: return
+        val next  = IndoorJourneyHandler.onCurrentRoomSelected(phase, nodeId, label, floor ?: 1)
+        setJourneyPhase(next)   // use setJourneyPhase for consistent phase transitions
+    }
+
+    /**
+     * Called by the UI when the user submits a room query in [AskCurrentRoom] dialog.
+     * The ViewModel owns the coroutine, error state, and resolution — the UI is
+     * purely a notification sender (SRP).
+     */
+    fun searchCurrentRoom(query: String, buildingCode: String) {
+        val repo = (searchProvider as? com.example.myapplication.logic.HybridSearchProvider)
+            ?.indoorRepo ?: return
+        viewModelScope.launch {
+            indoorRoomSearching  = true
+            indoorRoomSearchError = null
+            val resolved = com.example.myapplication.logic.IndoorRoomResolver.resolve(
+                repo         = repo,
+                buildingCode = buildingCode,
+                query        = query
+            )
+            indoorRoomSearching = false
+            if (resolved != null) {
+                onCurrentRoomSelected(resolved.nodeId, resolved.label,
+                    resolved.buildingCode, resolved.floor)
+                indoorRoomSearchError = null
+            } else {
+                indoorRoomSearchError = "Room \"$query\" not found in $buildingCode"
+            }
+        }
+    }
+
+    fun onUserExited() {
+        val phase = indoorJourneyState.phase as? IndoorJourneyPhase.IndoorToExit ?: return
+        val gps   = lastProcessedLocation ?: return
+        val next  = IndoorJourneyHandler.onUserExited(phase, gps)
+        setJourneyPhase(next)   // use setJourneyPhase — triggers startOutdoorLeg if next is Outdoor
+    }
+
+    fun onEntranceSelected(entrance: BuildingEntrance) {
+        val phase = indoorJourneyState.phase as? IndoorJourneyPhase.AskEntryPoint ?: return
+        val next  = IndoorJourneyHandler.onEntranceSelected(phase, entrance)
+        setJourneyPhase(next)   // use setJourneyPhase for consistent phase transitions
+    }
+
+    /**
+     * Called when IndoorNavScreen hands off to outdoor navigation.
+     * Sets up the outdoor route and triggers Google Maps directions.
+     */
+    fun startOutdoorLeg(
+        origin:      com.google.android.gms.maps.model.LatLng,
+        destination: com.google.android.gms.maps.model.LatLng,
+        destLabel:   String
+    ) {
+        uiBuildingState = uiBuildingState.copy(
+            mode                  = MapUIMode.DIRECTIONS,
+            startPoint            = origin,
+            endPoint              = destination,
+            destinationName       = destLabel,
+            selectedTransportMode = "walk",
+            routePoints           = emptyList(),
+            routeDuration         = ROUTE_DURATION_PLACEHOLDER,
+            routeDistance         = ROUTE_DISTANCE_PLACEHOLDER,
+            routeBounds           = null,
+            routeErrorMessage     = null
+        )
+        calculateRouteWithState()
     }
 
     fun onSearchQueryChanged(newQuery: String, field: String = "main") {
@@ -338,8 +503,8 @@ class MapViewModel(
             else {
                 uiBuildingState.copy(
                     routePoints       = emptyList(),
-                    routeDuration     = "-- min",
-                    routeDistance     = "-- m",
+                    routeDuration     = ROUTE_DURATION_PLACEHOLDER,
+                    routeDistance     = ROUTE_DISTANCE_PLACEHOLDER,
                     routeSegments = emptyList(),
                     routeBounds       = null,
                     routeErrorMessage = "$modeName route unavailable between these points."
@@ -385,8 +550,8 @@ class MapViewModel(
             // Route reset — atomically cleared so the UI shows a clean blank state
             // before the new polyline arrives from calculateRouteWithState()
             routePoints       = emptyList(),
-            routeDuration     = "-- min",
-            routeDistance     = "-- m",
+            routeDuration     = ROUTE_DURATION_PLACEHOLDER,
+            routeDistance     = ROUTE_DISTANCE_PLACEHOLDER,
             routeBounds       = null,
             routeErrorMessage = null
         )
@@ -412,14 +577,18 @@ class MapViewModel(
     private var lastRouteUpdateLocation: LatLng? = null
 
     fun startNavigation() {
-        val target = uiBuildingState.building ?: return
+        val destinationLabel = uiBuildingState.building?.name
+            ?: uiBuildingState.destinationName
+            ?: "destination"
+
+        if (uiBuildingState.endPoint == null && uiBuildingState.building == null) return
 
         uiBuildingState = uiBuildingState.copy(
             mode = MapUIMode.ACTIVE_NAVIGATION,
             navState = NavigationState(
-                hasArrived = false, // CRITICAL: Reset the gate
+                hasArrived          = false,
                 isAutoCenterEnabled = true,
-                currentInstruction = "Follow the path to ${target.name}"
+                currentInstruction  = "Follow the path to $destinationLabel"
             )
         )
         calculateRouteWithState()

@@ -149,4 +149,14 @@ object CampusRepo {
         return xIntersection > pX
     }
     fun getAllCampuses(): List<Campus> = allCampuses
+
+    /**
+     * Flat list of all buildings across all campuses.
+     * lazy(SYNCHRONIZED) ensures the flatMap runs exactly once even when
+     * called concurrently from multiple coroutines (Dispatchers.IO).
+     */
+    private val allBuildingsCache: List<Building> by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        allCampuses.flatMap { it.buildings }
+    }
+    fun getAllBuildings(): List<Building> = allBuildingsCache
 }

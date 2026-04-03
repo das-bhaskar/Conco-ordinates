@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import com.example.myapplication.data.Campus
+import com.example.myapplication.data.poi.POI
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.theme.concordiaGold
 import com.example.myapplication.ui.viewmodel.MapViewModel
@@ -15,27 +16,24 @@ import com.example.myapplication.ui.theme.ConcordiaGreen
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.ui.models.POIUiState
 import com.example.myapplication.ui.models.MapUIMode
 
 @Composable
 fun CampusMap(
-    currentCampus: Campus?,
-    highlightedBuildingName: String?,
     cameraPositionState: CameraPositionState,
-    hasLocationPermission: Boolean,
+    state: CampusMapState,
     modifier: Modifier = Modifier,
     viewModel: MapViewModel,
-    contentPadding: PaddingValues = PaddingValues(0.dp)
+    poiBindings: CampusMapPoiBindings
 ) {
     val context = LocalContext.current
-    val isShuttleMode = viewModel.uiBuildingState.selectedTransportMode == "shuttle"
-            && viewModel.uiBuildingState.mode == com.example.myapplication.ui.models.MapUIMode.DIRECTIONS
 
     GoogleMap(
-        modifier = Modifier.fillMaxSize().testTag("google_map"),
+        modifier = modifier.fillMaxSize().testTag("google_map"),
         cameraPositionState = cameraPositionState,
-        contentPadding = contentPadding,
-        properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
+        contentPadding = state.contentPadding,
+        properties = MapProperties(isMyLocationEnabled = state.hasLocationPermission),
         uiSettings = MapUiSettings(
             myLocationButtonEnabled = false,
             zoomControlsEnabled = false
@@ -47,6 +45,7 @@ fun CampusMap(
             isNavigating = viewModel.uiBuildingState.mode == MapUIMode.ACTIVE_NAVIGATION,
             onManualMove = { viewModel.toggleAutoCenter(false) }
         )
+
         // 1. THE ROUTE LINE
         val segments = viewModel.uiBuildingState.routeSegments
 
@@ -63,7 +62,6 @@ fun CampusMap(
                 )
             }
         } else if (viewModel.uiBuildingState.routePoints.isNotEmpty()) {
-            // SAFE FALLBACK: If no segments exist (standard walking), use original logic
             val transportMode = viewModel.uiBuildingState.selectedTransportMode
             Polyline(
                 points = viewModel.uiBuildingState.routePoints,
@@ -84,7 +82,7 @@ fun CampusMap(
                 val isDestinationBuilding = viewModel.uiBuildingState.mode == com.example.myapplication.ui.models.MapUIMode.DIRECTIONS
                         && building.name == viewModel.uiBuildingState.destinationName
                 val isSelected    = viewModel.uiBuildingState.building?.name == building.name
-                val isHighlighted = building.name == highlightedBuildingName
+                val isHighlighted = building.name == state.highlightedBuildingName
 
                 if (points.isNotEmpty()) {
                     Polygon(
@@ -107,25 +105,39 @@ fun CampusMap(
             }
         }
 
-        // 3. NAVIGATION MARKERS
+        // 3. POI MARKERS
+        POIMarkers(
+            uiState       = poiBindings.uiState,
+            onMarkerClick = poiBindings.onPoiSelected
+        )
+
+        // 4. NAVIGATION MARKERS
         if (viewModel.uiBuildingState.mode == MapUIMode.DIRECTIONS) {
-
-//
-                viewModel.uiBuildingState.startPoint?.let { startPos ->
-                    Marker(
-                        state = MarkerState(position = startPos),
-                        title = "Start: ${viewModel.uiBuildingState.startLocationName}",
-                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
-                    )
-                }
-                viewModel.uiBuildingState.endPoint?.let { endPos ->
-                    Marker(
-                        state = MarkerState(position = endPos),
-                        title = "Destination: ${viewModel.uiBuildingState.destinationName}",
-                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
-                    )
-                }
-
+            viewModel.uiBuildingState.startPoint?.let { startPos ->
+                Marker(
+                    state = MarkerState(position = startPos),
+                    title = "Start: ${viewModel.uiBuildingState.startLocationName}",
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+                )
+            }
+            viewModel.uiBuildingState.endPoint?.let { endPos ->
+                Marker(
+                    state = MarkerState(position = endPos),
+                    title = "Destination: ${viewModel.uiBuildingState.destinationName}",
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+                )
+            }
         }
     }
 }
+
+data class CampusMapState(
+    val highlightedBuildingName: String?,
+    val hasLocationPermission: Boolean,
+    val contentPadding: PaddingValues = PaddingValues(0.dp)
+)
+
+data class CampusMapPoiBindings(
+    val uiState: POIUiState,
+    val onPoiSelected: (POI) -> Unit
+)

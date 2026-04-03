@@ -7,6 +7,13 @@ import androidx.activity.result.ActivityResultLauncher
 import com.example.myapplication.telemetry.CrashReporter
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.maps.model.LatLng
+import java.util.Locale
+import kotlin.math.asin
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.roundToInt
+import kotlin.math.sin
+import kotlin.math.sqrt
 
 /**
  * Stateless location utility functions.
@@ -61,4 +68,27 @@ fun openAppSettings(context: Context) {
         android.net.Uri.fromParts("package", context.packageName, null)
     )
     context.startActivity(intent)
+}
+
+/**
+ * Computes the Haversine distance between two coordinates in meters.
+ */
+fun haversineDistanceMeters(start: LatLng, end: LatLng): Int {
+    val earthRadiusMeters = 6_371_000.0
+    val phi1 = Math.toRadians(start.latitude)
+    val phi2 = Math.toRadians(end.latitude)
+    val deltaPhi = Math.toRadians(end.latitude - start.latitude)
+    val deltaLambda = Math.toRadians(end.longitude - start.longitude)
+    val haversine = sin(deltaPhi / 2).pow(2) +
+        cos(phi1) * cos(phi2) * sin(deltaLambda / 2).pow(2)
+
+    return (2 * earthRadiusMeters * asin(sqrt(haversine))).roundToInt()
+}
+
+/**
+ * Formats a distance in meters for compact map/list display.
+ */
+fun formatDistance(meters: Int): String = when {
+    meters < 1000 -> "$meters m"
+    else -> String.format(Locale.US, "%.1f km", meters / 1000.0)
 }

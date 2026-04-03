@@ -1,4 +1,17 @@
 <resources>
     <string name="app_name">My Application</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="poi_nearby_places">Nearby Places</string>
+    <string name="poi_show_list">Show list</string>
+    <string name="poi_show_map">Show on map</string>
+    <string name="poi_close_panel">Close POI panel</string>
+    <string name="poi_tap_marker_hint">Tap a marker on the map to see details.</string>
+    <string name="poi_back_to_list">Back to list</string>
+    <string name="poi_get_directions">Get Directions</string>
+    <string name="poi_explore">EXPLORE</string>
+    <string name="poi_close">Close</string>
+    <string name="poi_retry">Retry</string>
+    <string name="poi_empty_message">No places found nearby. Try a different category or move the map.</string>
+    <string name="poi_error_message">Error: %1$s</string>
+    <string name="poi_distance_away">%1$s away</string>
 </resources>

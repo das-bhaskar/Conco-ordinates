@@ -27,15 +27,20 @@ import com.example.myapplication.logic.openAppSettings
 import com.example.myapplication.map.TrueCameraController
 import com.example.myapplication.ui.components.BuildingInfoPopup
 import com.example.myapplication.ui.components.CampusMap
+import com.example.myapplication.ui.components.CampusMapPoiBindings
+import com.example.myapplication.ui.components.CampusMapState
 import com.example.myapplication.ui.components.CampusSearchBar
 import com.example.myapplication.ui.components.CampusToggle
 import com.example.myapplication.ui.components.DirectionsHeader
 import com.example.myapplication.ui.components.DirectionsInfoPopup
 import com.example.myapplication.ui.components.LocationPermissionDialog
+import com.example.myapplication.ui.components.MapPOIOverlayState
 import com.example.myapplication.ui.components.NavigationOverlay
 import com.example.myapplication.ui.components.NextClassPill
 import com.example.myapplication.ui.components.ObserveCameraEffects
 import com.example.myapplication.ui.components.ObserveLocationUpdates
+import com.example.myapplication.ui.components.MapPOIOverlay
+import com.example.myapplication.ui.components.PoiActions
 import com.example.myapplication.ui.components.rememberMapCamera
 import com.example.myapplication.ui.models.BuildingUiState
 import com.example.myapplication.ui.models.MapUIMode
@@ -57,6 +62,8 @@ data class IndoorActions(
 @Composable
 fun MapScreen(
     mapViewModel:             com.example.myapplication.ui.viewmodel.MapViewModel,
+    poiUiState:               com.example.myapplication.ui.models.POIUiState,
+    poiActions:               PoiActions,
     currentCampus:            com.example.myapplication.data.Campus?,
     highlightedBuildingName:  String?,
     searchQuery:              String,
@@ -97,7 +104,10 @@ fun MapScreen(
     )
 
     ObserveLocationUpdates(hasLocationPermission, fusedLocationClient,
-        onLocationUpdate = { loc -> onLocationUpdate(loc, false) })
+        onLocationUpdate = { loc ->
+            onLocationUpdate(loc, false)
+            poiActions.onLocationUpdate(loc)
+        })
     val cameraPositionState = rememberMapCamera()
     val cameraController    = remember(cameraPositionState) { TrueCameraController(cameraPositionState) }
     ObserveCameraEffects(
@@ -121,12 +131,17 @@ fun MapScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         CampusMap(
-            currentCampus           = currentCampus,
-            highlightedBuildingName = highlightedBuildingName,
             cameraPositionState     = cameraPositionState,
-            hasLocationPermission   = hasLocationPermission,
+            state                   = CampusMapState(
+                highlightedBuildingName = highlightedBuildingName,
+                hasLocationPermission = hasLocationPermission,
+                contentPadding = PaddingValues(bottom = mapPaddingBottom.dp)
+            ),
             viewModel               = mapViewModel,
-            contentPadding          = PaddingValues(bottom = mapPaddingBottom.dp),
+            poiBindings             = CampusMapPoiBindings(
+                uiState = poiUiState,
+                onPoiSelected = poiActions.onPOISelected
+            ),
             modifier                = Modifier.testTag("campus_map")
         )
 
@@ -173,6 +188,14 @@ fun MapScreen(
                 onSwapLocations          = onSwapLocations,
                 onBackToPreview          = onBackToPreview,
                 onStartNavigationActions = onStartNavigationActions
+            )
+            // ── Epic 5: POI overlay ───────────────────────────────────────
+            MapPOIOverlay(
+                state = MapPOIOverlayState(
+                    uiState = poiUiState,
+                    showExploreFab = uiState.mode == MapUIMode.PREVIEW && !uiState.isVisible
+                ),
+                actions = poiActions
             )
         } else {
             NavigationOverlay(

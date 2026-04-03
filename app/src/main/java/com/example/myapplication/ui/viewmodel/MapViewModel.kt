@@ -570,6 +570,26 @@ class MapViewModel(
         }
     }
 
+    /**
+     * Navigate to an outdoor POI selected from the POI panel (Epic 5).
+     * Reuses the existing [MapUIMode.DIRECTIONS] pipeline — no new routing logic.
+     * SOLID — Open/Closed: existing pipeline extended, not modified.
+     */
+    fun navigateToPOI(name: String, latLng: LatLng) {
+        uiBuildingState = uiBuildingState.copy(
+            mode              = MapUIMode.DIRECTIONS,
+            destinationName   = name,
+            building          = null,
+            endPoint          = latLng,
+            routePoints       = emptyList(),
+            routeDuration     = ROUTE_DURATION_PLACEHOLDER,
+            routeDistance     = ROUTE_DISTANCE_PLACEHOLDER,
+            routeBounds       = null,
+            routeErrorMessage = null
+        )
+        calculateRouteWithState()
+    }
+
     fun toggleSearchExpansion(expanded: Boolean, field: String = "main") {
         activeSearchField = field
         uiBuildingState   = uiBuildingState.copy(isSearchExpanded = expanded)

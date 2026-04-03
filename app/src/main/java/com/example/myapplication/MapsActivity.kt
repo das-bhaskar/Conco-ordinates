@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -16,6 +17,7 @@ import com.example.myapplication.data.ShuttleRepo
 import com.example.myapplication.data.indoor.BuildingEntrance
 import com.example.myapplication.data.indoor.BuildingEntrances
 import com.example.myapplication.data.indoor.IndoorRepository
+import com.example.myapplication.data.poi.PlacesPOIRepository
 import com.example.myapplication.logic.AuthRepository
 import com.example.myapplication.logic.DefaultShuttleService
 import com.example.myapplication.logic.GoogleCalendarProvider
@@ -30,8 +32,10 @@ import com.example.myapplication.ui.screens.IndoorActions
 import com.example.myapplication.ui.screens.IndoorNavParams
 import com.example.myapplication.ui.screens.IndoorNavScreen
 import com.example.myapplication.ui.screens.MapScreen
+import com.example.myapplication.ui.components.PoiActions
 import com.example.myapplication.ui.viewmodel.CalendarViewModel
 import com.example.myapplication.ui.viewmodel.MapViewModel
+import com.example.myapplication.ui.viewmodel.POIViewModel
 import com.google.android.gms.location.LocationServices
 
 class MapsActivity : ComponentActivity() {
@@ -41,8 +45,12 @@ class MapsActivity : ComponentActivity() {
     private lateinit var calendarViewModel:   CalendarViewModel
     private lateinit var fusedLocationClient: com.google.android.gms.location.FusedLocationProviderClient
 
-    // ── Google Sign-In (must live here — needs ActivityResultLauncher) ─────────
-    // ── Google Sign-In (Surgical Update) ─────────
+    // ── POI ViewModel — lifecycle-aware, REST-backed ───────────────────────
+    private val poiViewModel: POIViewModel by viewModels {
+        POIViewModel.Factory(repository = PlacesPOIRepository(BuildConfig.MAPS_API_KEY))
+    }
+
+    // ── Google Sign-In ─────────────────────────────────────────────────────
     private val signInLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -53,19 +61,13 @@ class MapsActivity : ComponentActivity() {
             calendarViewModel.clearSelection()
             calendarViewModel.loadCalendarsAndAutoSelect()
         } else {
-            // SURGERY: Instead of just logging, update the UI state
             val exception = task.exception
             val errorMessage = when {
-                // Check if user cancelled or if it's a network issue
-                exception is com.google.android.gms.common.api.ApiException -> {
+                exception is com.google.android.gms.common.api.ApiException ->
                     "Connection failed. Please check your internet or try again."
-                }
                 else -> "Login cancelled or failed."
             }
-
-            // Notify the ViewModel so the UI can show the error
             calendarViewModel.setAuthError(errorMessage)
-
             CrashReporter.recordNonFatal(exception ?: Exception("Sign-in failed"), "google_sign_in_failed")
         }
     }
@@ -127,6 +129,7 @@ class MapsActivity : ComponentActivity() {
                 mapContent = {
                     MapContent(
                         mapViewModel        = viewModel,
+                        poiViewModel        = poiViewModel,
                         calendarViewModel   = calendarViewModel,
                         fusedLocationClient = fusedLocationClient
                     )
@@ -149,19 +152,33 @@ class MapsActivity : ComponentActivity() {
 @Composable
 private fun MapContent(
     mapViewModel:        MapViewModel,
+    poiViewModel:        POIViewModel,
     calendarViewModel:   CalendarViewModel,
     fusedLocationClient: com.google.android.gms.location.FusedLocationProviderClient
 ) {
-    // Simple indoor map overlay (building popup → Indoor button)
     var indoorTarget by remember { mutableStateOf<Pair<String, Int>?>(null) }
+    val poiUiState by poiViewModel.uiState.collectAsState()
 
-    // indoorNavTarget is now derived inside MapViewModel from the journey phase.
-    // The UI simply observes it — no local state or when-block needed here.
+    // indoorNavTarget is derived inside MapViewModel from the journey phase.
     val journeyIndoorTarget = mapViewModel.indoorNavTarget
 
     // ── Main map screen ───────────────────────────────────────────────────────
     MapScreen(
         mapViewModel             = mapViewModel,
+        poiUiState               = poiUiState,
+        poiActions               = PoiActions(
+            onLocationUpdate = poiViewModel::onLocationUpdated,
+            onOpenPanel = poiViewModel::openPOIPanel,
+            onClosePanel = poiViewModel::closePOIPanel,
+            onRetry = poiViewModel::openPOIPanel,
+            onCategorySelected = poiViewModel::onCategorySelected,
+            onPOISelected = poiViewModel::onPOISelected,
+            onPOIDismissed = poiViewModel::onPOIDismissed,
+            onNavigateToPOI = { poi ->
+                mapViewModel.navigateToPOI(name = poi.name, latLng = poi.latLng)
+                poiViewModel.closePOIPanel()
+            }
+        ),
         currentCampus            = mapViewModel.currentCampus,
         highlightedBuildingName  = mapViewModel.highlightedBuildingName,
         searchQuery              = mapViewModel.searchQuery,
@@ -191,25 +208,21 @@ private fun MapContent(
         )
     )
 
-    // ── Indoor journey state ──────────────────────────────────────────────────
-    // Read phase once; used by dialogs, journeyIndoorTarget derivation, and
-    // the IndoorNavScreen below. Direct read (not LaunchedEffect) is synchronous
-    // and avoids timing gaps between phase change and screen transition.
     val journeyPhase = mapViewModel.indoorJourneyState.phase
 
     // ── Indoor journey dialogs ────────────────────────────────────────────────
     IndoorJourneyDialogs(
-        phase              = journeyPhase,
-        onSearchRoom       = { query, buildingCode ->
+        phase          = journeyPhase,
+        onSearchRoom   = { query, buildingCode ->
             mapViewModel.searchCurrentRoom(query, buildingCode)
         },
-        isSearching        = mapViewModel.indoorRoomSearching,
-        searchError        = mapViewModel.indoorRoomSearchError,
-        onRoomResolved     = { nodeId, label, buildingCode, floor ->
+        isSearching    = mapViewModel.indoorRoomSearching,
+        searchError    = mapViewModel.indoorRoomSearchError,
+        onRoomResolved = { nodeId, label, buildingCode, floor ->
             mapViewModel.onCurrentRoomSelected(nodeId, label, buildingCode, floor)
         },
         onEntranceSelected = { entrance -> mapViewModel.onEntranceSelected(entrance) },
-        onDismiss          = { mapViewModel.clearJourney() }
+        onDismiss      = { mapViewModel.clearJourney() }
     )
 
     // ── Simple indoor map (building popup → Indoor button) ────────────────────

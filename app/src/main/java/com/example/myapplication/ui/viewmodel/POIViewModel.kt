@@ -7,7 +7,6 @@ import com.example.myapplication.data.poi.POI
 import com.example.myapplication.data.poi.POICategory
 import com.example.myapplication.data.poi.POIException
 import com.example.myapplication.data.poi.POIRepository
-import com.example.myapplication.data.poi.PlacesPOIRepository
 import com.example.myapplication.ui.models.POIUiState
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +35,7 @@ class POIViewModel(
     val uiState: StateFlow<POIUiState> = _uiState.asStateFlow()
 
     private var lastOrigin: LatLng? = null
+    private var currentRadiusMeters: Int = POIRepository.DEFAULT_RADIUS
 
     // ── Public API ─────────────────────────────────────────────────────────
 
@@ -67,20 +67,33 @@ class POIViewModel(
     /** Switches category filter chip and re-fetches. */
     fun onCategorySelected(category: POICategory) {
         val origin = lastOrigin ?: return
-        val radius = currentRadius()
-        fetchPOIs(origin, category, radiusMeters = radius)
+        fetchPOIs(origin, category, radiusMeters = currentRadiusMeters)
     }
 
-    /** Tap on a POI row — updates selectedPOI inside Success state. */
+    /** Tap on a POI row — switches from browse state to selected state. */
     fun onPOISelected(poi: POI) {
-        val current = _uiState.value as? POIUiState.Success ?: return
-        _uiState.value = current.copy(selectedPOI = poi)
+        when (val current = _uiState.value) {
+            is POIUiState.Browse -> {
+                _uiState.value = POIUiState.Selection(
+                    pois = current.pois,
+                    selectedCategory = current.selectedCategory,
+                    selectedPOI = poi
+                )
+            }
+            is POIUiState.Selection -> {
+                _uiState.value = current.copy(selectedPOI = poi)
+            }
+            else -> Unit
+        }
     }
 
     /** Dismisses the selected POI action panel, returns to list. */
     fun onPOIDismissed() {
-        val current = _uiState.value as? POIUiState.Success ?: return
-        _uiState.value = current.copy(selectedPOI = null)
+        val current = _uiState.value as? POIUiState.Selection ?: return
+        _uiState.value = POIUiState.Browse(
+            pois = current.pois,
+            selectedCategory = current.selectedCategory
+        )
     }
 
     // ── Private helpers ────────────────────────────────────────────────────
@@ -91,6 +104,7 @@ class POIViewModel(
         radiusMeters: Int = POIRepository.DEFAULT_RADIUS
     ) {
         _uiState.value = POIUiState.Loading
+        currentRadiusMeters = radiusMeters
 
         viewModelScope.launch {
             try {
@@ -98,10 +112,9 @@ class POIViewModel(
                 _uiState.value = if (results.isEmpty()) {
                     POIUiState.Empty
                 } else {
-                    POIUiState.Success(
+                    POIUiState.Browse(
                         pois               = results,
-                        selectedCategory   = category,
-                        searchRadiusMeters = radiusMeters
+                        selectedCategory   = category
                     )
                 }
             } catch (e: POIException) {
@@ -110,25 +123,21 @@ class POIViewModel(
         }
     }
 
-    private fun currentRadius(): Int =
-        (_uiState.value as? POIUiState.Success)?.searchRadiusMeters
-            ?: POIRepository.DEFAULT_RADIUS
-
     // ── Factory ────────────────────────────────────────────────────────────
 
     /**
      * Design Pattern — Factory Method:
-     *   Takes [apiKey] (your MAPS_API_KEY) instead of PlacesClient,
-     *   since the REST implementation no longer needs the SDK client.
+     *   Takes a [POIRepository] so tests can inject fakes without changing
+     *   the ViewModel or relying on production networking code.
      *
      * Usage in your Activity/NavHost:
      *   val poiViewModel: POIViewModel by viewModels {
-     *       POIViewModel.Factory(apiKey = BuildConfig.MAPS_API_KEY)
+     *       POIViewModel.Factory(repository = PlacesPOIRepository(BuildConfig.MAPS_API_KEY))
      *   }
      */
-    class Factory(private val apiKey: String) : ViewModelProvider.Factory {
+    class Factory(private val repository: POIRepository) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
-            POIViewModel(PlacesPOIRepository(apiKey)) as T
+            POIViewModel(repository) as T
     }
 }

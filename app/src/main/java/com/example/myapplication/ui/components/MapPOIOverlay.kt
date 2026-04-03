@@ -2,12 +2,12 @@ package com.example.myapplication.ui.components
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,10 +16,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.example.myapplication.R
+import com.example.myapplication.data.poi.POI
+import com.example.myapplication.data.poi.POICategory
 import com.example.myapplication.ui.models.POIUiState
 import com.example.myapplication.ui.theme.ConcordiaMaroon
-import com.example.myapplication.ui.viewmodel.MapViewModel
-import com.example.myapplication.ui.viewmodel.POIViewModel
 
 /**
  * Top-level overlay composable for Epic 5 — POI discovery + directions.
@@ -33,12 +35,17 @@ import com.example.myapplication.ui.viewmodel.POIViewModel
  */
 @Composable
 fun BoxScope.MapPOIOverlay(
-    poiViewModel: POIViewModel,
-    mapViewModel: MapViewModel,
-    modifier:     Modifier = Modifier
+    uiState: POIUiState,
+    showExploreFab: Boolean,
+    onOpenPanel: () -> Unit,
+    onClosePanel: () -> Unit,
+    onRetry: () -> Unit,
+    onCategorySelected: (POICategory) -> Unit,
+    onPOISelected: (POI) -> Unit,
+    onPOIDismissed: () -> Unit,
+    onNavigateToPOI: (POI) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val uiState by poiViewModel.uiState.collectAsState()
-
     // Toggle lives here — purely UI concern, no business logic
     var isMapView by remember { mutableStateOf(false) }
 
@@ -47,22 +54,22 @@ fun BoxScope.MapPOIOverlay(
 
     // ── Explore FAB — visible only when panel is fully hidden ─────────────
     AnimatedVisibility(
-        visible  = uiState is POIUiState.Hidden && !mapViewModel.uiBuildingState.isVisible,
+        visible  = uiState is POIUiState.Hidden && showExploreFab,
         enter    = fadeIn() + scaleIn(),
         exit     = fadeOut() + scaleOut(),
-        modifier = Modifier
+        modifier = modifier
             .align(Alignment.BottomEnd)
             .padding(end = 12.dp, bottom = 100.dp)
     ) {
         ExtendedFloatingActionButton(
             onClick        = {
                 isMapView = false          // always start in list mode
-                poiViewModel.openPOIPanel()
+                onOpenPanel()
             },
             containerColor = ConcordiaMaroon,
             contentColor   = Color.White,
             icon           = { Icon(Icons.Default.Explore, contentDescription = null) },
-            text           = { Text("EXPLORE") }
+            text           = { Text(stringResource(R.string.poi_explore)) }
         )
     }
 
@@ -71,55 +78,79 @@ fun BoxScope.MapPOIOverlay(
         visible  = uiState !is POIUiState.Hidden,
         enter    = slideInVertically(initialOffsetY = { it }) + fadeIn(),
         exit     = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
-        modifier = Modifier.align(Alignment.BottomCenter)
+        modifier = modifier.align(Alignment.BottomCenter)
     ) {
         when (val state = uiState) {
 
             is POIUiState.Loading -> POILoadingPanel(
-                onClose = { poiViewModel.closePOIPanel() }
+                onClose = onClosePanel
             )
 
             is POIUiState.Error -> POIErrorPanel(
                 message = state.message,
-                onRetry = { poiViewModel.openPOIPanel() },
-                onClose = { poiViewModel.closePOIPanel() }
+                onRetry = onRetry,
+                onClose = onClosePanel
             )
 
             is POIUiState.Empty -> POIEmptyPanel(
-                onClose = { poiViewModel.closePOIPanel() }
+                onClose = onClosePanel
             )
 
-            is POIUiState.Success -> {
-                if (state.selectedPOI != null) {
-                    // POI tapped (from list OR map marker) → action card
-                    POIActionCard(
-                        poi             = state.selectedPOI,
-                        onGetDirections = {
-                            mapViewModel.navigateToPOI(
-                                name   = state.selectedPOI.name,
-                                latLng = state.selectedPOI.latLng
-                            )
-                            poiViewModel.closePOIPanel()
-                        },
-                        onDismiss = { poiViewModel.onPOIDismissed() }
-                    )
-                } else {
-                    // List panel — collapses in map-view mode
-                    POIListPanel(
-                        pois               = state.pois,
-                        selectedCategory   = state.selectedCategory,
-                        onCategorySelected = { poiViewModel.onCategorySelected(it) },
-                        onPOISelected      = { poiViewModel.onPOISelected(it) },
-                        onClose            = { poiViewModel.closePOIPanel() },
-                        isMapView          = isMapView,
-                        onToggleView       = { isMapView = !isMapView }
-                    )
-                }
-            }
+            is POIUiState.Browse -> POIBrowsePanel(
+                state = state,
+                isMapView = isMapView,
+                onCategorySelected = onCategorySelected,
+                onPOISelected = onPOISelected,
+                onClose = onClosePanel,
+                onToggleView = { isMapView = !isMapView }
+            )
+
+            is POIUiState.Selection -> POISelectionPanel(
+                state = state,
+                onGetDirections = onNavigateToPOI,
+                onDismiss = onPOIDismissed
+            )
 
             is POIUiState.Hidden -> { /* guarded by AnimatedVisibility */ }
         }
     }
+}
+
+@Composable
+private fun POIBrowsePanel(
+    state: POIUiState.Browse,
+    isMapView: Boolean,
+    onCategorySelected: (POICategory) -> Unit,
+    onPOISelected: (POI) -> Unit,
+    onClose: () -> Unit,
+    onToggleView: () -> Unit
+) {
+    POIListPanel(
+        state = POIListPanelState(
+            pois = state.pois,
+            selectedCategory = state.selectedCategory,
+            isMapView = isMapView
+        ),
+        actions = POIListPanelActions(
+            onCategorySelected = onCategorySelected,
+            onPOISelected = onPOISelected,
+            onClose = onClose,
+            onToggleView = onToggleView
+        )
+    )
+}
+
+@Composable
+private fun POISelectionPanel(
+    state: POIUiState.Selection,
+    onGetDirections: (POI) -> Unit,
+    onDismiss: () -> Unit
+) {
+    POIActionCard(
+        poi = state.selectedPOI,
+        onGetDirections = { onGetDirections(state.selectedPOI) },
+        onDismiss = onDismiss
+    )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -146,8 +177,13 @@ private fun POIErrorPanel(message: String, onRetry: () -> Unit, onClose: () -> U
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("⚠️ $message", style = MaterialTheme.typography.bodyMedium)
-            TextButton(onClick = onRetry) { Text("Retry", color = ConcordiaMaroon) }
+            Text(
+                text = stringResource(R.string.poi_error_message, message),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            TextButton(onClick = onRetry) {
+                Text(stringResource(R.string.poi_retry), color = ConcordiaMaroon)
+            }
         }
     }
 }
@@ -160,7 +196,7 @@ private fun POIEmptyPanel(onClose: () -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text  = "No places found nearby. Try a different category or move the map.",
+                text  = stringResource(R.string.poi_empty_message),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -184,9 +220,12 @@ private fun POIShellCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment     = Alignment.CenterVertically
             ) {
-                Text("Nearby Places", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    stringResource(R.string.poi_nearby_places),
+                    style = MaterialTheme.typography.titleMedium
+                )
                 IconButton(onClick = onClose) {
-                    Icon(Icons.Default.Close, contentDescription = "Close")
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.poi_close))
                 }
             }
             content()

@@ -1,11 +1,12 @@
 package com.example.myapplication.data.poi
 
+import com.example.myapplication.logic.haversineDistanceMeters
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import java.net.HttpURLConnection
 import java.net.URL
-import kotlin.math.*
 
 /**
  * Production implementation of [POIRepository] using the Google Places
@@ -22,7 +23,8 @@ import kotlin.math.*
  * Design Pattern — Adapter: maps raw JSON fields into typed [POI] objects.
  */
 class PlacesPOIRepository(
-    private val apiKey: String
+    private val apiKey: String,
+    private val responseFetcher: (String) -> String = ::defaultFetch
 ) : POIRepository {
 
     override suspend fun getNearbyPOIs(
@@ -38,7 +40,7 @@ class PlacesPOIRepository(
                 .flatMap { cat ->
                     try {
                         val url      = buildUrl(origin, radiusMeters, cat.placesType)
-                        val response = URL(url).readText()
+                        val response = responseFetcher(url)
                         parseResponse(response, origin, cat)
                     } catch (e: Exception) {
                         emptyList() // one failing category shouldn't kill the whole fetch
@@ -52,7 +54,7 @@ class PlacesPOIRepository(
         // Single category — one request
         val url = buildUrl(origin, radiusMeters, category.placesType)
         try {
-            val response = URL(url).readText()
+            val response = responseFetcher(url)
             parseResponse(response, origin, category)
         } catch (e: Exception) {
             throw POIException("Nearby Search failed: ${e.message}", e)
@@ -62,8 +64,7 @@ class PlacesPOIRepository(
     // ── URL builder ────────────────────────────────────────────────────────
 
     private fun buildUrl(origin: LatLng, radius: Int, type: String): String {
-        val base = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
-        return "$base" +
+        return "$NEARBY_SEARCH_BASE_URL" +
             "?location=${origin.latitude},${origin.longitude}" +
             "&radius=$radius" +
             "&type=$type" +
@@ -78,12 +79,14 @@ class PlacesPOIRepository(
         requestedCategory: POICategory
     ): List<POI> {
         val root   = JSONObject(json)
-        val status = root.optString("status")
+        val results = root.optJSONArray("results") ?: return emptyList()
+        val status = root.optString("status", "")
 
         if (status == "ZERO_RESULTS") return emptyList()
-        if (status != "OK") throw POIException("Places API error: $status")
-
-        val results = root.optJSONArray("results") ?: return emptyList()
+        if (status.isNotBlank() && status != "OK") {
+            throw POIException("Places API error: $status")
+        }
+        if (status.isBlank() && results.length() == 0) return emptyList()
 
         return (0 until results.length())
             .mapNotNull { i -> results.getJSONObject(i).toPOI(origin, requestedCategory) }
@@ -102,7 +105,7 @@ class PlacesPOIRepository(
         if (lat.isNaN() || lng.isNaN()) return null
 
         val latLng   = LatLng(lat, lng)
-        val distance = haversineMeters(origin, latLng).toInt()
+        val distance = haversineDistanceMeters(origin, latLng)
 
         return POI(
             placeId        = placeId,
@@ -114,15 +117,20 @@ class PlacesPOIRepository(
         )
     }
 
-    // ── Haversine distance ─────────────────────────────────────────────────
+    companion object {
+        private const val NEARBY_SEARCH_BASE_URL =
+            "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
 
-    private fun haversineMeters(a: LatLng, b: LatLng): Double {
-        val r  = 6_371_000.0
-        val φ1 = Math.toRadians(a.latitude)
-        val φ2 = Math.toRadians(b.latitude)
-        val Δφ = Math.toRadians(b.latitude  - a.latitude)
-        val Δλ = Math.toRadians(b.longitude - a.longitude)
-        val h  = sin(Δφ / 2).pow(2) + cos(φ1) * cos(φ2) * sin(Δλ / 2).pow(2)
-        return 2 * r * asin(sqrt(h))
+        private fun defaultFetch(url: String): String {
+            val connection = URL(url).openConnection() as HttpURLConnection
+            return try {
+                connection.requestMethod = "GET"
+                connection.connectTimeout = 10_000
+                connection.readTimeout = 10_000
+                connection.inputStream.bufferedReader().use { it.readText() }
+            } finally {
+                connection.disconnect()
+            }
+        }
     }
 }

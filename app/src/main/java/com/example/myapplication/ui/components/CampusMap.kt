@@ -6,38 +6,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import com.example.myapplication.data.Campus
+import com.example.myapplication.data.poi.POI
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.theme.concordiaGold
 import com.example.myapplication.ui.viewmodel.MapViewModel
-import com.example.myapplication.ui.viewmodel.POIViewModel
 import com.google.maps.android.compose.*
 import com.example.myapplication.logic.MapInteractionHandler
 import com.example.myapplication.ui.theme.ConcordiaGreen
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.ui.unit.dp
+import com.example.myapplication.ui.models.POIUiState
 import com.example.myapplication.ui.models.MapUIMode
 
 @Composable
 fun CampusMap(
-    currentCampus: Campus?,
-    highlightedBuildingName: String?,
     cameraPositionState: CameraPositionState,
-    hasLocationPermission: Boolean,
+    state: CampusMapState,
     modifier: Modifier = Modifier,
     viewModel: MapViewModel,
-    poiViewModel: POIViewModel,                                    // ← NEW
-    contentPadding: PaddingValues = PaddingValues(0.dp)
+    poiBindings: CampusMapPoiBindings
 ) {
     val context = LocalContext.current
-    val isShuttleMode = viewModel.uiBuildingState.selectedTransportMode == "shuttle"
-            && viewModel.uiBuildingState.mode == com.example.myapplication.ui.models.MapUIMode.DIRECTIONS
 
     GoogleMap(
-        modifier = Modifier.fillMaxSize().testTag("google_map"),
+        modifier = modifier.fillMaxSize().testTag("google_map"),
         cameraPositionState = cameraPositionState,
-        contentPadding = contentPadding,
-        properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
+        contentPadding = state.contentPadding,
+        properties = MapProperties(isMyLocationEnabled = state.hasLocationPermission),
         uiSettings = MapUiSettings(
             myLocationButtonEnabled = false,
             zoomControlsEnabled = false
@@ -86,7 +82,7 @@ fun CampusMap(
                 val isDestinationBuilding = viewModel.uiBuildingState.mode == com.example.myapplication.ui.models.MapUIMode.DIRECTIONS
                         && building.name == viewModel.uiBuildingState.destinationName
                 val isSelected    = viewModel.uiBuildingState.building?.name == building.name
-                val isHighlighted = building.name == highlightedBuildingName
+                val isHighlighted = building.name == state.highlightedBuildingName
 
                 if (points.isNotEmpty()) {
                     Polygon(
@@ -111,8 +107,8 @@ fun CampusMap(
 
         // 3. POI MARKERS
         POIMarkers(
-            poiViewModel  = poiViewModel,
-            onMarkerClick = { poi -> poiViewModel.onPOISelected(poi) }
+            uiState       = poiBindings.uiState,
+            onMarkerClick = poiBindings.onPoiSelected
         )
 
         // 4. NAVIGATION MARKERS
@@ -134,3 +130,14 @@ fun CampusMap(
         }
     }
 }
+
+data class CampusMapState(
+    val highlightedBuildingName: String?,
+    val hasLocationPermission: Boolean,
+    val contentPadding: PaddingValues = PaddingValues(0.dp)
+)
+
+data class CampusMapPoiBindings(
+    val uiState: POIUiState,
+    val onPoiSelected: (POI) -> Unit
+)

@@ -17,6 +17,7 @@ import com.example.myapplication.data.ShuttleRepo
 import com.example.myapplication.data.indoor.BuildingEntrance
 import com.example.myapplication.data.indoor.BuildingEntrances
 import com.example.myapplication.data.indoor.IndoorRepository
+import com.example.myapplication.data.poi.PlacesPOIRepository
 import com.example.myapplication.logic.AuthRepository
 import com.example.myapplication.logic.DefaultShuttleService
 import com.example.myapplication.logic.GoogleCalendarProvider
@@ -31,6 +32,7 @@ import com.example.myapplication.ui.screens.IndoorActions
 import com.example.myapplication.ui.screens.IndoorNavParams
 import com.example.myapplication.ui.screens.IndoorNavScreen
 import com.example.myapplication.ui.screens.MapScreen
+import com.example.myapplication.ui.screens.PoiActions
 import com.example.myapplication.ui.viewmodel.CalendarViewModel
 import com.example.myapplication.ui.viewmodel.MapViewModel
 import com.example.myapplication.ui.viewmodel.POIViewModel
@@ -45,7 +47,7 @@ class MapsActivity : ComponentActivity() {
 
     // ── POI ViewModel — lifecycle-aware, REST-backed ───────────────────────
     private val poiViewModel: POIViewModel by viewModels {
-        POIViewModel.Factory(apiKey = BuildConfig.MAPS_API_KEY)
+        POIViewModel.Factory(repository = PlacesPOIRepository(BuildConfig.MAPS_API_KEY))
     }
 
     // ── Google Sign-In ─────────────────────────────────────────────────────
@@ -155,6 +157,7 @@ private fun MapContent(
     fusedLocationClient: com.google.android.gms.location.FusedLocationProviderClient
 ) {
     var indoorTarget by remember { mutableStateOf<Pair<String, Int>?>(null) }
+    val poiUiState by poiViewModel.uiState.collectAsState()
 
     // indoorNavTarget is derived inside MapViewModel from the journey phase.
     val journeyIndoorTarget = mapViewModel.indoorNavTarget
@@ -162,7 +165,20 @@ private fun MapContent(
     // ── Main map screen ───────────────────────────────────────────────────────
     MapScreen(
         mapViewModel             = mapViewModel,
-        poiViewModel             = poiViewModel,
+        poiUiState               = poiUiState,
+        poiActions               = PoiActions(
+            onLocationUpdate = poiViewModel::onLocationUpdated,
+            onOpenPanel = poiViewModel::openPOIPanel,
+            onClosePanel = poiViewModel::closePOIPanel,
+            onRetry = poiViewModel::openPOIPanel,
+            onCategorySelected = poiViewModel::onCategorySelected,
+            onPOISelected = poiViewModel::onPOISelected,
+            onPOIDismissed = poiViewModel::onPOIDismissed,
+            onNavigateToPOI = { poi ->
+                mapViewModel.navigateToPOI(name = poi.name, latLng = poi.latLng)
+                poiViewModel.closePOIPanel()
+            }
+        ),
         currentCampus            = mapViewModel.currentCampus,
         highlightedBuildingName  = mapViewModel.highlightedBuildingName,
         searchQuery              = mapViewModel.searchQuery,
@@ -193,10 +209,6 @@ private fun MapContent(
     )
 
     val journeyPhase = mapViewModel.indoorJourneyState.phase
-    val context      = androidx.compose.ui.platform.LocalContext.current
-    val indoorRepo   = remember(context) {
-        com.example.myapplication.data.indoor.IndoorRepository(context.applicationContext)
-    }
 
     // ── Indoor journey dialogs ────────────────────────────────────────────────
     IndoorJourneyDialogs(

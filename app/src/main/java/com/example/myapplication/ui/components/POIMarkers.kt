@@ -1,11 +1,10 @@
 package com.example.myapplication.ui.components
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import com.example.myapplication.data.poi.POI
+import com.example.myapplication.logic.formatDistance
+import com.example.myapplication.logic.poiMarkerHue
 import com.example.myapplication.ui.models.POIUiState
-import com.example.myapplication.ui.viewmodel.POIViewModel
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.maps.android.compose.MarkerInfoWindowContent
 import com.google.maps.android.compose.rememberMarkerState
@@ -32,25 +31,25 @@ import androidx.compose.ui.unit.sp
  */
 @Composable
 fun POIMarkers(
-    poiViewModel: POIViewModel,
+    uiState: POIUiState,
     onMarkerClick: (POI) -> Unit
 ) {
-    val uiState by poiViewModel.uiState.collectAsState()
-    val pois    = (uiState as? POIUiState.Success)?.pois ?: return
-    val selectedPOI = (uiState as? POIUiState.Success)?.selectedPOI
+    val pois = uiState.poisOrEmpty()
+    if (pois.isEmpty()) return
+    val selectedPlaceId = uiState.selectedPlaceId()
 
     pois.forEach { poi ->
         val markerState = rememberMarkerState(
             key      = poi.placeId,
             position = poi.latLng
         )
-        val isSelected = poi.placeId == selectedPOI?.placeId
+        val isSelected = poi.placeId == selectedPlaceId
 
         MarkerInfoWindowContent(
             state   = markerState,
             title   = poi.name,
             snippet = poi.address,
-            icon    = BitmapDescriptorFactory.defaultMarker(poi.category.categoryHue()),
+            icon    = BitmapDescriptorFactory.defaultMarker(poiMarkerHue(poi.category)),
             alpha   = if (isSelected) 1.0f else 0.85f,
             onClick = {
                 onMarkerClick(poi)
@@ -75,15 +74,13 @@ fun POIMarkers(
     }
 }
 
-// Maps each POICategory to a distinct Google Maps marker hue
-private fun com.example.myapplication.data.poi.POICategory.categoryHue(): Float =
-    when (this) {
-        com.example.myapplication.data.poi.POICategory.ALL        -> BitmapDescriptorFactory.HUE_RED
-        com.example.myapplication.data.poi.POICategory.CAFE       -> BitmapDescriptorFactory.HUE_ORANGE
-        com.example.myapplication.data.poi.POICategory.RESTAURANT -> BitmapDescriptorFactory.HUE_ROSE
-        com.example.myapplication.data.poi.POICategory.PHARMACY   -> BitmapDescriptorFactory.HUE_GREEN
-        com.example.myapplication.data.poi.POICategory.GROCERY    -> BitmapDescriptorFactory.HUE_YELLOW
-        com.example.myapplication.data.poi.POICategory.GYM        -> BitmapDescriptorFactory.HUE_VIOLET
-        com.example.myapplication.data.poi.POICategory.ATM        -> BitmapDescriptorFactory.HUE_AZURE
-    }
+private fun POIUiState.poisOrEmpty(): List<POI> = when (this) {
+    is POIUiState.Browse -> pois
+    is POIUiState.Selection -> pois
+    else -> emptyList()
+}
 
+private fun POIUiState.selectedPlaceId(): String? = when (this) {
+    is POIUiState.Selection -> selectedPOI.placeId
+    else -> null
+}

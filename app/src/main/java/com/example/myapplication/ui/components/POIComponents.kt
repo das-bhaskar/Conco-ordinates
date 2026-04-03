@@ -19,12 +19,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myapplication.R
 import com.example.myapplication.data.poi.POI
 import com.example.myapplication.data.poi.POICategory
+import com.example.myapplication.logic.formatDistance
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -42,7 +45,7 @@ fun POICategoryFilterRow(
         contentPadding        = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(POICategory.entries) { category ->
+        items(POICategory.entries, key = { it.name }) { category ->
             val isSelected = category == selectedCategory
             FilterChip(
                 selected = isSelected,
@@ -115,18 +118,13 @@ fun POIListItem(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * @param isMapView   true = map mode (list hidden, markers visible on map)
- * @param onToggleView called when the user taps the List ↔ Map toggle button
+ * @param state UI data required to render the panel.
+ * @param actions User interactions emitted by the panel.
  */
 @Composable
 fun POIListPanel(
-    pois:               List<POI>,
-    selectedCategory:   POICategory,
-    onCategorySelected: (POICategory) -> Unit,
-    onPOISelected:      (POI) -> Unit,
-    onClose:            () -> Unit,
-    isMapView:          Boolean,
-    onToggleView:       () -> Unit,
+    state: POIListPanelState,
+    actions: POIListPanelActions,
     modifier:           Modifier = Modifier
 ) {
     Card(
@@ -138,85 +136,116 @@ fun POIListPanel(
         colors    = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column {
-            // ── Header ────────────────────────────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 4.dp, top = 16.dp, bottom = 8.dp),
-                verticalAlignment     = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                // Title
-                Row(
-                    verticalAlignment     = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Icon(
-                        imageVector        = Icons.Default.Place,
-                        contentDescription = null,
-                        tint               = ConcordiaMaroon,
-                        modifier           = Modifier.size(20.dp)
-                    )
-                    Text(
-                        text       = "Nearby Places",
-                        fontWeight = FontWeight.Bold,
-                        fontSize   = 16.sp
-                    )
-                }
-
-                // Toggle + Close
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // List ↔ Map toggle button
-                    IconButton(onClick = onToggleView) {
-                        Icon(
-                            imageVector        = if (isMapView) Icons.Default.List else Icons.Default.Map,
-                            contentDescription = if (isMapView) "Show list" else "Show on map",
-                            tint               = ConcordiaMaroon
-                        )
-                    }
-                    IconButton(onClick = onClose) {
-                        Icon(Icons.Default.Close, contentDescription = "Close POI panel")
-                    }
-                }
-            }
+            POIListHeader(state = state, actions = actions)
 
             // ── Category filter chips (always visible) ────────────────────
             POICategoryFilterRow(
-                selectedCategory   = selectedCategory,
-                onCategorySelected = onCategorySelected
+                selectedCategory   = state.selectedCategory,
+                onCategorySelected = actions.onCategorySelected
             )
 
-            // ── List — hidden in map view ─────────────────────────────────
-            if (!isMapView) {
-                Spacer(modifier = Modifier.height(8.dp))
-                HorizontalDivider()
-                LazyColumn(
-                    modifier       = Modifier.heightIn(max = 320.dp),
-                    contentPadding = PaddingValues(vertical = 4.dp)
-                ) {
-                    items(pois, key = { it.placeId }) { poi ->
-                        POIListItem(poi = poi, onClick = { onPOISelected(poi) })
-                        HorizontalDivider(
-                            modifier  = Modifier.padding(horizontal = 16.dp),
-                            thickness = 0.5.dp,
-                            color     = MaterialTheme.colorScheme.outlineVariant
-                        )
-                    }
-                }
-            } else {
-                // Map mode hint
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text     = "Tap a marker on the map to see details.",
-                    fontSize = 13.sp,
-                    color    = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+            POIListContent(state = state, actions = actions)
+        }
+    }
+}
+
+@Composable
+private fun POIListHeader(
+    state: POIListPanelState,
+    actions: POIListPanelActions
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 4.dp, top = 16.dp, bottom = 8.dp),
+        verticalAlignment     = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(
+            verticalAlignment     = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector        = Icons.Default.Place,
+                contentDescription = null,
+                tint               = ConcordiaMaroon,
+                modifier           = Modifier.size(20.dp)
+            )
+            Text(
+                text       = stringResource(R.string.poi_nearby_places),
+                fontWeight = FontWeight.Bold,
+                fontSize   = 16.sp
+            )
+        }
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = actions.onToggleView) {
+                Icon(
+                    imageVector = if (state.isMapView) Icons.Default.List else Icons.Default.Map,
+                    contentDescription = if (state.isMapView) {
+                        stringResource(R.string.poi_show_list)
+                    } else {
+                        stringResource(R.string.poi_show_map)
+                    },
+                    tint = ConcordiaMaroon
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+            }
+            IconButton(onClick = actions.onClose) {
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = stringResource(R.string.poi_close_panel)
+                )
             }
         }
     }
 }
+
+@Composable
+private fun POIListContent(
+    state: POIListPanelState,
+    actions: POIListPanelActions
+) {
+    if (state.isMapView) {
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text     = stringResource(R.string.poi_tap_marker_hint),
+            fontSize = 13.sp,
+            color    = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        return
+    }
+
+    Spacer(modifier = Modifier.height(8.dp))
+    HorizontalDivider()
+    LazyColumn(
+        modifier       = Modifier.heightIn(max = 320.dp),
+        contentPadding = PaddingValues(vertical = 4.dp)
+    ) {
+        items(state.pois, key = { it.placeId }) { poi ->
+            POIListItem(poi = poi, onClick = { actions.onPOISelected(poi) })
+            HorizontalDivider(
+                modifier  = Modifier.padding(horizontal = 16.dp),
+                thickness = 0.5.dp,
+                color     = MaterialTheme.colorScheme.outlineVariant
+            )
+        }
+    }
+}
+
+data class POIListPanelState(
+    val pois: List<POI>,
+    val selectedCategory: POICategory,
+    val isMapView: Boolean
+)
+
+data class POIListPanelActions(
+    val onCategorySelected: (POICategory) -> Unit,
+    val onPOISelected: (POI) -> Unit,
+    val onClose: () -> Unit,
+    val onToggleView: () -> Unit
+)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // POIActionCard
@@ -272,7 +301,10 @@ fun POIActionCard(
                     }
                 }
                 IconButton(onClick = onDismiss) {
-                    Icon(Icons.Default.Close, contentDescription = "Back to list")
+                    Icon(
+                        Icons.Default.Close,
+                        contentDescription = stringResource(R.string.poi_back_to_list)
+                    )
                 }
             }
 
@@ -286,7 +318,10 @@ fun POIActionCard(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text       = "${formatDistance(poi.distanceMeters)} away",
+                text       = stringResource(
+                    R.string.poi_distance_away,
+                    formatDistance(poi.distanceMeters)
+                ),
                 fontSize   = 13.sp,
                 fontWeight = FontWeight.Medium,
                 color      = ConcordiaMaroon,
@@ -306,17 +341,11 @@ fun POIActionCard(
                     modifier           = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Get Directions", fontWeight = FontWeight.SemiBold)
+                Text(
+                    text = stringResource(R.string.poi_get_directions),
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-fun formatDistance(meters: Int): String = when {
-    meters < 1000 -> "$meters m"
-    else          -> "${"%.1f".format(meters / 1000.0)} km"
 }

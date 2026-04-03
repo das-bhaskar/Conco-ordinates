@@ -27,6 +27,8 @@ import com.example.myapplication.logic.openAppSettings
 import com.example.myapplication.map.TrueCameraController
 import com.example.myapplication.ui.components.BuildingInfoPopup
 import com.example.myapplication.ui.components.CampusMap
+import com.example.myapplication.ui.components.CampusMapPoiBindings
+import com.example.myapplication.ui.components.CampusMapState
 import com.example.myapplication.ui.components.CampusSearchBar
 import com.example.myapplication.ui.components.CampusToggle
 import com.example.myapplication.ui.components.DirectionsHeader
@@ -55,10 +57,22 @@ data class IndoorActions(
     val onIndoorMapClick: () -> Unit = {}
 )
 
+data class PoiActions(
+    val onLocationUpdate: (com.google.android.gms.maps.model.LatLng) -> Unit = {},
+    val onOpenPanel: () -> Unit,
+    val onClosePanel: () -> Unit,
+    val onRetry: () -> Unit,
+    val onCategorySelected: (com.example.myapplication.data.poi.POICategory) -> Unit,
+    val onPOISelected: (com.example.myapplication.data.poi.POI) -> Unit,
+    val onPOIDismissed: () -> Unit,
+    val onNavigateToPOI: (com.example.myapplication.data.poi.POI) -> Unit
+)
+
 @Composable
 fun MapScreen(
     mapViewModel:             com.example.myapplication.ui.viewmodel.MapViewModel,
-    poiViewModel:             com.example.myapplication.ui.viewmodel.POIViewModel,
+    poiUiState:               com.example.myapplication.ui.models.POIUiState,
+    poiActions:               PoiActions,
     currentCampus:            com.example.myapplication.data.Campus?,
     highlightedBuildingName:  String?,
     searchQuery:              String,
@@ -101,7 +115,7 @@ fun MapScreen(
     ObserveLocationUpdates(hasLocationPermission, fusedLocationClient,
         onLocationUpdate = { loc ->
             onLocationUpdate(loc, false)
-            poiViewModel.onLocationUpdated(loc)
+            poiActions.onLocationUpdate(loc)
         })
     val cameraPositionState = rememberMapCamera()
     val cameraController    = remember(cameraPositionState) { TrueCameraController(cameraPositionState) }
@@ -126,13 +140,17 @@ fun MapScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         CampusMap(
-            currentCampus           = currentCampus,
-            highlightedBuildingName = highlightedBuildingName,
             cameraPositionState     = cameraPositionState,
-            hasLocationPermission   = hasLocationPermission,
+            state                   = CampusMapState(
+                highlightedBuildingName = highlightedBuildingName,
+                hasLocationPermission = hasLocationPermission,
+                contentPadding = PaddingValues(bottom = mapPaddingBottom.dp)
+            ),
             viewModel               = mapViewModel,
-            poiViewModel            = poiViewModel,
-            contentPadding          = PaddingValues(bottom = mapPaddingBottom.dp),
+            poiBindings             = CampusMapPoiBindings(
+                uiState = poiUiState,
+                onPoiSelected = poiActions.onPOISelected
+            ),
             modifier                = Modifier.testTag("campus_map")
         )
 
@@ -182,8 +200,15 @@ fun MapScreen(
             )
             // ── Epic 5: POI overlay ───────────────────────────────────────
             MapPOIOverlay(
-                poiViewModel = poiViewModel,
-                mapViewModel = mapViewModel
+                uiState              = poiUiState,
+                showExploreFab       = uiState.mode == MapUIMode.PREVIEW && !uiState.isVisible,
+                onOpenPanel          = poiActions.onOpenPanel,
+                onClosePanel         = poiActions.onClosePanel,
+                onRetry              = poiActions.onRetry,
+                onCategorySelected   = poiActions.onCategorySelected,
+                onPOISelected        = poiActions.onPOISelected,
+                onPOIDismissed       = poiActions.onPOIDismissed,
+                onNavigateToPOI      = poiActions.onNavigateToPOI
             )
         } else {
             NavigationOverlay(

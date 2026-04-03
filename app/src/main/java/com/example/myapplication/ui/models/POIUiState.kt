@@ -22,12 +22,17 @@ sealed class POIUiState {
     /** Waiting for Places API response. */
     data object Loading : POIUiState()
 
-    /** Places API returned results successfully. */
-    data class Success(
+    /** Places API returned results successfully and the user is browsing them. */
+    data class Browse(
+        val pois:             List<POI>,
+        val selectedCategory: POICategory = POICategory.ALL
+    ) : POIUiState()
+
+    /** A POI is selected and the action card is visible. */
+    data class Selection(
         val pois:             List<POI>,
         val selectedCategory: POICategory = POICategory.ALL,
-        val selectedPOI:      POI?        = null,
-        val searchRadiusMeters: Int       = 500
+        val selectedPOI:      POI
     ) : POIUiState()
 
     /** Places API call failed. */

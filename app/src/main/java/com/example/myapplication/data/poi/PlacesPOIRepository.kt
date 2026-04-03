@@ -6,7 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 
 /**
  * Production implementation of [POIRepository] using the Google Places
@@ -122,7 +122,7 @@ class PlacesPOIRepository(
             "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
 
         private fun defaultFetch(url: String): String {
-            val connection = URL(url).openConnection() as HttpURLConnection
+            val connection = URI.create(url).toURL().openConnection() as HttpURLConnection
             return try {
                 connection.requestMethod = "GET"
                 connection.connectTimeout = 10_000

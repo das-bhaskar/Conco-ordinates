@@ -22,6 +22,8 @@ import com.example.myapplication.data.poi.POI
 import com.example.myapplication.data.poi.POICategory
 import com.example.myapplication.ui.models.POIUiState
 import com.example.myapplication.ui.theme.ConcordiaMaroon
+import java.net.URI
+import java.net.URLConnection
 
 /**
  * Top-level overlay composable for Epic 5 — POI discovery + directions.
@@ -35,15 +37,8 @@ import com.example.myapplication.ui.theme.ConcordiaMaroon
  */
 @Composable
 fun BoxScope.MapPOIOverlay(
-    uiState: POIUiState,
-    showExploreFab: Boolean,
-    onOpenPanel: () -> Unit,
-    onClosePanel: () -> Unit,
-    onRetry: () -> Unit,
-    onCategorySelected: (POICategory) -> Unit,
-    onPOISelected: (POI) -> Unit,
-    onPOIDismissed: () -> Unit,
-    onNavigateToPOI: (POI) -> Unit,
+    state: MapPOIOverlayState,
+    actions: MapPOIOverlayActions,
     modifier: Modifier = Modifier
 ) {
     // Toggle lives here — purely UI concern, no business logic
@@ -54,7 +49,7 @@ fun BoxScope.MapPOIOverlay(
 
     // ── Explore FAB — visible only when panel is fully hidden ─────────────
     AnimatedVisibility(
-        visible  = uiState is POIUiState.Hidden && showExploreFab,
+        visible  = state.uiState is POIUiState.Hidden && state.showExploreFab,
         enter    = fadeIn() + scaleIn(),
         exit     = fadeOut() + scaleOut(),
         modifier = modifier
@@ -64,7 +59,7 @@ fun BoxScope.MapPOIOverlay(
         ExtendedFloatingActionButton(
             onClick        = {
                 isMapView = false          // always start in list mode
-                onOpenPanel()
+                actions.onOpenPanel()
             },
             containerColor = ConcordiaMaroon,
             contentColor   = Color.White,
@@ -75,46 +70,61 @@ fun BoxScope.MapPOIOverlay(
 
     // ── Bottom panel — animated slide-up ──────────────────────────────────
     AnimatedVisibility(
-        visible  = uiState !is POIUiState.Hidden,
+        visible  = state.uiState !is POIUiState.Hidden,
         enter    = slideInVertically(initialOffsetY = { it }) + fadeIn(),
         exit     = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
         modifier = modifier.align(Alignment.BottomCenter)
     ) {
-        when (val state = uiState) {
+        when (val uiState = state.uiState) {
 
             is POIUiState.Loading -> POILoadingPanel(
-                onClose = onClosePanel
+                onClose = actions.onClosePanel
             )
 
             is POIUiState.Error -> POIErrorPanel(
-                message = state.message,
-                onRetry = onRetry,
-                onClose = onClosePanel
+                message = uiState.message,
+                onRetry = actions.onRetry,
+                onClose = actions.onClosePanel
             )
 
             is POIUiState.Empty -> POIEmptyPanel(
-                onClose = onClosePanel
+                onClose = actions.onClosePanel
             )
 
             is POIUiState.Browse -> POIBrowsePanel(
-                state = state,
+                state = uiState,
                 isMapView = isMapView,
-                onCategorySelected = onCategorySelected,
-                onPOISelected = onPOISelected,
-                onClose = onClosePanel,
+                onCategorySelected = actions.onCategorySelected,
+                onPOISelected = actions.onPOISelected,
+                onClose = actions.onClosePanel,
                 onToggleView = { isMapView = !isMapView }
             )
 
             is POIUiState.Selection -> POISelectionPanel(
-                state = state,
-                onGetDirections = onNavigateToPOI,
-                onDismiss = onPOIDismissed
+                state = uiState,
+                onGetDirections = actions.onNavigateToPOI,
+                onDismiss = actions.onPOIDismissed
             )
 
             is POIUiState.Hidden -> { /* guarded by AnimatedVisibility */ }
         }
     }
 }
+
+data class MapPOIOverlayState(
+    val uiState: POIUiState,
+    val showExploreFab: Boolean
+)
+
+data class MapPOIOverlayActions(
+    val onOpenPanel: () -> Unit,
+    val onClosePanel: () -> Unit,
+    val onRetry: () -> Unit,
+    val onCategorySelected: (POICategory) -> Unit,
+    val onPOISelected: (POI) -> Unit,
+    val onPOIDismissed: () -> Unit,
+    val onNavigateToPOI: (POI) -> Unit
+)
 
 @Composable
 private fun POIBrowsePanel(

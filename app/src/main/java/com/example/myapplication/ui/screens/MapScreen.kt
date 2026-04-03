@@ -34,6 +34,8 @@ import com.example.myapplication.ui.components.CampusToggle
 import com.example.myapplication.ui.components.DirectionsHeader
 import com.example.myapplication.ui.components.DirectionsInfoPopup
 import com.example.myapplication.ui.components.LocationPermissionDialog
+import com.example.myapplication.ui.components.MapPOIOverlayActions
+import com.example.myapplication.ui.components.MapPOIOverlayState
 import com.example.myapplication.ui.components.NavigationOverlay
 import com.example.myapplication.ui.components.NextClassPill
 import com.example.myapplication.ui.components.ObserveCameraEffects
@@ -200,15 +202,19 @@ fun MapScreen(
             )
             // ── Epic 5: POI overlay ───────────────────────────────────────
             MapPOIOverlay(
-                uiState              = poiUiState,
-                showExploreFab       = uiState.mode == MapUIMode.PREVIEW && !uiState.isVisible,
-                onOpenPanel          = poiActions.onOpenPanel,
-                onClosePanel         = poiActions.onClosePanel,
-                onRetry              = poiActions.onRetry,
-                onCategorySelected   = poiActions.onCategorySelected,
-                onPOISelected        = poiActions.onPOISelected,
-                onPOIDismissed       = poiActions.onPOIDismissed,
-                onNavigateToPOI      = poiActions.onNavigateToPOI
+                state = MapPOIOverlayState(
+                    uiState = poiUiState,
+                    showExploreFab = uiState.mode == MapUIMode.PREVIEW && !uiState.isVisible
+                ),
+                actions = MapPOIOverlayActions(
+                    onOpenPanel = poiActions.onOpenPanel,
+                    onClosePanel = poiActions.onClosePanel,
+                    onRetry = poiActions.onRetry,
+                    onCategorySelected = poiActions.onCategorySelected,
+                    onPOISelected = poiActions.onPOISelected,
+                    onPOIDismissed = poiActions.onPOIDismissed,
+                    onNavigateToPOI = poiActions.onNavigateToPOI
+                )
             )
         } else {
             NavigationOverlay(

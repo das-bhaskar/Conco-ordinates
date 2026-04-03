@@ -111,3 +111,5 @@ appId: com.example.myapplication
 
 - assertVisible:
     text: "Start"
+- waitForAnimationToEnd:
+    timeout: 2000

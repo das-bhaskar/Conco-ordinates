@@ -257,7 +257,7 @@ private fun MapContent(
                     // Destination is the exit node of the current building
                     com.example.myapplication.logic.IndoorOutdoorRouter.IndoorDestination(
                         building = phase.buildingCode,
-                        floor    = phase.floor,
+                        floor    = phase.exitFloor,
                         nodeId   = phase.exitNodeId,
                         label    = "Exit"
                     )

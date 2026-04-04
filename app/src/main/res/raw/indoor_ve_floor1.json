@@ -6,108 +6,357 @@
       "id": "corridor-1-1",
       "polygon": [
         [
-          0.7717,
-          0.0412
+          0.8089,
+          0.0887
         ],
         [
-          0.8109,
-          0.0412
+          0.7743,
+          0.089
         ],
         [
-          0.8109,
-          0.1659
+          0.774,
+          0.1407
         ],
         [
-          0.7717,
-          0.1659
+          0.7691,
+          0.1413
+        ],
+        [
+          0.7686,
+          0.1366
+        ],
+        [
+          0.6796,
+          0.1366
+        ],
+        [
+          0.6786,
+          0.1642
+        ],
+        [
+          0.7686,
+          0.1623
+        ],
+        [
+          0.7683,
+          0.1574
+        ],
+        [
+          0.7746,
+          0.1574
+        ],
+        [
+          0.7746,
+          0.1634
+        ],
+        [
+          0.8019,
+          0.1634
+        ],
+        [
+          0.8027,
+          0.1173
+        ],
+        [
+          0.8084,
+          0.1173
         ]
       ]
     }
   ],
   "rooms": [
     {
-      "id": "VE-1-190",
+      "id": "VE-191",
       "type": "classroom",
-      "label": "VE-190",
+      "label": "VE-191",
       "polygon": [
         [
-          0.7717,
-          0.0412
+          0.6788,
+          0.1657
         ],
         [
-          0.7717,
-          0.1659
+          0.6884,
+          0.166
         ],
         [
-          0.8045,
-          0.1659
+          0.6892,
+          0.1868
         ],
         [
-          0.8045,
-          0.1197
+          0.6788,
+          0.1873
+        ]
+      ]
+    },
+    {
+      "id": "VE-El",
+      "type": "elevator",
+      "label": "VE-El",
+      "polygon": [
+        [
+          0.6936,
+          0.167
         ],
         [
-          0.8109,
-          0.1197
+          0.6934,
+          0.1936
         ],
         [
-          0.8109,
-          0.0412
+          0.7223,
+          0.1936
         ],
         [
-          0.8045,
-          0.0412
+          0.7223,
+          0.1675
+        ]
+      ]
+    },
+    {
+      "id": "VE-St",
+      "type": "staircase",
+      "label": "VE-St",
+      "polygon": [
+        [
+          0.7746,
+          0.0439
+        ],
+        [
+          0.7746,
+          0.0882
+        ],
+        [
+          0.8084,
+          0.0887
+        ],
+        [
+          0.8084,
+          0.0442
         ]
       ]
     }
   ],
-  "pois": [],
+  "pois": [
+    {
+      "id": "exit-1-2",
+      "type": "exit",
+      "label": "Exit",
+      "x": 0.6728,
+      "y": 0.1491,
+      "nodeId": "node-H-1-exit-1-2"
+    },
+    {
+      "id": "water_fountain-1-1",
+      "type": "water_fountain",
+      "label": "Water Fountain",
+      "x": 0.6913,
+      "y": 0.1561,
+      "nodeId": "node-H-1-water_fountain-1-1"
+    },
+    {
+      "id": "elevator-1-1",
+      "type": "elevator",
+      "label": "Elevator",
+      "x": 0.7074,
+      "y": 0.1665,
+      "nodeId": "node-H-1-elevator-1-1"
+    },
+    {
+      "id": "staircase-1-1",
+      "type": "staircase",
+      "label": "Staircase",
+      "x": 0.7811,
+      "y": 0.0884,
+      "nodeId": "node-H-1-staircase-1-1"
+    }
+  ],
   "nodes": [
     {
-      "id": "node-VE-1-190",
-      "x": 0.797,
-      "y": 0.0993,
+      "id": "node-H-1-VE-191-door",
+      "x": 0.683,
+      "y": 0.1655,
       "type": "ROOM",
-      "roomId": "VE-1-190",
+      "roomId": "VE-191",
       "accessible": true
     },
     {
-      "id": "node-VE-1-c1",
-      "x": 0.797,
+      "id": "node-H-1-exit-1-2",
+      "x": 0.6728,
+      "y": 0.1491,
+      "type": "ENTRANCE",
+      "roomId": "exit-1-2",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-water_fountain-1-1",
+      "x": 0.6913,
+      "y": 0.1561,
+      "type": "CORRIDOR",
+      "roomId": "water_fountain-1-1",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-elevator-1-1",
+      "x": 0.7074,
+      "y": 0.1665,
+      "type": "ELEVATOR",
+      "roomId": "elevator-1-1",
+      "elevatorGroupId": "elev-VE-main",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-5",
+      "x": 0.6853,
+      "y": 0.1462,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-6",
+      "x": 0.7155,
+      "y": 0.1465,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-7",
+      "x": 0.753,
+      "y": 0.1499,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-8",
+      "x": 0.7712,
       "y": 0.1493,
       "type": "CORRIDOR",
       "accessible": true
     },
     {
-      "id": "node-VE-1-c2",
-      "x": 0.897,
-      "y": 0.1993,
+      "id": "node-H-1-9",
+      "x": 0.7917,
+      "y": 0.1501,
       "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-10",
+      "x": 0.7897,
+      "y": 0.0952,
+      "type": "CORRIDOR",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-staircase-1-1",
+      "x": 0.7811,
+      "y": 0.0884,
+      "type": "STAIRCASE",
+      "roomId": "staircase-1-1",
+      "elevatorGroupId": "stair-VE-main",
       "accessible": true
     }
   ],
   "edges": [
     {
-      "from": "node-VE-1-c1",
-      "to": "node-VE-1-c2",
-      "weight": 0.1118,
+      "from": "node-H-1-exit-1-2",
+      "to": "node-H-1-VE-191-door",
+      "weight": 0.5,
       "surface": "SMOOTH",
       "accessible": true
     },
     {
-      "from": "node-VE-1-190",
-      "to": "node-VE-1-c1",
-      "weight": 0.05,
+      "from": "node-H-1-water_fountain-1-1",
+      "to": "node-H-1-exit-1-2",
+      "weight": 0.5,
       "surface": "SMOOTH",
       "accessible": true
     },
     {
-      "from": "node-VE-1-190",
-      "to": "node-VE-1-c2",
-      "weight": 0.1414,
+      "from": "node-H-1-elevator-1-1",
+      "to": "node-H-1-water_fountain-1-1",
+      "weight": 0.5,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-staircase-1-1",
+      "to": "node-H-1-10",
+      "weight": 0.5,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-10",
+      "to": "node-H-1-9",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-9",
+      "to": "node-H-1-8",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-8",
+      "to": "node-H-1-7",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-7",
+      "to": "node-H-1-6",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-6",
+      "to": "node-H-1-elevator-1-1",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-6",
+      "to": "node-H-1-5",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-5",
+      "to": "node-H-1-water_fountain-1-1",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-5",
+      "to": "node-H-1-exit-1-2",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-5",
+      "to": "node-H-1-VE-191-door",
+      "weight": 1,
       "surface": "SMOOTH",
       "accessible": true
     }
   ],
-  "entrances": []
+  "entrances": [
+    {
+      "id": "entrance-1775256734405",
+      "label": "VE Main Entrance",
+      "floor": 1,
+      "x": 0.6728,
+      "y": 0.1488,
+      "nodeId": "node-H-1-exit-1-2",
+      "heading": 180
+    }
+  ]
 }

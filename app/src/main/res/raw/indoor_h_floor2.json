@@ -527,9 +527,9 @@
       ]
     },
     {
-      "id": "H-Es1",
+      "id": "H-Es4",
       "type": "escalator",
-      "label": "H-Es1",
+      "label": "H-Es4",
       "polygon": [
         [
           0.5288,
@@ -550,9 +550,9 @@
       ]
     },
     {
-      "id": "H-Es2",
+      "id": "H-Es3",
       "type": "escalator",
-      "label": "H-Es2",
+      "label": "H-Es3",
       "polygon": [
         [
           0.5042,
@@ -812,9 +812,9 @@
       ]
     },
     {
-      "id": "H-Es3",
+      "id": "H-Es2",
       "type": "escalator",
-      "label": "H-Es3",
+      "label": "H-Es2",
       "polygon": [
         [
           0.7194,
@@ -927,9 +927,9 @@
       ]
     },
     {
-      "id": "H-Es4",
+      "id": "H-Es1",
       "type": "escalator",
-      "label": "H-Es4",
+      "label": "H-Es1",
       "polygon": [
         [
           0.5946,
@@ -1135,7 +1135,8 @@
       "y": 0.403,
       "type": "STAIRCASE",
       "roomId": "staircase-2-1",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "stair-H-main"
     },
     {
       "id": "node-H-2-staircase-2-2",
@@ -1143,7 +1144,8 @@
       "y": 0.7044,
       "type": "STAIRCASE",
       "roomId": "staircase-2-2",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "stair-H-main"
     },
     {
       "id": "node-H-2-staircase-2-3",
@@ -1151,7 +1153,8 @@
       "y": 0.7362,
       "type": "STAIRCASE",
       "roomId": "staircase-2-3",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "stair-H-main"
     },
     {
       "id": "node-H-2-staircase-2-4",
@@ -1159,7 +1162,8 @@
       "y": 0.7367,
       "type": "STAIRCASE",
       "roomId": "staircase-2-4",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "stair-H-main"
     },
     {
       "id": "node-H-2-elevator-2-1",
@@ -1167,7 +1171,8 @@
       "y": 0.7264,
       "type": "ELEVATOR",
       "roomId": "elevator-2-1",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "elev-H-main"
     },
     {
       "id": "node-H-2-elevator-2-2",
@@ -1175,39 +1180,48 @@
       "y": 0.7262,
       "type": "ELEVATOR",
       "roomId": "elevator-2-2",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "elev-H-main"
     },
     {
       "id": "node-H-2-escalator-2-1",
       "x": 0.6044,
       "y": 0.7132,
       "type": "ESCALATOR",
-      "roomId": "escalator-2-1",
-      "accessible": true
+      "roomId": "H-Es1",
+      "accessible": true,
+      "elevatorGroupId": "escalator-H-1-2",
+      "transferFloor": 1,
+      "transferNodeId": "node-H-1-escalator-1-1"
     },
     {
       "id": "node-H-2-escalator-2-2",
       "x": 0.7305,
       "y": 0.7143,
       "type": "ESCALATOR",
-      "roomId": "escalator-2-2",
-      "accessible": true
+      "roomId": "H-Es2",
+      "accessible": true,
+      "elevatorGroupId": "escalator-H-1-2"
     },
     {
       "id": "node-H-2-escalator-2-3",
       "x": 0.5145,
       "y": 0.6961,
       "type": "ESCALATOR",
-      "roomId": "escalator-2-3",
-      "accessible": true
+      "roomId": "H-Es3",
+      "accessible": true,
+      "elevatorGroupId": "escalator-H-2-8"
     },
     {
       "id": "node-H-2-escalator-2-4",
       "x": 0.5409,
       "y": 0.5159,
       "type": "ESCALATOR",
-      "roomId": "escalator-2-4",
-      "accessible": true
+      "roomId": "H-Es4",
+      "accessible": true,
+      "elevatorGroupId": "escalator-H-2-8",
+      "transferFloor": 8,
+      "transferNodeId": "node-H-8-escalator-8-1"
     },
     {
       "id": "node-H-2-staircase-2-5",
@@ -1215,7 +1229,8 @@
       "y": 0.4825,
       "type": "STAIRCASE",
       "roomId": "staircase-2-5",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "stair-H-main"
     },
     {
       "id": "node-H-2-staircase-2-6",
@@ -1223,7 +1238,8 @@
       "y": 0.3999,
       "type": "STAIRCASE",
       "roomId": "staircase-2-6",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "stair-H-main"
     },
     {
       "id": "node-H-2-21",
@@ -3017,11 +3033,11 @@
   "entrances": [
     {
       "id": "entrance-1774995298766",
-      "label": "entrance-1774995298766",
+      "label": "H West Entrance",
       "floor": 2,
       "x": 0.0185,
       "y": 0.4243,
-      "nodeId": "",
+      "nodeId": "node-H-2-exit-2-1",
       "heading": 180
     }
   ]

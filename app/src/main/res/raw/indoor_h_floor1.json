@@ -249,52 +249,6 @@
       ]
     },
     {
-      "id": "H-114",
-      "type": "washroom",
-      "label": "H-114",
-      "polygon": [
-        [
-          0.3916,
-          0.5146
-        ],
-        [
-          0.4603,
-          0.7281
-        ],
-        [
-          0.4975,
-          0.7289
-        ],
-        [
-          0.4951,
-          0.5153
-        ]
-      ]
-    },
-    {
-      "id": "H-EL2",
-      "type": "elevator",
-      "label": "H-EL2",
-      "polygon": [
-        [
-          0.6574,
-          0.7361
-        ],
-        [
-          0.6585,
-          0.7607
-        ],
-        [
-          0.6876,
-          0.7607
-        ],
-        [
-          0.6876,
-          0.7365
-        ]
-      ]
-    },
-    {
       "id": "H-102-90",
       "type": "staircase",
       "label": "H-102-90",
@@ -322,29 +276,6 @@
       ]
     },
     {
-      "id": "H-102-91",
-      "type": "escalator",
-      "label": "H-102-91",
-      "polygon": [
-        [
-          0.572,
-          0.763
-        ],
-        [
-          0.5736,
-          0.8614
-        ],
-        [
-          0.6189,
-          0.8622
-        ],
-        [
-          0.6196,
-          0.7643
-        ]
-      ]
-    },
-    {
       "id": "H-102-90",
       "type": "escalator",
       "label": "H-102-90",
@@ -368,25 +299,280 @@
       ]
     },
     {
-      "id": "H-EL1",
-      "type": "elevator",
-      "label": "H-EL1",
+      "id": "H_Es1-2",
+      "type": "escalator",
+      "label": "H_Es1-2",
       "polygon": [
         [
-          0.6248,
-          0.7357
+          0.6985,
+          0.7296
         ],
         [
-          0.6249,
-          0.7598
+          0.6981,
+          0.8648
         ],
         [
-          0.6538,
-          0.7606
+          0.7265,
+          0.8648
         ],
         [
-          0.6541,
-          0.7358
+          0.726,
+          0.7296
+        ]
+      ]
+    },
+    {
+      "id": "H-St_2",
+      "type": "staircase",
+      "label": "to 2floor",
+      "polygon": [
+        [
+          0.7274,
+          0.7301
+        ],
+        [
+          0.7288,
+          0.8643
+        ],
+        [
+          0.7526,
+          0.8634
+        ],
+        [
+          0.753,
+          0.7296
+        ]
+      ]
+    },
+    {
+      "id": "H-Es2-1",
+      "type": "escalator",
+      "label": "H-Es2-1",
+      "polygon": [
+        [
+          0.5905,
+          0.7273
+        ],
+        [
+          0.5923,
+          0.8615
+        ],
+        [
+          0.6179,
+          0.8611
+        ],
+        [
+          0.6179,
+          0.7278
+        ]
+      ]
+    },
+    {
+      "id": "H-St1",
+      "type": "staircase",
+      "label": "to2floor",
+      "polygon": [
+        [
+          0.5639,
+          0.7287
+        ],
+        [
+          0.5616,
+          0.8615
+        ],
+        [
+          0.59,
+          0.8606
+        ],
+        [
+          0.5909,
+          0.7273
+        ]
+      ]
+    },
+    {
+      "id": "H-Ws",
+      "type": "washroom",
+      "label": "H-Ws",
+      "polygon": [
+        [
+          0.3836,
+          0.5157
+        ],
+        [
+          0.4525,
+          0.7324
+        ],
+        [
+          0.4982,
+          0.7328
+        ],
+        [
+          0.494,
+          0.5175
+        ]
+      ]
+    },
+    {
+      "id": "H-116",
+      "type": "office",
+      "label": "H-116",
+      "polygon": [
+        [
+          0.5583,
+          0.6481
+        ],
+        [
+          0.5592,
+          0.6792
+        ],
+        [
+          0.6156,
+          0.6811
+        ],
+        [
+          0.6184,
+          0.6394
+        ],
+        [
+          0.6012,
+          0.6389
+        ],
+        [
+          0.6002,
+          0.6463
+        ]
+      ]
+    },
+    {
+      "id": "H-118",
+      "type": "office",
+      "label": "securitydesk",
+      "polygon": [
+        [
+          0.6221,
+          0.6046
+        ],
+        [
+          0.6217,
+          0.6824
+        ],
+        [
+          0.8686,
+          0.6843
+        ],
+        [
+          0.8686,
+          0.7049
+        ],
+        [
+          0.9031,
+          0.7049
+        ],
+        [
+          0.9021,
+          0.6
+        ]
+      ]
+    },
+    {
+      "id": "H-115",
+      "type": "office",
+      "label": "H-115",
+      "polygon": [
+        [
+          0.5318,
+          0.4782
+        ],
+        [
+          0.5336,
+          0.6215
+        ],
+        [
+          0.5536,
+          0.6211
+        ],
+        [
+          0.556,
+          0.6449
+        ],
+        [
+          0.5965,
+          0.6444
+        ],
+        [
+          0.597,
+          0.6353
+        ],
+        [
+          0.6179,
+          0.6366
+        ],
+        [
+          0.6198,
+          0.4782
+        ]
+      ]
+    },
+    {
+      "id": "H-199",
+      "type": "office",
+      "label": "H-199",
+      "polygon": [
+        [
+          0.3985,
+          0.4804
+        ],
+        [
+          0.3985,
+          0.5029
+        ],
+        [
+          0.5005,
+          0.5024
+        ],
+        [
+          0.5019,
+          0.6137
+        ],
+        [
+          0.528,
+          0.6142
+        ],
+        [
+          0.5294,
+          0.6037
+        ],
+        [
+          0.5262,
+          0.6037
+        ],
+        [
+          0.5266,
+          0.4763
+        ]
+      ]
+    },
+    {
+      "id": "H-St3",
+      "type": "staircase",
+      "label": "H-St3",
+      "polygon": [
+        [
+          0.8772,
+          0.7402
+        ],
+        [
+          0.8776,
+          0.8172
+        ],
+        [
+          0.9563,
+          0.8172
+        ],
+        [
+          0.9572,
+          0.7406
         ]
       ]
     }
@@ -463,6 +649,38 @@
       "x": 0.637,
       "y": 0.7355,
       "nodeId": "node-H-1-elevator-1-2"
+    },
+    {
+      "id": "escalator-1-3",
+      "type": "escalator",
+      "label": "Escalator",
+      "x": 0.7116,
+      "y": 0.8634,
+      "nodeId": "node-H-1-escalator-1-3"
+    },
+    {
+      "id": "staircase-1-2",
+      "type": "staircase",
+      "label": "Staircase",
+      "x": 0.5746,
+      "y": 0.8606,
+      "nodeId": "node-H-1-staircase-1-2"
+    },
+    {
+      "id": "staircase-1-3",
+      "type": "staircase",
+      "label": "Staircase",
+      "x": 0.7442,
+      "y": 0.8634,
+      "nodeId": "node-H-1-staircase-1-3"
+    },
+    {
+      "id": "staircase-1-4",
+      "type": "staircase",
+      "label": "Staircase",
+      "x": 0.8765,
+      "y": 0.7997,
+      "nodeId": "node-H-1-staircase-1-4"
     }
   ],
   "nodes": [
@@ -512,8 +730,8 @@
       "y": 0.965,
       "type": "STAIRCASE",
       "roomId": "staircase-1-1",
-      "accessible": true,
-      "elevatorGroupId": "stair-H-main"
+      "elevatorGroupId": "stair-H-main",
+      "accessible": true
     },
     {
       "id": "node-H-1-elevator-1-2",
@@ -521,8 +739,8 @@
       "y": 0.7344,
       "type": "ELEVATOR",
       "roomId": "elevator-1-2",
-      "accessible": true,
-      "elevatorGroupId": "elev-H-main"
+      "elevatorGroupId": "elev-H-main",
+      "accessible": true
     },
     {
       "id": "node-H-1-escalator-1-1",
@@ -530,8 +748,8 @@
       "y": 0.8613,
       "type": "ESCALATOR",
       "roomId": "escalator-1-1",
-      "accessible": true,
-      "elevatorGroupId": "escalator-H-inner-1"
+      "elevatorGroupId": "escalator-H-1-2",
+      "accessible": true
     },
     {
       "id": "node-H-1-escalator-1-2",
@@ -539,8 +757,7 @@
       "y": 0.9439,
       "type": "ESCALATOR",
       "roomId": "escalator-1-2",
-      "accessible": true,
-      "elevatorGroupId": "escalator-H-inner-2"
+      "accessible": true
     },
     {
       "id": "node-H-1-washroom-1-1",
@@ -689,9 +906,7 @@
       "y": 0.6217,
       "type": "CORRIDOR",
       "roomId": "H-114",
-      "accessible": true,
-      "building": "H",
-      "floor": 1
+      "accessible": true
     },
     {
       "id": "node-H-1-H-102-90-door",
@@ -699,21 +914,8 @@
       "y": 0.9684,
       "type": "STAIRCASE",
       "roomId": "H-102-90",
-      "accessible": true,
-      "building": "H",
-      "floor": 1,
-      "elevatorGroupId": "stair-H-main"
-    },
-    {
-      "id": "node-H-1-H-102-91-door",
-      "x": 0.596,
-      "y": 0.8127,
-      "type": "ESCALATOR",
-      "roomId": "H-102-91",
-      "accessible": true,
-      "building": "H",
-      "floor": 1,
-      "elevatorGroupId": "escalator-H-lower"
+      "elevatorGroupId": "stair-H-main",
+      "accessible": true
     },
     {
       "id": "node-H-1-H-EL1-door",
@@ -721,10 +923,75 @@
       "y": 0.748,
       "type": "ELEVATOR",
       "roomId": "H-EL1",
-      "accessible": true,
-      "building": "H",
-      "floor": 1,
-      "elevatorGroupId": "elev-H-main"
+      "elevatorGroupId": "elev-H-main",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-escalator-1-3",
+      "x": 0.7116,
+      "y": 0.8634,
+      "type": "ESCALATOR",
+      "roomId": "escalator-1-3",
+      "elevatorGroupId": "escalator-H-1-2",
+      "transferFloor": 2,
+      "transferNodeId": "node-H-2-escalator-2-2",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-staircase-1-2",
+      "x": 0.5746,
+      "y": 0.8606,
+      "type": "STAIRCASE",
+      "roomId": "staircase-1-2",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-staircase-1-3",
+      "x": 0.7442,
+      "y": 0.8634,
+      "type": "STAIRCASE",
+      "roomId": "staircase-1-3",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-staircase-1-4",
+      "x": 0.8765,
+      "y": 0.7997,
+      "type": "STAIRCASE",
+      "roomId": "staircase-1-4",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-H-116-door",
+      "x": 0.6071,
+      "y": 0.6802,
+      "type": "ROOM",
+      "roomId": "H-116",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-H-118-door",
+      "x": 0.7856,
+      "y": 0.6809,
+      "type": "ROOM",
+      "roomId": "H-118",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-H-115-door",
+      "x": 0.5404,
+      "y": 0.6175,
+      "type": "ROOM",
+      "roomId": "H-115",
+      "accessible": true
+    },
+    {
+      "id": "node-H-1-H-199-door",
+      "x": 0.519,
+      "y": 0.6124,
+      "type": "ROOM",
+      "roomId": "H-199",
+      "accessible": true
     }
   ],
   "edges": [
@@ -921,66 +1188,147 @@
       "from": "node-H-1-exit-1-1",
       "to": "node-H-1-16",
       "weight": 0.0763,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-1-24",
       "to": "node-H-1-23",
       "weight": 0.0898,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-1-24",
       "to": "node-H-1-25",
       "weight": 0.0858,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-1-25",
       "to": "node-H-1-22",
       "weight": 0.0894,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-1-30",
       "to": "node-H-1-31",
       "weight": 0.0497,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-1-30",
       "to": "node-H-1-29",
       "weight": 0.0862,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-1-23",
       "to": "node-H-1-22",
       "weight": 0.0862,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-1-H-114-door",
       "to": "node-H-1-washroom-1-1",
       "weight": 0.0488,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-1-H-102-90-door",
       "to": "node-H-1-27",
       "weight": 0.0733,
-      "accessible": true
-    },
-    {
-      "from": "node-H-1-H-102-91-door",
-      "to": "node-H-1-26",
-      "weight": 0.0902,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-1-H-EL1-door",
       "to": "node-H-1-H-EL2-door",
       "weight": 0.0335,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-escalator-1-3",
+      "to": "node-H-1-27",
+      "weight": 0.5,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-staircase-1-2",
+      "to": "node-H-1-escalator-1-1",
+      "weight": 0.5,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-staircase-1-3",
+      "to": "node-H-1-escalator-1-3",
+      "weight": 0.5,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-staircase-1-2",
+      "to": "node-H-1-26",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-staircase-1-3",
+      "to": "node-H-1-28",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-staircase-1-4",
+      "to": "node-H-1-30",
+      "weight": 0.5,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-staircase-1-5",
+      "to": "node-H-1-H-114-door",
+      "weight": 0.5,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-H-118-door",
+      "to": "node-H-1-32",
+      "weight": 0.5,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-H-116-door",
+      "to": "node-H-1-33",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-H-115-door",
+      "to": "node-H-1-34",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-1-H-199-door",
+      "to": "node-H-1-34",
+      "weight": 1,
+      "surface": "SMOOTH",
       "accessible": true
     }
   ],

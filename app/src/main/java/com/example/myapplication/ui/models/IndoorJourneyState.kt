@@ -64,7 +64,8 @@ sealed class IndoorJourneyPhase {
      */
     data class IndoorToExit(
         val buildingCode: String,
-        val floor:        Int,
+        val startFloor:   Int,
+        val exitFloor:    Int,
         val startNodeId:  String,
         val exitNodeId:   String,
         val destination:  SearchResult.IndoorRoomResult

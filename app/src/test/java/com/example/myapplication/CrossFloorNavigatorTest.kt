@@ -27,6 +27,21 @@ class CrossFloorNavigatorTest {
                      groupId: String? = null) =
         IndoorNode(id = id, x = x, y = y, type = type, elevatorGroupId = groupId)
 
+    private fun escalatorNode(
+        id: String,
+        x: Float,
+        y: Float,
+        targetFloor: Int? = null,
+        targetNodeId: String? = null
+    ) = IndoorNode(
+        id = id,
+        x = x,
+        y = y,
+        type = "ESCALATOR",
+        transferFloor = targetFloor,
+        transferNodeId = targetNodeId
+    )
+
     private fun edge(from: String, to: String) = IndoorEdge(from = from, to = to)
 
     private val startNode   = node("start",       0f, 0f)
@@ -195,6 +210,72 @@ class CrossFloorNavigatorTest {
         assertTrue(steps.isNotEmpty())
         val change = steps.filterIsInstance<CrossFloorNavigator.NavStep.ChangeFloor>().first()
         assertEquals(CrossFloorNavigator.VIA_ELEVATOR, change.via)
+    }
+
+    @Test
+    fun `navigate can chain directed escalators across multiple floors`() = runTest {
+        val floor1Esc = IndoorFloor(
+            building = "H",
+            floor = 1,
+            nodes = listOf(
+                node("start", 0f, 0f),
+                escalatorNode("es_1_2", 1f, 0f, targetFloor = 2, targetNodeId = "es_2_from_1")
+            ),
+            edges = listOf(edge("start", "es_1_2"))
+        )
+        val floor2Esc = IndoorFloor(
+            building = "H",
+            floor = 2,
+            nodes = listOf(
+                escalatorNode("es_2_from_1", 0f, 0f),
+                escalatorNode("es_2_8", 1f, 0f, targetFloor = 8, targetNodeId = "es_8_from_2")
+            ),
+            edges = listOf(edge("es_2_from_1", "es_2_8"))
+        )
+        val floor8Esc = IndoorFloor(
+            building = "H",
+            floor = 8,
+            nodes = listOf(
+                escalatorNode("es_8_from_2", 0f, 0f),
+                escalatorNode("es_8_9", 1f, 0f, targetFloor = 9, targetNodeId = "es_9_from_8")
+            ),
+            edges = listOf(edge("es_8_from_2", "es_8_9"))
+        )
+        val floor9Esc = IndoorFloor(
+            building = "H",
+            floor = 9,
+            nodes = listOf(
+                escalatorNode("es_9_from_8", 0f, 0f),
+                node("dest", 1f, 0f)
+            ),
+            edges = listOf(edge("es_9_from_8", "dest"))
+        )
+
+        val repo = mock<IndoorRepository>()
+        runBlocking { whenever(repo.getFloor("H", 1)).thenReturn(floor1Esc) }
+        runBlocking { whenever(repo.getFloor("H", 2)).thenReturn(floor2Esc) }
+        runBlocking { whenever(repo.getFloor("H", 8)).thenReturn(floor8Esc) }
+        runBlocking { whenever(repo.getFloor("H", 9)).thenReturn(floor9Esc) }
+
+        val steps = CrossFloorNavigator.navigate(
+            repo = repo,
+            building = "H",
+            startFloor = 1,
+            startNodeId = "start",
+            targetFloor = 9,
+            targetNodeId = "dest",
+            preference = TransferPreference.ESCALATOR
+        )
+
+        assertEquals(7, steps.size)
+        assertEquals(
+            listOf(2, 8, 9),
+            steps.filterIsInstance<CrossFloorNavigator.NavStep.ChangeFloor>().map { it.toFloor }
+        )
+        assertTrue(
+            steps.filterIsInstance<CrossFloorNavigator.NavStep.ChangeFloor>()
+                .all { it.via == CrossFloorNavigator.VIA_ESCALATOR }
+        )
     }
 
     // ── NavStep data classes ──────────────────────────────────────────────────

@@ -1850,6 +1850,7 @@
       "y": 0.5035,
       "type": "ESCALATOR",
       "roomId": "escalator--2-1",
+      "elevatorGroupId": "escalator-MB-main",
       "accessible": true
     },
     {
@@ -1858,6 +1859,7 @@
       "y": 0.5032,
       "type": "STAIRCASE",
       "roomId": "staircase--2-1",
+      "elevatorGroupId": "stair-MB-upper",
       "accessible": true
     },
     {
@@ -1866,6 +1868,7 @@
       "y": 0.4097,
       "type": "STAIRCASE",
       "roomId": "staircase--2-2",
+      "elevatorGroupId": "stair-MB-main",
       "accessible": true
     },
     {
@@ -1916,6 +1919,7 @@
       "y": 0.588,
       "type": "ELEVATOR",
       "roomId": "elevator--2-1",
+      "elevatorGroupId": "elev-MB-main",
       "accessible": true
     }
   ],
@@ -2437,17 +2441,119 @@
       "weight": 1,
       "surface": "SMOOTH",
       "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r501",
+      "to": "node-MB--2-81",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r510",
+      "to": "node-MB--2-55",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r511",
+      "to": "node-MB--2-56",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r512",
+      "to": "node-MB--2-56",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r513",
+      "to": "node-MB--2-57",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r514",
+      "to": "node-MB--2-59",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r515",
+      "to": "node-MB--2-58",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r516",
+      "to": "node-MB--2-57",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r517",
+      "to": "node-MB--2-56",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r518",
+      "to": "node-MB--2-56",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r519",
+      "to": "node-MB--2-55",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r520",
+      "to": "node-MB--2-60",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r521",
+      "to": "node-MB--2-68",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB-n2-r522",
+      "to": "node-MB--2-70",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-MB-S2.345-door",
+      "to": "node-MB--2-56",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-MB--2-MB-S2.494-door",
+      "to": "node-MB--2-68",
+      "weight": 1,
+      "surface": "SMOOTH",
+      "accessible": true
     }
   ],
-  "entrances": [
-    {
-      "id": "ent-1",
-      "label": "Entrance 1",
-      "floor": -2,
-      "x": 0.3794,
-      "y": 0.4558,
-      "nodeId": "node-MB-n2-exit1",
-      "heading": 180
-    }
-  ]
+  "entrances": []
 }

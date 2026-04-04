@@ -147,6 +147,8 @@ class IndoorJourneyHandlerTest {
         assertTrue(result is IndoorJourneyPhase.IndoorToExit)
         val exit = result as IndoorJourneyPhase.IndoorToExit
         assertEquals("H", exit.buildingCode)
+        assertEquals(1, exit.startFloor)
+        assertEquals(1, exit.exitFloor)
         assertEquals("node-H-ent-south", exit.exitNodeId)
         assertEquals(ccDestination, exit.destination)
     }
@@ -164,7 +166,7 @@ class IndoorJourneyHandlerTest {
     @Test
     fun `onUserExited returns Outdoor with CC entrance as destination`() {
         val exitPhase = IndoorJourneyPhase.IndoorToExit(
-            buildingCode = "H", floor = 1,
+            buildingCode = "H", startFloor = 1, exitFloor = 1,
             startNodeId = "node-h-110", exitNodeId = "node-H-ent-south",
             destination = ccDestination
         )
@@ -180,7 +182,7 @@ class IndoorJourneyHandlerTest {
     fun `onUserExited returns Idle when no entrance data for destination`() {
         injectEntrances(mapOf("H" to listOf(hEntrance)))
         val exitPhase = IndoorJourneyPhase.IndoorToExit(
-            buildingCode = "H", floor = 1,
+            buildingCode = "H", startFloor = 1, exitFloor = 1,
             startNodeId = "s", exitNodeId = "e", destination = ccDestination
         )
         val result = IndoorJourneyHandler.onUserExited(exitPhase, LatLng(45.497, -73.579))

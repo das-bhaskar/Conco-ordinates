@@ -23,6 +23,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.myapplication.data.ResolvedCalendarEvent
 import com.example.myapplication.ui.components.CalendarScreen
 import com.example.myapplication.ui.components.CalendarActions
 import com.example.myapplication.ui.components.UserAccountState
@@ -57,7 +58,7 @@ sealed class Screen(val route: String) {
  * AND the NavController switch together — preventing state desync.
  */
 data class NavigationActions(
-    val onNavigateToMap: (buildingCode: String) -> Unit,
+    val onNavigateToMap: (event: ResolvedCalendarEvent) -> Unit,
     val onConnectClick:  () -> Unit,
     val onSignOutClick:  () -> Unit
 )
@@ -145,8 +146,8 @@ fun AppNavigation(
                             onNextWeek       = { calId?.let { calendarViewModel.goToNextWeek(it) } },
                             // NavigationActions guarantees Coordinator callback + NavController
                             // switch always fire together — prevents state desync (PR review).
-                            onNavigateToEvent = { buildingCode ->
-                                navigationActions.onNavigateToMap(buildingCode)
+                            onNavigateToEvent = { event ->
+                                navigationActions.onNavigateToMap(event)
                                 navController.navigate(Screen.Map.route) {
                                     popUpTo(navController.graph.findStartDestination().id) {
                                         saveState = true

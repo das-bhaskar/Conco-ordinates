@@ -118,7 +118,7 @@ class MapsActivity : ComponentActivity() {
             AppNavigation(
                 calendarViewModel = calendarViewModel,
                 navigationActions = com.example.myapplication.ui.screens.NavigationActions(
-                    onNavigateToMap = { buildingCode -> viewModel.navigateToBuildingCode(buildingCode) },
+                    onNavigateToMap = { event -> viewModel.navigateToCalendarEvent(event) },
                     onConnectClick  = { connectCalendar() },
                     onSignOutClick  = { signOutCalendar() }
                 ),
@@ -198,7 +198,7 @@ private fun MapContent(
         onBuildingDismiss        = { mapViewModel.handleMapTap(null) },
         onDirectionsRequested    = { mapViewModel.onDirectionsRequested() },
         onLocationUpdate         = { loc, force -> mapViewModel.processLocationUpdate(loc, force) },
-        onNavigateToBuilding     = { mapViewModel.navigateToBuildingCode(it) },
+        onNavigateToBuilding     = { mapViewModel.navigateToCalendarEvent(it) },
         onStartNavigationActions = { mapViewModel.startNavigation() },
         indoorActions            = IndoorActions(
             onIndoorMapClick = {

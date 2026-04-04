@@ -42,7 +42,7 @@ data class CalendarActions(
     val onCalendarPicked:  (id: String, name: String) -> Unit,
     val onPreviousWeek:    () -> Unit,
     val onNextWeek:        () -> Unit,
-    val onNavigateToEvent: (destination: String) -> Unit,
+    val onNavigateToEvent: (event: ResolvedCalendarEvent) -> Unit,
     val onDismissError:    () -> Unit //
 )
 
@@ -106,11 +106,7 @@ fun CalendarScreen(
         ),
         onPreviousWeek    = calendarActions.onPreviousWeek,
         onNextWeek        = calendarActions.onNextWeek,
-        // ResolvedCalendarEvent.destinationBuildingCode encapsulates the
-        // (locationResult as? Known)?.buildingCode fallback — no logic in UI (PR review).
-        onNavigateToEvent = { event ->
-            event.destinationBuildingCode?.let { calendarActions.onNavigateToEvent(it) }
-        },
+        onNavigateToEvent = calendarActions.onNavigateToEvent,
         modifier          = modifier
     )
 }

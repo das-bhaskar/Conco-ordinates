@@ -83,7 +83,7 @@ fun MapScreen(
     onBuildingDismiss:        () -> Unit,
     onDirectionsRequested:    () -> Unit,
     onLocationUpdate:         (com.google.android.gms.maps.model.LatLng, Boolean) -> Unit,
-    onNavigateToBuilding:     (String) -> Unit,
+    onNavigateToBuilding:     (com.example.myapplication.data.ResolvedCalendarEvent) -> Unit,
     onStartNavigationActions: () -> Unit = {},
     indoorActions:            IndoorActions = IndoorActions()
 ) {
@@ -360,7 +360,7 @@ private fun BoxScope.MapPreviewOverlays(
     context:                android.content.Context,
     onLocationUpdate:       (com.google.android.gms.maps.model.LatLng, Boolean) -> Unit,
     onCampusSelected:       (String) -> Unit,
-    onNavigateToBuilding:   (String) -> Unit
+    onNavigateToBuilding:   (com.example.myapplication.data.ResolvedCalendarEvent) -> Unit
 ) {
     val mode = uiState.mode
     if (mode == MapUIMode.ACTIVE_NAVIGATION) return
@@ -370,7 +370,7 @@ private fun BoxScope.MapPreviewOverlays(
             isUrgent        = isNextClassUrgent,
             timeRemaining   = nextClassTimeRemaining,
             onNavigateClick = {
-                nextClassEvent?.destinationBuildingCode?.let { onNavigateToBuilding(it) }
+                nextClassEvent?.let(onNavigateToBuilding)
             },
             modifier = Modifier.align(Alignment.BottomStart).padding(start = 12.dp, bottom = 28.dp)
         )

@@ -9,6 +9,7 @@ import com.example.myapplication.analytics.NoOpAnalyticsProvider
 import com.example.myapplication.data.Building
 import com.example.myapplication.data.Campus
 import com.example.myapplication.data.CampusRepo
+import com.example.myapplication.data.ResolvedCalendarEvent
 import androidx.lifecycle.viewModelScope
 import com.example.myapplication.logic.CampusNavigationEngine
 import com.example.myapplication.logic.DateUtils
@@ -304,25 +305,49 @@ class MapViewModel(
             }
             is SearchResult.GoogleResult -> { /* Future implementation */ }
             is SearchResult.IndoorRoomResult -> {
-                val nextPhase = IndoorJourneyHandler.onDestinationSelected(
-                    destination  = result,
-                    userGps      = lastProcessedLocation,
-                    allBuildings = CampusRepo.getAllBuildings()
-                )
-                indoorJourneyState = IndoorJourneyState(phase = nextPhase)
-
-                // Case 2: user is already outdoors — skip the indoor-to-exit leg
-                // and jump straight to outdoor navigation toward the destination building.
-                if (nextPhase is IndoorJourneyPhase.Outdoor) {
-                    startOutdoorLeg(
-                        origin      = nextPhase.origin,
-                        destination = nextPhase.destination,
-                        destLabel   = nextPhase.destRoom.label
-                    )
-                }
+                startIndoorJourney(result)
             }
         }
         searchResults = emptyList()
+    }
+
+    fun navigateToCalendarEvent(event: ResolvedCalendarEvent) {
+        val parsed = event.parsedLocation
+        val buildingCode = parsed?.buildingCode?.uppercase()
+            ?: event.destinationBuildingCode?.uppercase()
+
+        if (buildingCode.isNullOrBlank()) return
+
+        val repo = searchProvider?.indoorRepo
+        val hasIndoorMap = com.example.myapplication.data.indoor.IndoorBuildingConfig
+            .hasIndoorMap(buildingCode)
+
+        if (parsed == null || repo == null || !hasIndoorMap) {
+            navigateToBuildingCode(buildingCode)
+            return
+        }
+
+        viewModelScope.launch {
+            val resolved = com.example.myapplication.logic.IndoorRoomResolver.resolve(
+                repo = repo,
+                buildingCode = buildingCode,
+                query = parsed.roomDisplay
+            )
+
+            if (resolved != null) {
+                startIndoorJourney(
+                    SearchResult.IndoorRoomResult(
+                        buildingCode = resolved.buildingCode,
+                        floor = resolved.floor,
+                        roomId = resolved.roomId,
+                        nodeId = resolved.nodeId,
+                        label = resolved.label
+                    )
+                )
+            } else {
+                navigateToBuildingCode(buildingCode)
+            }
+        }
     }
 
     /**
@@ -337,6 +362,23 @@ class MapViewModel(
     }
 
     // ── Indoor journey helpers ─────────────────────────────────────────────────
+
+    private fun startIndoorJourney(destination: SearchResult.IndoorRoomResult) {
+        val nextPhase = IndoorJourneyHandler.onDestinationSelected(
+            destination  = destination,
+            userGps      = lastProcessedLocation,
+            allBuildings = CampusRepo.getAllBuildings()
+        )
+        indoorJourneyState = IndoorJourneyState(phase = nextPhase)
+
+        if (nextPhase is IndoorJourneyPhase.Outdoor) {
+            startOutdoorLeg(
+                origin      = nextPhase.origin,
+                destination = nextPhase.destination,
+                destLabel   = nextPhase.destRoom.label
+            )
+        }
+    }
 
     fun setJourneyPhase(phase: IndoorJourneyPhase) {
         indoorJourneyState = IndoorJourneyState(phase = phase)

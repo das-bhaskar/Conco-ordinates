@@ -106,6 +106,11 @@ class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
         val startFloor:  Int,
         val userGps:     com.google.android.gms.maps.model.LatLng?
     )
+    private data class RouteAnchor(
+        val building: String,
+        val floor: Int,
+        val nodeId: String
+    )
     private var lastNavParams: NavParams? = null
 
     init {
@@ -130,14 +135,22 @@ class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun recomputeWithPreference(p: NavParams, preference: TransferPreference) {
         viewModelScope.launch {
+            val anchor = currentRouteAnchor()
+            val rerouteParams = if (anchor != null) {
+                p.copy(
+                    building = anchor.building,
+                    startFloor = anchor.floor,
+                    startNodeId = anchor.nodeId
+                )
+            } else p
             _state.update { it.copy(isLoading = true, error = null) }
             val route = IndoorOutdoorRouter.buildRoute(
                 repo          = repo,
-                startBuilding = p.building,
-                startFloor    = p.startFloor,
-                startNodeId   = p.startNodeId,
-                destination   = p.destination,
-                userGps       = p.userGps,
+                startBuilding = rerouteParams.building,
+                startFloor    = rerouteParams.startFloor,
+                startNodeId   = rerouteParams.startNodeId,
+                destination   = rerouteParams.destination,
+                userGps       = rerouteParams.userGps,
                 preference    = preference
             )
             if (route.segments.isEmpty()) {
@@ -145,9 +158,60 @@ class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
                     error = "No path with ${preference.label}. Try another option.") }
                 return@launch
             }
+            lastNavParams = rerouteParams
             _state.update { it.copy(isLoading = false, fullRoute = route, currentSegmentIdx = 0) }
             applySegment(0)
         }
+    }
+
+    private fun currentRouteAnchor(): RouteAnchor? {
+        val st = _state.value
+        val route = st.fullRoute ?: return null
+        if (st.outdoorSegment != null || st.hasArrived) return null
+
+        st.pendingFloorChange?.let {
+            val previousWalk = route.segments
+                .getOrNull(st.currentSegmentIdx - 1) as? Segment.IndoorWalk
+            val node = previousWalk?.path?.lastOrNull()
+            if (node != null) {
+                return RouteAnchor(
+                    building = previousWalk.building,
+                    floor = previousWalk.floor,
+                    nodeId = node.id
+                )
+            }
+        }
+
+        st.pendingSegmentAdvance?.let {
+            val node = st.currentSteps.lastOrNull()?.nodes?.lastOrNull()
+            if (node != null) {
+                return RouteAnchor(
+                    building = st.currentBuilding,
+                    floor = st.currentFloorNumber,
+                    nodeId = node.id
+                )
+            }
+        }
+
+        val activeNode = st.currentSteps
+            .getOrNull(st.currentStepIdx)
+            ?.nodes
+            ?.firstOrNull()
+        if (activeNode != null) {
+            return RouteAnchor(
+                building = st.currentBuilding,
+                floor = st.currentFloorNumber,
+                nodeId = activeNode.id
+            )
+        }
+
+        val currentWalk = route.segments.getOrNull(st.currentSegmentIdx) as? Segment.IndoorWalk
+        val fallbackNode = currentWalk?.path?.firstOrNull() ?: return null
+        return RouteAnchor(
+            building = currentWalk.building,
+            floor = currentWalk.floor,
+            nodeId = fallbackNode.id
+        )
     }
 
     // ── loading ───────────────────────────────────────────────────────────────

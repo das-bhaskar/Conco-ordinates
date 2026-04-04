@@ -70,7 +70,8 @@ object IndoorJourneyHandler {
 
         return IndoorJourneyPhase.IndoorToExit(
             buildingCode = currentBuildingCode,
-            floor        = exitNode.floor,
+            startFloor   = startFloor,
+            exitFloor    = exitNode.floor,
             startNodeId  = startNodeId,
             exitNodeId   = exitNode.nodeId,
             destination  = phase.destination

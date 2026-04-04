@@ -120,7 +120,7 @@ class MapViewModel(
     val indoorNavTarget: Triple<String, Int, String>?
         get() = when (val phase = indoorJourneyState.phase) {
             is IndoorJourneyPhase.IndoorToExit        ->
-                Triple(phase.buildingCode, phase.floor, phase.startNodeId)
+                Triple(phase.buildingCode, phase.startFloor, phase.startNodeId)
             is IndoorJourneyPhase.IndoorToDestination ->
                 Triple(phase.buildingCode, phase.startFloor, phase.startNodeId)
             else -> null

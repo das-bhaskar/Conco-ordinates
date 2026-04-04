@@ -126,7 +126,7 @@ class MapViewModel(
             else -> null
         }
 
-    private val indoorBuildingCodes = setOf("CC", "H", "MB", "EV")
+    private val indoorBuildingCodes = setOf("CC", "H", "MB","VE","VL")
 
     fun handleMapTap(building: Building?, imageUrl: String? = null) {
         if (uiBuildingState.mode == MapUIMode.DIRECTIONS) return

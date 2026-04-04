@@ -61,6 +61,8 @@ data class IndoorNode(
     val type: String,           // CORRIDOR | ROOM | ELEVATOR | STAIRCASE | ENTRANCE
     val roomId: String? = null,
     val elevatorGroupId: String? = null,
+    val transferFloor: Int? = null,
+    val transferNodeId: String? = null,
     val accessible: Boolean = true
 )
 

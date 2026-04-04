@@ -91,10 +91,24 @@ object IndoorOutdoorRouter {
         preference:    TransferPreference
     ): FullRoute {
         val floor = repo.getFloor(startBuilding, startFloor) ?: return FullRoute(emptyList())
+        if (startNodeId == destination.nodeId) {
+            val node = floor.nodes.firstOrNull { it.id == startNodeId } ?: return FullRoute(emptyList())
+            return FullRoute(
+                listOf(
+                    Segment.IndoorWalk(
+                        startBuilding,
+                        startFloor,
+                        listOf(node),
+                        "Walk to ${destination.label}"
+                    )
+                )
+            )
+        }
         val path  = IndoorPathfinder.findPath(
             floor.nodes, floor.edges, startNodeId, destination.nodeId,
             preference == TransferPreference.ELEVATOR_ONLY
         )
+        if (path.isEmpty()) return FullRoute(emptyList())
         return FullRoute(listOf(Segment.IndoorWalk(
             startBuilding, startFloor, path, "Walk to ${destination.label}"
         )))

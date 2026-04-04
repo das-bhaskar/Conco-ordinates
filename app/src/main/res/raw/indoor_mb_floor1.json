@@ -1290,6 +1290,7 @@
       "y": 0.7725,
       "type": "ESCALATOR",
       "roomId": "escalator-1-1",
+      "elevatorGroupId": "escalator-MB-main",
       "accessible": true
     },
     {
@@ -1298,6 +1299,7 @@
       "y": 0.5898,
       "type": "ELEVATOR",
       "roomId": "elevator-1-2",
+      "elevatorGroupId": "elev-MB-main",
       "accessible": true
     },
     {
@@ -1322,6 +1324,7 @@
       "y": 0.8271,
       "type": "STAIRCASE",
       "roomId": "staircase-1-2",
+      "elevatorGroupId": "stair-MB-east",
       "accessible": true
     },
     {
@@ -1394,6 +1397,7 @@
       "y": 0.1637,
       "type": "STAIRCASE",
       "roomId": "staircase-1-3",
+      "elevatorGroupId": "stair-MB-upper",
       "accessible": true
     },
     {
@@ -2011,7 +2015,7 @@
   "entrances": [
     {
       "id": "ent-south",
-      "label": "Entrance south",
+      "label": "MB South Entrance",
       "floor": 1,
       "x": 0.3912,
       "y": 0.1195,
@@ -2019,12 +2023,12 @@
       "heading": 180
     },
     {
-      "id": "entrance-south",
-      "label": "entrance-south",
+      "id": "ent-main",
+      "label": "MB Main Entrance",
       "floor": 1,
       "x": 0.5086,
       "y": 0.9064,
-      "nodeId": "",
+      "nodeId": "node-MB-1-exit-1-1",
       "heading": 180
     }
   ]

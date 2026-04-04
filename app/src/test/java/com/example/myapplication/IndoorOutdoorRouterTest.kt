@@ -109,6 +109,26 @@ class IndoorOutdoorRouterTest {
         assertTrue(route.segments.isEmpty())
     }
 
+    @Test
+    fun `buildRoute same building same floor with same start and end returns single node walk`() = runTest {
+        val repo = makeRepo()
+        val dest = IndoorOutdoorRouter.IndoorDestination("H", 1, "start", "H-Start")
+        val route = IndoorOutdoorRouter.buildRoute(
+            repo = repo,
+            startBuilding = "H",
+            startFloor = 1,
+            startNodeId = "start",
+            destination = dest,
+            userGps = null,
+            entrances = testEntrances
+        )
+
+        assertEquals(1, route.segments.size)
+        val walk = route.segments[0] as IndoorOutdoorRouter.Segment.IndoorWalk
+        assertEquals(1, walk.path.size)
+        assertEquals("start", walk.path[0].id)
+    }
+
     // ── Case 2: same building, different floor ────────────────────────────────
 
     @Test

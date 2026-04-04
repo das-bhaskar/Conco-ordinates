@@ -29,32 +29,46 @@
       "lat": 45.49751,
       "lng": -73.5782,
       "floor": 1
+    },
+    {
+      "nodeId": "node-H-2-exit-2-1",
+      "label": "H West Entrance",
+      "lat": 45.49717,
+      "lng": -73.57954,
+      "floor": 2
     }
   ],
   "MB": [
     {
-      "nodeId": "node-MB-1-exit1",
+      "nodeId": "node-MB-1-exit-1-1",
       "label": "MB Main Entrance",
-      "lat": 45.49584,
-      "lng": -73.5788,
+      "lat": 45.4955205,
+      "lng": -73.5791459,
+      "floor": 1
+    },
+    {
+      "nodeId": "node-MB-1-exit1",
+      "label": "MB South Entrance",
+      "lat": 45.4952220,
+      "lng": -73.5785555,
       "floor": 1
     }
   ],
   "VE": [
     {
-      "nodeId": "node-VE-1-ent-main",
+      "nodeId": "node-H-1-exit-1-2",
       "label": "VE Main Entrance",
-      "lat": 45.45829,
-      "lng": -73.63882,
+      "lat": 45.4589002,
+      "lng": -73.6389853,
       "floor": 1
     }
   ],
   "VL": [
     {
-      "nodeId": "node-VL-1-ent-main",
+      "nodeId": "node-VL-1-exit-1-1",
       "label": "VL Main Entrance",
-      "lat": 45.45848,
-      "lng": -73.6401,
+      "lat": 45.4590752,
+      "lng": -73.6389304,
       "floor": 1
     }
   ]

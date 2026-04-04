@@ -73,13 +73,15 @@ class IndoorJourneyStateTest {
     fun `IndoorToExit holds correct fields`() {
         val phase = IndoorJourneyPhase.IndoorToExit(
             buildingCode = "H",
-            floor        = 1,
+            startFloor   = 8,
+            exitFloor    = 1,
             startNodeId  = "node-h-110",
             exitNodeId   = "node-h-ent-south",
             destination  = destination
         )
         assertEquals("H", phase.buildingCode)
-        assertEquals(1, phase.floor)
+        assertEquals(8, phase.startFloor)
+        assertEquals(1, phase.exitFloor)
         assertEquals("node-h-110", phase.startNodeId)
         assertEquals("node-h-ent-south", phase.exitNodeId)
         assertEquals(destination, phase.destination)
@@ -87,9 +89,10 @@ class IndoorJourneyStateTest {
 
     @Test
     fun `IndoorToExit data class copy works`() {
-        val phase = IndoorJourneyPhase.IndoorToExit("H", 1, "s", "e", destination)
-        val copy  = phase.copy(floor = 8)
-        assertEquals(8, copy.floor)
+        val phase = IndoorJourneyPhase.IndoorToExit("H", 1, 2, "s", "e", destination)
+        val copy  = phase.copy(startFloor = 8)
+        assertEquals(8, copy.startFloor)
+        assertEquals(2, copy.exitFloor)
         assertEquals("H", copy.buildingCode)
     }
 
@@ -192,7 +195,7 @@ class IndoorJourneyStateTest {
 
     @Test
     fun `IndoorToExit canGoBack is true`() {
-        val phase = IndoorJourneyPhase.IndoorToExit("H", 1, "s", "e", destination)
+        val phase = IndoorJourneyPhase.IndoorToExit("H", 1, 1, "s", "e", destination)
         assertTrue(phase.canGoBack)
     }
 

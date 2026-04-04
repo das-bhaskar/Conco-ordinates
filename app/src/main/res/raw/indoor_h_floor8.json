@@ -1442,6 +1442,98 @@
           0.5457
         ]
       ]
+    },
+    {
+      "id": "H-Es2",
+      "type": "escalator",
+      "label": "8-9",
+      "polygon": [
+        [
+          0.4986,
+          0.4159
+        ],
+        [
+          0.4778,
+          0.4159
+        ],
+        [
+          0.477,
+          0.5177
+        ],
+        [
+          0.4978,
+          0.5058
+        ]
+      ]
+    },
+    {
+      "id": "H-Es8-1",
+      "type": "escalator",
+      "label": "7-8",
+      "polygon": [
+        [
+          0.4778,
+          0.4159
+        ],
+        [
+          0.4766,
+          0.5181
+        ],
+        [
+          0.4516,
+          0.5335
+        ],
+        [
+          0.4504,
+          0.4155
+        ]
+      ]
+    },
+    {
+      "id": "H-Es8-3",
+      "type": "escalator",
+      "label": "8-7",
+      "polygon": [
+        [
+          0.4774,
+          0.517
+        ],
+        [
+          0.4743,
+          0.6203
+        ],
+        [
+          0.4982,
+          0.6176
+        ],
+        [
+          0.4986,
+          0.5062
+        ]
+      ]
+    },
+    {
+      "id": "H-Es8-4",
+      "type": "escalator",
+      "label": "9-8",
+      "polygon": [
+        [
+          0.4762,
+          0.5173
+        ],
+        [
+          0.4751,
+          0.6222
+        ],
+        [
+          0.4512,
+          0.6203
+        ],
+        [
+          0.4516,
+          0.5328
+        ]
+      ]
     }
   ],
   "pois": [
@@ -2096,8 +2188,8 @@
       "y": 0.413,
       "type": "ESCALATOR",
       "roomId": "escalator-8-1",
-      "accessible": true,
-      "elevatorGroupId": "escalator-H-inner-1"
+      "elevatorGroupId": "escalator-H-2-8",
+      "accessible": true
     },
     {
       "id": "node-H-8-escalator-8-2",
@@ -2105,8 +2197,10 @@
       "y": 0.413,
       "type": "ESCALATOR",
       "roomId": "escalator-8-2",
-      "accessible": true,
-      "elevatorGroupId": "escalator-H-inner-2"
+      "elevatorGroupId": "escalator-H-8-9",
+      "transferFloor": 9,
+      "transferNodeId": "node-H-9-escalator-9-1",
+      "accessible": true
     },
     {
       "id": "node-H-8-escalator-8-3",
@@ -2114,8 +2208,19 @@
       "y": 0.6221,
       "type": "ESCALATOR",
       "roomId": "escalator-8-3",
-      "accessible": true,
-      "elevatorGroupId": "escalator-H-lower"
+      "elevatorGroupId": "escalator-H-8-9",
+      "accessible": true
+    },
+    {
+      "id": "node-H-8-escalator-8-4",
+      "x": 0.4584,
+      "y": 0.626,
+      "type": "ESCALATOR",
+      "roomId": "escalator-8-4",
+      "elevatorGroupId": "escalator-H-2-8",
+      "transferFloor": 2,
+      "transferNodeId": "node-H-2-escalator-2-2",
+      "accessible": true
     },
     {
       "id": "node-H-8-H-832-door",
@@ -2425,31 +2530,23 @@
       "y": 0.402,
       "type": "ROOM",
       "roomId": "H-823",
-      "accessible": true,
-      "building": "H",
-      "floor": 8
+      "accessible": true
     },
     {
       "id": "node-H-8-staircase-8-1",
       "x": 0.316,
       "y": 0.626,
       "type": "STAIRCASE",
-      "roomId": null,
-      "accessible": false,
-      "building": "H",
-      "floor": 8,
-      "elevatorGroupId": "stair-H-main"
+      "elevatorGroupId": "stair-H-main",
+      "accessible": false
     },
     {
       "id": "node-H-8-staircase-8-2",
       "x": 0.768,
       "y": 0.339,
       "type": "STAIRCASE",
-      "roomId": null,
-      "accessible": false,
-      "building": "H",
-      "floor": 8,
-      "elevatorGroupId": "stair-H-main"
+      "elevatorGroupId": "stair-H-main",
+      "accessible": false
     }
   ],
   "edges": [
@@ -2457,690 +2554,812 @@
       "from": "node-H-8-68",
       "to": "node-H-8-69",
       "weight": 0.0394,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-69",
       "to": "node-H-8-70",
       "weight": 0.0629,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-69",
       "to": "node-H-8-84",
       "weight": 0.0957,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-867",
       "to": "node-H-8-68",
       "weight": 0.0516,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-865",
       "to": "node-H-8-68",
       "weight": 0.0196,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-863",
       "to": "node-H-8-68",
       "weight": 0.0156,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-861",
       "to": "node-H-8-71",
       "weight": 0.102,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-70",
       "to": "node-H-8-71",
       "weight": 0.0745,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-859",
       "to": "node-H-8-72",
       "weight": 0.1033,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-71",
       "to": "node-H-8-72",
       "weight": 0.0827,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-72",
       "to": "node-H-8-73",
       "weight": 0.0673,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-73",
       "to": "node-H-8-74",
       "weight": 0.0465,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-74",
       "to": "node-H-8-75",
       "weight": 0.0657,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-75",
       "to": "node-H-8-76",
       "weight": 0.0721,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-76",
       "to": "node-H-8-77",
       "weight": 0.0539,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-77",
       "to": "node-H-8-78",
       "weight": 0.0693,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-84",
       "to": "node-H-8-83",
       "weight": 0.1231,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-83",
       "to": "node-H-8-79",
       "weight": 0.1514,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-79",
       "to": "node-H-8-80",
       "weight": 0.1519,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-79",
       "to": "node-H-8-82",
       "weight": 0.1505,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-82",
       "to": "node-H-8-81",
       "weight": 0.1406,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-81",
       "to": "node-H-8-109",
       "weight": 0.0766,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-109",
       "to": "node-H-8-108",
       "weight": 0.1024,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-108",
       "to": "node-H-8-107",
       "weight": 0.0657,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-107",
       "to": "node-H-8-106",
       "weight": 0.0884,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-106",
       "to": "node-H-8-105",
       "weight": 0.1718,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-105",
       "to": "node-H-8-104",
       "weight": 0.1013,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-104",
       "to": "node-H-8-103",
       "weight": 0.0432,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-104",
       "to": "node-H-8-102",
       "weight": 0.0394,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-102",
       "to": "node-H-8-103",
       "weight": 0.0576,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-102",
       "to": "node-H-8-101",
       "weight": 0.0884,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-101",
       "to": "node-H-8-100",
       "weight": 0.088,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-100",
       "to": "node-H-8-96",
       "weight": 0.0859,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-96",
       "to": "node-H-8-97",
       "weight": 0.0923,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-96",
       "to": "node-H-8-95",
       "weight": 0.0869,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-95",
       "to": "node-H-8-93",
       "weight": 0.052,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-93",
       "to": "node-H-8-92",
       "weight": 0.0237,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-93",
       "to": "node-H-8-94",
       "weight": 0.0953,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-92",
       "to": "node-H-8-91",
       "weight": 0.1195,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-91",
       "to": "node-H-8-89",
       "weight": 0.0838,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-89",
       "to": "node-H-8-88",
       "weight": 0.0638,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-89",
       "to": "node-H-8-90",
       "weight": 0.0716,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-87",
       "to": "node-H-8-90",
       "weight": 0.0715,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-86",
       "to": "node-H-8-87",
       "weight": 0.0914,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-85",
       "to": "node-H-8-86",
       "weight": 0.1022,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-72",
       "to": "node-H-8-85",
       "weight": 0.1013,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-801",
       "to": "node-H-8-84",
       "weight": 0.0572,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-803",
       "to": "node-H-8-84",
       "weight": 0.0591,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-803",
       "to": "node-H-8-83",
       "weight": 0.0785,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-807",
       "to": "node-H-8-79",
       "weight": 0.0571,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-811",
       "to": "node-H-8-82",
       "weight": 0.0416,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-813",
       "to": "node-H-8-82",
       "weight": 0.0628,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-815",
       "to": "node-H-8-81",
       "weight": 0.0512,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-819",
       "to": "node-H-8-81",
       "weight": 0.0364,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-817",
       "to": "node-H-8-81",
       "weight": 0.0615,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-821",
       "to": "node-H-8-108",
       "weight": 0.0466,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-823",
       "to": "node-H-8-108",
       "weight": 0.0286,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-820-01",
       "to": "node-H-8-107",
       "weight": 0.0611,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-106",
       "to": "node-H-8-820",
       "weight": 0.0675,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-825",
       "to": "node-H-8-106",
       "weight": 0.0373,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-827",
       "to": "node-H-8-106",
       "weight": 0.0576,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-829",
       "to": "node-H-8-105",
       "weight": 0.04,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-105",
       "to": "node-H-8-822",
       "weight": 0.0852,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-H-832-door",
       "to": "node-H-8-100",
       "weight": 0.0304,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-elevator-8-3",
       "to": "node-H-8-94",
       "weight": 0.0345,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-elevator-8-4",
       "to": "node-H-8-94",
       "weight": 0.033,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-escalator-8-3",
       "to": "node-H-8-98",
       "weight": 0.0664,
+      "surface": "SMOOTH",
+      "accessible": true
+    },
+    {
+      "from": "node-H-8-escalator-8-4",
+      "to": "node-H-8-98",
+      "weight": 0.0952,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-98",
       "to": "node-H-8-97",
       "weight": 0.1372,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-98",
       "to": "node-H-8-99",
       "weight": 0.1211,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-78",
       "to": "node-H-8-99",
       "weight": 0.0844,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-79",
       "to": "node-H-8-78",
       "weight": 0.1986,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-washroom-8-2",
       "to": "node-H-8-79",
       "weight": 0.0845,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-washroom-8-3",
       "to": "node-H-8-83",
       "weight": 0.0341,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-805-01",
       "to": "node-H-8-83",
       "weight": 0.0479,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-892",
       "to": "node-H-8-77",
       "weight": 0.0548,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-elevator-8-2",
       "to": "node-H-8-75",
       "weight": 0.0588,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-805-02",
       "to": "node-H-8-83",
       "weight": 0.0906,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-805-03",
       "to": "node-H-8-84",
       "weight": 0.1395,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-806-01",
       "to": "node-H-8-77",
       "weight": 0.1053,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-806-02",
       "to": "node-H-8-77",
       "weight": 0.0645,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-806-03",
       "to": "node-H-8-77",
       "weight": 0.0363,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-escalator-8-1",
       "to": "node-H-8-77",
       "weight": 0.036,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-escalator-8-2",
       "to": "node-H-8-78",
       "weight": 0.0651,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-886",
       "to": "node-H-8-108",
       "weight": 0.0688,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-829-01",
       "to": "node-H-8-102",
       "weight": 0.0754,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-831",
       "to": "node-H-8-102",
       "weight": 0.0841,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-833",
       "to": "node-H-8-101",
       "weight": 0.0807,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-835",
       "to": "node-H-8-101",
       "weight": 0.0369,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-837",
       "to": "node-H-8-100",
       "weight": 0.0573,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-838",
       "to": "node-H-8-94",
       "weight": 0.0453,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-838-01",
       "to": "node-H-8-94",
       "weight": 0.0767,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-881",
       "to": "node-H-8-93",
       "weight": 0.0769,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-877",
       "to": "node-H-8-94",
       "weight": 0.1187,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-842",
       "to": "node-H-8-94",
       "weight": 0.1056,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-841",
       "to": "node-H-8-95",
       "weight": 0.1504,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-843",
       "to": "node-H-8-93",
       "weight": 0.1514,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-845",
       "to": "node-H-8-92",
       "weight": 0.1786,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-847",
       "to": "node-H-8-91",
       "weight": 0.161,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-849",
       "to": "node-H-8-89",
       "weight": 0.1528,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-851-01",
       "to": "node-H-8-89",
       "weight": 0.079,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-851-02",
       "to": "node-H-8-88",
       "weight": 0.1046,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-851-03",
       "to": "node-H-8-88",
       "weight": 0.0827,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-853",
       "to": "node-H-8-87",
       "weight": 0.096,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-855",
       "to": "node-H-8-86",
       "weight": 0.0956,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-857",
       "to": "node-H-8-85",
       "weight": 0.1002,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-852",
       "to": "node-H-8-87",
       "weight": 0.0704,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-854",
       "to": "node-H-8-86",
       "weight": 0.0879,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-860-01",
       "to": "node-H-8-73",
       "weight": 0.067,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-860-03",
       "to": "node-H-8-73",
       "weight": 0.0893,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-860-04",
       "to": "node-H-8-74",
       "weight": 0.0617,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-860-05",
       "to": "node-H-8-74",
       "weight": 0.1473,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-860-06",
       "to": "node-H-8-75",
       "weight": 0.1487,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-862",
       "to": "node-H-8-75",
       "weight": 0.1099,
+      "surface": "SMOOTH",
       "accessible": true
     },
     {
       "from": "node-H-8-staircase-8-1",
       "to": "node-H-8-94",
       "weight": 0.1186,
+      "surface": "SMOOTH",
       "accessible": false
     },
     {
       "from": "node-H-8-staircase-8-2",
       "to": "node-H-8-108",
       "weight": 0.0691,
+      "surface": "SMOOTH",
       "accessible": false
     }
   ],
@@ -3193,18 +3412,20 @@
     {
       "id": "ent-stair-left",
       "label": "Staircase (left)",
+      "floor": 8,
       "x": 0.316,
       "y": 0.626,
       "nodeId": "node-H-8-staircase-8-1",
-      "floor": 8
+      "heading": 180
     },
     {
       "id": "ent-stair-right",
       "label": "Staircase (right)",
+      "floor": 8,
       "x": 0.768,
       "y": 0.339,
       "nodeId": "node-H-8-staircase-8-2",
-      "floor": 8
+      "heading": 180
     }
   ]
 }

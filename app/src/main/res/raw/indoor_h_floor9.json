@@ -3126,7 +3126,8 @@
       "y": 0.756,
       "type": "STAIRCASE",
       "roomId": "staircase-9-1",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "stair-H-main"
     },
     {
       "id": "node-H-9-staircase-9-2",
@@ -3134,7 +3135,8 @@
       "y": 0.3377,
       "type": "STAIRCASE",
       "roomId": "staircase-9-2",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "stair-H-main"
     },
     {
       "id": "node-H-9-staircase-9-3",
@@ -3142,7 +3144,8 @@
       "y": 0.3377,
       "type": "STAIRCASE",
       "roomId": "staircase-9-3",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "stair-H-main"
     },
     {
       "id": "node-H-9-elevator-9-1",
@@ -3150,7 +3153,8 @@
       "y": 0.6367,
       "type": "ELEVATOR",
       "roomId": "elevator-9-1",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "elev-H-main"
     },
     {
       "id": "node-H-9-elevator-9-2",
@@ -3158,7 +3162,8 @@
       "y": 0.6367,
       "type": "ELEVATOR",
       "roomId": "elevator-9-2",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "elev-H-main"
     },
     {
       "id": "node-H-9-staircase-9-4",
@@ -3166,7 +3171,8 @@
       "y": 0.6291,
       "type": "STAIRCASE",
       "roomId": "staircase-9-4",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "stair-H-main"
     },
     {
       "id": "node-H-9-escalator-9-1",
@@ -3174,7 +3180,8 @@
       "y": 0.3979,
       "type": "ESCALATOR",
       "roomId": "escalator-9-1",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "escalator-H-8-9"
     },
     {
       "id": "node-H-9-escalator-9-2",
@@ -3182,7 +3189,10 @@
       "y": 0.5771,
       "type": "ESCALATOR",
       "roomId": "escalator-9-2",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "escalator-H-8-9",
+      "transferFloor": 8,
+      "transferNodeId": "node-H-8-escalator-8-3"
     },
     {
       "id": "node-H-9-escalator-9-3",
@@ -3190,7 +3200,8 @@
       "y": 0.5792,
       "type": "ESCALATOR",
       "roomId": "escalator-9-3",
-      "accessible": true
+      "accessible": true,
+      "elevatorGroupId": "escalator-H-9-10"
     },
     {
       "id": "node-H-9-85",

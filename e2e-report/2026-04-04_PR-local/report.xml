@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="E2E Tests - 2026-04-04_PR-local" tests="9" failures="0" timestamp="2026-04-04 17:06:25">
+<testsuites>
+  <testsuite name="Test Suite" device="Pixel_7" tests="1" failures="0" time="27.0">
+    <testcase id="us_1_1" name="us_1_1" classname="us_1_1" time="27.0" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
+<testsuites>
+  <testsuite name="Test Suite" device="Pixel_7" tests="1" failures="0" time="29.0">
+    <testcase id="us_1_2" name="us_1_2" classname="us_1_2" time="29.0" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
+<testsuites>
+  <testsuite name="Test Suite" device="Pixel_7" tests="1" failures="0" time="46.0">
+    <testcase id="us_1_3" name="us_1_3" classname="us_1_3" time="46.0" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
+<testsuites>
+  <testsuite name="Test Suite" device="Pixel_7" tests="1" failures="0" time="42.0">
+    <testcase id="us_1_5" name="us_1_5" classname="us_1_5" time="42.0" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
+<testsuites>
+  <testsuite name="Test Suite" device="Pixel_7" tests="1" failures="0" time="30.0">
+    <testcase id="us_1_6" name="us_1_6" classname="us_1_6" time="30.0" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
+<testsuites>
+  <testsuite name="Test Suite" device="Pixel_7" tests="1" failures="0" time="73.0">
+    <testcase id="us_2_1" name="us_2_1" classname="us_2_1" time="73.0" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
+<testsuites>
+  <testsuite name="Test Suite" device="Pixel_7" tests="1" failures="0" time="42.0">
+    <testcase id="us_2_3" name="us_2_3" classname="us_2_3" time="42.0" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
+<testsuites>
+  <testsuite name="Test Suite" device="Pixel_7" tests="1" failures="0" time="48.0">
+    <testcase id="us_2_5" name="us_2_5" classname="us_2_5" time="48.0" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
+<testsuites>
+  <testsuite name="Test Suite" device="Pixel_7" tests="1" failures="0" time="43.0">
+    <testcase id="us_2_6" name="us_2_6" classname="us_2_6" time="43.0" status="SUCCESS"/>
+  </testsuite>
+</testsuites>
+</testsuites>

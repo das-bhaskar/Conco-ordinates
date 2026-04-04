@@ -181,10 +181,22 @@ class MapViewModel(
         val allBuildings = CampusRepo.getAllBuildings()
         if (journeyPhase is IndoorJourneyPhase.Outdoor &&
             IndoorJourneyHandler.isNearBuilding(userLocation, journeyPhase.destRoom.buildingCode, allBuildings)) {
-            indoorJourneyState = IndoorJourneyState(
-                phase = IndoorJourneyHandler.onNearDestinationBuilding(journeyPhase, allBuildings)
-            )
+            val nextPhase = IndoorJourneyHandler.onNearDestinationBuilding(journeyPhase, allBuildings)
+            endOutdoorLegUi()
+            indoorJourneyState = IndoorJourneyState(phase = nextPhase)
         }
+    }
+
+    private fun endOutdoorLegUi() {
+        uiBuildingState = uiBuildingState.copy(
+            mode = MapUIMode.PREVIEW,
+            routePoints = emptyList(),
+            routeDuration = ROUTE_DURATION_PLACEHOLDER,
+            routeDistance = ROUTE_DISTANCE_PLACEHOLDER,
+            routeBounds = null,
+            routeErrorMessage = null,
+            navState = NavigationState()
+        )
     }
 
     private fun updateCampusState(userLocation: LatLng) {

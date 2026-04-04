@@ -63,8 +63,15 @@ data class IndoorNode(
     val elevatorGroupId: String? = null,
     val transferFloor: Int? = null,
     val transferNodeId: String? = null,
-    val accessible: Boolean = true
+    val accessible: Boolean = true,
+    val allowPassThrough: Boolean = defaultAllowPassThrough(type)
 )
+
+private fun defaultAllowPassThrough(type: String): Boolean =
+    when (type.uppercase()) {
+        "ELEVATOR", "ESCALATOR", "STAIRCASE" -> false
+        else -> true
+    }
 
 data class IndoorEdge(
     val from: String,

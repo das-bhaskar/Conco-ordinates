@@ -51,11 +51,13 @@ object IndoorPathfinder {
 
             adj[current]?.forEach { (neighbor, weight) ->
                 if (neighbor in closed) return@forEach
+                val neighborNode = nodeMap[neighbor] ?: return@forEach
+                if (neighbor != endId && !neighborNode.allowPassThrough) return@forEach
                 val tentativeG = (gScore[current] ?: Float.MAX_VALUE) + weight
                 if (tentativeG < (gScore[neighbor] ?: Float.MAX_VALUE)) {
                     cameFrom[neighbor] = current
                     gScore[neighbor]   = tentativeG
-                    fScore[neighbor]   = tentativeG + h(nodeMap[neighbor] ?: return@forEach, goal, dims)
+                    fScore[neighbor]   = tentativeG + h(neighborNode, goal, dims)
                     if (!openSet.contains(neighbor)) openSet.add(neighbor)
                 }
             }

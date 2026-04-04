@@ -134,6 +134,31 @@ class IndoorPathfinderTest {
         assertEquals(listOf("A", "B", "C"), result.map { it.id })
     }
 
+    @Test
+    fun `findPath does not pass through transfer nodes marked as non traversable`() {
+        val start = node("START", 0f, 0f)
+        val escalator = IndoorNode(
+            id = "ESC",
+            x = 0.3f,
+            y = 0f,
+            type = "ESCALATOR",
+            allowPassThrough = false
+        )
+        val corridor = node("MID", 0.6f, 0f)
+        val dest = node("DEST", 1f, 0f)
+
+        val weightedNodes = listOf(start, escalator, corridor, dest)
+        val weightedEdges = listOf(
+            edge("START", "ESC", weight = 1f),
+            edge("ESC", "DEST", weight = 1f),
+            edge("START", "MID", weight = 1f),
+            edge("MID", "DEST", weight = 1f)
+        )
+
+        val result = IndoorPathfinder.findPath(weightedNodes, weightedEdges, "START", "DEST")
+        assertEquals(listOf("START", "MID", "DEST"), result.map { it.id })
+    }
+
     // ── Edge cases ────────────────────────────────────────────────────────────
 
     @Test

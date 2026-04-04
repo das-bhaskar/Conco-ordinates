@@ -113,6 +113,27 @@ class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
     )
     private var lastNavParams: NavParams? = null
 
+    private fun clearDisplayedRoute() {
+        _state.update {
+            it.copy(
+                fullRoute = null,
+                currentSegmentIdx = 0,
+                pathNodeIds = emptySet(),
+                pathEdgeIds = emptyList(),
+                instruction = "",
+                currentSteps = emptyList(),
+                currentStepIdx = 0,
+                totalStepCount = 0,
+                stepOffset = 0,
+                pendingFloorChange = null,
+                pendingSegmentAdvance = null,
+                pendingExitConfirm = false,
+                outdoorSegment = null,
+                hasArrived = false
+            )
+        }
+    }
+
     init {
         // Observe only the two preference fields using map + distinctUntilChanged.
         // This is the standard Kotlin Flow pattern — no Compose API involved.
@@ -154,8 +175,13 @@ class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
                 preference    = preference
             )
             if (route.segments.isEmpty()) {
-                _state.update { it.copy(isLoading = false,
-                    error = "No path with ${preference.label}. Try another option.") }
+                clearDisplayedRoute()
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "No path with ${preference.label}. Try another option."
+                    )
+                }
                 return@launch
             }
             lastNavParams = rerouteParams
@@ -376,8 +402,13 @@ class IndoorNavViewModel(app: Application) : AndroidViewModel(app) {
                 "→ ${resolvedDestNodeId}(F${destination.floor})")
 
             if (route.segments.isEmpty()) {
-                _state.update { it.copy(isLoading = false,
-                    error = "No path found to ${destination.label}") }
+                clearDisplayedRoute()
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "No path found from your selected start room to ${destination.label}."
+                    )
+                }
                 return@launch
             }
 

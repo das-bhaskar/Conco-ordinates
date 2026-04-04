@@ -45,6 +45,7 @@ data class IndoorNavParams(
     val destination:      IndoorOutdoorRouter.IndoorDestination?           = null,
     val startNodeId:      String?                                          = null,
     val startFloor:       Int?                                             = null,
+    val sessionKey:       String                                           = "default",
     val onBack:           () -> Unit                                       = {},
     val onConfirmExit:    (() -> Unit)?                                    = null,
     val onOutdoorHandoff: (IndoorOutdoorRouter.Segment.OutdoorWalk) -> Unit = {}
@@ -55,7 +56,7 @@ data class IndoorNavParams(
 fun IndoorNavScreen(
     params: IndoorNavParams,
     vm: IndoorNavViewModel = viewModel(
-        key     = "${params.building}-${params.initialFloor}-${params.startNodeId}",
+        key     = "indoor-nav-${params.sessionKey}",
         factory = IndoorNavViewModelFactory(
             androidx.compose.ui.platform.LocalContext.current.applicationContext as android.app.Application
         )
@@ -210,18 +211,44 @@ private fun IndoorNavContent(
         if (state.isLoading) {
             CircularProgressIndicator(Modifier.align(Alignment.Center), color = Maroon)
         }
-        state.error?.let {
-            Column(Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text("🗺️", fontSize = 48.sp); Spacer(Modifier.height(12.dp))
-                Text(it, color = MaterialTheme.colorScheme.onSurface.copy(.45f))
-            }
-        }
 
         state.floor?.let { floor ->
             IndoorMapCanvas(floor = floor, modifier = Modifier.fillMaxSize(),
                 highlightRoomId = state.highlightRoomId, pathNodeIds = state.pathNodeIds,
                 pathEdgeIds = state.pathEdgeIds, showNavGraph = state.showNavGraph,
                 onRoomTap = { vm.onRoomTap(it) })
+        }
+
+        state.error?.let { error ->
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.errorContainer,
+                tonalElevation = 6.dp,
+                shadowElevation = 6.dp
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("⚠️", fontSize = 20.sp)
+                    Column {
+                        Text(
+                            "Route unavailable",
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                        Spacer(Modifier.height(2.dp))
+                        Text(
+                            error,
+                            color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.92f)
+                        )
+                    }
+                }
+            }
         }
 
         if (state.availableFloors.size > 1) {

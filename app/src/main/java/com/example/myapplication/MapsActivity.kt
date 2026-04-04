@@ -237,6 +237,7 @@ private fun MapContent(
                 building        = code,
                 availableFloors = com.example.myapplication.data.indoor.IndoorBuildingConfig.floorsFor(code),
                 initialFloor    = floor,
+                sessionKey      = "preview",
                 onBack          = { indoorTarget = null }
             ))
         }
@@ -288,6 +289,7 @@ private fun MapContent(
                 destination     = destination,
                 startNodeId     = startNode,
                 startFloor      = floor,
+                sessionKey      = "journey",
                 onConfirmExit   = if (phase is IndoorJourneyPhase.IndoorToExit) {
                     { mapViewModel.onUserExited() }
                 } else null,

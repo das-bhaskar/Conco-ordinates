@@ -64,7 +64,15 @@ class IndoorJsonParser {
         elevatorGroupId = n.optString("elevatorGroupId", "").takeIf { it.isNotBlank() },
         transferFloor   = n.takeIf { it.has("transferFloor") }?.optInt("transferFloor"),
         transferNodeId  = n.optString("transferNodeId", "").takeIf { it.isNotBlank() },
-        accessible      = n.optBoolean("accessible", true)
+        accessible      = n.optBoolean("accessible", true),
+        allowPassThrough = if (n.has("allowPassThrough")) {
+            n.optBoolean("allowPassThrough", true)
+        } else {
+            when (n.optString("type", "CORRIDOR").uppercase()) {
+                "ELEVATOR", "ESCALATOR", "STAIRCASE" -> false
+                else -> true
+            }
+        }
     )
 
     private fun parseEdge(e: JSONObject) = IndoorEdge(

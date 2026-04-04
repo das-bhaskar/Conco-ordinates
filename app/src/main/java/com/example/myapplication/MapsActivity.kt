@@ -32,7 +32,7 @@ import com.example.myapplication.ui.screens.IndoorActions
 import com.example.myapplication.ui.screens.IndoorNavParams
 import com.example.myapplication.ui.screens.IndoorNavScreen
 import com.example.myapplication.ui.screens.MapScreen
-import com.example.myapplication.ui.screens.PoiActions
+import com.example.myapplication.ui.components.PoiActions
 import com.example.myapplication.ui.viewmodel.CalendarViewModel
 import com.example.myapplication.ui.viewmodel.MapViewModel
 import com.example.myapplication.ui.viewmodel.POIViewModel

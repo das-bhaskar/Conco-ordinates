@@ -2,6 +2,7 @@ package com.example.myapplication.data.poi
 
 import com.example.myapplication.logic.haversineDistanceMeters
 import com.google.android.gms.maps.model.LatLng
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -24,6 +25,7 @@ import java.net.URI
  */
 class PlacesPOIRepository(
     private val apiKey: String,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val responseFetcher: (String) -> String = ::defaultFetch
 ) : POIRepository {
 
@@ -31,7 +33,7 @@ class PlacesPOIRepository(
         origin:       LatLng,
         radiusMeters: Int,
         category:     POICategory
-    ): List<POI> = withContext(Dispatchers.IO) {
+    ): List<POI> = withContext(ioDispatcher) {
         // Nearby Search API only accepts ONE type per request.
         // For ALL: fire one request per supported category, merge, deduplicate by placeId.
         if (category == POICategory.ALL) {

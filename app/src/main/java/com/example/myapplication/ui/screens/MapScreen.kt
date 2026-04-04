@@ -34,13 +34,13 @@ import com.example.myapplication.ui.components.CampusToggle
 import com.example.myapplication.ui.components.DirectionsHeader
 import com.example.myapplication.ui.components.DirectionsInfoPopup
 import com.example.myapplication.ui.components.LocationPermissionDialog
-import com.example.myapplication.ui.components.MapPOIOverlayActions
 import com.example.myapplication.ui.components.MapPOIOverlayState
 import com.example.myapplication.ui.components.NavigationOverlay
 import com.example.myapplication.ui.components.NextClassPill
 import com.example.myapplication.ui.components.ObserveCameraEffects
 import com.example.myapplication.ui.components.ObserveLocationUpdates
 import com.example.myapplication.ui.components.MapPOIOverlay
+import com.example.myapplication.ui.components.PoiActions
 import com.example.myapplication.ui.components.rememberMapCamera
 import com.example.myapplication.ui.models.BuildingUiState
 import com.example.myapplication.ui.models.MapUIMode
@@ -57,17 +57,6 @@ import kotlinx.coroutines.launch
  */
 data class IndoorActions(
     val onIndoorMapClick: () -> Unit = {}
-)
-
-data class PoiActions(
-    val onLocationUpdate: (com.google.android.gms.maps.model.LatLng) -> Unit = {},
-    val onOpenPanel: () -> Unit,
-    val onClosePanel: () -> Unit,
-    val onRetry: () -> Unit,
-    val onCategorySelected: (com.example.myapplication.data.poi.POICategory) -> Unit,
-    val onPOISelected: (com.example.myapplication.data.poi.POI) -> Unit,
-    val onPOIDismissed: () -> Unit,
-    val onNavigateToPOI: (com.example.myapplication.data.poi.POI) -> Unit
 )
 
 @Composable
@@ -206,15 +195,7 @@ fun MapScreen(
                     uiState = poiUiState,
                     showExploreFab = uiState.mode == MapUIMode.PREVIEW && !uiState.isVisible
                 ),
-                actions = MapPOIOverlayActions(
-                    onOpenPanel = poiActions.onOpenPanel,
-                    onClosePanel = poiActions.onClosePanel,
-                    onRetry = poiActions.onRetry,
-                    onCategorySelected = poiActions.onCategorySelected,
-                    onPOISelected = poiActions.onPOISelected,
-                    onPOIDismissed = poiActions.onPOIDismissed,
-                    onNavigateToPOI = poiActions.onNavigateToPOI
-                )
+                actions = poiActions
             )
         } else {
             NavigationOverlay(

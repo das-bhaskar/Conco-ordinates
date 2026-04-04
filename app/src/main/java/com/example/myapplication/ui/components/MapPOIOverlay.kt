@@ -22,8 +22,6 @@ import com.example.myapplication.data.poi.POI
 import com.example.myapplication.data.poi.POICategory
 import com.example.myapplication.ui.models.POIUiState
 import com.example.myapplication.ui.theme.ConcordiaMaroon
-import java.net.URI
-import java.net.URLConnection
 
 /**
  * Top-level overlay composable for Epic 5 — POI discovery + directions.
@@ -38,7 +36,7 @@ import java.net.URLConnection
 @Composable
 fun BoxScope.MapPOIOverlay(
     state: MapPOIOverlayState,
-    actions: MapPOIOverlayActions,
+    actions: PoiActions,
     modifier: Modifier = Modifier
 ) {
     // Toggle lives here — purely UI concern, no business logic
@@ -116,7 +114,8 @@ data class MapPOIOverlayState(
     val showExploreFab: Boolean
 )
 
-data class MapPOIOverlayActions(
+data class PoiActions(
+    val onLocationUpdate: (com.google.android.gms.maps.model.LatLng) -> Unit = {},
     val onOpenPanel: () -> Unit,
     val onClosePanel: () -> Unit,
     val onRetry: () -> Unit,

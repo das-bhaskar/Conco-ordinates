@@ -62,6 +62,8 @@ class IndoorJsonParser {
         type            = n.optString("type", "CORRIDOR"),
         roomId          = n.optString("roomId", "").takeIf { it.isNotBlank() },
         elevatorGroupId = n.optString("elevatorGroupId", "").takeIf { it.isNotBlank() },
+        transferFloor   = n.takeIf { it.has("transferFloor") }?.optInt("transferFloor"),
+        transferNodeId  = n.optString("transferNodeId", "").takeIf { it.isNotBlank() },
         accessible      = n.optBoolean("accessible", true)
     )
 

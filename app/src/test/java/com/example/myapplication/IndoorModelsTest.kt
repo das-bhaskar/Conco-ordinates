@@ -60,12 +60,24 @@ class IndoorModelsTest {
         val n = IndoorNode("n", 0f, 0f, "CORRIDOR")
         assertNull(n.roomId)
         assertNull(n.elevatorGroupId)
+        assertNull(n.transferFloor)
+        assertNull(n.transferNodeId)
         assertTrue(n.accessible)
     }
 
     @Test fun `IndoorNode with elevatorGroupId`() {
         val n = IndoorNode("n", 0f, 0f, "ELEVATOR", elevatorGroupId = "elev-A")
         assertEquals("elev-A", n.elevatorGroupId)
+    }
+
+    @Test fun `IndoorNode with directed transfer metadata`() {
+        val n = IndoorNode(
+            "n", 0f, 0f, "ESCALATOR",
+            transferFloor = 2,
+            transferNodeId = "node-H-2-escalator-2-3"
+        )
+        assertEquals(2, n.transferFloor)
+        assertEquals("node-H-2-escalator-2-3", n.transferNodeId)
     }
 
     // ── IndoorEdge ─────────────────────────────────────────────────────────────

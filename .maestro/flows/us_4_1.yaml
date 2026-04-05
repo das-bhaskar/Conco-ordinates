@@ -1,9 +1,9 @@
 
 # US-4.1: As a student, I want to be able to search for specific room numbers on the indoor map, so that I can see exactly where my destination is within the building layout.
 
-- appId: com.example.myapplication
+appId: com.example.myapplication
 ---
-- lauchApp:
+- launchApp:
     clearState: true
 - waitForAnimationToEnd:
     timeout: 5000
@@ -18,20 +18,48 @@
 - waitForAnimationToEnd:
     timeout: 10000
 
+- assertVisible:
+    text: "Henry F. Hall Building"
+- assertVisible: "Directions"
+- assertVisible: "Indoor"
+- assertVisible: "Save"
+- assertVisible: "PIN"
+- assertVisible: "Share"
+
 - tapOn: "Indoor"
 - waitForAnimationToEnd:
     timeout: 5000
+
+- assertVisible:
+    text: "H · Floor 1"
 
 - tapOn: "2"
 - waitForAnimationToEnd:
     timeout: 5000
 
+- assertVisible:
+    text: "H · Floor 2"
+
 - tapOn: "8"
 - waitForAnimationToEnd:
     timeout: 5000
+
+- assertVisible:
+    text: "H · Floor 8"
 
 - tapOn: "9"
 - waitForAnimationToEnd:
     timeout: 5000
 
+- assertVisible:
+    text: "H · Floor 9"
+
 - tapOn: "Back"
+
+- assertVisible:
+    text: "Henry F. Hall Building"
+- assertVisible: "Directions"
+- assertVisible: "Indoor"
+- assertVisible: "Save"
+- assertVisible: "PIN"
+- assertVisible: "Share"

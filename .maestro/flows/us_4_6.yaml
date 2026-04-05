@@ -1,0 +1,68 @@
+
+# US-4.6: As a student, I want to see a single route from a room on one campus to a room on the other, so that I don't have to restart my navigation mid-trip.
+
+appId: com.example.myapplication
+---
+- setLocation:
+    latitude: 45.4972
+    longitude: -73.5789
+- launchApp:
+    clearState: true
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Tap on Hall Building
+- tapOn:
+    text: "Search buildings or addresses..."
+- waitForAnimationToEnd:
+    timeout: 5000
+- inputText: "cc-1"
+- tapOn:
+    text: "CC-101 · CC Floor 1"
+
+
+- assertVisible:
+    text: "You're in Henry F. Hall Building"
+- assertVisible:
+    text: "Which room are you currently in?"
+- tapOn:
+    text: "e.g. H-119"
+- waitForAnimationToEnd:
+    timeout: 2000
+
+- inputText: "H-110"
+- tapOn:
+    text: "Start Navigation"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Yes, I'm at the Exit"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm Outside — Start Outdoor Navigation"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "Drive"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Start"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- setLocation:
+    latitude: 45.4972
+    longitude: -73.5789

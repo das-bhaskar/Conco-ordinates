@@ -408,7 +408,7 @@
           "description": "The Engineering, Computer Science and Visual Arts Integrated Complex (EV) is a landmark interdisciplinary facility completed in 2005. It houses the Gina Cody School of Engineering and Computer Science alongside studios and labs for the Faculty of Fine Arts. The building contains modern electronics and fabrication labs, the Hexagram research studio, game development labs, digital media studios, and visual art workshops. Its award-winning architectural design was created by Saucier + Perrotte.",
           "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
           "isWheelchairAccessible": true,
-          "hasTunnelAccess": false
+          "hasTunnelAccess": true
         },
         {
           "code": "FB",

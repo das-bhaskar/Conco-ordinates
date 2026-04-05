@@ -34,9 +34,9 @@ fun BuildingInfoPopup(
     uiState:           BuildingUiState,
     onDismiss:         () -> Unit,
     onDirectionsClick: () -> Unit,
-    onIndoorMapClick:  () -> Unit = {}
+    onIndoorMapClick:  () -> Unit = {},
+    onInfoClick:       () -> Unit = {}
 ) {
-    var showInfo by remember { mutableStateOf(false) }
 
     Box(
         modifier         = Modifier.fillMaxSize(),
@@ -88,9 +88,9 @@ fun BuildingInfoPopup(
                             ActionButton(Icons.Default.Map, "Indoor", onIndoorMapClick)
                         }
                         ActionButton(
-                            icon    = if (showInfo) Icons.Default.KeyboardArrowDown else Icons.Default.Info,
+                            icon    = if (uiState.isInfoExpanded) Icons.Default.KeyboardArrowDown else Icons.Default.Info,
                             label   = "Info",
-                            onClick = { showInfo = !showInfo }
+                            onClick = onInfoClick
                         )
                         ActionButton(Icons.Default.PinDrop, "PIN")   {}
                         ActionButton(Icons.Default.Share,   "Share") {}
@@ -114,7 +114,7 @@ fun BuildingInfoPopup(
                     }
 
                     // ── Inline info panel ─────────────────────────────────────────
-                    AnimatedVisibility(visible = showInfo) {
+                    AnimatedVisibility(visible = uiState.isInfoExpanded) {
                         Column(
                             modifier            = Modifier.padding(top = 12.dp),
                             verticalArrangement = Arrangement.spacedBy(14.dp)

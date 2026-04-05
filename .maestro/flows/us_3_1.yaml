@@ -1,5 +1,6 @@
 
 # US-3.1: As a student, I want to connect my Google Calendar, so that the app can automatically find my next class location and show me how to get there.
+# US-3.2: As a student with multiple Google calendars, I want to select specific calendars as the data source for my classes so that my navigation is only based on my academic schedule and not my personal events.
 
 appId: com.example.myapplication
 ---
@@ -30,33 +31,19 @@ appId: com.example.myapplication
 - waitForAnimationToEnd:
     timeout: 5000
 
-- tapOn:
-    text: "SKIP"
-- waitForAnimationToEnd:
-    timeout: 5000
+- tapOn: "concoordinates@gmail.com"
 
-- tapOn:
-    id: "identifierId"
-- waitForAnimationToEnd:
-    timeout: 2000
-- inputText: "concoordinates@gmail.com"
-- tapOn:
-    text: "NEXT"
-- tapOn: "Enter your password"
-- waitForAnimationToEnd:
-    timeout: 2000
-- inputText: "A12345678?"
-- tapOn:
-    text: "NEXT"
-- waitForAnimationToEnd:
-    timeout: 2000
-- tapOn:
-    text: "I agree"
-- waitForAnimationToEnd:
-    timeout: 20000
 - assertVisible:
     text: "Choose a Calendar"
 - assertVisible:
     text: "Map"
 - assertVisible:
     text: "Schedule"
+
+- tapOn: "concoordinates@gmail.com"
+- assertVisible:
+    text: "Schedule"
+    index: 0
+- assertVisible:
+    text: "Schedule"
+    index: 1

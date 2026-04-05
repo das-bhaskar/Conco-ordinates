@@ -58,7 +58,7 @@ appId: com.example.myapplication
           id: "identifierId"
       - waitForAnimationToEnd:
           timeout: 2000
-      - inputText: "concoordinates@gmail.com"
+      - inputText: "concoortest@gmail.com"
       - tapOn:
           text: "NEXT"
       - tapOn: "Enter your password"

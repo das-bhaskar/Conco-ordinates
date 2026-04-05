@@ -139,6 +139,10 @@ class MapViewModel(
         )
     }
 
+    fun toggleBuildingInfo() {
+        uiBuildingState = uiBuildingState.copy(isInfoExpanded = !uiBuildingState.isInfoExpanded)
+    }
+
     fun onCampusSelected(name: String) {
         val found = CampusRepo.getCampusByName(name)
         if (found != null) {

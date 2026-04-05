@@ -183,6 +183,7 @@ fun MapScreen(
                 onDismiss                = onBuildingDismiss,
                 onDirectionsRequested    = onDirectionsRequested,
                 onIndoorMapClick         = indoorActions.onIndoorMapClick,
+                onInfoClick              = { mapViewModel.toggleBuildingInfo() },
                 onTransportModeChanged   = onTransportModeChanged,
                 onToggleSearchExpansion  = onToggleSearchExpansion,
                 onSwapLocations          = onSwapLocations,
@@ -410,6 +411,7 @@ private fun BoxScope.MapBuildingOverlay(
     onDismiss:                () -> Unit,
     onDirectionsRequested:    () -> Unit,
     onIndoorMapClick:         () -> Unit,
+    onInfoClick:              () -> Unit,
     onTransportModeChanged:   (String) -> Unit,
     onToggleSearchExpansion:  (Boolean, String) -> Unit,
     onSwapLocations:          () -> Unit,
@@ -424,7 +426,8 @@ private fun BoxScope.MapBuildingOverlay(
             uiState           = uiState,
             onDismiss         = onDismiss,
             onDirectionsClick = onDirectionsRequested,
-            onIndoorMapClick  = onIndoorMapClick
+            onIndoorMapClick  = onIndoorMapClick,
+            onInfoClick       = onInfoClick
         )
     } else {
         DirectionsInfoPopup(

@@ -1,20 +1,32 @@
 package com.example.myapplication.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.myapplication.data.Building
 import com.example.myapplication.ui.models.BuildingUiState
+import com.example.myapplication.ui.theme.ConcordiaGreen
+import com.example.myapplication.ui.theme.ConcordiaMaroon
+import com.example.myapplication.ui.theme.concordiaGold
+import com.example.myapplication.ui.theme.faintMaroon
 
 @Composable
 fun BuildingInfoPopup(
@@ -22,27 +34,47 @@ fun BuildingInfoPopup(
     uiState:           BuildingUiState,
     onDismiss:         () -> Unit,
     onDirectionsClick: () -> Unit,
-    onIndoorMapClick:  () -> Unit = {}
+    onIndoorMapClick:  () -> Unit = {},
+    onInfoClick:       () -> Unit = {}
 ) {
+
     Box(
         modifier         = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
         Card(
-            modifier  = Modifier.fillMaxWidth().padding(12.dp),
+            modifier  = Modifier.fillMaxWidth().padding(12.dp).animateContentSize(),
             shape     = RoundedCornerShape(24.dp),
             colors    = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(12.dp)
         ) {
             Column {
-                AsyncImage(
-                    model              = uiState.imageUrl,
-                    contentDescription = null,
-                    modifier           = Modifier.fillMaxWidth().height(180.dp),
-                    contentScale       = ContentScale.Crop
-                )
+                Box {
+                    AsyncImage(
+                        model              = uiState.imageUrl,
+                        contentDescription = null,
+                        modifier           = Modifier.fillMaxWidth().height(180.dp),
+                        contentScale       = ContentScale.Crop
+                    )
+                    IconButton(
+                        onClick  = onDismiss,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .size(32.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(Color.Black.copy(alpha = 0.45f))
+                    ) {
+                        Icon(
+                            imageVector        = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint               = Color.White,
+                            modifier           = Modifier.size(18.dp)
+                        )
+                    }
+                }
                 Column(
-                    modifier            = Modifier.padding(16.dp),
+                    modifier            = Modifier.verticalScroll(rememberScrollState()).padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(text = building.name, style = MaterialTheme.typography.headlineSmall)
@@ -55,7 +87,11 @@ fun BuildingInfoPopup(
                         if (uiState.hasIndoorMap) {
                             ActionButton(Icons.Default.Map, "Indoor", onIndoorMapClick)
                         }
-                        ActionButton(Icons.Default.Save,    "Save")  {}
+                        ActionButton(
+                            icon    = if (uiState.isInfoExpanded) Icons.Default.KeyboardArrowDown else Icons.Default.Info,
+                            label   = "Info",
+                            onClick = onInfoClick
+                        )
                         ActionButton(Icons.Default.PinDrop, "PIN")   {}
                         ActionButton(Icons.Default.Share,   "Share") {}
                     }
@@ -76,9 +112,141 @@ fun BuildingInfoPopup(
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
+
+                    // ── Inline info panel ─────────────────────────────────────────
+                    AnimatedVisibility(visible = uiState.isInfoExpanded) {
+                        BuildingInfoPanel(building = building)
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun BuildingInfoPanel(building: Building) {
+    Column(
+        modifier            = Modifier.padding(top = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
+    ) {
+        HorizontalDivider(color = faintMaroon, thickness = 1.dp)
+        BuildingAboutSection(building)
+        HorizontalDivider(color = faintMaroon, thickness = 1.dp)
+        BuildingHoursSection(building)
+        HorizontalDivider(color = faintMaroon, thickness = 1.dp)
+        BuildingAccessSection(building)
+    }
+}
+
+@Composable
+private fun BuildingAboutSection(building: Building) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            text          = "About",
+            color         = ConcordiaMaroon,
+            fontWeight    = FontWeight.SemiBold,
+            fontSize      = 11.sp,
+            letterSpacing = 1.sp
+        )
+        Text(
+            text       = building.description ?: "No description available.",
+            style      = MaterialTheme.typography.bodyMedium,
+            color      = Color(0xFF2C2C2C),
+            lineHeight = 22.sp
+        )
+    }
+}
+
+@Composable
+private fun BuildingHoursSection(building: Building) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text          = "Opening Hours",
+            color         = ConcordiaMaroon,
+            fontWeight    = FontWeight.SemiBold,
+            fontSize      = 11.sp,
+            letterSpacing = 1.sp
+        )
+        Row(
+            verticalAlignment     = Alignment.Top,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier         = Modifier
+                    .size(28.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(faintMaroon),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector        = Icons.Default.Schedule,
+                    contentDescription = null,
+                    tint               = ConcordiaMaroon,
+                    modifier           = Modifier.size(16.dp)
+                )
+            }
+            Text(
+                text       = building.openingHours ?: "Hours not available",
+                style      = MaterialTheme.typography.bodySmall,
+                color      = Color(0xFF555555),
+                lineHeight = 20.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun BuildingAccessSection(building: Building) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text          = "Access",
+            color         = ConcordiaMaroon,
+            fontWeight    = FontWeight.SemiBold,
+            fontSize      = 11.sp,
+            letterSpacing = 1.sp
+        )
+        val wcColor = if (building.isWheelchairAccessible) ConcordiaGreen else Color(0xFF9E9E9E)
+        AccessRow(
+            icon  = Icons.Default.Accessible,
+            tint  = wcColor,
+            label = if (building.isWheelchairAccessible) "Wheelchair Accessible" else "Limited Accessibility"
+        )
+        val tnColor = if (building.hasTunnelAccess) ConcordiaMaroon else Color(0xFF9E9E9E)
+        AccessRow(
+            icon  = Icons.Default.Subway,
+            tint  = tnColor,
+            label = if (building.hasTunnelAccess) "Underground Tunnel Connected" else "No Underground Tunnel"
+        )
+    }
+}
+
+@Composable
+private fun AccessRow(icon: ImageVector, tint: Color, label: String) {
+    Row(
+        modifier              = Modifier.fillMaxWidth(),
+        verticalAlignment     = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box(
+            modifier         = Modifier
+                .size(28.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(tint.copy(alpha = 0.12f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector        = icon,
+                contentDescription = null,
+                tint               = tint,
+                modifier           = Modifier.size(16.dp)
+            )
+        }
+        Text(
+            text       = label,
+            style      = MaterialTheme.typography.bodySmall,
+            color      = tint,
+            fontWeight = FontWeight.Medium
+        )
     }
 }
 

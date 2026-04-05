@@ -1,0 +1,59 @@
+
+# US-4.2: As a student, I want to be able to get direction on the shortest path to get to a certain room, so that I can save time and do my stuff.
+# US-4.3: As a student with disabilities, I want to be able to get direction on the path that I can take physically with my disability, so that I can get to the room I want to go.
+# US-4.4: As a student, I want to see when I am looking at an indoor map different point of interest like (washrooms, water fountains, stairs, elevators), so I know quickly where are located all those point of interest.
+# US-4.5: As a student, I want to be able to get direction between rooms in different floor, so that I can conveniently plan my trip between room without constantly replanning route on each floor.
+
+- appId: com.example.myapplication
+---
+- setLocation:
+    latitude: 45.4972
+    longitude: -73.5789
+- launchApp:
+    clearState: true
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Tap on Hall Building
+- tapOn:
+    point: "50%, 47%"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- tapOn: "Indoor"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "8"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    text: "H · Floor 8"
+
+# Tap on room H-859
+- tapOn:
+    point: "7%, 45%"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    text: "H-859"
+- assertVisible:
+    text: "Where are you starting from?"
+
+- tapOn: "Room number e.g. H-110"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Tap on disability icon
+- tapOn:
+    point: "62%,15%"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- inputText: "H-110"
+- tapOn:
+    text: "Navigate Here"
+- waitForAnimationToEnd:
+    timeout: 5000

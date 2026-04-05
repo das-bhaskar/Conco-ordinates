@@ -8,13 +8,16 @@ appId: com.example.myapplication
 - waitForAnimationToEnd:
     timeout: 5000
 
-- tapOn:
-    point: "90%, 30%"
 - waitForAnimationToEnd:
-    timeout: 10000
+    timeout: 5000
 
 - tapOn:
-    point: "50%, 47%"
+    text: "SGW"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    point: "55%, 47%"
 - waitForAnimationToEnd:
     timeout: 10000
 

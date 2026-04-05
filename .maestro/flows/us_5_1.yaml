@@ -35,10 +35,12 @@ appId: com.example.myapplication
     start: 90%, 49%
     end: 20%, 49%
 - tapOn: ".*Grocery.*"
+
 - swipe:
     start: 90%, 49%
     end: 20%, 49%
 - tapOn: ".*Gym.*"
+
 - repeat:
     times: 4
     commands:

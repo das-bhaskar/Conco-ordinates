@@ -4,7 +4,7 @@
 # US-4.4: As a student, I want to see when I am looking at an indoor map different point of interest like (washrooms, water fountains, stairs, elevators), so I know quickly where are located all those point of interest.
 # US-4.5: As a student, I want to be able to get direction between rooms in different floor, so that I can conveniently plan my trip between room without constantly replanning route on each floor.
 
-- appId: com.example.myapplication
+appId: com.example.myapplication
 ---
 - setLocation:
     latitude: 45.4972
@@ -14,11 +14,22 @@
 - waitForAnimationToEnd:
     timeout: 5000
 
+- waitForAnimationToEnd:
+    timeout: 5000
+
 # Tap on Hall Building
 - tapOn:
     point: "50%, 47%"
 - waitForAnimationToEnd:
-    timeout: 10000
+    timeout: 5000
+
+- assertVisible:
+    text: "Henry F. Hall Building"
+- assertVisible: "Directions"
+- assertVisible: "Indoor"
+- assertVisible: "Save"
+- assertVisible: "PIN"
+- assertVisible: "Share"
 
 - tapOn: "Indoor"
 - waitForAnimationToEnd:
@@ -55,5 +66,55 @@
 - inputText: "H-110"
 - tapOn:
     text: "Navigate Here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Yes, Continue"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm on floor 8"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Yes, I've Arrived!"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Done"
 - waitForAnimationToEnd:
     timeout: 5000

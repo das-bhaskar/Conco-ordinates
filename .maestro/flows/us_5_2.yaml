@@ -1,0 +1,38 @@
+
+appId: com.example.myapplication
+---
+- setLocation:
+    latitude: 45.4971
+    longitude: -73.5788
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+- tapOn:
+    text: "SGW"
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn:
+    point: "81%, 75%"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible: "Nearby Places"
+
+- assertVisible: "RBC Royal Bank ATM"
+
+- tapOn: "RBC Royal Bank ATM"
+
+- tapOn: "Get Directions"
+
+- tapOn: "Start"
+- waitForAnimationToEnd:
+    timeout: 10000

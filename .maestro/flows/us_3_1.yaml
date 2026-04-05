@@ -4,7 +4,7 @@
 appId: com.example.myapplication
 ---
 - launchApp:
-    clearState: true
+    clearState: false
 - assertVisible:
     text: "Search buildings or addresses..."
 - assertVisible:

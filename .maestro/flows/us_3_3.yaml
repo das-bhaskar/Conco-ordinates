@@ -39,7 +39,6 @@ appId: com.example.myapplication
 
 - tapOn:
     text: "SOEN 345 Lab"
-    index: 1
 - waitForAnimationToEnd:
     timeout: 2000
 

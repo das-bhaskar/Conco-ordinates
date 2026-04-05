@@ -1,0 +1,37 @@
+
+# US-4.1: As a student, I want to be able to search for specific room numbers on the indoor map, so that I can see exactly where my destination is within the building layout.
+
+- appId: com.example.myapplication
+---
+- lauchApp:
+    clearState: true
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    point: "90%, 30%"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- tapOn:
+    point: "50%, 47%"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- tapOn: "Indoor"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "2"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "8"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "9"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "Back"

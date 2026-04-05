@@ -14,7 +14,10 @@ data class Building(
     val address: String,
     val outline: List<JsonLatLng>?, // Make nullable for safety
     val isCampusBuilding: Boolean = true,
-    val description: String? = null
+    val description: String? = null,
+    val openingHours: String? = null,
+    val isWheelchairAccessible: Boolean = true,
+    val hasTunnelAccess: Boolean = false
 ) {
     fun getGoogleOutline(): List<LatLng> = outline?.map { LatLng(it.latitude, it.longitude) } ?: emptyList()
 

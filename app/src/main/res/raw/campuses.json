@@ -62,7 +62,10 @@
             }
           ],
           "wayID": 22080570,
-          "description": "The 14-storey Henry F. Hall Building is the academic heart of Concordia's Sir George Williams campus. Opened in 1966, it houses over 20 departments within the Faculty of Arts & Science, including Sociology, History, Economics, Political Science, Anthropology, Geography, and Philosophy. The building features large lecture theatres, a multi-level atrium lobby, faculty offices, graduate study rooms, and the Dean of Arts & Science offices. It is connected to the underground tunnel network linking SGW campus buildings."
+          "description": "The 14-storey Henry F. Hall Building is the academic heart of Concordia's Sir George Williams campus. Opened in 1966, it houses over 20 departments within the Faculty of Arts & Science, including Sociology, History, Economics, Political Science, Anthropology, Geography, and Philosophy. The building features large lecture theatres, a multi-level atrium lobby, faculty offices, graduate study rooms, and the Dean of Arts & Science offices. It is connected to the underground tunnel network linking SGW campus buildings.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": true
         },
         {
           "code": "LB",
@@ -192,7 +195,10 @@
             }
           ],
           "wayID": 22080572,
-          "description": "The J. W. McConnell Building is a 14-storey tower at the eastern anchor of the Sir George Williams campus. It is home to Webster Library, Concordia's main research library housing over 1.5 million volumes and extensive digital collections. The building also contains the Birks Student Service Centre, the Registrar's Office, Financial Aid, and the Welcome Centre. Opened in 1992, it forms a covered courtyard with the Hall Building and connects to the campus tunnel system."
+          "description": "The J. W. McConnell Building is a 14-storey tower at the eastern anchor of the Sir George Williams campus. It is home to Webster Library, Concordia's main research library housing over 1.5 million volumes and extensive digital collections. The building also contains the Birks Student Service Centre, the Registrar's Office, Financial Aid, and the Welcome Centre. Opened in 1992, it forms a covered courtyard with the Hall Building and connects to the campus tunnel system.",
+          "openingHours": "Mon–Thu: 08:00–22:00\nFri: 08:00–18:00\nSat–Sun: 10:00–18:00",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": true
         },
         {
           "code": "MB",
@@ -282,7 +288,10 @@
             }
           ],
           "wayID": 22080581,
-          "description": "The John Molson Building is a 16-storey tower completed in 2009 and named after a major donation by the Molson family. It is the flagship home of the John Molson School of Business (JMSB), hosting undergraduate, MBA, Executive MBA, and PhD programs in commerce, finance, marketing, and supply chain management. The building features the state-of-the-art Concordia Trading Floor with Bloomberg terminals, case-study classrooms, and the Dean of Business offices."
+          "description": "The John Molson Building is a 16-storey tower completed in 2009 and named after a major donation by the Molson family. It is the flagship home of the John Molson School of Business (JMSB), hosting undergraduate, MBA, Executive MBA, and PhD programs in commerce, finance, marketing, and supply chain management. The building features the state-of-the-art Concordia Trading Floor with Bloomberg terminals, case-study classrooms, and the Dean of Business offices.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": true
         },
         {
           "code": "EV",
@@ -396,7 +405,10 @@
             }
           ],
           "wayID": 103248064,
-          "description": "The Engineering, Computer Science and Visual Arts Integrated Complex (EV) is a landmark interdisciplinary facility completed in 2005. It houses the Gina Cody School of Engineering and Computer Science alongside studios and labs for the Faculty of Fine Arts. The building contains modern electronics and fabrication labs, the Hexagram research studio, game development labs, digital media studios, and visual art workshops. Its award-winning architectural design was created by Saucier + Perrotte."
+          "description": "The Engineering, Computer Science and Visual Arts Integrated Complex (EV) is a landmark interdisciplinary facility completed in 2005. It houses the Gina Cody School of Engineering and Computer Science alongside studios and labs for the Faculty of Fine Arts. The building contains modern electronics and fabrication labs, the Hexagram research studio, game development labs, digital media studios, and visual art workshops. Its award-winning architectural design was created by Saucier + Perrotte.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "FB",
@@ -498,7 +510,10 @@
             }
           ],
           "wayID": 103248058,
-          "description": "The Faubourg Tower is a 13-storey academic building at Guy and De Maisonneuve, primarily housing graduate program offices and classrooms for a range of disciplines alongside administrative departments. It connects to the broader SGW campus network and provides seminar spaces and faculty offices for graduate studies."
+          "description": "The Faubourg Tower is a 13-storey academic building at Guy and De Maisonneuve, primarily housing graduate program offices and classrooms for a range of disciplines alongside administrative departments. It connects to the broader SGW campus network and provides seminar spaces and faculty offices for graduate studies.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "FG",
@@ -560,7 +575,10 @@
             }
           ],
           "wayID": 103248050,
-          "description": "Le Faubourg Building at 1610 Ste-Catherine St. W. serves as a Concordia facility for offices, classrooms, and student-support services. Its location near the Guy-Concordia Metro station makes it easily accessible for students and staff attending classes and meetings throughout the day."
+          "description": "Le Faubourg Building at 1610 Ste-Catherine St. W. serves as a Concordia facility for offices, classrooms, and student-support services. Its location near the Guy-Concordia Metro station makes it easily accessible for students and staff attending classes and meetings throughout the day.",
+          "openingHours": "Mon–Fri: 08:00–18:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "GM",
@@ -618,7 +636,10 @@
             }
           ],
           "wayID": 86068897,
-          "description": "The Guy Metro Building sits directly above the Guy-Concordia Metro station, making it one of the most accessible points on the SGW campus. The building houses the Student Success Centre, academic advising, counselling and psychological services, and several student-facing administrative offices. It is the primary transit-connected gateway for commuting students entering the downtown campus."
+          "description": "The Guy Metro Building sits directly above the Guy-Concordia Metro station, making it one of the most accessible points on the SGW campus. The building houses the Student Success Centre, academic advising, counselling and psychological services, and several student-facing administrative offices. It is the primary transit-connected gateway for commuting students entering the downtown campus.",
+          "openingHours": "Mon–Fri: 07:00–22:00\nSat: 09:00–17:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": true
         },
         {
           "code": "ER",
@@ -664,7 +685,10 @@
             }
           ],
           "wayID": 103896385,
-          "description": "The ER Building at 2155 Guy St. accommodates Concordia administrative services, research offices, and support units. As part of the expanded Sir George Williams campus footprint along Guy Street, it provides additional office and meeting space for university departments operating beyond the main campus core."
+          "description": "The ER Building at 2155 Guy St. accommodates Concordia administrative services, research offices, and support units. As part of the expanded Sir George Williams campus footprint along Guy Street, it provides additional office and meeting space for university departments operating beyond the main campus core.",
+          "openingHours": "Mon–Fri: 08:00–18:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "GN",
@@ -1286,7 +1310,10 @@
             }
           ],
           "wayID": 1369689991,
-          "description": "The Grey Nuns Building is a beautifully restored 19th-century heritage complex originally built as the motherhouse of the Sisters of Charity (Grey Nuns) in 1869. Acquired by Concordia University, it now houses Faculty of Arts & Science offices, community spaces, and research institutes. Its Gothic Revival chapel, historic courtyards, and residential wings are protected heritage elements, blending Concordia's academic mission with Montreal's rich architectural and cultural history."
+          "description": "The Grey Nuns Building is a beautifully restored 19th-century heritage complex originally built as the motherhouse of the Sisters of Charity (Grey Nuns) in 1869. Acquired by Concordia University, it now houses Faculty of Arts & Science offices, community spaces, and research institutes. Its Gothic Revival chapel, historic courtyards, and residential wings are protected heritage elements, blending Concordia's academic mission with Montreal's rich architectural and cultural history.",
+          "openingHours": "Mon–Fri: 08:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "LS",
@@ -1324,7 +1351,10 @@
             }
           ],
           "wayID": 979438074,
-          "description": "Concordia Learning Square, opened in 2021, is one of Concordia's newest academic buildings. It features state-of-the-art collaborative classrooms, flexible learning spaces, the District 3 Innovation Hub for student entrepreneurship and startups, a rooftop terrace, and multiple food and beverage outlets. The building embodies Concordia's commitment to experiential, student-centred learning and entrepreneurial culture."
+          "description": "Concordia Learning Square, opened in 2021, is one of Concordia's newest academic buildings. It features state-of-the-art collaborative classrooms, flexible learning spaces, the District 3 Innovation Hub for student entrepreneurship and startups, a rooftop terrace, and multiple food and beverage outlets. The building embodies Concordia's commitment to experiential, student-centred learning and entrepreneurial culture.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "GS",
@@ -1370,7 +1400,10 @@
             }
           ],
           "wayID": 103973074,
-          "description": "The GS Building at 1538 Sherbrooke St. W. is a Concordia annex facility housing various academic departmental offices and supplementary classroom space. It supports disciplines within arts, social sciences, and humanities that require additional office and instructional facilities beyond the main SGW campus towers."
+          "description": "The GS Building at 1538 Sherbrooke St. W. is a Concordia annex facility housing various academic departmental offices and supplementary classroom space. It supports disciplines within arts, social sciences, and humanities that require additional office and instructional facilities beyond the main SGW campus towers.",
+          "openingHours": "Mon–Fri: 08:00–18:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "LD",
@@ -1432,7 +1465,10 @@
             }
           ],
           "wayID": 103248059,
-          "description": "The LD Building at 1424 Bishop St. is a Concordia-owned property used for faculty offices, departmental meeting rooms, and administrative functions supporting the Sir George Williams campus. It is part of the cluster of university-managed properties in the downtown Concordia neighbourhood."
+          "description": "The LD Building at 1424 Bishop St. is a Concordia-owned property used for faculty offices, departmental meeting rooms, and administrative functions supporting the Sir George Williams campus. It is part of the cluster of university-managed properties in the downtown Concordia neighbourhood.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "VA",
@@ -1486,7 +1522,10 @@
             }
           ],
           "wayID": 103521746,
-          "description": "The Visual Arts Building at 1395 Rene-Levesque Blvd. W. provides dedicated studio and workshop facilities for students in Concordia's Faculty of Fine Arts. It houses painting, drawing, printmaking, and other studio art programs, offering large-format working spaces designed for visual art production. The building reflects Concordia's longstanding reputation as one of Canada's premier fine arts institutions."
+          "description": "The Visual Arts Building at 1395 Rene-Levesque Blvd. W. provides dedicated studio and workshop facilities for students in Concordia's Faculty of Fine Arts. It houses painting, drawing, printmaking, and other studio art programs, offering large-format working spaces designed for visual art production. The building reflects Concordia's longstanding reputation as one of Canada's premier fine arts institutions.",
+          "openingHours": "Mon–Fri: 08:00–21:00\nSat: 10:00–17:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "SB",
@@ -1588,7 +1627,10 @@
             }
           ],
           "wayID": 340272877,
-          "description": "The SB Building at 1590 Docteur Penfield is a Concordia facility on the northern perimeter of the Sir George Williams campus. It supports research groups, graduate student offices, and specialized academic programs that require dedicated workspace away from the main campus towers."
+          "description": "The SB Building at 1590 Docteur Penfield is a Concordia facility on the northern perimeter of the Sir George Williams campus. It supports research groups, graduate student offices, and specialized academic programs that require dedicated workspace away from the main campus towers.",
+          "openingHours": "Mon–Fri: 08:00–18:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "CL",
@@ -1634,7 +1676,10 @@
             }
           ],
           "wayID": 103248055,
-          "description": "The CL Annex at 1665 Ste-Catherine St. W. is a smaller Concordia property used primarily for departmental offices and support services associated with the SGW campus. Its location adjacent to the main campus cluster makes it a convenient overflow facility for growing academic units."
+          "description": "The CL Annex at 1665 Ste-Catherine St. W. is a smaller Concordia property used primarily for departmental offices and support services associated with the SGW campus. Its location adjacent to the main campus cluster makes it a convenient overflow facility for growing academic units.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "B",
@@ -1668,7 +1713,10 @@
             }
           ],
           "wayID": 103892958,
-          "description": "The B Annex at 2160 Bishop St. is one of several small Concordia-owned properties along Bishop and Mackay Streets. It provides office space for faculty, researchers, and administrative staff affiliated with programs and institutes operating in the Sir George Williams area."
+          "description": "The B Annex at 2160 Bishop St. is one of several small Concordia-owned properties along Bishop and Mackay Streets. It provides office space for faculty, researchers, and administrative staff affiliated with programs and institutes operating in the Sir George Williams area.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "CI",
@@ -1718,7 +1766,10 @@
             }
           ],
           "wayID": 103892934,
-          "description": "The CI Annex at 2149 Mackay St. is a compact Concordia facility on the residential fringe of the SGW campus. Used for faculty offices and small-group research activities, it is part of the network of university-owned properties that extend beyond the main campus towers."
+          "description": "The CI Annex at 2149 Mackay St. is a compact Concordia facility on the residential fringe of the SGW campus. Used for faculty offices and small-group research activities, it is part of the network of university-owned properties that extend beyond the main campus towers.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "MI",
@@ -1764,7 +1815,10 @@
             }
           ],
           "wayID": 103892938,
-          "description": "The MI Annex at 2130 Bishop St. serves as additional office and meeting space for Concordia academic departments and research centres. Like other annexes in the Bishop-Mackay corridor, it helps accommodate the university's growing research and graduate program needs."
+          "description": "The MI Annex at 2130 Bishop St. serves as additional office and meeting space for Concordia academic departments and research centres. Like other annexes in the Bishop-Mackay corridor, it helps accommodate the university's growing research and graduate program needs.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "EN",
@@ -1822,7 +1876,10 @@
             }
           ],
           "wayID": 103892973,
-          "description": "The EN Annex at 2070 Mackay St. is used for academic offices and specialized research activities. It represents part of Concordia's strategy of maintaining a cluster of support buildings near the main SGW campus to serve departments with space needs beyond what the main towers provide."
+          "description": "The EN Annex at 2070 Mackay St. is used for academic offices and specialized research activities. It represents part of Concordia's strategy of maintaining a cluster of support buildings near the main SGW campus to serve departments with space needs beyond what the main towers provide.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "MU",
@@ -1860,7 +1917,10 @@
             }
           ],
           "wayID": 103892927,
-          "description": "The MU Annex at 2170 Bishop St. provides additional office and seminar space for Concordia faculty and research teams. Its quiet residential-adjacent setting makes it well-suited for graduate supervision, small seminars, and research consultations."
+          "description": "The MU Annex at 2170 Bishop St. provides additional office and seminar space for Concordia faculty and research teams. Its quiet residential-adjacent setting makes it well-suited for graduate supervision, small seminars, and research consultations.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "GA",
@@ -1922,7 +1982,10 @@
             }
           ],
           "wayID": 103248061,
-          "description": "The GA Annex at 1215 Rue St. Mathieu is a Concordia facility used for specialized academic and administrative purposes connected to the SGW campus. It supports departments and programs that require dedicated space in the immediate neighbourhood of the downtown campus."
+          "description": "The GA Annex at 1215 Rue St. Mathieu is a Concordia facility used for specialized academic and administrative purposes connected to the SGW campus. It supports departments and programs that require dedicated space in the immediate neighbourhood of the downtown campus.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "P",
@@ -1956,7 +2019,10 @@
             }
           ],
           "wayID": 103892936,
-          "description": "The P Annex at 2020 Mackay St. is part of the Concordia SGW annex cluster along Mackay Street. It is used for faculty offices, departmental meeting rooms, and small research teams that support the broader academic mission of the Sir George Williams campus."
+          "description": "The P Annex at 2020 Mackay St. is part of the Concordia SGW annex cluster along Mackay Street. It is used for faculty offices, departmental meeting rooms, and small research teams that support the broader academic mission of the Sir George Williams campus.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "PR",
@@ -2038,7 +2104,10 @@
             }
           ],
           "wayID": 103892959,
-          "description": "The PR Annex at 2100 Mackay St. is a Concordia-managed property providing supplementary office and seminar facilities for academic departments. Located within walking distance of the main campus buildings, it extends the university's available workspace for researchers and faculty."
+          "description": "The PR Annex at 2100 Mackay St. is a Concordia-managed property providing supplementary office and seminar facilities for academic departments. Located within walking distance of the main campus buildings, it extends the university's available workspace for researchers and faculty.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "Q",
@@ -2072,7 +2141,10 @@
             }
           ],
           "wayID": 103892957,
-          "description": "The Q Annex at 2010 Mackay St. is one of the Concordia University annexes clustered along Mackay Street. Used for administrative offices and academic workspace, it helps support departmental operations that have expanded beyond the capacity of the main SGW campus towers."
+          "description": "The Q Annex at 2010 Mackay St. is one of the Concordia University annexes clustered along Mackay Street. Used for administrative offices and academic workspace, it helps support departmental operations that have expanded beyond the capacity of the main SGW campus towers.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "R",
@@ -2102,7 +2174,10 @@
             }
           ],
           "wayID": 103892935,
-          "description": "The R Annex at 2050 Mackay St. is a Concordia-owned property providing additional office and meeting space for academic and administrative units. As part of the Mackay corridor annex group, it contributes to the university's capacity to accommodate growing faculties and research institutes."
+          "description": "The R Annex at 2050 Mackay St. is a Concordia-owned property providing additional office and meeting space for academic and administrative units. As part of the Mackay corridor annex group, it contributes to the university's capacity to accommodate growing faculties and research institutes.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "RR",
@@ -2144,7 +2219,10 @@
             }
           ],
           "wayID": 103892971,
-          "description": "The RR Annex at 2040 Mackay St. is a small Concordia facility used for offices and support services associated with the SGW campus. It is part of the cluster of university-owned properties along Mackay Street that collectively support departmental overflow and specialized program needs."
+          "description": "The RR Annex at 2040 Mackay St. is a small Concordia facility used for offices and support services associated with the SGW campus. It is part of the cluster of university-owned properties along Mackay Street that collectively support departmental overflow and specialized program needs.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "S",
@@ -2198,7 +2276,10 @@
             }
           ],
           "wayID": 103892969,
-          "description": "The S Annex at 2145 Mackay St. is a Concordia-owned building housing faculty offices and departmental resources for programs affiliated with the Sir George Williams campus. Like other annexes in the Mackay-Bishop corridor, it extends the available workspace for Concordia's academic units."
+          "description": "The S Annex at 2145 Mackay St. is a Concordia-owned building housing faculty offices and departmental resources for programs affiliated with the Sir George Williams campus. Like other annexes in the Mackay-Bishop corridor, it extends the available workspace for Concordia's academic units.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "T",
@@ -2228,7 +2309,10 @@
             }
           ],
           "wayID": 103892939,
-          "description": "The T Annex at 2030 Mackay St. is part of the cluster of Concordia annex buildings along Mackay Street. It provides office space and meeting facilities for faculty and researchers working within the SGW campus ecosystem, contributing to the collaborative academic environment of the downtown campus."
+          "description": "The T Annex at 2030 Mackay St. is part of the cluster of Concordia annex buildings along Mackay Street. It provides office space and meeting facilities for faculty and researchers working within the SGW campus ecosystem, contributing to the collaborative academic environment of the downtown campus.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "V",
@@ -2270,7 +2354,10 @@
             }
           ],
           "wayID": 103892931,
-          "description": "The V Annex at 2110 Mackay St. is a Concordia University facility offering office and seminar space for academic departments and research groups. Its location within the Mackay Street annex cluster ensures convenient access for faculty and graduate students working across the SGW campus."
+          "description": "The V Annex at 2110 Mackay St. is a Concordia University facility offering office and seminar space for academic departments and research groups. Its location within the Mackay Street annex cluster ensures convenient access for faculty and graduate students working across the SGW campus.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "X",
@@ -2300,7 +2387,10 @@
             }
           ],
           "wayID": 103892928,
-          "description": "The X (FA) Annex at 2080 Mackay St. is linked to the Faculty of Fine Arts and provides dedicated studio, office, or workspace for fine arts programs and faculty. It extends the Fine Arts footprint beyond the main EV and VA buildings, supporting a variety of studio arts and design disciplines."
+          "description": "The X (FA) Annex at 2080 Mackay St. is linked to the Faculty of Fine Arts and provides dedicated studio, office, or workspace for fine arts programs and faculty. It extends the Fine Arts footprint beyond the main EV and VA buildings, supporting a variety of studio arts and design disciplines.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "Z",
@@ -2358,7 +2448,10 @@
             }
           ],
           "wayID": 103892926,
-          "description": "The Z Annex at 2090 Mackay St. is a Concordia-managed property used for university offices and specialized academic activities. It is part of the contiguous block of university properties along Mackay Street that jointly support the Sir George Williams campus's administrative and instructional capacity."
+          "description": "The Z Annex at 2090 Mackay St. is a Concordia-managed property used for university offices and specialized academic activities. It is part of the contiguous block of university properties along Mackay Street that jointly support the Sir George Williams campus's administrative and instructional capacity.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "M",
@@ -2408,7 +2501,10 @@
             }
           ],
           "wayID": 103892967,
-          "description": "The M Annex at 2135 Mackay St. provides Concordia with additional office and meeting space for academic and administrative departments on the Sir George Williams campus. It is a member of the university's Mackay Street annex cluster, giving faculty and researchers nearby facilities to conduct their work."
+          "description": "The M Annex at 2135 Mackay St. provides Concordia with additional office and meeting space for academic and administrative departments on the Sir George Williams campus. It is a member of the university's Mackay Street annex cluster, giving faculty and researchers nearby facilities to conduct their work.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "D",
@@ -2470,7 +2566,10 @@
             }
           ],
           "wayID": 103892960,
-          "description": "The D (KK) Annex at 2140 Bishop St. is a Concordia facility providing supplementary office and academic space for departments in the SGW campus area. The building supports university functions that require proximity to the main campus while benefiting from a quieter, smaller-scale setting."
+          "description": "The D (KK) Annex at 2140 Bishop St. is a Concordia facility providing supplementary office and academic space for departments in the SGW campus area. The building supports university functions that require proximity to the main campus while benefiting from a quieter, smaller-scale setting.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "TD",
@@ -2528,7 +2627,10 @@
             }
           ],
           "wayID": 103248049,
-          "description": "The TD Bank Building at 1410 Guy St. provides additional office and administrative space for Concordia University services. Named after the TD Bank branch that occupies part of the building, it supports a range of administrative operations and student-facing services at the Guy Street gateway to the downtown campus."
+          "description": "The TD Bank Building at 1410 Guy St. provides additional office and administrative space for Concordia University services. Named after the TD Bank branch that occupies part of the building, it supports a range of administrative operations and student-facing services at the Guy Street gateway to the downtown campus.",
+          "openingHours": "Mon–Fri: 07:00–22:00\nSat: 09:00–17:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         }
       ],
       "center": {
@@ -2764,7 +2866,10 @@
             }
           ],
           "wayID": 111604324457,
-          "description": "The Administration Building is the central hub of Concordia's Loyola campus at 7141 Sherbrooke St. W. It houses the main administrative offices for Loyola, including the campus registrar, academic advising, financial services, and senior leadership of Loyola programs. The building serves as the primary governance and student services centre for the west-island campus, supporting thousands of students enrolled in arts, science, and communication programs."
+          "description": "The Administration Building is the central hub of Concordia's Loyola campus at 7141 Sherbrooke St. W. It houses the main administrative offices for Loyola, including the campus registrar, academic advising, financial services, and senior leadership of Loyola programs. The building serves as the primary governance and student services centre for the west-island campus, supporting thousands of students enrolled in arts, science, and communication programs.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "BB",
@@ -2790,7 +2895,10 @@
             }
           ],
           "wayID": 604324439,
-          "description": "The BB Annex at 3502 Belmore Ave. is a small Concordia University property on the residential northern edge of the Loyola campus. It is used for specialized offices, research space, or academic support functions affiliated with programs operating on the Loyola campus."
+          "description": "The BB Annex at 3502 Belmore Ave. is a small Concordia University property on the residential northern edge of the Loyola campus. It is used for specialized offices, research space, or academic support functions affiliated with programs operating on the Loyola campus.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "BH",
@@ -2816,7 +2924,10 @@
             }
           ],
           "wayID": 604324440,
-          "description": "The BH Annex at 3500 Belmore Ave. is adjacent to the BB Annex and serves a similar function, providing supplementary workspace and office facilities for Concordia academic or administrative units on the Loyola campus. Both Belmore annexes reflect the university's integration into the surrounding Notre-Dame-de-Grace neighbourhood."
+          "description": "The BH Annex at 3500 Belmore Ave. is adjacent to the BB Annex and serves a similar function, providing supplementary workspace and office facilities for Concordia academic or administrative units on the Loyola campus. Both Belmore annexes reflect the university's integration into the surrounding Notre-Dame-de-Grace neighbourhood.",
+          "openingHours": "Mon–Fri: 09:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "CC",
@@ -2894,7 +3005,10 @@
             }
           ],
           "wayID": 111604324456,
-          "description": "The Communication Studies Building on the Loyola campus is dedicated to Concordia's renowned Department of Communication Studies. It houses classrooms, seminar rooms, faculty offices, and research facilities supporting undergraduate and graduate programs in media studies, cultural studies, and communication theory. Concordia's communication programs are consistently ranked among the best in Canada."
+          "description": "The Communication Studies Building on the Loyola campus is dedicated to Concordia's renowned Department of Communication Studies. It houses classrooms, seminar rooms, faculty offices, and research facilities supporting undergraduate and graduate programs in media studies, cultural studies, and communication theory. Concordia's communication programs are consistently ranked among the best in Canada.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "CJ",
@@ -3044,7 +3158,10 @@
             }
           ],
           "wayID": 47332007,
-          "description": "The Communication Studies and Journalism Building on the Loyola campus provides dedicated facilities for Concordia's journalism and media production programs. It features broadcast-quality production studios, editing suites, and classrooms for print, digital, and multimedia journalism. The building supports Concordia's mission to train professional communicators and journalists for the evolving media landscape."
+          "description": "The Communication Studies and Journalism Building on the Loyola campus provides dedicated facilities for Concordia's journalism and media production programs. It features broadcast-quality production studios, editing suites, and classrooms for print, digital, and multimedia journalism. The building supports Concordia's mission to train professional communicators and journalists for the evolving media landscape.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "DO",
@@ -3110,7 +3227,10 @@
             }
           ],
           "wayID": 129437736,
-          "description": "The Stinger Dome is the outdoor athletic dome on Concordia's Loyola campus. It serves as a year-round training and multi-sport facility for the Concordia Stingers varsity athletics teams, hosting practice sessions for football, soccer, and other sports requiring outdoor-style conditions regardless of season. The dome is also available to recreational sport programs and community events."
+          "description": "The Stinger Dome is the outdoor athletic dome on Concordia's Loyola campus. It serves as a year-round training and multi-sport facility for the Concordia Stingers varsity athletics teams, hosting practice sessions for football, soccer, and other sports requiring outdoor-style conditions regardless of season. The dome is also available to recreational sport programs and community events.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat–Sun: 08:00–20:00",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "FC",
@@ -3240,7 +3360,10 @@
             }
           ],
           "wayID": 11147332003,
-          "description": "The F.C. Smith Building on the Loyola campus is a multifunctional academic building housing classrooms, faculty offices, and laboratories for programs in the Faculty of Arts & Science. It serves as a key instructional facility on the Loyola campus, accommodating disciplines including philosophy, theology, and the social sciences historically rooted in Loyola's Jesuit educational tradition."
+          "description": "The F.C. Smith Building on the Loyola campus is a multifunctional academic building housing classrooms, faculty offices, and laboratories for programs in the Faculty of Arts & Science. It serves as a key instructional facility on the Loyola campus, accommodating disciplines including philosophy, theology, and the social sciences historically rooted in Loyola's Jesuit educational tradition.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "GE",
@@ -3294,7 +3417,10 @@
             }
           ],
           "wayID": 545014554,
-          "description": "The Centre for Structural and Functional Genomics (GE Building) is a cutting-edge research facility on the Loyola campus dedicated to genomics, proteomics, and bioinformatics. Home to internationally recognized researchers, the centre is equipped with advanced genomics instrumentation, high-throughput sequencing platforms, and computational biology infrastructure. It plays a lead role in Concordia's strategy to become a hub for synthetic biology and life sciences research in Canada."
+          "description": "The Centre for Structural and Functional Genomics (GE Building) is a cutting-edge research facility on the Loyola campus dedicated to genomics, proteomics, and bioinformatics. Home to internationally recognized researchers, the centre is equipped with advanced genomics instrumentation, high-throughput sequencing platforms, and computational biology infrastructure. It plays a lead role in Concordia's strategy to become a hub for synthetic biology and life sciences research in Canada.",
+          "openingHours": "Mon–Fri: 08:00–18:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "HA",
@@ -3384,7 +3510,10 @@
             }
           ],
           "wayID": 47331994,
-          "description": "Wing HA is a component of the main academic complex on Concordia's Loyola campus. It houses classrooms, faculty offices, and instructional labs serving programs in the arts, humanities, and social sciences. Wing HA is integrated with adjacent wings HB and HC to form a cohesive academic core at the heart of the Loyola campus."
+          "description": "Wing HA is a component of the main academic complex on Concordia's Loyola campus. It houses classrooms, faculty offices, and instructional labs serving programs in the arts, humanities, and social sciences. Wing HA is integrated with adjacent wings HB and HC to form a cohesive academic core at the heart of the Loyola campus.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "HB",
@@ -3498,7 +3627,10 @@
             }
           ],
           "wayID": 47331999,
-          "description": "Wing HB is part of the central academic wing complex on the Loyola campus. Alongside wings HA and HC, it provides classrooms, laboratory space, faculty offices, and student common areas. Wing HB supports a range of academic disciplines within arts, science, and communications, serving the daily instructional needs of the Loyola campus community."
+          "description": "Wing HB is part of the central academic wing complex on the Loyola campus. Alongside wings HA and HC, it provides classrooms, laboratory space, faculty offices, and student common areas. Wing HB supports a range of academic disciplines within arts, science, and communications, serving the daily instructional needs of the Loyola campus community.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "HC",
@@ -3548,7 +3680,10 @@
             }
           ],
           "wayID": 604324438,
-          "description": "Wing HC is one of three interconnected academic wings (HA, HB, HC) forming the instructional backbone of Concordia's Loyola campus. It contains classrooms, seminar rooms, and research offices for various departments. The layout of the wing complex encourages interdisciplinary interaction between students and faculty who share corridors and common spaces."
+          "description": "Wing HC is one of three interconnected academic wings (HA, HB, HC) forming the instructional backbone of Concordia's Loyola campus. It contains classrooms, seminar rooms, and research offices for various departments. The layout of the wing complex encourages interdisciplinary interaction between students and faculty who share corridors and common spaces.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "HU",
@@ -3610,7 +3745,10 @@
             }
           ],
           "wayID": 795012497,
-          "description": "The Applied Science Hub (HU Building) on the Loyola campus houses facilities for engineering, applied science, and technical research. It features specialized laboratories, prototyping workshops, and collaborative research spaces aligned with Concordia's applied science and engineering program offerings on the Loyola campus. The Hub supports both undergraduate instruction and graduate-level research projects."
+          "description": "The Applied Science Hub (HU Building) on the Loyola campus houses facilities for engineering, applied science, and technical research. It features specialized laboratories, prototyping workshops, and collaborative research spaces aligned with Concordia's applied science and engineering program offerings on the Loyola campus. The Hub supports both undergraduate instruction and graduate-level research projects.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "JR",
@@ -3684,7 +3822,10 @@
             }
           ],
           "wayID": 129437733,
-          "description": "The Jesuit Residence is a historic building on Concordia's Loyola campus that reflects the university's origins as a Jesuit institution. Originally built to house the Jesuit community that founded Loyola College, the building retains its historic residential and spiritual character and serves as a living reminder of the Catholic intellectual tradition that shaped Concordia's founding values."
+          "description": "The Jesuit Residence is a historic building on Concordia's Loyola campus that reflects the university's origins as a Jesuit institution. Originally built to house the Jesuit community that founded Loyola College, the building retains its historic residential and spiritual character and serves as a living reminder of the Catholic intellectual tradition that shaped Concordia's founding values.",
+          "openingHours": "Not publicly accessible",
+          "isWheelchairAccessible": false,
+          "hasTunnelAccess": false
         },
         {
           "code": "PC",
@@ -3714,7 +3855,10 @@
             }
           ],
           "wayID": 604019520,
-          "description": "The PERFORM Centre is a state-of-the-art preventive health and wellness research and clinical facility on the Loyola campus. Opened in 2010, it houses laboratories for exercise science, kinesiology, nutrition, and preventive medicine research. The centre includes a fully equipped fitness floor, clinical assessment rooms, and research labs open to Concordia students, faculty, and members of the public. It is a flagship facility for Concordia's health sciences research mission."
+          "description": "The PERFORM Centre is a state-of-the-art preventive health and wellness research and clinical facility on the Loyola campus. Opened in 2010, it houses laboratories for exercise science, kinesiology, nutrition, and preventive medicine research. The centre includes a fully equipped fitness floor, clinical assessment rooms, and research labs open to Concordia students, faculty, and members of the public. It is a flagship facility for Concordia's health sciences research mission.",
+          "openingHours": "Mon–Fri: 06:00–22:00\nSat–Sun: 08:00–20:00",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "PS",
@@ -3772,7 +3916,10 @@
             }
           ],
           "wayID": 47332006,
-          "description": "The Physical Services Building houses Concordia University's facilities management, physical plant operations, and maintenance departments for the Loyola campus. It supports the day-to-day operational functions that keep campus buildings, infrastructure, and grounds running efficiently, including heating, cooling, electrical, and custodial services."
+          "description": "The Physical Services Building houses Concordia University's facilities management, physical plant operations, and maintenance departments for the Loyola campus. It supports the day-to-day operational functions that keep campus buildings, infrastructure, and grounds running efficiently, including heating, cooling, electrical, and custodial services.",
+          "openingHours": "Mon–Fri: 08:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "PT",
@@ -3814,7 +3961,10 @@
             }
           ],
           "wayID": 604324443,
-          "description": "The Oscar Peterson Concert Hall is named in honour of Oscar Peterson, the legendary Montreal-born jazz pianist and global icon. Located on the Loyola campus, this concert hall hosts classical recitals, jazz concerts, student showcases, and community events. It serves as the home venue for Concordia's music programs and is a cultural landmark for the Loyola campus and the broader Notre-Dame-de-Grace community."
+          "description": "The Oscar Peterson Concert Hall is named in honour of Oscar Peterson, the legendary Montreal-born jazz pianist and global icon. Located on the Loyola campus, this concert hall hosts classical recitals, jazz concerts, student showcases, and community events. It serves as the home venue for Concordia's music programs and is a cultural landmark for the Loyola campus and the broader Notre-Dame-de-Grace community.",
+          "openingHours": "Event-based — check concordia.ca/events",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "PY",
@@ -3872,7 +4022,10 @@
             }
           ],
           "wayID": 604324454,
-          "description": "The PY Building on the Loyola campus provides academic offices, meeting rooms, and support facilities for various Concordia departments. It is part of the integrated academic infrastructure of the Loyola campus, supplementing the main wing complex with additional workspace for faculty, researchers, and administrative units."
+          "description": "The PY Building on the Loyola campus provides academic offices, meeting rooms, and support facilities for various Concordia departments. It is part of the integrated academic infrastructure of the Loyola campus, supplementing the main wing complex with additional workspace for faculty, researchers, and administrative units.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "RA",
@@ -3946,7 +4099,10 @@
             }
           ],
           "wayID": 47332005,
-          "description": "The RA Complex at 7200 Sherbrooke St. W. is Concordia's primary athletics and recreation facility on the Loyola campus. It houses the Ed Meagher Arena (home ice of the Concordia Stingers hockey teams), a full gymnasium, squash and racquetball courts, a swimming pool, and fitness facilities. The complex is the home of Concordia Stingers varsity competitions and is heavily used by intramural and recreational sports programs."
+          "description": "The RA Complex at 7200 Sherbrooke St. W. is Concordia's primary athletics and recreation facility on the Loyola campus. It houses the Ed Meagher Arena (home ice of the Concordia Stingers hockey teams), a full gymnasium, squash and racquetball courts, a swimming pool, and fitness facilities. The complex is the home of Concordia Stingers varsity competitions and is heavily used by intramural and recreational sports programs.",
+          "openingHours": "Mon–Sun: 06:00–22:00",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "RF",
@@ -4032,7 +4188,10 @@
             }
           ],
           "wayID": 604324455,
-          "description": "The Loyola Jesuit Hall and Conference Centre is a hospitality and conference facility on the Loyola campus. It offers meeting rooms, event spaces, and accommodation facilities, making it a venue for academic conferences, community events, and university gatherings. The building honours the Jesuit heritage of the Loyola campus and serves as a hub for intellectual and community engagement."
+          "description": "The Loyola Jesuit Hall and Conference Centre is a hospitality and conference facility on the Loyola campus. It offers meeting rooms, event spaces, and accommodation facilities, making it a venue for academic conferences, community events, and university gatherings. The building honours the Jesuit heritage of the Loyola campus and serves as a hub for intellectual and community engagement.",
+          "openingHours": "Mon–Fri: 08:00–17:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "SC",
@@ -4098,7 +4257,10 @@
             }
           ],
           "wayID": 47332009,
-          "description": "The Student Centre is the hub of student life on Concordia's Loyola campus. It houses student government offices, clubs and associations meeting spaces, the campus pub, food services, and informal lounges. The Student Centre organizes campus events, social programs, and extracurricular activities that connect Loyola students to campus life. It is managed in partnership with the Concordia Student Union and serves as the main gathering point for the Loyola campus community."
+          "description": "The Student Centre is the hub of student life on Concordia's Loyola campus. It houses student government offices, clubs and associations meeting spaces, the campus pub, food services, and informal lounges. The Student Centre organizes campus events, social programs, and extracurricular activities that connect Loyola students to campus life. It is managed in partnership with the Concordia Student Union and serves as the main gathering point for the Loyola campus community.",
+          "openingHours": "Mon–Fri: 09:00–21:00\nSat: 12:00–17:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "SH",
@@ -4124,7 +4286,10 @@
             }
           ],
           "wayID": 352622186,
-          "description": "The SH Building on the Loyola campus provides additional academic and administrative space for university departments. It is part of the campus infrastructure that supplements the main academic wings, offering offices, meeting rooms, and instructional space for programs and services based at the Loyola campus."
+          "description": "The SH Building on the Loyola campus provides additional academic and administrative space for university departments. It is part of the campus infrastructure that supplements the main academic wings, offering offices, meeting rooms, and instructional space for programs and services based at the Loyola campus.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "SI",
@@ -4266,7 +4431,10 @@
             }
           ],
           "wayID": 47331997,
-          "description": "The SI Building at 4455 West Broadway St. is a Concordia University facility located near the Loyola campus perimeter. It houses administrative offices, research groups, or support services that benefit from proximity to the main campus while operating in a more self-contained setting."
+          "description": "The SI Building at 4455 West Broadway St. is a Concordia University facility located near the Loyola campus perimeter. It houses administrative offices, research groups, or support services that benefit from proximity to the main campus while operating in a more self-contained setting.",
+          "openingHours": "Mon–Fri: 08:00–18:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "SP",
@@ -4472,7 +4640,10 @@
             }
           ],
           "wayID": 47331993,
-          "description": "The Science Complex is the central hub for natural sciences on Concordia's Loyola campus. It houses the Departments of Biology, Chemistry, Physics, Mathematics, and Statistics, along with their associated teaching and research laboratories. The complex contains fully equipped wet labs, instrumentation suites, computational facilities, and lecture halls dedicated to undergraduate and graduate science education. It is integral to Concordia's strong reputation in the physical and life sciences."
+          "description": "The Science Complex is the central hub for natural sciences on Concordia's Loyola campus. It houses the Departments of Biology, Chemistry, Physics, Mathematics, and Statistics, along with their associated teaching and research laboratories. The complex contains fully equipped wet labs, instrumentation suites, computational facilities, and lecture halls dedicated to undergraduate and graduate science education. It is integral to Concordia's strong reputation in the physical and life sciences.",
+          "openingHours": "Mon–Fri: 07:00–23:00\nSat: 08:00–18:00\nSun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "TA",
@@ -4498,7 +4669,10 @@
             }
           ],
           "wayID": 352622559,
-          "description": "The Terrebonne Building at 7079 de Terrebonne St. is a Concordia-owned property adjacent to the Loyola campus boundary. It provides supplementary office and operational space for university functions associated with the Loyola campus that require a separate facility from the main campus buildings."
+          "description": "The Terrebonne Building at 7079 de Terrebonne St. is a Concordia-owned property adjacent to the Loyola campus boundary. It provides supplementary office and operational space for university functions associated with the Loyola campus that require a separate facility from the main campus buildings.",
+          "openingHours": "Mon–Fri: 08:00–18:00\nSat–Sun: Closed",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "VL",
@@ -4588,7 +4762,10 @@
             }
           ],
           "wayID": 1449641781,
-          "description": "Vanier Library is the main library on Concordia's Loyola campus, serving students and researchers across all disciplines. The library provides access to print and digital collections, group study rooms, individual study carrels, research support services, and subject-specialist librarians. As a comprehensive academic library, Vanier Library is an essential resource for undergraduate, graduate, and faculty research at the Loyola campus."
+          "description": "Vanier Library is the main library on Concordia's Loyola campus, serving students and researchers across all disciplines. The library provides access to print and digital collections, group study rooms, individual study carrels, research support services, and subject-specialist librarians. As a comprehensive academic library, Vanier Library is an essential resource for undergraduate, graduate, and faculty research at the Loyola campus.",
+          "openingHours": "Mon–Thu: 08:00–22:00\nFri: 08:00–18:00\nSat–Sun: 10:00–18:00",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         },
         {
           "code": "VE",
@@ -4622,7 +4799,10 @@
             }
           ],
           "wayID": 604324441,
-          "description": "The Vanier Extension is an annex connected to the Vanier Library on the Loyola campus. It provides additional study space, library collections overflow, and supplementary facilities that extend the capacity of the main Vanier Library building to better serve the growing student and research community at the Loyola campus."
+          "description": "The Vanier Extension is an annex connected to the Vanier Library on the Loyola campus. It provides additional study space, library collections overflow, and supplementary facilities that extend the capacity of the main Vanier Library building to better serve the growing student and research community at the Loyola campus.",
+          "openingHours": "Mon–Thu: 08:00–22:00\nFri: 08:00–18:00\nSat–Sun: 10:00–18:00",
+          "isWheelchairAccessible": true,
+          "hasTunnelAccess": false
         }
       ],
       "center": {

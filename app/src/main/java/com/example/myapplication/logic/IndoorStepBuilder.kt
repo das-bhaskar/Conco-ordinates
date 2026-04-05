@@ -126,7 +126,7 @@ class IndoorStepBuilder(
     /** Rewrites the last step's instruction to the arrival message. */
     private fun markArrival(steps: MutableList<NavStep>, destinationLabel: String) {
         if (steps.isNotEmpty()) {
-            val last = steps.removeLast()
+            val last = steps.removeAt(steps.lastIndex)
             steps.add(last.copy(instruction = "You have arrived at $destinationLabel", isLast = true))
         }
     }

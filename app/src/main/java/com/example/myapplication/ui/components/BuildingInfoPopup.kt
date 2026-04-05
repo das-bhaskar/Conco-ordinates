@@ -1,5 +1,7 @@
 package com.example.myapplication.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -18,10 +20,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.example.myapplication.data.Building
 import com.example.myapplication.ui.models.BuildingUiState
+import com.example.myapplication.ui.theme.ConcordiaGreen
 import com.example.myapplication.ui.theme.ConcordiaMaroon
 import com.example.myapplication.ui.theme.concordiaGold
 import com.example.myapplication.ui.theme.faintMaroon
@@ -34,145 +36,45 @@ fun BuildingInfoPopup(
     onDirectionsClick: () -> Unit,
     onIndoorMapClick:  () -> Unit = {}
 ) {
-    var showInfoDialog by remember { mutableStateOf(false) }
-
-    if (showInfoDialog) {
-        Dialog(onDismissRequest = { showInfoDialog = false }) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color.White)
-            ) {
-                // ── Maroon gradient header ────────────────────────────────────
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(ConcordiaMaroon)
-                        .padding(horizontal = 20.dp, vertical = 18.dp)
-                ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        // Building code badge
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(concordiaGold.copy(alpha = 0.25f))
-                                .padding(horizontal = 8.dp, vertical = 3.dp)
-                        ) {
-                            Text(
-                                text       = building.code,
-                                color      = concordiaGold,
-                                fontWeight = FontWeight.Bold,
-                                fontSize   = 11.sp,
-                                letterSpacing = 1.5.sp
-                            )
-                        }
-                        Text(
-                            text       = building.name,
-                            color      = Color.White,
-                            style      = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            lineHeight = 26.sp
-                        )
-                        // Gold accent divider
-                        Box(
-                            modifier = Modifier
-                                .width(48.dp)
-                                .height(3.dp)
-                                .clip(RoundedCornerShape(2.dp))
-                                .background(concordiaGold)
-                        )
-                    }
-                }
-
-                // ── Scrollable body ───────────────────────────────────────────
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    // Description section
-                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Text(
-                            text       = "About",
-                            color      = ConcordiaMaroon,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize   = 11.sp,
-                            letterSpacing = 1.sp
-                        )
-                        Text(
-                            text  = building.description ?: "No description available.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color(0xFF2C2C2C),
-                            lineHeight = 22.sp
-                        )
-                    }
-
-                    HorizontalDivider(color = faintMaroon, thickness = 1.dp)
-
-                    // Address row
-                    Row(
-                        verticalAlignment    = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Box(
-                            modifier          = Modifier
-                                .size(34.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(faintMaroon),
-                            contentAlignment  = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector        = Icons.Default.LocationOn,
-                                contentDescription = null,
-                                tint               = ConcordiaMaroon,
-                                modifier           = Modifier.size(18.dp)
-                            )
-                        }
-                        Text(
-                            text  = building.address,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFF555555)
-                        )
-                    }
-
-                    // Close button
-                    Button(
-                        onClick  = { showInfoDialog = false },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape    = RoundedCornerShape(12.dp),
-                        colors   = ButtonDefaults.buttonColors(
-                            containerColor = ConcordiaMaroon,
-                            contentColor   = Color.White
-                        )
-                    ) {
-                        Text("Close", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
-                    }
-                }
-            }
-        }
-    }
+    var showInfo by remember { mutableStateOf(false) }
 
     Box(
         modifier         = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter
     ) {
         Card(
-            modifier  = Modifier.fillMaxWidth().padding(12.dp),
+            modifier  = Modifier.fillMaxWidth().padding(12.dp).animateContentSize(),
             shape     = RoundedCornerShape(24.dp),
             colors    = CardDefaults.cardColors(containerColor = Color.White),
             elevation = CardDefaults.cardElevation(12.dp)
         ) {
             Column {
-                AsyncImage(
-                    model              = uiState.imageUrl,
-                    contentDescription = null,
-                    modifier           = Modifier.fillMaxWidth().height(180.dp),
-                    contentScale       = ContentScale.Crop
-                )
+                Box {
+                    AsyncImage(
+                        model              = uiState.imageUrl,
+                        contentDescription = null,
+                        modifier           = Modifier.fillMaxWidth().height(180.dp),
+                        contentScale       = ContentScale.Crop
+                    )
+                    IconButton(
+                        onClick  = onDismiss,
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .size(32.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(Color.Black.copy(alpha = 0.45f))
+                    ) {
+                        Icon(
+                            imageVector        = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint               = Color.White,
+                            modifier           = Modifier.size(18.dp)
+                        )
+                    }
+                }
                 Column(
-                    modifier            = Modifier.padding(16.dp),
+                    modifier            = Modifier.verticalScroll(rememberScrollState()).padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(text = building.name, style = MaterialTheme.typography.headlineSmall)
@@ -185,7 +87,11 @@ fun BuildingInfoPopup(
                         if (uiState.hasIndoorMap) {
                             ActionButton(Icons.Default.Map, "Indoor", onIndoorMapClick)
                         }
-                        ActionButton(Icons.Default.Info,    "Info")  { showInfoDialog = true }
+                        ActionButton(
+                            icon    = if (showInfo) Icons.Default.KeyboardArrowDown else Icons.Default.Info,
+                            label   = "Info",
+                            onClick = { showInfo = !showInfo }
+                        )
                         ActionButton(Icons.Default.PinDrop, "PIN")   {}
                         ActionButton(Icons.Default.Share,   "Share") {}
                     }
@@ -205,6 +111,138 @@ fun BuildingInfoPopup(
                             text  = uiState.address ?: "Address loading...",
                             style = MaterialTheme.typography.bodyMedium
                         )
+                    }
+
+                    // ── Inline info panel ─────────────────────────────────────────
+                    AnimatedVisibility(visible = showInfo) {
+                        Column(
+                            modifier            = Modifier.padding(top = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            HorizontalDivider(color = faintMaroon, thickness = 1.dp)
+
+                            // About
+                            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                                Text(
+                                    text          = "About",
+                                    color         = ConcordiaMaroon,
+                                    fontWeight    = FontWeight.SemiBold,
+                                    fontSize      = 11.sp,
+                                    letterSpacing = 1.sp
+                                )
+                                Text(
+                                    text       = building.description ?: "No description available.",
+                                    style      = MaterialTheme.typography.bodyMedium,
+                                    color      = Color(0xFF2C2C2C),
+                                    lineHeight = 22.sp
+                                )
+                            }
+
+                            HorizontalDivider(color = faintMaroon, thickness = 1.dp)
+
+                            // Opening hours
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    text          = "Opening Hours",
+                                    color         = ConcordiaMaroon,
+                                    fontWeight    = FontWeight.SemiBold,
+                                    fontSize      = 11.sp,
+                                    letterSpacing = 1.sp
+                                )
+                                Row(
+                                    verticalAlignment     = Alignment.Top,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    Box(
+                                        modifier         = Modifier
+                                            .size(28.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(faintMaroon),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector        = Icons.Default.Schedule,
+                                            contentDescription = null,
+                                            tint               = ConcordiaMaroon,
+                                            modifier           = Modifier.size(16.dp)
+                                        )
+                                    }
+                                    Text(
+                                        text       = building.openingHours ?: "Hours not available",
+                                        style      = MaterialTheme.typography.bodySmall,
+                                        color      = Color(0xFF555555),
+                                        lineHeight = 20.sp
+                                    )
+                                }
+                            }
+
+                            HorizontalDivider(color = faintMaroon, thickness = 1.dp)
+
+                            // Access
+                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(
+                                    text          = "Access",
+                                    color         = ConcordiaMaroon,
+                                    fontWeight    = FontWeight.SemiBold,
+                                    fontSize      = 11.sp,
+                                    letterSpacing = 1.sp
+                                )
+                                val wcColor = if (building.isWheelchairAccessible) ConcordiaGreen else Color(0xFF9E9E9E)
+                                Row(
+                                    modifier              = Modifier.fillMaxWidth(),
+                                    verticalAlignment     = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Box(
+                                        modifier         = Modifier
+                                            .size(28.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(wcColor.copy(alpha = 0.12f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector        = Icons.Default.Accessible,
+                                            contentDescription = null,
+                                            tint               = wcColor,
+                                            modifier           = Modifier.size(16.dp)
+                                        )
+                                    }
+                                    Text(
+                                        text       = if (building.isWheelchairAccessible) "Wheelchair Accessible" else "Limited Accessibility",
+                                        style      = MaterialTheme.typography.bodySmall,
+                                        color      = wcColor,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                                val tnColor = if (building.hasTunnelAccess) ConcordiaMaroon else Color(0xFF9E9E9E)
+                                Row(
+                                    modifier              = Modifier.fillMaxWidth(),
+                                    verticalAlignment     = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Box(
+                                        modifier         = Modifier
+                                            .size(28.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(tnColor.copy(alpha = 0.12f)),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector        = Icons.Default.Subway,
+                                            contentDescription = null,
+                                            tint               = tnColor,
+                                            modifier           = Modifier.size(16.dp)
+                                        )
+                                    }
+                                    Text(
+                                        text       = if (building.hasTunnelAccess) "Underground Tunnel Connected" else "No Underground Tunnel",
+                                        style      = MaterialTheme.typography.bodySmall,
+                                        color      = tnColor,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

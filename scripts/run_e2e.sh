@@ -12,7 +12,8 @@ REPORT_DIR="${REPORT_DIR:-e2e-report}"
 TEST_OUTPUT_DIR="${TEST_OUTPUT_DIR:-e2e-test-output}"
 
 FLOWS=(
-  "us_3_1"
+  "us_5_1"
+  "us_5_2"
 
 )
 

@@ -1,0 +1,45 @@
+
+appId: com.example.myapplication
+---
+- setLocation:
+    latitude: 45.4971
+    longitude: -73.5788
+- launchApp:
+    clearState: true
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+- tapOn:
+    text: "SGW"
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn:
+    point: "81%, 75%"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- assertVisible: "Nearby Places"
+
+- tapOn: ".*Cafe.*"
+- tapOn: ".*Restaurant.*"
+- tapOn: ".*Pharmacy.*"
+
+- swipe:
+    start: 90%, 49%
+    end: 20%, 49%
+- tapOn: ".*Grocery.*"
+- swipe:
+    start: 90%, 49%
+    end: 20%, 49%
+- tapOn: ".*Gym.*"
+- swipe:
+    start: 90%, 49%
+    end: 20%, 49%
+- tapOn: ".*ATM.*"

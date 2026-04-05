@@ -27,48 +27,18 @@ appId: com.example.myapplication
 - waitForAnimationToEnd:
     timeout: 10000
 
+- tapOn:
+    text: "concoordinates@gmail.com"
 - waitForAnimationToEnd:
     timeout: 5000
-
-- tapOn:
-    text: "SKIP"
-- waitForAnimationToEnd:
-    timeout: 5000
-
-- tapOn:
-    id: "identifierId"
-- waitForAnimationToEnd:
-    timeout: 2000
-- inputText: "concoordinates@gmail.com"
-- tapOn:
-    text: "NEXT"
-- tapOn: "Enter your password"
-- waitForAnimationToEnd:
-    timeout: 2000
-- inputText: "A12345678?"
-- tapOn:
-    text: "NEXT"
-- waitForAnimationToEnd:
-    timeout: 2000
-- tapOn:
-    text: "I agree"
-- waitForAnimationToEnd:
-    timeout: 20000
-
-- assertVisible:
-    text: "Choose a Calendar"
-- assertVisible:
-    text: "Map"
-- assertVisible:
-    text: "Schedule"
 
 - tapOn:
     text: "concoordinates@gmail.com"
 - waitForAnimationToEnd:
-    timeout: 10000
+    timeout: 5000
 
 - tapOn:
-    text: "SOEN 345 Lecture"
+    text: "SOEN 345 Lab"
     index: 1
 - waitForAnimationToEnd:
     timeout: 2000
@@ -97,8 +67,15 @@ appId: com.example.myapplication
 - assertVisible: "Shuttle"
 - assertVisible:
     text: "Your position"
-
-  # TODO: Add specific text for room destination
-
 - assertVisible:
     text: "Start"
+
+- tapOn:
+    text: "Start"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "END TRIP"
+- waitForAnimationToEnd:
+    timeout: 5000

@@ -42,13 +42,11 @@ appId: com.example.myapplication
 - tapOn: ".*Gym.*"
 
 - repeat:
-    times: 4
+    times: 2
     commands:
       - swipe:
-          start: 98%, 49%
-          end: 5%, 49%
-      - waitForAnimationToEnd:
-          timeout: 1500
+          start: 90%, 49%
+          end: 20%, 49%
 
 - assertVisible: ".*ATM.*"
 - tapOn: ".*ATM.*"

@@ -64,5 +64,45 @@ appId: com.example.myapplication
     timeout: 5000
 
 - setLocation:
-    latitude: 45.4972
-    longitude: -73.5789
+    latitude: 45.457983
+    longitude: -73.639798
+- waitForAnimationToEnd:
+    timeout: 10000
+
+- tapOn:
+    text: "🚪  CC West Entrance"
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Yes, I've Arrived!"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    text: "Destination Reached"
+- tapOn:
+    text: "Done"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "EXIT"
+- waitForAnimationToEnd:
+    timeout: 5000

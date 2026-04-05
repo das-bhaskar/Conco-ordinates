@@ -1,211 +1,192 @@
 package com.example.myapplication.data.indoor
 
 import com.google.android.gms.maps.model.LatLng
-import org.junit.Assert.*
-import org.junit.Before
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/**
- * Unit tests for [BuildingEntrances].
- *
- * Strategy:
- * - [parseJson] is private but pure — tested via reflection without any Context.
- * - [forBuilding] and [nearest] are tested by injecting test data via the
- *   same reflection approach used in IndoorJourneyHandlerTest.
- * - [initialize] early-exit branch is tested by injecting non-empty data first.
- */
 class BuildingEntrancesTest {
 
-    // ── helpers ───────────────────────────────────────────────────────────────
-
-    private fun injectData(data: Map<String, List<BuildingEntrance>>) {
-        val field = BuildingEntrances::class.java.getDeclaredField("data")
-        field.isAccessible = true
-        field.set(BuildingEntrances.default, data)
-    }
-
-    private fun clearData() = injectData(emptyMap())
-
-    @Before
-    fun setup() = clearData()
-
-    // ── parseJson ─────────────────────────────────────────────────────────────
-    // Note: parseJson uses org.json.JSONObject which behaves differently in the
-    // JVM unit test stub vs the Android runtime. These tests verify the logic
-    // works correctly in the Android environment via integration tests.
-    // The forBuilding/nearest tests below cover the public API with injected data.
-
-
-
-    // ── forBuilding ───────────────────────────────────────────────────────────
-
     @Test
-    fun `forBuilding returns entrances for known building`() {
-        val entrance = BuildingEntrance("node-H-1-exit-1-1", "H South Entrance", LatLng(45.49726, -73.57879), 1)
-        injectData(mapOf("H" to listOf(entrance)))
+    fun `forBuilding should be case insensitive`() {
+        val entrance = BuildingEntrance(
+            nodeId = "n1",
+            label = "Main Entrance",
+            gps = LatLng(45.4971, -73.5788),
+            floor = 2
+        )
 
-        val result = BuildingEntrances.forBuilding("H")
-        assertEquals(1, result.size)
-        assertEquals("node-H-1-exit-1-1", result[0].nodeId)
+        val sut = BuildingEntrances(
+            mapOf("CC" to listOf(entrance))
+        )
+
+        val resultLower = sut.forBuilding("cc")
+        val resultMixed = sut.forBuilding("Cc")
+        val resultUpper = sut.forBuilding("CC")
+
+        assertEquals(1, resultLower.size)
+        assertEquals(1, resultMixed.size)
+        assertEquals(1, resultUpper.size)
+        assertEquals("n1", resultLower.first().nodeId)
+        assertEquals("Main Entrance", resultLower.first().label)
     }
 
     @Test
-    fun `forBuilding is case insensitive`() {
-        val entrance = BuildingEntrance("node-H-1-exit-1-1", "H South Entrance", LatLng(45.49726, -73.57879), 1)
-        injectData(mapOf("H" to listOf(entrance)))
+    fun `forBuilding should return empty list when building does not exist`() {
+        val sut = BuildingEntrances()
 
-        assertFalse(BuildingEntrances.forBuilding("h").isEmpty())
-        assertFalse(BuildingEntrances.forBuilding("H").isEmpty())
+        val result = sut.forBuilding("XYZ")
+
+        assertTrue(result.isEmpty())
     }
 
     @Test
-    fun `forBuilding returns empty list for unknown building`() {
-        injectData(mapOf("H" to listOf(BuildingEntrance("n1", "L", LatLng(45.497, -73.578)))))
-        assertTrue(BuildingEntrances.forBuilding("UNKNOWN").isEmpty())
+    fun `nearest should return closest entrance for a building`() {
+        val farEntrance = BuildingEntrance(
+            nodeId = "far",
+            label = "Far Entrance",
+            gps = LatLng(45.5010, -73.5700),
+            floor = 1
+        )
+        val nearEntrance = BuildingEntrance(
+            nodeId = "near",
+            label = "Near Entrance",
+            gps = LatLng(45.4975, -73.5790),
+            floor = 2
+        )
+
+        val sut = BuildingEntrances(
+            mapOf("H" to listOf(farEntrance, nearEntrance))
+        )
+
+        val userLocation = LatLng(45.4974, -73.5791)
+
+        val result = sut.nearest("h", userLocation)
+
+        assertEquals("near", result?.nodeId)
+        assertEquals("Near Entrance", result?.label)
+        assertEquals(2, result?.floor)
     }
 
     @Test
-    fun `forBuilding returns empty list when data is empty`() {
-        assertTrue(BuildingEntrances.forBuilding("H").isEmpty())
-    }
+    fun `nearest should return null when building has no entrances`() {
+        val sut = BuildingEntrances()
 
-    // ── nearest ───────────────────────────────────────────────────────────────
+        val result = sut.nearest("CC", LatLng(45.497, -73.579))
 
-    @Test
-    fun `nearest returns closest entrance by Haversine distance`() {
-        val south = BuildingEntrance("node-H-1-exit-1-1", "H South Entrance", LatLng(45.49726, -73.57879), 1)
-        val east  = BuildingEntrance("node-H-1-exit-1-2", "H East Entrance",  LatLng(45.49751, -73.57820), 1)
-        injectData(mapOf("H" to listOf(south, east)))
-
-        // User very close to south entrance
-        val user   = LatLng(45.49727, -73.57880)
-        val result = BuildingEntrances.nearest("H", user)
-        assertNotNull(result)
-        assertEquals("node-H-1-exit-1-1", result!!.nodeId)
+        assertNull(result)
     }
 
     @Test
-    fun `nearest returns null when no entrances for building`() {
-        assertNull(BuildingEntrances.nearest("UNKNOWN", LatLng(45.497, -73.579)))
+    fun `parseJson should parse valid json and uppercase building codes`() {
+        val sut = BuildingEntrances()
+
+        val json = """
+            {
+              "h": [
+                {
+                  "nodeId": "h1",
+                  "label": "Hall Main",
+                  "lat": 45.4971,
+                  "lng": -73.5788,
+                  "floor": 2
+                },
+                {
+                  "nodeId": "h2",
+                  "label": "Hall Side",
+                  "lat": 45.4972,
+                  "lng": -73.5789
+                }
+              ],
+              "cc": [
+                {
+                  "nodeId": "cc1",
+                  "label": "CC Front",
+                  "lat": 45.4950,
+                  "lng": -73.5770,
+                  "floor": 1
+                }
+              ]
+            }
+        """.trimIndent()
+
+        val result = sut.parseJson(json)
+
+        assertEquals(setOf("H", "CC"), result.keys)
+
+        val hallEntrances = result["H"]!!
+        assertEquals(2, hallEntrances.size)
+
+        assertEquals("h1", hallEntrances[0].nodeId)
+        assertEquals("Hall Main", hallEntrances[0].label)
+        assertEquals(45.4971, hallEntrances[0].gps.latitude, 0.000001)
+        assertEquals(-73.5788, hallEntrances[0].gps.longitude, 0.000001)
+        assertEquals(2, hallEntrances[0].floor)
+
+        assertEquals("h2", hallEntrances[1].nodeId)
+        assertEquals("Hall Side", hallEntrances[1].label)
+        assertEquals(45.4972, hallEntrances[1].gps.latitude, 0.000001)
+        assertEquals(-73.5789, hallEntrances[1].gps.longitude, 0.000001)
+        assertEquals(1, hallEntrances[1].floor) // default floor
     }
 
     @Test
-    fun `nearest returns single entrance when only one exists`() {
-        val only = BuildingEntrance("node-MB-1-exit1", "MB Main Entrance", LatLng(45.49584, -73.57880), 1)
-        injectData(mapOf("MB" to listOf(only)))
-        assertEquals("node-MB-1-exit1", BuildingEntrances.nearest("MB", LatLng(0.0, 0.0))!!.nodeId)
-    }
+    fun `parseJson should use default values for missing fields`() {
+        val sut = BuildingEntrances()
 
-    // ── initialize early-exit ─────────────────────────────────────────────────
+        val json = """
+            {
+              "EV": [
+                {
+                }
+              ]
+            }
+        """.trimIndent()
 
-    @Test
-    fun `initialize skips loading when data already injected`() {
-        // Inject data to simulate already-initialised state
-        val existing = BuildingEntrance("existing", "E", LatLng(45.0, -73.0))
-        injectData(mapOf("H" to listOf(existing)))
+        val result = sut.parseJson(json)
 
-        // initialize with a mock context that would fail if called
-        val mockCtx = org.mockito.kotlin.mock<android.content.Context>()
-        BuildingEntrances.initialize(mockCtx)
+        val entrances = result["EV"]!!
+        assertEquals(1, entrances.size)
 
-        // Data should still be our injected data — initialize() returned early
-        assertEquals("existing", BuildingEntrances.forBuilding("H").firstOrNull()?.nodeId)
-    }
-
-    // ── BuildingEntrance data class ───────────────────────────────────────────
-
-    @Test
-    fun `BuildingEntrance data class equality and defaults`() {
-        val e1 = BuildingEntrance("n1", "Label", LatLng(45.0, -73.0))
-        val e2 = e1.copy()
-        assertEquals(e1, e2)
-        assertEquals(1, e1.floor) // default floor
-        assertNotEquals(e1, e1.copy(nodeId = "n2"))
-        assertNotNull(e1.toString())
-        assertEquals(e1.hashCode(), e2.hashCode())
+        val entrance = entrances.first()
+        assertEquals("", entrance.nodeId)
+        assertEquals("", entrance.label)
+        assertEquals(0.0, entrance.gps.latitude, 0.000001)
+        assertEquals(0.0, entrance.gps.longitude, 0.000001)
+        assertEquals(1, entrance.floor)
     }
 
     @Test
-    fun `BuildingEntrance with explicit floor`() {
-        val e = BuildingEntrance("n1", "Label", LatLng(45.0, -73.0), floor = 8)
-        assertEquals(8, e.floor)
-    }
+    fun `parseJson should ignore blank building codes and non array values`() {
+        val sut = BuildingEntrances()
 
-    @Test
-    fun `forBuilding returns all entrances for building with multiple`() {
-        val e1 = BuildingEntrance("n1", "North", LatLng(45.497, -73.578), 1)
-        val e2 = BuildingEntrance("n2", "South", LatLng(45.496, -73.578), 1)
-        val e3 = BuildingEntrance("n3", "East",  LatLng(45.497, -73.577), 1)
-        injectData(mapOf("H" to listOf(e1, e2, e3)))
+        val json = """
+            {
+              "": [
+                {
+                  "nodeId": "bad",
+                  "label": "Should be ignored",
+                  "lat": 1.0,
+                  "lng": 2.0
+                }
+              ],
+              "H": "not_an_array",
+              "MB": [
+                {
+                  "nodeId": "mb1",
+                  "label": "MB Entrance",
+                  "lat": 45.1,
+                  "lng": -73.1
+                }
+              ]
+            }
+        """.trimIndent()
 
-        val result = BuildingEntrances.forBuilding("H")
-        assertEquals(3, result.size)
-    }
+        val result = sut.parseJson(json)
 
-    @Test
-    fun `nearest picks entrance closest to user among three options`() {
-        val far    = BuildingEntrance("far",   "Far",   LatLng(45.500, -73.600), 1)
-        val mid    = BuildingEntrance("mid",   "Mid",   LatLng(45.498, -73.579), 1)
-        val close  = BuildingEntrance("close", "Close", LatLng(45.4972, -73.5788), 1)
-        injectData(mapOf("H" to listOf(far, mid, close)))
-
-        val user   = LatLng(45.4973, -73.5787)
-        val result = BuildingEntrances.nearest("H", user)
-        assertEquals("close", result!!.nodeId)
-    }
-
-    @Test
-    fun `nearest returns null for building with empty entrance list`() {
-        injectData(mapOf("H" to emptyList()))
-        assertNull(BuildingEntrances.nearest("H", LatLng(45.0, -73.0)))
-    }
-
-    @Test
-    fun `forBuilding handles multiple buildings independently`() {
-        val hEntrance  = BuildingEntrance("h1",  "H South",  LatLng(45.497, -73.578))
-        val ccEntrance = BuildingEntrance("cc1", "CC West",  LatLng(45.458, -73.640))
-        injectData(mapOf("H" to listOf(hEntrance), "CC" to listOf(ccEntrance)))
-
-        assertEquals(1, BuildingEntrances.forBuilding("H").size)
-        assertEquals(1, BuildingEntrances.forBuilding("CC").size)
-        assertEquals("h1",  BuildingEntrances.forBuilding("H").first().nodeId)
-        assertEquals("cc1", BuildingEntrances.forBuilding("CC").first().nodeId)
-    }
-
-    // ── BuildingEntrances class instance (DI path) ────────────────────────────
-
-    @Test
-    fun `BuildingEntrances class instance forBuilding works independently`() {
-        val entrance = BuildingEntrance("n-inst", "Instance Entrance", LatLng(45.0, -73.0))
-        val instance = BuildingEntrances(mapOf("H" to listOf(entrance)))
-        assertEquals(1, instance.forBuilding("H").size)
-        assertEquals("n-inst", instance.forBuilding("H").first().nodeId)
-        assertTrue(instance.forBuilding("CC").isEmpty())
-    }
-
-    @Test
-    fun `BuildingEntrances class instance nearest works`() {
-        val e1 = BuildingEntrance("near", "Near", LatLng(45.497, -73.578))
-        val e2 = BuildingEntrance("far",  "Far",  LatLng(45.500, -73.600))
-        val instance = BuildingEntrances(mapOf("H" to listOf(e1, e2)))
-        val result = instance.nearest("H", LatLng(45.497, -73.578))
-        assertEquals("near", result!!.nodeId)
-    }
-
-    @Test
-    fun `BuildingEntrances empty constructor returns empty for any building`() {
-        val instance = BuildingEntrances()
-        assertTrue(instance.forBuilding("H").isEmpty())
-        assertNull(instance.nearest("H", LatLng(45.0, -73.0)))
-    }
-
-    @Test
-    fun `companion default delegates to singleton instance`() {
-        val e = BuildingEntrance("del-n", "Delegated", LatLng(45.0, -73.0))
-        injectData(mapOf("H" to listOf(e)))
-        // companion forBuilding delegates to default
-        assertEquals("del-n", BuildingEntrances.forBuilding("H").first().nodeId)
-        // companion nearest delegates to default
-        assertNotNull(BuildingEntrances.nearest("H", LatLng(45.0, -73.0)))
+        assertEquals(setOf("MB"), result.keys)
+        assertEquals(1, result["MB"]!!.size)
+        assertEquals("mb1", result["MB"]!!.first().nodeId)
     }
 }

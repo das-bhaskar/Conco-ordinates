@@ -1,78 +1,216 @@
 package com.example.myapplication.logic
 
+import android.accounts.Account
 import android.content.Context
 import android.content.Intent
+import com.example.myapplication.telemetry.CrashReporter
+import com.google.android.gms.auth.GoogleAuthUtil
+import com.google.android.gms.auth.UserRecoverableAuthException
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import io.mockk.MockKAnnotations
+import io.mockk.clearAllMocks
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.mockkStatic
+import io.mockk.unmockkAll
+import io.mockk.verify
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
-import org.junit.Before
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
-import org.mockito.ArgumentMatchers.any
-import org.mockito.kotlin.*
+import java.io.IOException
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AuthRepositoryTest {
 
-    private val mockContext: Context = mock()
-    private val mockSignInClient: GoogleSignInClient = mock()
-    private val mockTask: Task<Void> = mock()
+    private lateinit var context: Context
+    private lateinit var signInClient: GoogleSignInClient
+    private lateinit var dispatchers: DispatcherProvider
+    private lateinit var repository: AuthRepository
 
-    private val testDispatchers = object : DispatcherProvider {
-        override val main = kotlinx.coroutines.Dispatchers.Unconfined
-        override val io = kotlinx.coroutines.Dispatchers.Unconfined
-        override val default = kotlinx.coroutines.Dispatchers.Unconfined
-    }
+    @org.junit.Before
+    fun setUp() {
+        MockKAnnotations.init(this, relaxUnitFun = true)
 
-    private lateinit var authRepository: AuthRepository
+        context = mockk(relaxed = true)
+        signInClient = mockk(relaxed = true)
 
-    @Before
-    fun setup() {
-        authRepository = AuthRepository(
-            context = mockContext,
-            signInClient = mockSignInClient,
-            dispatchers = testDispatchers
+        dispatchers = object : DispatcherProvider {
+            override val main = Dispatchers.Unconfined
+            override val io = Dispatchers.Unconfined
+            override val default = Dispatchers.Unconfined
+        }
+
+        mockkStatic(GoogleSignIn::class)
+        mockkStatic(GoogleAuthUtil::class)
+        mockkObject(CrashReporter)
+
+        every { CrashReporter.recordNonFatal(any(), any()) } returns Unit
+
+        repository = AuthRepository(
+            context = context,
+            signInClient = signInClient,
+            dispatchers = dispatchers
         )
     }
 
-    @Test
-    fun `signOut calls client and triggers callback`() {
-        // 1. Setup the Task mock
-        whenever(mockSignInClient.signOut()).thenReturn(mockTask)
-
-        // 2. Capture the listener and force it to run
-        whenever(mockTask.addOnCompleteListener(any())).thenAnswer {
-            val listener = it.arguments[0] as OnCompleteListener<Void>
-            listener.onComplete(mockTask)
-            mockTask
-        }
-
-        var callbackCalled = false
-        authRepository.signOut { callbackCalled = true }
-
-        assertTrue("Callback should be triggered after signOut", callbackCalled)
-        verify(mockSignInClient).signOut()
+    @After
+    fun tearDown() {
+        clearAllMocks()
+        unmockkAll()
     }
 
     @Test
-    fun `revokeAndSignIn calls revoke and then provides intent`() {
-        whenever(mockSignInClient.revokeAccess()).thenReturn(mockTask)
-        val expectedIntent = mock<Intent>()
-        whenever(mockSignInClient.signInIntent).thenReturn(expectedIntent)
+    fun `buildSignInIntent returns sign in client intent`() {
+        val expectedIntent = Intent("test.signin")
 
-        whenever(mockTask.addOnCompleteListener(any())).thenAnswer {
-            val listener = it.arguments[0] as OnCompleteListener<Void>
-            listener.onComplete(mockTask)
-            mockTask
+        every { signInClient.signInIntent } returns expectedIntent
+
+        val result = repository.buildSignInIntent()
+
+        assertSame(expectedIntent, result)
+    }
+
+
+    @Test
+    fun `getCalendarToken returns null when no signed in account`() = runTest {
+        every { GoogleSignIn.getLastSignedInAccount(context) } returns null
+
+        val result = repository.getCalendarToken()
+
+        assertNull(result)
+        verify(exactly = 1) { GoogleSignIn.getLastSignedInAccount(context) }
+        verify(exactly = 0) {
+            GoogleAuthUtil.getToken(
+                any<Context>(),
+                any<Account>(),
+                any<String>()
+            )
         }
+    }
 
-        var capturedIntent: Intent? = null
-        authRepository.revokeAndSignIn { capturedIntent = it }
+    @Test
+    fun `getCalendarToken returns token when account exists`() = runTest {
+        val account = mockk<GoogleSignInAccount>()
+        val androidAccount = Account("test@example.com", "com.google")
+        val expectedToken = "token-123456"
 
-        assertNotNull("Intent should not be null", capturedIntent)
-        assertEquals(expectedIntent, capturedIntent)
+        every { GoogleSignIn.getLastSignedInAccount(context) } returns account
+        every { account.account } returns androidAccount
+        every {
+            GoogleAuthUtil.getToken(
+                context,
+                androidAccount,
+                "oauth2:https://www.googleapis.com/auth/calendar.readonly"
+            )
+        } returns expectedToken
+
+        val result = repository.getCalendarToken()
+
+        assertEquals(expectedToken, result)
+    }
+
+    @Test
+    fun `getCalendarToken returns null and records non fatal for recoverable auth exception`() = runTest {
+        val account = mockk<GoogleSignInAccount>()
+        val androidAccount = Account("test@example.com", "com.google")
+        val exception = mockk<UserRecoverableAuthException>(relaxed = true)
+
+        every { GoogleSignIn.getLastSignedInAccount(context) } returns account
+        every { account.account } returns androidAccount
+        every {
+            GoogleAuthUtil.getToken(
+                context,
+                androidAccount,
+                "oauth2:https://www.googleapis.com/auth/calendar.readonly"
+            )
+        } throws exception
+
+        val result = repository.getCalendarToken()
+
+        assertNull(result)
+        verify(exactly = 1) {
+            CrashReporter.recordNonFatal(exception, "calendar_user_recoverable_auth")
+        }
+    }
+
+    @Test
+    fun `getCalendarToken returns null and records non fatal for generic exception`() = runTest {
+        val account = mockk<GoogleSignInAccount>()
+        val androidAccount = Account("test@example.com", "com.google")
+        val exception = IOException("network failure")
+
+        every { GoogleSignIn.getLastSignedInAccount(context) } returns account
+        every { account.account } returns androidAccount
+        every {
+            GoogleAuthUtil.getToken(
+                context,
+                androidAccount,
+                "oauth2:https://www.googleapis.com/auth/calendar.readonly"
+            )
+        } throws exception
+
+        val result = repository.getCalendarToken()
+
+        assertNull(result)
+        verify(exactly = 1) {
+            CrashReporter.recordNonFatal(exception, "calendar_token_refresh_failed")
+        }
     }
 
 
 
+    @Test
+    fun `isSignedIn returns true when account exists`() {
+        val account = mockk<GoogleSignInAccount>()
+
+        every { GoogleSignIn.getLastSignedInAccount(context) } returns account
+
+        val result = repository.isSignedIn()
+
+        assertTrue(result)
+    }
+
+    @Test
+    fun `isSignedIn returns false when account does not exist`() {
+        every { GoogleSignIn.getLastSignedInAccount(context) } returns null
+
+        val result = repository.isSignedIn()
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `getSignedInEmail returns email when account exists`() {
+        val account = mockk<GoogleSignInAccount>()
+
+        every { GoogleSignIn.getLastSignedInAccount(context) } returns account
+        every { account.email } returns "test@example.com"
+
+        val result = repository.getSignedInEmail()
+
+        assertEquals("test@example.com", result)
+    }
+
+    @Test
+    fun `getSignedInEmail returns null when no account exists`() {
+        every { GoogleSignIn.getLastSignedInAccount(context) } returns null
+
+        val result = repository.getSignedInEmail()
+
+        assertNull(result)
+    }
+
+    private fun completedVoidTask(): Task<Void> = Tasks.forResult(null)
 }

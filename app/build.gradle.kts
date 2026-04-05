@@ -125,9 +125,12 @@ dependencies {
     testImplementation("com.google.code.gson:gson:2.10.1")
     testImplementation(libs.junit)
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    testImplementation("org.json:json:20240303")
+    testImplementation("io.mockk:mockk:1.13.10")
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
@@ -167,7 +170,6 @@ val jacocoTestReport = tasks.register<JacocoReport>("jacocoTestReport") {
 
         // Exclude Activities and App entry points
         "**/com/example/myapplication/MainActivity*",
-        "**/com/example/myapplication/logic/TravelMode*",
         "**/com/example/myapplication/ui/screens/**",
         "**/com/example/myapplication/analytics/**",
         "**/MyCustomApplication.*",

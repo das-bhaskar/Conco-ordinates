@@ -57,6 +57,7 @@ appId: com.example.myapplication
     timeout: 5000
 
 - inputText: "H-857"
+- hideKeyboard
 - tapOn:
     text: "Navigate Here"
 - waitForAnimationToEnd:

@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<testsuites>
-  <testsuite name="Test Suite" device="Pixel_7" tests="1" failures="0" time="67.0">
-    <testcase id="us_2_1" name="us_2_1" classname="us_2_1" time="67.0" status="SUCCESS"/>
-  </testsuite>
-</testsuites>

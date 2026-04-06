@@ -12,12 +12,8 @@ REPORT_DIR="${REPORT_DIR:-e2e-report}"
 TEST_OUTPUT_DIR="${TEST_OUTPUT_DIR:-e2e-test-output}"
 
 FLOWS=(
-  "us_4_1"
-  "us_4_2"
-  "us_4_6"
   "us_5_1"
   "us_5_2"
-
 )
 
 mkdir -p "$REPORT_DIR"

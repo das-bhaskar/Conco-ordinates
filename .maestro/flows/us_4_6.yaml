@@ -19,7 +19,7 @@ appId: com.example.myapplication
     text: "Search buildings or addresses..."
 - waitForAnimationToEnd:
     timeout: 5000
-- inputText: "cc-1"
+- inputText: "CC-101"
 - tapOn:
     text: "CC-101 · CC Floor 1"
 

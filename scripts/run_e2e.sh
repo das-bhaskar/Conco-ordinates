@@ -16,7 +16,6 @@ FLOWS=(
   "us_4_2"
   "us_4_3"
   "us_4_6"
-
 )
 
 mkdir -p "$REPORT_DIR"

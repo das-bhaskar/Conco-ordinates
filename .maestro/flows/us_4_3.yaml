@@ -1,0 +1,134 @@
+
+
+# US-4.3: As a student with disabilities, I want to be able to get direction on the path that I can take physically with my disability, so that I can get to the room I want to go.
+
+appId: com.example.myapplication
+---
+- setLocation:
+    latitude: 45.4972
+    longitude: -73.5789
+- launchApp:
+    clearState: true
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "SGW"
+# Tap on Hall Building
+- tapOn:
+    point: "50%, 47%"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    text: "Henry F. Hall Building"
+- assertVisible: "Directions"
+- assertVisible: "Indoor"
+- assertVisible: "PIN"
+- assertVisible: "Share"
+
+- tapOn: "Indoor"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn: "9"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    text: "H · Floor 9"
+
+# Tap on room H-859
+- tapOn:
+    point: "7%, 45%"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- assertVisible:
+    text: "H-927"
+- assertVisible:
+    text: "Where are you starting from?"
+
+- tapOn: "Room number e.g. H-110"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- inputText: "H-857"
+- tapOn:
+    text: "Navigate Here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Tap on disability icon
+- tapOn:
+    point: "48%, 15%"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Yes, Continue"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm on floor 9"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "I'm here"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Yes, I've Arrived!"
+- waitForAnimationToEnd:
+    timeout: 5000
+
+- tapOn:
+    text: "Done"
+- waitForAnimationToEnd:
+    timeout: 5000

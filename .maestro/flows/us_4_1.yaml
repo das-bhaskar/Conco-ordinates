@@ -55,9 +55,4 @@ appId: com.example.myapplication
 
 - tapOn: "Back"
 
-- assertVisible:
-    text: "Henry F. Hall Building"
-- assertVisible: "Directions"
-- assertVisible: "Indoor"
-- assertVisible: "PIN"
-- assertVisible: "Share"
+

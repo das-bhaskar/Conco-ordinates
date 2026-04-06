@@ -8,11 +8,26 @@ appId: com.example.myapplication
 - waitForAnimationToEnd:
     timeout: 5000
 
-- tapOn:
-    point: "90%, 30%"
 - waitForAnimationToEnd:
     timeout: 10000
 
+- assertVisible:
+    text: "Search buildings or addresses..."
+- assertVisible:
+    text: "SGW"
+- assertVisible:
+    text: "LOY"
+- assertVisible:
+    text: "Map"
+- assertVisible:
+    text: "Schedule"
+
+- tapOn:
+    text: "SGW"
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# Tap on Hall building
 - tapOn:
     point: "50%, 47%"
 - waitForAnimationToEnd:
@@ -55,4 +70,9 @@ appId: com.example.myapplication
 
 - tapOn: "Back"
 
-
+- assertVisible:
+    text: "Henry F. Hall Building"
+- assertVisible: "Directions"
+- assertVisible: "Indoor"
+- assertVisible: "PIN"
+- assertVisible: "Share"
